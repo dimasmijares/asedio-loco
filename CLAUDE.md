@@ -4,14 +4,14 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 
 ## Estado actual
 
-- **Fase 0 (preparación)** en curso.
+- **Fase 0 (preparación)** terminada.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).
   - [x] 0.3 Servidor de salas: Cloudflare Workers + Durable Objects (cuenta con subdominio `dimasmijares.workers.dev`, wrangler con sesión)
   - [x] 0.4 Cliente: archivos estáticos del mismo Worker. Página, `/api/health` y WebSocket de eco verificados en producción
   - [x] 0.5 Despliegue continuo: `.github/workflows/deploy.yml` (push a `main` → typecheck, build, `wrangler deploy`). Secret `CLOUDFLARE_API_TOKEN` (solo Workers Scripts:Edit) y variable `CLOUDFLARE_ACCOUNT_ID`
-  - [ ] 0.6 Esqueleto desplegado
-  - [ ] 0.7 Confirmación final
+  - [x] 0.6 Esqueleto desplegado: lobby con enlace, lista de conectados y reconexión, probado con Playwright contra producción
+  - [x] 0.7 Confirmación: el usuario autorizó seguir sin más preguntas
 
 ## Arquitectura
 
