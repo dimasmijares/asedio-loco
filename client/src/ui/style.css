@@ -283,3 +283,296 @@ button.big {
     opacity: 0;
   }
 }
+
+/* ---------- HUD de la partida ---------- */
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+}
+
+.hud button {
+  pointer-events: auto;
+}
+
+.hud-top {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hud-phase {
+  background: rgba(29, 22, 38, 0.72);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 6px 16px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.hud-phase b {
+  font-family: var(--display);
+  font-size: 22px;
+  display: block;
+}
+
+.hud-phase span {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.hud-timer {
+  font-family: var(--display);
+  font-size: 40px;
+  min-width: 64px;
+  height: 64px;
+  line-height: 58px;
+  text-align: center;
+  border-radius: 50%;
+  background: #ffd23f;
+  color: var(--ink);
+  text-shadow: none;
+  border: 4px solid var(--ink);
+}
+
+.hud-timer.urgent {
+  background: #ff5d5d;
+  animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.hud-players {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  gap: 6px;
+  width: 220px;
+}
+
+.hp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(29, 22, 38, 0.7);
+  border-radius: 10px;
+  padding: 5px 8px;
+  border: 2px solid transparent;
+}
+
+.hp.you {
+  border-color: #fff;
+}
+
+.hp.out {
+  opacity: 0.55;
+  filter: grayscale(0.7);
+}
+
+.hp .banner {
+  width: 24px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.hp-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hp-name {
+  font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hp-bar {
+  height: 7px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.hp-bar > div {
+  height: 100%;
+  transition: width 0.4s;
+}
+
+.hp-state {
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+}
+
+.hud-corner {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  text-align: right;
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.hud-wind {
+  background: rgba(29, 22, 38, 0.7);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 16px;
+}
+
+.wind-arrow {
+  display: inline-block;
+  font-size: 22px;
+  color: #72ddf7;
+  transition: transform 0.3s;
+}
+
+.hud-stats {
+  font-size: 13px;
+  opacity: 0.85;
+  font-family: monospace;
+}
+
+.hud-bottom {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(900px, calc(100vw - 24px));
+}
+
+.hud-aim {
+  display: flex;
+  gap: 18px;
+  font-size: 17px;
+  background: rgba(29, 22, 38, 0.6);
+  border-radius: 10px;
+  padding: 4px 14px;
+}
+
+.hud-aim:empty {
+  display: none;
+}
+
+.hud-ammo {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ammo {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 78px;
+  padding: 6px 8px 4px;
+  font-size: 13px;
+  border-color: var(--rar);
+  box-shadow: 0 4px 0 var(--rar);
+  position: relative;
+  background: rgba(255, 250, 240, 0.95);
+}
+
+.ammo.sel {
+  background: #ffd23f;
+  transform: translateY(-4px);
+}
+
+.ammo-icon {
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.ammo-name {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ammo-key {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.hud-confirm {
+  font-size: 20px;
+  padding: 10px 26px;
+}
+
+.hud-help {
+  position: absolute;
+  top: 120px;
+  right: 14px;
+  max-width: 260px;
+  font-size: 13px;
+  text-align: right;
+  opacity: 0.85;
+  white-space: pre-line;
+}
+
+.hud-banner {
+  position: absolute;
+  top: 34%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.3, 1.6, 0.6, 1);
+}
+
+.hud-banner.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.banner-text {
+  font-family: var(--display);
+  font-size: clamp(38px, 7vw, 76px);
+  color: #ffd23f;
+  -webkit-text-stroke: 3px var(--ink);
+  text-shadow: 0 6px 0 var(--ink);
+}
+
+.banner-text.bad {
+  color: #ff6b6b;
+}
+
+.banner-sub {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+@media (max-width: 700px) {
+  .hud-players {
+    width: 160px;
+  }
+  .hud-help {
+    display: none;
+  }
+}

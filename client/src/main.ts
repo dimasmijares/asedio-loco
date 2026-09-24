@@ -29,7 +29,21 @@ function enterRoom(code: string, name: string) {
   new LobbyView(ui, conn);
 }
 
+async function startSandbox() {
+  ui.replaceChildren();
+  const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
+  document.getElementById('app')!.prepend(canvas);
+  const { Game } = await import('./game/game');
+  const { SandboxMode } = await import('./game/modes/sandbox');
+  const game = await Game.create(canvas, [1, 2]);
+  const mode = new SandboxMode(game, document.getElementById('app')!);
+  debug.game = game;
+  debug.mode = mode;
+  canvas.focus();
+}
+
 function boot() {
+  if (location.hash === '#sandbox') return void startSandbox();
   const code = codeFromHash();
   let hasToken = false;
   try {
@@ -49,7 +63,10 @@ function boot() {
         home.error((e as Error).message);
       }
     },
-    onSolo: () => home.error('El modo solitario llega en la Fase 2'),
+    onSolo: () => {
+      history.replaceState(null, '', '#sandbox');
+      void startSandbox();
+    },
   });
 }
 

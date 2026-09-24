@@ -8,3 +8,7 @@ test-results/
 playwright-report/
 *.log
 .DS_Store
+
+# Depuración local
+tests/unit/_*.test.ts
+_debug.txt
