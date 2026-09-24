@@ -9,7 +9,7 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).
   - [x] 0.3 Servidor de salas: Cloudflare Workers + Durable Objects (cuenta con subdominio `dimasmijares.workers.dev`, wrangler con sesión)
   - [x] 0.4 Cliente: archivos estáticos del mismo Worker. Página, `/api/health` y WebSocket de eco verificados en producción
-  - [ ] 0.5 Despliegue continuo
+  - [x] 0.5 Despliegue continuo: `.github/workflows/deploy.yml` (push a `main` → typecheck, build, `wrangler deploy`). Secret `CLOUDFLARE_API_TOKEN` (solo Workers Scripts:Edit) y variable `CLOUDFLARE_ACCOUNT_ID`
   - [ ] 0.6 Esqueleto desplegado
   - [ ] 0.7 Confirmación final
 
