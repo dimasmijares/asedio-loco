@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "description": "Juego 3D multijugador de castillos y catapultas",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "dev:server": "wrangler dev",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json && tsc -p server/tsconfig.json",
+    "deploy": "npm run build && wrangler deploy"
   },
   "license": "ISC",
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260924.1",
     "@playwright/test": "^1.63.0",
     "typescript": "^7.0.2",
+    "vite": "^8.3.1",
     "wrangler": "^4.139.0"
   },
   "private": true,
