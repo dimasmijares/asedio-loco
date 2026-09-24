@@ -7,6 +7,7 @@ import { castleOrigin, launchPoint, toWorld } from '../../../../shared/map';
 import type { Vec3 } from '../../../../shared/math';
 import { Hud } from '../../ui/hud';
 import type { Game, Mode } from '../game';
+import { Director } from '../director';
 import type { SimEvent } from '../sim/sim';
 
 // Campo de pruebas (Fase 1): tu catapulta contra un castillo, munición ilimitada.
@@ -15,14 +16,14 @@ export class SandboxMode implements Mode {
   target = 1;
   ammoIdx = 0;
   hud: Hud;
-  private lastProj: number | null = null;
-  private lastEnd = -10;
   private t = 0;
+  private director: Director;
   private freeCam = false;
   private keyHandler: (e: KeyboardEvent) => void;
 
   constructor(readonly game: Game, parent: HTMLElement) {
     this.hud = new Hud(parent);
+    this.director = new Director(game.view, game.rig);
     game.startSim([this.target, this.slot]);
     game.mode = this;
     const input = game.input;
@@ -80,7 +81,7 @@ export class SandboxMode implements Mode {
     const sim = this.game.sim;
     if (!sim) return;
     this.game.view.catapults.get(this.slot)!.fire();
-    this.lastProj = sim.launch(this.slot, this.ammo, a);
+    sim.launch(this.slot, this.ammo, a);
   }
 
   // Apunta con precisión a una parte del castillo diana (para pruebas y depuración).
@@ -100,13 +101,11 @@ export class SandboxMode implements Mode {
 
   reset() {
     this.game.startSim([this.target, this.slot]);
-    this.lastProj = null;
+    this.director.reset();
   }
 
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
-      if (e.e === 'proj' && e.owner === this.slot) this.lastProj = e.id;
-      if (e.e === 'projEnd' && e.id === this.lastProj) this.lastEnd = this.t;
       if (e.e === 'king') this.hud.showBanner('¡REY ELIMINADO!', causeText(e.cause), 2200);
     }
   }
@@ -115,18 +114,10 @@ export class SandboxMode implements Mode {
     this.t += dt;
     const g = this.game;
     const view = g.view;
-    const pr = this.lastProj !== null ? view.projs.get(this.lastProj) : undefined;
+    const directing = this.director.update(dt);
     if (this.freeCam) {
       if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(...castleOrigin(this.target)), 22, 14, 0.15);
-    } else if (pr) {
-      const y = g.input.aim.yaw;
-      g.rig.follow(() => pr.p, new THREE.Vector3(Math.sin(y), 0, Math.cos(y)));
-    } else if (this.t - this.lastEnd < 2.2 && this.lastEnd > 0) {
-      const o = castleOrigin(this.target);
-      const lp = launchPoint(this.slot);
-      const from = new THREE.Vector3(o[0], 9, o[2]).lerp(new THREE.Vector3(lp[0], 9, lp[2]), 0.45);
-      g.rig.watch(new THREE.Vector3(o[0], 2, o[2]), from);
-    } else {
+    } else if (!directing) {
       g.rig.aim(new THREE.Vector3(...launchPoint(this.slot)), g.input.aim.yaw);
     }
     const alive = g.sim ? g.sim.blocksAlive(this.target) : 0;

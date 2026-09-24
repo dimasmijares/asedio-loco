@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CATAPULT_LOCAL, ISLAND_CORNER_R, ISLAND_HALF, castleOrigin, insideCastle, toWorld } from '../../../../shared/map';
+import { CATAPULT_LOCAL, ISLAND_CORNER_R, ISLAND_HALF, castleOrigin, toWorld } from '../../../../shared/map';
 import { rng } from '../../../../shared/math';
 import { outline, toon } from './materials';
 import { tex } from './textures';
@@ -248,18 +248,23 @@ export class Stage {
     const rockMat = toon('#9aa1a8');
     const flowerCols = ['#ff5d8f', '#ffd23f', '#ffffff', '#b388ff'].map((c) => toon(c));
     let placed = 0;
-    for (let tries = 0; tries < 400 && placed < 34; tries++) {
-      const x = r.range(-27, 27);
-      const z = r.range(-27, 27);
-      // Lejos de los castillos, las catapultas y el centro (zona de tiro).
-      if ([0, 1, 2, 3].some((s) => insideCastle(s, [x, 0, z], 2.5))) continue;
-      const nearCatapult = [0, 1, 2, 3].some((s) => {
-        const c = toWorld(s, CATAPULT_LOCAL);
-        return Math.hypot(x - c[0], z - c[2]) < 3.5;
-      });
-      if (nearCatapult) continue;
-      if (Math.hypot(x, z) < 6) continue;
-      if (Math.abs(x) > 26 || Math.abs(z) > 26) continue;
+    // Solo en zonas que no tapan las líneas de tiro: franjas del borde entre castillos
+    // y bosquecillos cerca del centro, lejos de las diagonales.
+    const zones: [number, number, number, number][] = [
+      [-11, 11, 23.5, 27.5],
+      [-11, 11, -27.5, -23.5],
+      [23.5, 27.5, -11, 11],
+      [-27.5, -23.5, -11, 11],
+      [-3, 3, 7, 12],
+      [-3, 3, -12, -7],
+      [7, 12, -3, 3],
+      [-12, -7, -3, 3],
+    ];
+    for (let tries = 0; tries < 400 && placed < 30; tries++) {
+      const zn = zones[tries % zones.length];
+      const x = r.range(zn[0], zn[1]);
+      const z = r.range(zn[2], zn[3]);
+      if (Math.abs(Math.abs(x) - Math.abs(z)) < 4) continue;
       const kind = r.next();
       if (kind < 0.4) {
         const t = new THREE.Group();

@@ -42,8 +42,21 @@ async function startSandbox() {
   canvas.focus();
 }
 
+async function startPhysicsTest(scene: string) {
+  ui.replaceChildren();
+  const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
+  document.getElementById('app')!.prepend(canvas);
+  const { Game } = await import('./game/game');
+  const { PhysicsTestMode } = await import('./game/modes/physicsTest');
+  const game = await Game.create(canvas, []);
+  debug.game = game;
+  debug.physics = new PhysicsTestMode(game, scene as never);
+}
+
 function boot() {
   if (location.hash === '#sandbox') return void startSandbox();
+  const phys = location.hash.match(/^#physics=(\w+)$/);
+  if (phys) return void startPhysicsTest(phys[1]);
   const code = codeFromHash();
   let hasToken = false;
   try {
