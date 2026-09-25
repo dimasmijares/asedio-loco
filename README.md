@@ -6,6 +6,12 @@ Un "Angry Birds" en 3D de castillos y catapultas, en formato battle royale rápi
 
 Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus amigos. También puedes jugar solo contra bots (fácil, normal o difícil) o destrozar castillos en el campo de pruebas.
 
+![Cuatro castillos bajo una lluvia de vacas, troncos y gallinas](docs/capturas/batalla.png)
+
+| | |
+|---|---|
+| ![Un rey aplastado en plena ronda](docs/capturas/rey-eliminado.png) | ![Pantalla final con las estadísticas](docs/capturas/final.png) |
+
 ## Cómo se juega
 
 - **Rondas simultáneas.** Todos apuntáis a la vez durante 12 s (9 s cuando quedan 2) y pulsáis «¡Listo!». Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.

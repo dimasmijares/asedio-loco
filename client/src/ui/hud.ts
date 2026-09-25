@@ -139,6 +139,10 @@ export class Hud {
     this.help.textContent = text;
   }
 
+  showHelp(show: boolean) {
+    this.help.style.display = show ? '' : 'none';
+  }
+
   setStats(text: string) {
     this.stats.textContent = text;
   }

@@ -149,6 +149,7 @@ export class MatchUI {
     }
 
     input.enabled = this.canAim();
+    this.hud.showHelp(this.canAim());
     this.tutorial?.update(dt, this.canAim());
     if (this.tutorial?.done) this.tutorial = null;
     if (this.canAim() && me) {
