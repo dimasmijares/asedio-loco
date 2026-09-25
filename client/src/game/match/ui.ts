@@ -111,6 +111,8 @@ export class MatchUI {
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
       if (e.e === 'fx' && e.kind === 'lavaRise') this.hud.showBanner('¡LA LAVA SUBE!', 'Se come las bases de los castillos', 2200, 'bad');
+      // La cámara se va al rey que cae (el anfitrión pone además cámara lenta).
+      if (e.e === 'king') this.director.spotlight(() => this.game.view.kingPos(e.slot), 2.6);
     }
   }
 
@@ -148,7 +150,7 @@ export class MatchUI {
     }
 
     // Cámara.
-    const directing = s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
+    const directing = s.phase === 'impact' || s.phase === 'results' || this.director.spotActive ? this.director.update(dt) : false;
     if (!directing) {
       if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
       else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {

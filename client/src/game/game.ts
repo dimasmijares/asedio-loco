@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import type { Quat, Vec3 } from '../../../shared/math';
 import { TrajectoryPreview, AimInput } from './aim';
+import { AMMO, AMMO_IDS } from '../../../shared/ammo';
 import { sfx } from './audio';
+import { makeProjectile } from './render/models';
 import { CameraRig } from './camera';
 import { Stage, type Quality } from './render/stage';
 import { loadRapier } from './sim/rapier';
@@ -48,6 +50,9 @@ export class Game {
   simPaused = false;
   fps = 0;
   frameMs = 0;
+  simMs = 0; // coste de la física (pasos + sincronización) en el último fotograma
+  lastSteps = 0; // pasos de física del último fotograma
+  worstSim = { total: 0, steps: 0, events: 0, sync: 0, n: 0, kinds: '' };
   private acc = 0;
   private last = performance.now();
   private frames = 0;
@@ -70,6 +75,7 @@ export class Game {
     this.preview.hide();
     sfx.camera = this.stage.camera;
     this.view.onEvent((e) => sfx.onSimEvent(e));
+    this.prewarm();
     canvas.addEventListener(
       'wheel',
       (e) => {
@@ -85,6 +91,39 @@ export class Game {
   }
 
   // Crea una simulación nueva (el anfitrión o el modo solitario).
+  // Calidad adaptativa: si va lento de forma sostenida (5 s por debajo de 38 fps), baja un
+  // nivel y avisa. No actúa si la calidad se fijó en la URL ni en navegadores automatizados.
+  private slowSamples = 0;
+  autoQuality = !new URLSearchParams(location.search).has('quality') && !navigator.webdriver;
+  onQualityChange: (q: Quality) => void = () => {};
+  private adaptQuality() {
+    if (!this.autoQuality || document.visibilityState !== 'visible') return;
+    this.slowSamples = this.fps < 38 ? this.slowSamples + 1 : Math.max(0, this.slowSamples - 2);
+    if (this.slowSamples < 10) return;
+    this.slowSamples = 0;
+    const q = this.stage.quality;
+    const next: Quality | null = q === 'high' ? 'medium' : q === 'medium' ? 'low' : null;
+    if (!next) {
+      this.autoQuality = false;
+      return;
+    }
+    this.stage.setQuality(next);
+    saveQuality(next);
+    this.onQualityChange(next);
+  }
+
+  // Crea todas las plantillas de proyectiles y compila sus shaders al arrancar, para que el
+  // primer disparo de cada munición no dé un tirón.
+  private prewarm() {
+    const g = new THREE.Group();
+    for (const id of AMMO_IDS) if (AMMO[id].shape !== 'none') g.add(makeProjectile(id));
+    g.add(makeProjectile('coconuts', 0.62));
+    g.position.set(0, -400, 0);
+    this.stage.scene.add(g);
+    this.stage.renderer.compile(this.stage.scene, this.stage.camera);
+    this.stage.scene.remove(g);
+  }
+
   // Adopta una simulación ya construida (migración de anfitrión).
   adoptSim(sim: Sim) {
     this.sim?.free();
@@ -152,8 +191,10 @@ export class Game {
       this.fps = Math.round(this.frames / this.fpsT);
       this.frames = 0;
       this.fpsT = 0;
+      this.adaptQuality();
     }
     this.input.tick(rawDt);
+    const s0 = performance.now();
     if (this.sim && !this.simPaused) {
       this.acc += dt;
       let steps = 0;
@@ -164,10 +205,16 @@ export class Game {
         steps++;
       }
       if (steps === 4) this.acc = 0;
+      this.lastSteps = steps;
+      const s1 = performance.now();
       const events = this.sim.drainEvents();
       for (const e of events) this.view.apply(e);
       if (events.length) this.mode?.onSimEvents?.(events);
+      const s2 = performance.now();
       this.syncFromSim(this.onBodyMoved);
+      this.simMs = performance.now() - s0;
+      // Registro de tirones para el perfilado (pasos, eventos, sincronización).
+      if (this.simMs > this.worstSim.total) this.worstSim = { total: this.simMs, steps: s1 - s0, events: s2 - s1, sync: performance.now() - s2, n: steps, kinds: [...new Set(events.map((e) => (e.e === 'fx' ? `fx:${e.kind}` : e.e)))].join(',') };
       this.view.lavaY = this.sim.lavaY;
     }
     this.mode?.update(rawDt);

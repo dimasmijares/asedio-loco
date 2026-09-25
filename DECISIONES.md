@@ -51,3 +51,13 @@ Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de 
 
 - **D-034 · Sonido 100 % sintetizado con WebAudio.** Ruido filtrado y osciladores con envolventes: golpes distintos para madera, piedra, cristal (con tintineo) y hierro (tañido inarmónico), explosiones, lanzamiento, mugido (diente de sierra con formantes y vibrato), cacareo, acorde disonante del piano, zumbido del imán, agujero negro, pompa de la burbuja, martillazos del andamio, siseo de la lava, trombón triste al caer un rey, fanfarrias y cuenta atrás. Panorámica y volumen según la posición respecto a la cámara, límite de repeticiones por tipo y compresor en la salida. Se activa con el primer gesto del usuario; M o el botón silencian, y la preferencia se guarda.
 - **D-035 · Estadísticas divertidas al final.** Mayor destrozo, mejor disparo (más bloques en una ronda), disparo más ridículo (el que acabó más lejos de cualquier castillo rival sin romper nada), autogol (bloques propios rotos) y castillo más entero.
+
+## Fase 5
+
+- **D-036 · Plantillas de proyectiles y shaders precompilados.** Crear la malla de la primera vaca costaba 61 ms (materiales, contornos y compilación de shaders en pleno disparo). Ahora cada munición tiene una plantilla que se clona y al arrancar se compilan todos los shaders con `renderer.compile`.
+- **D-037 · El AudioContext solo nace con un gesto del usuario.** Crearlo al primer sonido de la partida daba otro tirón de unos 60 ms.
+- **D-038 · Geometría estática fusionada por material.** Decoración, nubes, islotes y las partes fijas de catapultas y reyes se fusionan con `mergeGeometries`: de 751 a 392 llamadas de dibujo en la escena más cargada (272 en calidad baja), y el tiempo de CPU por fotograma baja de 4,2 a 2,6 ms. Las nubes giran como un solo grupo.
+- **D-039 · Compresión de instantáneas.** Además de la cuantización (cm y 1e-4), el anfitrión no reenvía poses que han cambiado menos de medio centímetro. Lo que se detiene se repite 3 tics más, por si se pierde un paquete.
+- **D-040 · Pérdida de paquetes simulada realista.** WebSocket es fiable (TCP), así que `?loss=` simula un canal que pierde solo lo redundante: las poses de los tics. Eventos y estado llegan siempre. Con 250 ms ±120 ms y un 30 % de poses perdidas, la partida sigue consistente en cada ronda (test E2E «red mala»).
+- **D-041 · Calidad adaptativa.** Si los fps se quedan por debajo de 38 durante unos 5 s, la calidad baja un nivel (alta → media → baja) y se guarda. No actúa si la calidad viene fijada en la URL ni con navegadores automatizados.
+- **D-042 · Límite de pasos de física.** Como mucho 4 pasos por fotograma: en un equipo muy lento la física va más despacio en vez de entrar en una espiral de pasos.

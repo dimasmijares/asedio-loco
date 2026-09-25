@@ -124,8 +124,20 @@ async function startPhysicsTest(scene: string) {
   debug.physics = new PhysicsTestMode(game, scene as never);
 }
 
+async function startBench() {
+  ui.replaceChildren();
+  const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
+  document.getElementById('app')!.prepend(canvas);
+  const { Game } = await import('./game/game');
+  const { BenchMode } = await import('./game/modes/bench');
+  const game = await Game.create(canvas, []);
+  debug.game = game;
+  debug.bench = new BenchMode(game);
+}
+
 function boot() {
   if (location.hash === '#sandbox') return void startSandbox();
+  if (location.hash === '#bench') return void startBench();
   if (location.hash === '#solo') return void startSolo(soloFromUrl());
   const phys = location.hash.match(/^#physics=(\w+)$/);
   if (phys) return void startPhysicsTest(phys[1]);

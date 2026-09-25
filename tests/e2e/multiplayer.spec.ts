@@ -40,8 +40,8 @@ async function createRoom(host: Page, extra = '') {
   return new URL(await host.inputValue('#room-link')).hash;
 }
 
-async function join(p: Page, hash: string, name: string) {
-  await p.goto(`/?autoplay=1${hash}`);
+async function join(p: Page, hash: string, name: string, extra = '') {
+  await p.goto(`/?autoplay=1${extra}${hash}`);
   await p.fill('#name', name);
   await p.click('#join');
 }
@@ -202,5 +202,44 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   const again = await waitAll([host, g1], (s) => s.round === 1 && s.phase === 'aim');
   expect(again[0].role).toBe('host');
   for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
+test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }) => {
+  test.setTimeout(420_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const g1 = await newPlayer(browser, errors, 'j2');
+  const g2 = await newPlayer(browser, errors, 'j3');
+  const hash = await createRoom(host, '&bots=1');
+  // 150 ms de retraso en cada sentido, ±80 ms de variación y 20 % de instantáneas perdidas.
+  await join(g1, hash, 'Lento', '&lag=150&jitter=80&loss=0.2');
+  await join(g2, hash, 'Lentísimo', '&lag=250&jitter=120&loss=0.3');
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
+  await host.click('#start');
+  const players = [host, g1, g2];
+  const checked = new Set<number>();
+  const t0 = Date.now();
+  while (Date.now() - t0 < 360_000) {
+    const all = (await Promise.all(players.map(summary))) as Summary[];
+    if (all[0]?.phase === 'over') break;
+    if (all[0]?.phase === 'results' && !checked.has(all[0].round)) {
+      await host.waitForTimeout(900); // margen para que llegue el estado completo con retraso
+      const again = (await Promise.all(players.map(summary))) as Summary[];
+      if (again.every((s) => s.phase === 'results' && s.round === again[0].round)) {
+        for (let i = 1; i < again.length; i++) compare(again[0], again[i], `red mala, ronda ${again[0].round}, jugador ${i + 1}`);
+        checked.add(again[0].round);
+        console.log(`red mala, ronda ${again[0].round}: consistente`);
+      }
+    }
+    await host.waitForTimeout(300);
+  }
+  const finals = await waitAll(players, (s) => s.phase === 'over', 60_000);
+  for (const f of finals) {
+    expect(f.winner).toBe(finals[0].winner);
+    expect(f.round).toBe(finals[0].round);
+  }
+  expect(checked.size).toBeGreaterThanOrEqual(1);
+  for (const p of players) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
   expect(errors).toEqual([]);
 });

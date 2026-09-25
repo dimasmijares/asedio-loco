@@ -37,9 +37,37 @@ export class Director {
     return this.t < this.watchUntil || [...this.tracks.values()].some((t) => !t.impacted && this.view.projs.has(t.id));
   }
 
+  // Foco prioritario (p. ej. un rey cayendo): se mira eso durante `dur` segundos.
+  private spotUntil = 0;
+  private spotGetter: (() => THREE.Vector3 | null) | null = null;
+  spotlight(getter: () => THREE.Vector3 | null, dur = 2.5) {
+    this.spotGetter = getter;
+    this.spotUntil = this.t + dur;
+    const p = getter();
+    if (p) {
+      const from = this.rig.pos.clone().sub(p).setY(0).normalize().multiplyScalar(9).add(p).add(new THREE.Vector3(0, 5, 0));
+      this.rig.watch(p.clone(), from);
+      this.rig.sharpness = 3.5;
+    }
+  }
+
+  get spotActive() {
+    return this.t < this.spotUntil;
+  }
+
   // Devuelve true si ha tomado el control de la cámara.
   update(dt: number): boolean {
     this.t += dt;
+    if (this.t < this.spotUntil && this.spotGetter) {
+      const p = this.spotGetter();
+      if (p) {
+        const from = this.rig.pos.clone().sub(p).setY(0).normalize().multiplyScalar(9).add(p).add(new THREE.Vector3(0, 5, 0));
+        this.rig.watch(p.clone().add(new THREE.Vector3(0, 0.5, 0)), from);
+        this.rig.sharpness = 3.5;
+        for (const pr of this.view.projs.values()) this.observe(pr, dt);
+        return true;
+      }
+    }
     for (const pr of this.view.projs.values()) this.observe(pr, dt);
     for (const [id, tr] of this.tracks) if (!this.view.projs.has(id) && !tr.impacted) this.impact(tr, tr.last);
 

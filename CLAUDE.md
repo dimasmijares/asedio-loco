@@ -7,6 +7,8 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 - **Fase 0 (preparación)** terminada.
 - **Fase 1 (sandbox)** terminada: `/#sandbox` con las 12 municiones, física completa y escenas de física en verde.
 - **Fase 2 (partida contra bots)** terminada: `/#solo` (en la portada, «Jugar solo»). Equilibrio medido con `tests/balance`.
+- **Fase 4 (contenido y sensación)** terminada: 12 municiones, sonido procedural, cámara lenta y foco en el rey que cae, estadísticas divertidas.
+- **Fase 5 (rendimiento y robustez)** terminada: benchmark, instancing y geometría fusionada, compresión de instantáneas, pruebas con red mala, migración de anfitrión.
 - **Fase 3 (multijugador)** terminada: salas, anfitrión autoritativo, interpolación, espectadores, reconexión, migración de anfitrión y revancha, con pruebas E2E de 4-5 clientes.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).
@@ -68,6 +70,18 @@ Partida (`client/src/game/net/messages.ts`, dentro de `relay.d`):
 | `hi` | cliente → anfitrión | "acabo de llegar": el anfitrión responde con `full` |
 
 Los clientes solo aceptan `st`/`tk`/`full` del `hostId` actual.
+
+## Rendimiento (sección 5.8)
+
+Escena más cargada: `/#bench`. Son los 4 castillos enteros (424 bloques) y 12 proyectiles cruzados a la vez (vacas, pianos, agujero negro, imán…); se miden 9 s. Se ejecuta con `node tests/tools/bench.mjs <base> <high|medium|low> gpu`.
+
+| Calidad | fps medios | peor 5 % | CPU/fotograma | física/paso | llamadas | triángulos | cuerpos despiertos | fragmentos | partículas |
+|---|---|---|---|---|---|---|---|---|---|
+| alta | 322 | 112 | 2,9 ms | 3,3 ms | 392 | 85 k | 421 | 260 | 1187 |
+| media | 354 | 125 | 2,6 ms | 3,3 ms | 392 | 76 k | 421 | 170 | 773 |
+| baja | 537 | 182 | 1,7 ms | 3,1 ms | 272 | 56 k | 421 | 90 | 392 |
+
+Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1280×720, sin vsync). No he podido medir en una gráfica integrada. Por la carga (menos de 400 llamadas, menos de 90 k triángulos, unos 3 ms de física en el peor momento), el objetivo de 60 fps en calidad media parece alcanzable en una integrada de gama media, y la calidad adaptativa baja a «baja» si no llega. Con SwiftShader (CPU, en CI) la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms; `tests/e2e/perf.spec.ts` exige menos de 10 ms por paso.
 
 ## Pruebas
 

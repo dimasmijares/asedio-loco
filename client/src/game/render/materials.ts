@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { toonGradient } from './textures';
 
 export function toon(color: THREE.ColorRepresentation, o: { map?: THREE.Texture; transparent?: boolean; opacity?: number; emissive?: THREE.ColorRepresentation; side?: THREE.Side } = {}) {
@@ -79,6 +80,45 @@ export function hullOutlineMaterial(width = 0.035) {
         #include <fog_fragment>
       }`,
   });
+}
+
+// Fusiona todas las mallas estáticas de un grupo en una por material (menos llamadas de
+// dibujo). Si `withOutline`, añade un contorno por cada malla fusionada.
+// La geometría queda en el espacio local del grupo.
+export function mergeStatic(group: THREE.Object3D, withOutline = true, castShadow = true, outlineWidth = 0.03): THREE.Group {
+  group.updateMatrixWorld(true);
+  const inv = group.matrixWorld.clone().invert();
+  const byMat = new Map<THREE.Material, THREE.BufferGeometry[]>();
+  group.traverse((o) => {
+    const m = o as THREE.Mesh;
+    // Se saltan los contornos que ya tuviera (se añaden de nuevo sobre lo fusionado).
+    if (!m.isMesh || m.material instanceof THREE.ShaderMaterial) return;
+    const g = (m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone()).applyMatrix4(inv.clone().multiply(m.matrixWorld));
+    // Mismos atributos en todas para poder fusionar.
+    for (const name of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(name)) g.deleteAttribute(name);
+    if (!g.attributes.uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
+    if (!g.attributes.normal) g.computeVertexNormals();
+    const mat = m.material as THREE.Material;
+    const list = byMat.get(mat) ?? [];
+    list.push(g);
+    byMat.set(mat, list);
+  });
+  const out = new THREE.Group();
+  const hull = withOutline ? hullOutlineMaterial(outlineWidth) : null;
+  for (const [mat, geos] of byMat) {
+    const merged = mergeGeometries(geos, false);
+    if (!merged) continue;
+    const mesh = new THREE.Mesh(merged, mat);
+    mesh.castShadow = castShadow;
+    mesh.receiveShadow = true;
+    out.add(mesh);
+    if (hull) {
+      const ol = new THREE.Mesh(merged, hull);
+      ol.userData.noOutline = true;
+      out.add(ol);
+    }
+  }
+  return out;
 }
 
 // Añade un contorno a todas las mallas de un grupo.

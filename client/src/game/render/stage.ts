@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CATAPULT_LOCAL, ISLAND_CORNER_R, ISLAND_HALF, castleOrigin, toWorld } from '../../../../shared/map';
 import { rng } from '../../../../shared/math';
-import { outline, toon } from './materials';
+import { mergeStatic, outline, toon } from './materials';
 import { tex } from './textures';
 
 export type Quality = 'low' | 'medium' | 'high';
@@ -67,7 +67,8 @@ export class Stage {
     this.scene.add(mesh);
     this.makeClouds();
     this.scene.add(this.clouds);
-    this.scene.add(this.makeDecor());
+    // Decoración fusionada por material: cientos de mallas pasan a ser una docena de llamadas.
+    this.scene.add(mergeStatic(this.makeDecor(), true, quality !== 'low'));
     for (const slot of [0, 1, 2, 3]) this.scene.add(this.makeBastion(slot));
     this.resize();
   }
@@ -222,6 +223,7 @@ export class Stage {
     const r = rng(12);
     const mat = toon('#ffffff');
     const geo = new THREE.IcosahedronGeometry(1, 1);
+    const tmp = new THREE.Group();
     for (let i = 0; i < 16; i++) {
       const c = new THREE.Group();
       const n = r.int(3, 6);
@@ -235,9 +237,10 @@ export class Stage {
       const a = r.range(0, Math.PI * 2);
       const d = r.range(70, 200);
       c.position.set(Math.cos(a) * d, r.range(18, 55), Math.sin(a) * d);
-      c.userData.speed = r.range(0.4, 1.2);
-      this.clouds.add(c);
+      tmp.add(c);
     }
+    // Todas las nubes en una sola malla; giran juntas alrededor de la isla.
+    this.clouds.add(mergeStatic(tmp, false, false));
   }
 
   private makeDecor() {
@@ -332,13 +335,7 @@ export class Stage {
     this.lavaMat.uniforms.uTime.value = t;
     // La lava sube despacio hasta su nivel.
     this.lava.position.y += (this.lavaTarget - this.lava.position.y) * Math.min(1, dt * 1.5);
-    for (const c of this.clouds.children) {
-      const sp = c.userData.speed as number;
-      const a = Math.atan2(c.position.z, c.position.x) + dt * 0.004 * sp;
-      const d = Math.hypot(c.position.x, c.position.z);
-      c.position.x = Math.cos(a) * d;
-      c.position.z = Math.sin(a) * d;
-    }
+    this.clouds.rotation.y += dt * 0.004;
   }
 
   render() {

@@ -16,6 +16,8 @@ const MAX_JSON = 56 * 1024;
 export class NetHost {
   host: MatchHost;
   private moved = new Map<number, { p: Vec3; q: Quat }>();
+  private lastSent = new Map<number, { p: Vec3; q: Quat }>();
+  private resend = new Map<number, number>();
   private evBuf: SimEvent[] = [];
   private aims = new Map<number, number[]>();
   private tickT = 0;
@@ -106,7 +108,23 @@ export class NetHost {
   private flushTick() {
     const t = hostNow();
     const b: number[] = [];
-    for (const [id, m] of this.moved) packPose(b, id, m.p, m.q);
+    // Compresión: solo lo que ha cambiado de verdad (más de medio centímetro o algo de giro).
+    for (const [id, m] of this.moved) {
+      const last = this.lastSent.get(id);
+      if (last && Math.abs(last.p[0] - m.p[0]) + Math.abs(last.p[1] - m.p[1]) + Math.abs(last.p[2] - m.p[2]) < 0.005 && Math.abs(last.q[0] * m.q[0] + last.q[1] * m.q[1] + last.q[2] * m.q[2] + last.q[3] * m.q[3]) > 0.99999) continue;
+      packPose(b, id, m.p, m.q);
+      this.lastSent.set(id, m);
+      this.resend.set(id, 3);
+    }
+    // Lo que se ha parado se repite unos tics más: si se perdiera un paquete, el cliente
+    // no se quedaría con una pose a medio camino.
+    for (const [id, n] of this.resend) {
+      if (this.moved.has(id)) continue;
+      const last = this.lastSent.get(id);
+      if (last) packPose(b, id, last.p, last.q);
+      if (n <= 1) this.resend.delete(id);
+      else this.resend.set(id, n - 1);
+    }
     this.moved.clear();
     const a: number[] = [];
     for (const arr of this.aims.values()) a.push(...arr);

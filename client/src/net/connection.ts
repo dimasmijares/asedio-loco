@@ -11,7 +11,7 @@ interface ConnEvents {
 }
 
 // Simulación de red para pruebas: ?lag=150&jitter=50&loss=0.1
-// La pérdida solo afecta a las instantáneas (k='s'), que son redundantes.
+// La pérdida solo quita las poses de los tics (k='tk'), que son redundantes.
 interface NetSim {
   lag: number;
   jitter: number;
@@ -106,7 +106,9 @@ export class Connection {
       return;
     }
     if (this.sim && m.t === 'relay') {
-      if (m.d.k === 's' && Math.random() < this.sim.loss) return;
+      // Pérdida simulada: se pierden las poses del tic (lo redundante); eventos y estado llegan siempre,
+      // como pasaría con un canal fiable para lo importante.
+      if (m.d.k === 'tk' && Math.random() < this.sim.loss) delete (m.d as { b?: unknown }).b;
       const at = Math.max(this.lastInAt, performance.now() + this.sim.lag + Math.random() * this.sim.jitter);
       this.lastInAt = at;
       setTimeout(() => this.handle(m), at - performance.now());
@@ -149,7 +151,7 @@ export class Connection {
 
   send(m: ClientMsg) {
     if (this.sim && m.t === 'relay') {
-      if (m.d.k === 's' && Math.random() < this.sim.loss) return;
+      if (m.d.k === 'tk' && Math.random() < this.sim.loss) delete (m.d as { b?: unknown }).b;
       const at = Math.max(this.lastOutAt, performance.now() + this.sim.lag + Math.random() * this.sim.jitter);
       this.lastOutAt = at;
       setTimeout(() => this.rawSend(m), at - performance.now());

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { AmmoId } from '../../../../shared/ammo';
 import { KING_HALF_HEIGHT, KING_RADIUS } from '../../../../shared/castle';
 import { PLAYER_STYLES } from '../../../../shared/players';
-import { outline, toon } from './materials';
+import { mergeStatic, outline, toon } from './materials';
 import { tex } from './textures';
 
 const box = (w: number, h: number, d: number, m: THREE.Material) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
@@ -41,54 +41,56 @@ export class Catapult {
     const metal = toon('#5b6470');
     const color = toon(st.color);
     this.root.add(this.yawPivot);
-    // Chasis.
+    // Las piezas fijas se construyen sueltas y luego se fusionan por material (menos llamadas de dibujo).
+    const chassis = new THREE.Group();
     for (const x of [-0.55, 0.55]) {
       const rail = box(0.18, 0.2, 2.2, wood);
       rail.position.set(x, 0.35, 0);
-      this.yawPivot.add(rail);
+      chassis.add(rail);
       for (const z of [-0.8, 0.8]) {
         const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.14, 10), dark);
         wheel.rotation.z = Math.PI / 2;
         wheel.position.set(x * 1.25, 0.32, z);
-        this.yawPivot.add(wheel);
+        chassis.add(wheel);
       }
     }
     const cross = box(1.3, 0.16, 0.2, wood);
     cross.position.set(0, 0.4, -0.7);
-    this.yawPivot.add(cross);
+    chassis.add(cross);
     // Soportes en A.
     for (const x of [-0.5, 0.5]) {
       const post = box(0.16, 1.3, 0.16, wood);
       post.position.set(x, 1.0, 0.1);
-      this.yawPivot.add(post);
+      chassis.add(post);
     }
     const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 8), metal);
     axle.rotation.z = Math.PI / 2;
     axle.position.set(0, 1.55, 0.1);
-    this.yawPivot.add(axle);
+    chassis.add(axle);
+    this.yawPivot.add(mergeStatic(chassis));
     // Brazo con cazo y contrapeso de color del jugador.
     this.arm.position.set(0, 1.55, 0.1);
+    const armParts = new THREE.Group();
     const beam = box(0.16, 0.16, 2.6, wood);
     beam.position.z = -0.6;
-    this.arm.add(beam);
+    armParts.add(beam);
     const weight = box(0.6, 0.6, 0.6, color);
     weight.position.set(0, -0.2, 0.75);
-    this.arm.add(weight);
+    armParts.add(weight);
     this.bucket.position.set(0, 0.12, -1.85);
-    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.25, 8, 1, true), dark);
-    cup.material = toon('#6b3f1f', { side: THREE.DoubleSide });
-    this.bucket.add(cup);
-    this.arm.add(this.bucket);
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.25, 8, 1, true), toon('#6b3f1f', { side: THREE.DoubleSide }));
+    cup.position.copy(this.bucket.position);
+    armParts.add(cup);
+    this.arm.add(mergeStatic(armParts), this.bucket);
     this.yawPivot.add(this.arm);
     // Estandarte.
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.2, 6), dark);
     pole.position.set(0.9, 1.6, 0.9);
-    this.root.add(pole);
+    this.root.add(outline(pole, 0.03));
     this.flag = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.8, 6, 1), toon('#ffffff', { map: tex.banner(st.color, st.glyph), side: THREE.DoubleSide }));
     this.flag.position.set(0.9 + 0.55, 2.8, 0.9);
     this.flag.userData.noOutline = true;
     this.root.add(this.flag);
-    outline(this.root, 0.03);
     shadows(this.root);
     this.setArm(0);
   }
@@ -177,16 +179,34 @@ export function makeKing(slot: number) {
   const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.045), toon('#e63946'));
   gem.position.set(0, 0.02, 0.2);
   crown.add(gem);
-  crown.position.y = -h + 1.05;
-  crown.name = 'crown';
-  g.add(crown);
-  outline(g, 0.022);
-  shadows(g);
-  return g;
+  // Cuerpo y corona fusionados por separado (la corona se oculta cuando el rey cae).
+  const king = new THREE.Group();
+  king.add(mergeStatic(g, true, true, 0.022));
+  const crownMerged = mergeStatic(crown, true, true, 0.022);
+  crownMerged.position.y = -h + 1.05;
+  crownMerged.name = 'crown';
+  king.add(crownMerged);
+  shadows(king);
+  return king;
 }
 
 // Una malla distinta para cada munición.
+// Plantillas por munición: cada proyectil nuevo es un clon (comparte geometría y materiales),
+// así no se crean materiales ni se compilan shaders en mitad de un disparo.
+const templates = new Map<string, THREE.Object3D>();
+
 export function makeProjectile(ammo: AmmoId, scale = 1): THREE.Object3D {
+  const key = `${ammo}:${scale}`;
+  let t = templates.get(key);
+  if (!t) templates.set(key, (t = buildProjectile(ammo, scale)));
+  return t.clone(true);
+}
+
+export function projectileTemplates() {
+  return [...templates.values()];
+}
+
+function buildProjectile(ammo: AmmoId, scale = 1): THREE.Object3D {
   const g = new THREE.Group();
   switch (ammo) {
     case 'rock': {

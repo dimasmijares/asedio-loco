@@ -81,7 +81,8 @@ export class Sfx {
   }
 
   private out(p: Vec3 | undefined, vol: number): AudioNode | null {
-    const ctx = this.ensure();
+    // El contexto solo se crea con un gesto del usuario (crearlo aquí daría un tirón en pleno disparo).
+    const ctx = this.ctx;
     if (!ctx || !this.master || this.muted || ctx.state !== 'running') return null;
     const { gain, pan } = this.spatial(p);
     const g = ctx.createGain();
