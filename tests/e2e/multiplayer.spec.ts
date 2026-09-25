@@ -78,18 +78,20 @@ function agrees(host: Summary, other: Summary) {
 
 // Resultados de una ronda vistos por todos. Algo puede seguir moviéndose al empezar la fase
 // (un rey que aún rueda) y un cliente con retraso lo ve más tarde, así que se exige que las
-// vistas converjan: se sondea hasta `ms` y se devuelve la primera instantánea en la que
-// todos coinciden (o la última, para que compare() diga qué falla). null si la fase acaba antes.
+// vistas converjan: se sondea hasta `ms` y se devuelve la primera instantánea en la que todos
+// coinciden, o la última si se agota el tiempo (para que compare() diga qué falla). Si la fase
+// termina antes de converger (en modo rápido dura 1 s), esa ronda no se evalúa (null): una
+// desincronización de verdad no se arregla sola y saltaría en las demás rondas.
 async function settledResults(pages: Page[], ms: number) {
   let last: Summary[] | null = null;
   for (const t1 = Date.now(); Date.now() - t1 < ms; await pages[0].waitForTimeout(250)) {
     const all = (await Promise.all(pages.map(summary))) as Summary[];
     if (!all.every((s) => s?.phase === 'results' && s.round === all[0].round)) {
-      if (last) break;
+      if (last) return null;
       continue;
     }
     last = all;
-    if (all.slice(1).every((o) => agrees(all[0], o))) break;
+    if (all.slice(1).every((o) => agrees(all[0], o))) return all;
   }
   return last;
 }
