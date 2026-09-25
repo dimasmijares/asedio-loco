@@ -87,7 +87,7 @@ export class Catapult {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.2, 6), dark);
     pole.position.set(0.9, 1.6, 0.9);
     this.root.add(outline(pole, 0.03));
-    this.flag = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.8, 6, 1), toon('#ffffff', { map: tex.banner(st.color, st.glyph), side: THREE.DoubleSide }));
+    this.flag = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.8, 6, 1), toon('#ffffff', { map: tex.banner(st.color, st.glyph, st.ink), side: THREE.DoubleSide }));
     this.flag.position.set(0.9 + 0.55, 2.8, 0.9);
     this.flag.userData.noOutline = true;
     this.root.add(this.flag);

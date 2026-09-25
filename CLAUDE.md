@@ -9,6 +9,7 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 - **Fase 2 (partida contra bots)** terminada: `/#solo` (en la portada, «Jugar solo»). Equilibrio medido con `tests/balance`.
 - **Fase 4 (contenido y sensación)** terminada: 12 municiones, sonido procedural, cámara lenta y foco en el rey que cae, estadísticas divertidas.
 - **Fase 5 (rendimiento y robustez)** terminada: benchmark, instancing y geometría fusionada, compresión de instantáneas, pruebas con red mala, migración de anfitrión.
+- **Fase 6 (pulido)** terminada: portada animada, «Cómo se juega», tutorial de 3 pasos, ajustes (calidad, sonido, texto grande, sensibilidad) y colores accesibles.
 - **Fase 3 (multijugador)** terminada: salas, anfitrión autoritativo, interpolación, espectadores, reconexión, migración de anfitrión y revancha, con pruebas E2E de 4-5 clientes.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).

@@ -4,6 +4,7 @@ import { TrajectoryPreview, AimInput } from './aim';
 import { AMMO, AMMO_IDS } from '../../../shared/ammo';
 import { sfx } from './audio';
 import { makeProjectile } from './render/models';
+import { setQualityTarget, settings } from '../ui/settings';
 import { CameraRig } from './camera';
 import { Stage, type Quality } from './render/stage';
 import { loadRapier } from './sim/rapier';
@@ -84,6 +85,7 @@ export class Game {
       { passive: true },
     );
     window.addEventListener('resize', () => this.stage.resize());
+    setQualityTarget((q) => this.stage.setQuality(q));
     this.rig.orbit(new THREE.Vector3(0, 2, 0), 62, 34, 0.06);
     this.rig.snap();
     this.loop = this.loop.bind(this);
@@ -108,6 +110,7 @@ export class Game {
       return;
     }
     this.stage.setQuality(next);
+    settings.quality = next;
     saveQuality(next);
     this.onQualityChange(next);
   }
@@ -229,6 +232,7 @@ export class Game {
 
   dispose() {
     this.stopped = true;
+    setQualityTarget(null);
     cancelAnimationFrame(this.raf);
     this.mode?.dispose?.();
     this.mode = null;

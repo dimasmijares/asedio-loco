@@ -61,3 +61,10 @@ Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de 
 - **D-040 · Pérdida de paquetes simulada realista.** WebSocket es fiable (TCP), así que `?loss=` simula un canal que pierde solo lo redundante: las poses de los tics. Eventos y estado llegan siempre. Con 250 ms ±120 ms y un 30 % de poses perdidas, la partida sigue consistente en cada ronda (test E2E «red mala»).
 - **D-041 · Calidad adaptativa.** Si los fps se quedan por debajo de 38 durante unos 5 s, la calidad baja un nivel (alta → media → baja) y se guarda. No actúa si la calidad viene fijada en la URL ni con navegadores automatizados.
 - **D-042 · Límite de pasos de física.** Como mucho 4 pasos por fotograma: en un equipo muy lento la física va más despacio en vez de entrar en una espiral de pasos.
+
+## Fase 6
+
+- **D-043 · Portada animada con el propio juego.** Detrás del título giran la isla y los 4 castillos, con el mismo renderizador que la partida pero sin física. Se desmonta al empezar la partida y en navegadores automatizados no se crea (se fuerza con `?backdrop=1`).
+- **D-044 · Tutorial de 3 pasos que avanza haciendo.** Tensar y soltar, afinar (rueda, Q/E, 1/2; avanza solo a los 7 s) y confirmar. Aparece en la primera partida (se guarda en `localStorage`), se puede saltar y en solitario da 10 s más de apuntado en la ronda 1. Para las pruebas se fuerza con `?tutorial=1`.
+- **D-045 · Accesibilidad.** Colores Okabe-Ito más un emblema distinto por jugador (☀ ☾ ★ ϟ) en estandartes, HUD y lobby, con tinta oscura sobre los colores claros. Opción de texto grande, silencio (M o botón) y sensibilidad del tirachinas ajustable.
+- **D-046 · Ajustes de calidad al momento.** Baja, media y alta cambian la resolución interna y las sombras en el acto. Los topes de partículas y fragmentos se aplican a partir de la siguiente partida.

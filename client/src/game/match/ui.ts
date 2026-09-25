@@ -7,6 +7,7 @@ import type { MatchState, PlayerState } from '../../../../shared/match';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud } from '../../ui/hud';
+import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
 import type { Game } from '../game';
@@ -38,6 +39,7 @@ export class MatchUI {
   private resultsBox: HTMLElement;
   private aimSent = 0;
   private lastTick = -1;
+  tutorial: Tutorial | null = null;
   private pendingAim: Aim | null = null;
 
   constructor(readonly game: Game, readonly src: MatchSource, readonly parent: HTMLElement, readonly opts: MatchUIOptions = {}) {
@@ -56,6 +58,7 @@ export class MatchUI {
     const me = this.me();
     if (me) input.setAim(me.aim);
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
+    if (src.you !== null && tutorialPending()) this.tutorial = new Tutorial(this.hud.root);
     game.rig.orbit(new THREE.Vector3(0, 2, 0), 58, 32, 0.08);
   }
 
@@ -71,6 +74,8 @@ export class MatchUI {
 
   private onAim(a: Aim, release = false) {
     if (!this.canAim()) return;
+    if (release) this.tutorial?.event('drag');
+    else if (!this.game.input.dragging) this.tutorial?.event('adjust');
     this.pendingAim = a;
     // Se manda a ~10 Hz (y siempre al soltar).
     if (release || performance.now() - this.aimSent > 100) this.flushAim();
@@ -85,12 +90,14 @@ export class MatchUI {
 
   lock() {
     if (!this.canAim()) return;
+    this.tutorial?.event('lock');
     this.src.send({ aim: this.game.input.aim, locked: true });
   }
 
   selectAmmo(i: number) {
     const me = this.me();
     if (!me || !this.canAim() || i >= me.ammo.length) return;
+    this.tutorial?.event('adjust');
     this.src.send({ selected: i });
   }
 
@@ -101,6 +108,7 @@ export class MatchUI {
     if (!rivals.length) return;
     const i = rivals.indexOf(me.target);
     const next = rivals[(i + dir + rivals.length) % rivals.length];
+    this.tutorial?.event('adjust');
     const lp = launchPoint(me.slot);
     const o = castleOrigin(next);
     const aim = { ...this.game.input.aim, yaw: Math.atan2(o[0] - lp[0], o[2] - lp[2]) };
@@ -141,6 +149,8 @@ export class MatchUI {
     }
 
     input.enabled = this.canAim();
+    this.tutorial?.update(dt, this.canAim());
+    if (this.tutorial?.done) this.tutorial = null;
     if (this.canAim() && me) {
       g.preview.show(launchPoint(me.slot), input.aim, me.ammo[me.selected] ?? 'rock', s.wind, PLAYER_STYLES[me.slot].color);
       this.hud.setAimInfo(input.aim, me.ammo[me.selected]);
@@ -213,7 +223,7 @@ export class MatchUI {
         h(
           'div',
           { class: 'res-row' },
-          h('span', { class: 'banner', style: `background:${PLAYER_STYLES[p.slot].color}` }, PLAYER_STYLES[p.slot].glyph),
+          h('span', { class: 'banner', style: `background:${PLAYER_STYLES[p.slot].color};color:${PLAYER_STYLES[p.slot].ink};text-shadow:none` }, PLAYER_STYLES[p.slot].glyph),
           h('b', null, p.name),
           h('span', null, `−${r.lost[p.slot] ?? 0} bloques`),
           (r.dealt[p.slot] ?? 0) > 0 ? h('span', { class: 'muted' }, ` · rompió ${r.dealt[p.slot]}`) : '',

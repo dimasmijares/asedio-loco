@@ -667,3 +667,173 @@ button.big {
   box-shadow: 0 3px 0 var(--ink);
   background: rgba(255, 250, 240, 0.92);
 }
+
+/* Fondo animado de la portada y el lobby */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  filter: saturate(1.1);
+}
+
+#ui .panel {
+  backdrop-filter: blur(2px);
+}
+
+/* Ajustes */
+.modal {
+  background: rgba(20, 14, 30, 0.45);
+  z-index: 50;
+}
+
+.seg {
+  display: flex;
+  gap: 8px;
+}
+
+.seg button {
+  flex: 1;
+  font-size: 16px;
+  padding: 8px;
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 17px;
+  margin-top: 14px;
+}
+
+label.check input {
+  width: 22px;
+  height: 22px;
+}
+
+input[type='range'] {
+  padding: 0;
+  border: none;
+  accent-color: var(--accent);
+}
+
+.home-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-wrap .title {
+  font-size: clamp(56px, 11vw, 120px);
+}
+
+.subtitle {
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+  text-shadow: 0 2px 0 var(--ink), 0 0 12px rgba(0, 0, 0, 0.5);
+  margin: -6px 0 14px;
+  text-align: center;
+}
+
+.home-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.home-links button {
+  font-size: 15px;
+  padding: 6px 12px;
+}
+
+/* Texto grande (accesibilidad) */
+html.big-text body {
+  font-size: 20px;
+}
+
+html.big-text .hud-players {
+  width: 260px;
+}
+
+html.big-text .hp-name,
+html.big-text .hud-aim,
+html.big-text .res-row {
+  font-size: 19px;
+}
+
+html.big-text .hud-help {
+  font-size: 16px;
+}
+
+html.big-text .ammo-name {
+  font-size: 14px;
+}
+
+/* Tutorial */
+.coach {
+  position: absolute;
+  left: 50%;
+  bottom: 190px;
+  transform: translateX(-50%);
+  width: min(460px, calc(100vw - 32px));
+  background: var(--panel);
+  color: var(--ink);
+  text-shadow: none;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  padding: 12px 16px 10px;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  font-size: 16px;
+  display: grid;
+  gap: 4px;
+}
+
+.coach b {
+  font-family: var(--display);
+  font-size: 19px;
+  color: var(--accent-dark);
+}
+
+.coach.pop {
+  animation: coach 0.35s cubic-bezier(0.3, 1.6, 0.6, 1);
+}
+
+@keyframes coach {
+  from {
+    transform: translate(-50%, 20px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.coach-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.coach-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #cfc6d6;
+}
+
+.coach-dots span.on {
+  background: var(--accent);
+}
+
+.coach-skip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 13px;
+  padding: 2px 8px;
+  box-shadow: 0 2px 0 var(--ink);
+}

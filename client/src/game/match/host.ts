@@ -44,6 +44,7 @@ const STAGGER = 0.45; // segundos entre disparos para que se vean todos
 export class MatchHost {
   onState: (s: MatchState) => void = () => {};
   onAim: (slot: number, p: PlayerState) => void = () => {};
+  firstAimBonus = 0; // segundos extra en la primera ronda (tutorial en solitario)
   private bots = new Map<number, BotPlan>();
   private shots: Shot[] = [];
   private impactStart = 0;
@@ -158,6 +159,7 @@ export class MatchHost {
     const s = this.state;
     const prevLevel = s.lavaLevel;
     startRound(s);
+    if (s.round === 1) s.remaining += this.firstAimBonus;
     this.lockGrace = -1;
     this.sim.setLava(s.lavaY);
     this.game.setLavaVisual(s.lavaY);

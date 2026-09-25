@@ -5,6 +5,7 @@ import type { Game, Mode } from '../game';
 import { MatchHost } from '../match/host';
 import { MatchUI, type MatchSource } from '../match/ui';
 import type { SimEvent } from '../sim/sim';
+import { tutorialPending } from '../../ui/tutorial';
 
 export interface SoloOptions {
   name: string;
@@ -29,10 +30,11 @@ export class SoloMode implements Mode {
     const slots = [0, 2, 1, 3].slice(0, 1 + o.bots).sort();
     const seed = o.seed ?? (Math.random() * 2 ** 31) >>> 0;
     const players = slots.map((slot, i) =>
-      i === 0 ? { slot, id: 'you', name: o.name || 'Tú', bot: !!o.autoplay, difficulty: 'dificil' as Difficulty } : { slot, id: `bot${slot}`, name: BOT_NAMES[(seed + i) % BOT_NAMES.length], bot: true, difficulty: o.difficulty },
+      i === 0 ? { slot, id: 'you', name: o.name || 'Jugador', bot: !!o.autoplay, difficulty: 'dificil' as Difficulty } : { slot, id: `bot${slot}`, name: BOT_NAMES[(seed + i) % BOT_NAMES.length], bot: true, difficulty: o.difficulty },
     );
     const state = createMatch(players, seed, !!o.fast);
     this.host = new MatchHost(this.game, state);
+    if (tutorialPending() && !o.autoplay) this.host.firstAimBonus = 10;
     const you = slots[0];
     const host = this.host;
     const src: MatchSource = {

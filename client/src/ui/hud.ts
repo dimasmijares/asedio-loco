@@ -4,6 +4,7 @@ import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
 import { sfx } from '../game/audio';
 import { h } from './dom';
+import { openSettings } from './settings';
 
 export interface HudPlayer {
   slot: number;
@@ -46,7 +47,10 @@ export class Hud {
       if (e.code === 'KeyM' && (e.target as HTMLElement)?.tagName !== 'INPUT') toggle();
     };
     window.addEventListener('keydown', this.keyHandler);
-    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute), this.stats);
+    const gear = h('button', { class: 'hud-mute', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, '⚙️');
+    gear.onclick = () => openSettings();
+    gear.onpointerdown = (e) => e.stopPropagation();
+    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.stats);
     this.root.append(this.top, this.players, this.corner, bottom, this.help, this.banner);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
@@ -118,7 +122,7 @@ export class Hud {
         return h(
           'div',
           { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}`, 'data-slot': String(p.slot) },
-          h('div', { class: 'banner', style: `background:${st.color}` }, st.glyph),
+          h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, st.glyph),
           h(
             'div',
             { class: 'hp-body' },

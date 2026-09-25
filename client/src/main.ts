@@ -2,6 +2,7 @@ import './ui/style.css';
 import { DIFFICULTIES, ROOM_CODE_RE, type Difficulty } from '../../shared/protocol';
 import { Connection } from './net/connection';
 import { h } from './ui/dom';
+import { hideBackdrop, showBackdrop } from './ui/backdrop';
 import { LobbyView, savedName, showHome, showSoloSetup } from './ui/lobby';
 
 const ui = h('div', { class: 'overlay', id: 'ui' });
@@ -37,6 +38,7 @@ function enterRoom(code: string, name: string) {
     if (room.inGame && !online && !starting) {
       starting = true;
       ui.replaceChildren();
+      void hideBackdrop();
       const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
       app.prepend(canvas);
       const { Game } = await import('./game/game');
@@ -55,6 +57,7 @@ function enterRoom(code: string, name: string) {
       online = null;
       debug.game = debug.mode = undefined;
       new LobbyView(ui, conn);
+      void showBackdrop(app);
     }
   };
   conn.on('room', () => void sync());
@@ -71,6 +74,7 @@ function enterRoom(code: string, name: string) {
 
 async function startSandbox() {
   ui.replaceChildren();
+  void hideBackdrop();
   const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
   document.getElementById('app')!.prepend(canvas);
   const { Game } = await import('./game/game');
@@ -86,6 +90,7 @@ async function startSandbox() {
 // ?bots=3&dif=normal&fast=1&autoplay=1&seed=42#solo
 async function startSolo(opts: { name: string; bots: number; difficulty: Difficulty }) {
   ui.replaceChildren();
+  void hideBackdrop();
   const q = new URLSearchParams(location.search);
   const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
   document.getElementById('app')!.prepend(canvas);
@@ -115,6 +120,7 @@ function soloFromUrl() {
 
 async function startPhysicsTest(scene: string) {
   ui.replaceChildren();
+  void hideBackdrop();
   const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
   document.getElementById('app')!.prepend(canvas);
   const { Game } = await import('./game/game');
@@ -126,6 +132,7 @@ async function startPhysicsTest(scene: string) {
 
 async function startBench() {
   ui.replaceChildren();
+  void hideBackdrop();
   const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
   document.getElementById('app')!.prepend(canvas);
   const { Game } = await import('./game/game');
@@ -142,6 +149,7 @@ function boot() {
   const phys = location.hash.match(/^#physics=(\w+)$/);
   if (phys) return void startPhysicsTest(phys[1]);
   const code = codeFromHash();
+  void showBackdrop(document.getElementById('app')!);
   let hasToken = false;
   try {
     hasToken = !!code && !!localStorage.getItem(`asedio.token.${code}`);

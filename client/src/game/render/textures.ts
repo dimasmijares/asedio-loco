@@ -161,19 +161,19 @@ export const tex = {
       ),
     ),
   // Estandarte con el color y el emblema del jugador.
-  banner: (color: string, glyph: string) =>
+  banner: (color: string, glyph: string, ink = '#ffffff') =>
     once(`banner-${color}`, () =>
       canvas(128, (g, s) => {
         g.fillStyle = color;
         g.fillRect(0, 0, s, s);
         g.fillStyle = 'rgba(0,0,0,0.2)';
         g.fillRect(0, s - 14, s, 14);
-        g.fillStyle = '#fff';
+        g.fillStyle = ink;
         g.font = 'bold 76px serif';
         g.textAlign = 'center';
         g.textBaseline = 'middle';
         g.lineWidth = 6;
-        g.strokeStyle = 'rgba(0,0,0,0.6)';
+        g.strokeStyle = ink === '#ffffff' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
         g.strokeText(glyph, s / 2, s / 2);
         g.fillText(glyph, s / 2, s / 2);
       }),

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { AMMO, type AmmoId } from '../../../shared/ammo';
 import { PITCH_DEFAULT, PREVIEW_TIME, clampAim, launchVelocity, trajectory, type Aim } from '../../../shared/ballistics';
 import { DEG, clamp, type Vec3 } from '../../../shared/math';
+import { settings } from '../ui/settings';
 import { toon } from './render/materials';
 
 // Control tipo tirachinas: pulsa y arrastra hacia atrás. La distancia del arrastre da la
@@ -38,7 +39,7 @@ export class AimInput {
     });
     dom.addEventListener('pointermove', (e) => {
       if (!this.dragging) return;
-      const k = e.shiftKey ? 0.25 : 1;
+      const k = (e.shiftKey ? 0.25 : 1) * settings.sensitivity;
       this.vx += (e.clientX - this.lx) * k;
       this.vy += (e.clientY - this.ly) * k;
       this.lx = e.clientX;

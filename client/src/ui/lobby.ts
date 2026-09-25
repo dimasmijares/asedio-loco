@@ -2,6 +2,7 @@ import { DIFFICULTIES, MAX_PLAYERS, type Difficulty, type RoomState } from '../.
 import { PLAYER_STYLES } from '../../../shared/players';
 import type { Connection } from '../net/connection';
 import { h, titleEl, toast } from './dom';
+import { openSettings } from './settings';
 
 const NAME_KEY = 'asedio.name';
 const DIFF_LABEL: Record<Difficulty, string> = { facil: 'Fácil', normal: 'Normal', dificil: 'Difícil' };
@@ -34,7 +35,7 @@ export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (na
   create.onclick = busy(create, () => opts.onCreate(getName()));
   const solo = h('button', { class: 'big', id: 'solo' }, 'Jugar solo contra bots');
   solo.onclick = () => opts.onSolo(getName());
-  const children: Node[] = [titleEl(), h('label', { htmlFor: 'name' }, '¿Cómo te llamas?'), input];
+  const children: Node[] = [h('label', { htmlFor: 'name' }, '¿Cómo te llamas?'), input];
   if (opts.code) {
     const join = h('button', { class: 'primary big', id: 'join' }, `Entrar en la sala ${opts.code}`);
     join.onclick = busy(join, () => opts.onJoin(getName()));
@@ -42,13 +43,42 @@ export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (na
   } else {
     children.push(create, solo);
   }
-  children.push(err);
-  root.replaceChildren(h('div', { class: 'panel', id: 'home' }, ...children));
+  const settingsBtn = h('button', { id: 'open-settings' }, '⚙️ Ajustes');
+  settingsBtn.onclick = () => openSettings();
+  const howBtn = h('button', { id: 'how-to' }, '❓ Cómo se juega');
+  howBtn.onclick = () => showHowTo();
+  children.push(err, h('div', { class: 'home-links' }, howBtn, settingsBtn));
+  root.replaceChildren(
+    h('div', { class: 'home-wrap' }, titleEl(), h('div', { class: 'subtitle' }, 'Castillos, catapultas y vacas explosivas · hasta 4 jugadores'), h('div', { class: 'panel', id: 'home' }, ...children)),
+  );
   input.focus();
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') (root.querySelector('#join') ?? create).dispatchEvent(new MouseEvent('click'));
   });
   return { error: (msg: string) => ((err.textContent = msg), root.querySelectorAll('button').forEach((b) => (b.disabled = false))) };
+}
+
+// Resumen de cómo se juega (también accesible desde la portada).
+export function showHowTo() {
+  document.getElementById('howto')?.remove();
+  const close = h('button', { class: 'primary big' }, '¡Entendido!');
+  const modal = h(
+    'div',
+    { class: 'overlay modal', id: 'howto', role: 'dialog', 'aria-label': 'Cómo se juega' },
+    h(
+      'div',
+      { class: 'panel' },
+      h('h2', null, 'Cómo se juega'),
+      h('p', null, '👑 Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
+      h('p', null, '🎯 Todos apuntáis a la vez. Arrastra hacia atrás desde cualquier punto para tensar: cuanto más lejos, más potencia; tira hacia un lado para girar. Rueda o W/S cambian la elevación. Q/E eligen otro castillo.'),
+      h('p', null, '🐄 Cada ronda te toca munición al azar y tienes dos en la mano (teclas 1 y 2). Las defensivas (andamio y burbuja) protegen tu castillo.'),
+      h('p', null, '🌋 Cada 3 rondas sube la lava y, desde la ronda 6, sopla el viento. ¡Mira la flecha!'),
+      close,
+    ),
+  );
+  close.onclick = () => modal.remove();
+  modal.onclick = (e) => e.target === modal && modal.remove();
+  document.body.append(modal);
 }
 
 // Configuración de la partida en solitario: cuántos bots y de qué dificultad.
@@ -116,7 +146,7 @@ export class LobbyView {
     for (let slot = 0; slot < MAX_PLAYERS; slot++) {
       const st = PLAYER_STYLES[slot];
       const p = bySlot.get(slot);
-      const banner = h('div', { class: 'banner', style: `background:${st.color}` }, st.glyph);
+      const banner = h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, st.glyph);
       if (p) {
         list.append(
           h(
