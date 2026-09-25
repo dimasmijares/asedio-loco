@@ -32,7 +32,7 @@ export function showBackdrop(parent: HTMLElement): Promise<Backdrop | null> {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       a += dt * 0.05;
-      stage.camera.position.set(Math.cos(a) * 64, 30 + Math.sin(a * 0.7) * 4, Math.sin(a) * 64);
+      stage.camera.position.set(Math.cos(a) * 72, 34 + Math.sin(a * 0.7) * 4, Math.sin(a) * 72);
       stage.camera.lookAt(new THREE.Vector3(0, 0, 0));
       view.update(dt);
       stage.update(dt);

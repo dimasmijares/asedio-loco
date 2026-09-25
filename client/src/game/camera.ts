@@ -124,7 +124,7 @@ export class CameraRig {
           .copy(this.aimFrom)
           .addScaledVector(d, -back)
           .addScaledVector(right, 3)
-          .add(new THREE.Vector3(0, 6 * this.userZoom + this.userPitch * 6, 0));
+          .add(new THREE.Vector3(0, 8 * this.userZoom + this.userPitch * 6, 0));
         this.wantTarget.copy(this.aimFrom).addScaledVector(d, 22).add(new THREE.Vector3(0, 3.5, 0));
         break;
       }

@@ -1,11 +1,11 @@
 import { quatFromYaw, v3, type Quat, type Vec3 } from './math';
 
 // Isla: cuadrado redondeado de lado 2*ISLAND_HALF, con la superficie en y = 0.
-export const ISLAND_HALF = 30;
-export const ISLAND_CORNER_R = 9;
-export const CASTLE_OFFSET = 19; // distancia del centro de la isla a cada castillo, por eje
-export const CASTLE_HALF = 4.6; // mitad del lado de la zona "dentro del castillo"
-export const CATAPULT_LOCAL: Vec3 = [0, 1.5, 6.6]; // bastión con la catapulta, delante del castillo
+export const ISLAND_HALF = 34;
+export const ISLAND_CORNER_R = 10;
+export const CASTLE_OFFSET = 22; // distancia del centro de la isla a cada castillo, por eje
+export const CASTLE_HALF = 5.6; // mitad del lado de la zona "dentro del castillo" (con los contrafuertes)
+export const CATAPULT_LOCAL: Vec3 = [0, 1.5, 7.4]; // bastión con la catapulta, delante del castillo
 export const LAUNCH_HEIGHT = 1.9; // altura del cazo sobre el bastión
 
 // Esquinas: 0 = (-x,-z), 1 = (+x,-z), 2 = (+x,+z), 3 = (-x,+z).
@@ -58,7 +58,7 @@ export function islandSdf(x: number, z: number): number {
 }
 
 // Alturas del mar de lava por nivel (sube cada 3 rondas). Los tres primeros quedan por debajo
-// de la isla (avisos); desde el cuarto (ronda 10) inunda el patio y se come una hilera por nivel.
-export const LAVA_LEVELS = [-3.6, -2.3, -1.0, 0.35, 1.3, 2.25, 3.2, 4.2];
+// de la isla (avisos); desde el cuarto (ronda 10) inunda el patio y se come una hilera (1,2 m) por nivel.
+export const LAVA_LEVELS = [-3.6, -2.3, -1.0, 0.4, 1.6, 2.8, 4.0, 5.2];
 export const LAVA_RISE_EVERY = 3; // rondas
 export const WIND_FROM_ROUND = 6;

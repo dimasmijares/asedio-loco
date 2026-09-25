@@ -6,7 +6,7 @@ import { writeFileSync } from 'node:fs';
 import { test } from 'vitest';
 import { AMMO, type AmmoId } from '../../shared/ammo';
 import { solveAim } from '../../shared/ballistics';
-import { buildCastle, kingId } from '../../shared/castle';
+import { CASTLE_SCALE, buildCastle, kingId } from '../../shared/castle';
 import { launchPoint, toWorld } from '../../shared/map';
 import { rng } from '../../shared/math';
 import { loadRapier } from '../../client/src/game/sim/rapier';
@@ -14,7 +14,7 @@ import { DT, Sim } from '../../client/src/game/sim/sim';
 
 const OFFENSIVE: AmmoId[] = ['rock', 'log', 'coconuts', 'cow', 'melon', 'chicken', 'piano', 'blackhole', 'magnet', 'snowball'];
 // Los mismos puntos de la estructura a los que apuntan los bots.
-const STRUCTURE: [number, number, number][] = [[0, 2.5, 3.3], [3.25, 3.5, 3.25], [-3.25, 3.5, 3.25], [0, 3.4, 0]];
+const STRUCTURE = ([[0, 2.5, 3.3], [3.25, 3.5, 3.25], [-3.25, 3.5, 3.25], [0, 3.4, 0]] as [number, number, number][]).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE] as [number, number, number]);
 const SHOTS = Number(process.env.SHOTS ?? 6);
 
 test('destrozo por munición', async () => {

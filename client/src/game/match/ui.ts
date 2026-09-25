@@ -53,6 +53,7 @@ export class MatchUI {
   private pendingAim: Aim | null = null;
   // Repetición de reyes caídos (fase 'replay').
   private replayQueue: number[] = [];
+  replaysSeen = 0; // fases de repetición vistas (para las pruebas)
   private replaySlot = -1;
   private replayT = 0;
   private replayCam = { from: new THREE.Vector3(), at: new THREE.Vector3() };
@@ -74,7 +75,7 @@ export class MatchUI {
     if (me) input.setAim(me.aim);
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
     if (src.you !== null && tutorialPending()) this.tutorial = new Tutorial(this.hud.root);
-    game.rig.orbit(new THREE.Vector3(0, 2, 0), 58, 32, 0.08);
+    game.rig.orbit(new THREE.Vector3(0, 2, 0), 66, 36, 0.08);
   }
 
   me(): PlayerState | undefined {
@@ -196,7 +197,7 @@ export class MatchUI {
       else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
         const o = castleOrigin(s.winner);
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 18) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 18, 11, 0.25);
-      } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 50, 30, 0.06);
+      } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
     }
 
     // HUD.
@@ -239,6 +240,7 @@ export class MatchUI {
     const prev = this.last.phase;
     this.last.phase = s.phase;
     if (s.phase === 'replay' && prev !== 'replay') {
+      this.replaysSeen++;
       this.replayQueue = [...(s.replay ?? [])];
       this.hud.root.classList.add('replaying');
       this.nextReplay(s);

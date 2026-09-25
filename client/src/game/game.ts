@@ -91,7 +91,7 @@ export class Game {
     );
     window.addEventListener('resize', () => this.stage.resize());
     setQualityTarget((q) => this.stage.setQuality(q));
-    this.rig.orbit(new THREE.Vector3(0, 2, 0), 62, 34, 0.06);
+    this.rig.orbit(new THREE.Vector3(0, 2, 0), 70, 38, 0.06);
     this.rig.snap();
     this.loop = this.loop.bind(this);
     this.raf = requestAnimationFrame(this.loop);

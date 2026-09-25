@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { BLOCKS_PER_CASTLE } from '../../shared/castle';
 import { canvasNotBlack, watchErrors } from './helpers';
 
 // Sección 5.1: la página carga sin errores y la isla con los castillos se ve bien.
@@ -19,7 +20,7 @@ test('humo: portada y campo de pruebas sin errores', async ({ page }, info) => {
     const g = (window as any).__asedio.game;
     return { blocks: g.view.blockCount(), kings: g.view.kings.size };
   });
-  expect(state.blocks).toBe(212);
+  expect(state.blocks).toBe(2 * BLOCKS_PER_CASTLE);
   expect(state.kings).toBe(2);
   await page.screenshot({ path: info.outputPath('isla.png') });
 
@@ -32,7 +33,7 @@ test('humo: portada y campo de pruebas sin errores', async ({ page }, info) => {
     const g = (window as any).__asedio.game;
     return { blocks: g.view.blockCount(), kings: g.view.kings.size };
   });
-  expect(four).toEqual({ blocks: 424, kings: 4 });
+  expect(four).toEqual({ blocks: 4 * BLOCKS_PER_CASTLE, kings: 4 });
   await page.screenshot({ path: info.outputPath('cuatro-castillos.png') });
   expect(errors).toEqual([]);
 });

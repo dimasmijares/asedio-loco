@@ -1,6 +1,6 @@
 import { AMMO, type AmmoId } from './ammo';
 import { clampAim, solveAim, type Aim } from './ballistics';
-import { BLOCKS_PER_CASTLE } from './castle';
+import { BLOCKS_PER_CASTLE, CASTLE_SCALE } from './castle';
 import { launchPoint, toWorld } from './map';
 import { DEG, type Rng, type Vec3 } from './math';
 import type { MatchState, PlayerState } from './match';
@@ -28,14 +28,16 @@ export interface BotDecision {
 }
 
 // Puntos de la estructura a los que apunta cuando no va a por el rey (coordenadas locales).
-const STRUCTURE: Vec3[] = [
-  [0, 2.5, 3.3],
-  [3.25, 3.5, 3.25],
-  [-3.25, 3.5, 3.25],
-  [3.3, 2.5, 0],
-  [-3.3, 2.5, 0],
-  [0, 3.4, 0],
-];
+const STRUCTURE: Vec3[] = (
+  [
+    [0, 2.5, 3.3],
+    [3.25, 3.5, 3.25],
+    [-3.25, 3.5, 3.25],
+    [3.3, 2.5, 0],
+    [-3.3, 2.5, 0],
+    [0, 3.4, 0],
+  ] as Vec3[]
+).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE]);
 
 export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number, Vec3>, r: Rng): BotDecision {
   const skill = BOT_SKILL[me.difficulty ?? 'normal'];

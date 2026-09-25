@@ -1,6 +1,7 @@
 // Lógica pura de la partida: rondas, reparto de munición, lava, viento, eliminación y victoria.
 // Se ejecuta en el anfitrión; el estado es serializable y viaja por la red tal cual.
 import { drawAmmo, type AmmoId } from './ammo';
+import { BLOCKS_PER_CASTLE } from './castle';
 import { PITCH_DEFAULT, type Aim } from './ballistics';
 import { LAVA_LEVELS, LAVA_RISE_EVERY, WIND_FROM_ROUND, castleOrigin, launchPoint } from './map';
 import { hashString, rng, type Vec3 } from './math';
@@ -99,7 +100,7 @@ export function createMatch(players: { slot: number; id: string; name: string; b
     remaining: fast ? 1 : 3,
     players: players.map((p) => {
       const target = nearestRival(p.slot, slots);
-      return { ...p, alive: true, ammo: [], selected: 0, locked: false, aim: defaultAim(p.slot, target), target, blocks: 106, stats: newStats() };
+      return { ...p, alive: true, ammo: [], selected: 0, locked: false, aim: defaultAim(p.slot, target), target, blocks: BLOCKS_PER_CASTLE, stats: newStats() };
     }),
     lavaLevel: 0,
     lavaY: LAVA_LEVELS[0],

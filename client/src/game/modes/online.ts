@@ -131,7 +131,7 @@ export class OnlineMode implements Mode {
     }
     const perSlot: Record<number, number> = {};
     for (const p of s.players) perSlot[p.slot] = view.blockCount(p.slot);
-    return { role: this.role, you: this.you, spectator: this.conn.you?.role === 'spectator', round: s.round, phase: s.phase, winner: s.winner, blocks: view.blockCount(), perSlot, kings, alive: s.players.filter((p) => p.alive).map((p) => p.slot), migrations: this.migrations, fulls: this.netClient?.fullsReceived ?? 0 };
+    return { role: this.role, you: this.you, spectator: this.conn.you?.role === 'spectator', round: s.round, phase: s.phase, winner: s.winner, blocks: view.blockCount(), perSlot, kings, alive: s.players.filter((p) => p.alive).map((p) => p.slot), migrations: this.migrations, v: s.v, replays: this.ui.replaysSeen, fulls: this.netClient?.fullsReceived ?? 0 };
   }
 
   onSimEvents(events: SimEvent[]) {

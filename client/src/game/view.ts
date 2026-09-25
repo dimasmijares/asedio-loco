@@ -53,7 +53,7 @@ export class WorldView {
   constructor(readonly stage: Stage, readonly slots: number[]) {
     stage.scene.add(this.root);
     const shadows = stage.quality !== 'low';
-    this.blocks = new BlockMeshes(this.root, 520, 0.035, shadows);
+    this.blocks = new BlockMeshes(this.root, 640, 0.035, shadows);
     this.debris = new Debris(this.root, stage.quality === 'high' ? 260 : stage.quality === 'medium' ? 170 : 90, shadows);
     this.fx = new Fx(this.root, stage.quality);
     for (const slot of [0, 1, 2, 3]) {

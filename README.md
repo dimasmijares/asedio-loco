@@ -37,7 +37,7 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 | Silenciar | M |
 | Mostrar u ocultar la ayuda de controles | H |
 
-Los puntos muestran solo el primer tramo del vuelo (sobre el 60 % mientras cargas), no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto, la sensibilidad del tirachinas y si se muestran los fps.
+Los puntos muestran solo el primer tramo del vuelo (sobre el 60 % mientras cargas), no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto, la sensibilidad del ratón al apuntar y si se muestran los fps.
 
 ## Desarrollo
 

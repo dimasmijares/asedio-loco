@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { AMMO_IDS, type AmmoId } from '../../../../shared/ammo';
 import { AMMO } from '../../../../shared/ammo';
 import { solveAim, type Aim } from '../../../../shared/ballistics';
-import { BLOCKS_PER_CASTLE, buildCastle } from '../../../../shared/castle';
+import { BLOCKS_PER_CASTLE, CASTLE_SCALE, buildCastle } from '../../../../shared/castle';
 import { castleOrigin, launchPoint, toWorld } from '../../../../shared/map';
 import type { Vec3 } from '../../../../shared/math';
 import { Hud } from '../../ui/hud';
@@ -104,7 +104,8 @@ export class SandboxMode implements Mode {
   // Apunta con precisión a una parte del castillo diana (para pruebas y depuración).
   aimAt(what: 'king' | 'wall' | 'tower', pitch = 0.7) {
     const k = buildCastle(this.target).kingPos;
-    const local: Record<string, Vec3> = { king: [0, 0.3, 0], wall: [0, -1.4, 3.3], tower: [3.25, -0.9, 3.25] };
+    const s = CASTLE_SCALE;
+    const local: Record<string, Vec3> = { king: [0, 0.3, 0], wall: [0, -1.4 * s, 3.3 * s], tower: [3.25 * s, -0.9 * s, 3.25 * s] };
     const l = local[what];
     const p = toWorld(this.target, [l[0], k[1] + l[1], l[2]]);
     const a = AMMO[this.ammo];

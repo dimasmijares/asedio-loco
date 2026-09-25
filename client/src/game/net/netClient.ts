@@ -62,6 +62,8 @@ export class NetClient implements MatchSource {
   }
 
   private setState(s: MatchState) {
+    // Un estado más viejo que el que ya tenemos (misma partida) no puede deshacer nada.
+    if (s.seed === this.state.seed && s.v < this.state.v) return;
     this.state = s;
     this.deadline = performance.now() / 1000 + s.remaining;
     this.applyLiveAims();

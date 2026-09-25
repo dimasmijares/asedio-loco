@@ -27,7 +27,7 @@ export class BenchMode implements Mode {
     game.startSim([0, 1, 2, 3]);
     this.t0 = game.sim!.time;
     game.mode = this;
-    game.rig.orbit(new THREE.Vector3(0, 2, 0), 55, 30, 0.1);
+    game.rig.orbit(new THREE.Vector3(0, 2, 0), 63, 34, 0.1);
     game.rig.snap();
   }
 

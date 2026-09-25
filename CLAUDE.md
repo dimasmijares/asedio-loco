@@ -25,7 +25,7 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 shared/          Lógica pura, sin DOM ni Rapier (la usan cliente, servidor y tests)
   protocol.ts    Mensajes cliente↔servidor, validación, saneado de nombres, TokenBucket
   map.ts         Isla, posiciones de castillos por hueco (0-3), lava, toWorld/toLocal
-  castle.ts      Plano del castillo (106 bloques, uniones, posición del rey), ids
+  castle.ts      Plano del castillo (140 bloques a escala 1,2, uniones, posición del rey), ids
   materials.ts   Madera, piedra, cristal, hierro (densidad, fricción, umbral de rotura…)
   ammo.ts        12 municiones (rareza, forma, masa, arrastre) y reparto con semilla
   ballistics.ts  Trayectoria con arrastre y viento, solveAim (bots), vista previa
@@ -43,7 +43,8 @@ client/src/
                  scenes.ts (escenas de prueba de física, para el navegador y Vitest)
     view.ts      Todo lo visible; se alimenta de eventos SimEvent y poses de cuerpos
     render/      Three.js: stage (cielo, isla, lava), blocks (instancing), models, fx, toon
-    camera.ts, director.ts, aim.ts   Cámara, dirección de cámara en impactos, tirachinas
+    camera.ts, director.ts, aim.ts   Cámara, plano panorámico en impactos, puntería (clic derecho + Espacio)
+    replay.ts    Grabación de lo que ve cada cliente y repetición de la caída de un rey
     match/       host.ts (MatchHost, autoritativo), ui.ts (MatchUI, HUD y cámara), autoplay.ts
     net/         netHost.ts, netClient.ts, interp.ts, messages.ts (partida en red)
     modes/       sandbox, physicsTest, solo (contra bots), online (en red, con migración)
@@ -75,15 +76,15 @@ Los clientes solo aceptan `st`/`tk`/`full` del `hostId` actual.
 
 ## Rendimiento (sección 5.8)
 
-Escena más cargada: `/#bench`. Son los 4 castillos enteros (424 bloques) y 12 proyectiles cruzados a la vez (vacas, pianos, agujero negro, imán…); se miden 9 s de simulación (los fps, en tiempo real). Se ejecuta con `node tests/tools/bench.mjs <base> <high|medium|low> gpu`.
+Escena más cargada: `/#bench`. Son los 4 castillos enteros (560 bloques) y 12 proyectiles cruzados a la vez (vacas, pianos, agujero negro, imán…); se miden 9 s de simulación (los fps, en tiempo real). Se ejecuta con `node tests/tools/bench.mjs <base> <high|medium|low> gpu`.
 
 | Calidad | fps medios | peor 5 % | CPU/fotograma | física/paso | llamadas | triángulos | cuerpos despiertos | fragmentos | partículas |
 |---|---|---|---|---|---|---|---|---|---|
-| alta | 322 | 112 | 2,9 ms | 3,3 ms | 392 | 85 k | 421 | 260 | 1187 |
-| media | 354 | 125 | 2,6 ms | 3,3 ms | 392 | 76 k | 421 | 170 | 773 |
-| baja | 537 | 182 | 1,7 ms | 3,1 ms | 272 | 56 k | 421 | 90 | 392 |
+| alta | 199 | 69 | 4,8 ms | 5,5 ms | 394 | 85 k | 562 | 260 | 1005 |
+| media | 220 | 78 | 4,3 ms | 4,9 ms | 394 | 80 k | 562 | 170 | 833 |
+| baja | 305 | 93 | 3,1 ms | 5,2 ms | 274 | 59 k | 562 | 90 | 416 |
 
-Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1280×720, sin vsync). No he podido medir en una gráfica integrada. Por la carga (menos de 400 llamadas, menos de 90 k triángulos, unos 3 ms de física en el peor momento), el objetivo de 60 fps en calidad media parece alcanzable en una integrada de gama media, y la calidad adaptativa baja a «baja» si no llega. Con SwiftShader (CPU, en CI) la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms; `tests/e2e/perf.spec.ts` exige que cada paso quepa en su presupuesto de 16 ms.
+Medido el 25-09-2026, con los castillos de 140 bloques, en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1280×720, sin vsync). Con los castillos de 106 bloques el paso de física costaba 3,3 ms. No he podido medir en una gráfica integrada. Por la carga (menos de 400 llamadas, menos de 90 k triángulos, unos 5 ms de física en el peor momento), el objetivo de 60 fps en calidad media parece alcanzable en una integrada de gama media, y la calidad adaptativa baja a «baja» si no llega. Con SwiftShader (CPU, en CI) la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms; `tests/e2e/perf.spec.ts` exige que cada paso quepa en su presupuesto de 16 ms.
 
 ## Pruebas
 
@@ -96,7 +97,7 @@ Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1
 - `npm run e2e:prod`: Playwright contra producción. CI lo ejecuta tras cada despliegue, repartido en 7 trabajos paralelos (uno por prueba larga), y guarda las capturas como artefactos `capturas-e2e-<grupo>`. Para lanzar solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
 - `npm run ci:estado` resume la última ejecución de CI (trabajos, ✓/✘ y errores); `-- <id>` para otra y `-- --wait` para esperar a que termine.
 - Las escenas de física se abren a mano con `/#physics=ccd|tower|glass|fragments`.
-- Herramientas de captura: `node tests/tools/review.mjs <base> <carpeta>` (portada, apuntado, tirachinas tensado, impacto y resultados con GPU, para revisar la interfaz a ojo), `node tests/tools/shot.mjs <url> <png>` y `node tests/tools/sandbox-shot.mjs <url> <prefijo> <municion> king|wall|tower <elevación>`.
+- Herramientas de captura: `node tests/tools/review.mjs <base> <carpeta>` (portada, apuntado, carga del disparo, impacto y resultados con GPU, para revisar la interfaz a ojo), `node tests/tools/impact-shots.mjs <base> <carpeta>` (la cámara panorámica), `node tests/tools/replay-shots.mjs <base> <carpeta>` (la repetición), `node tests/tools/shot.mjs <url> <png>` y `node tests/tools/sandbox-shot.mjs <url> <prefijo> <municion> king|wall|tower <elevación>`.
 - Depuración de física en Node: los archivos `tests/unit/_*.test.ts` están en `.gitignore` y sirven para experimentar con `Sim` sin navegador.
 - Playwright en Chromium sin interfaz necesita estos flags para WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`.
 

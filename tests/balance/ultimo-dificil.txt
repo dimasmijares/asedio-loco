@@ -1,4 +1,4 @@
 dificultad dificil, 6 partidas
-media: 7.7 rondas, 177.8 s
-primera eliminación en la ronda: 2, 1, 2, 1, 10, 1
-causas: {"outside":6,"lava":7,"crushed":5}
+media: 6.0 rondas, 202.2 s
+primera eliminación en la ronda: 1, 2, 3, 2, 2, 3
+causas: {"outside":8,"fell":1,"crushed":6,"lava":4}

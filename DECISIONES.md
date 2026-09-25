@@ -98,3 +98,9 @@ Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de 
   - **Sin grabación:** un espectador que entra tarde no tiene nada grabado y ve el plano general.
   - **Protocolo v3.**
 - **D-062 · Bloqueo del puntero con dos salvaguardas.** Se ignora el primer movimiento tras bloquear el puntero (Chrome lo manda con un salto falso) y cada movimiento se limita a 200 px. Si con el puntero bloqueado `movementX` llega a 0 pero el cursor se mueve (eventos sintéticos de las pruebas), se usa el cursor.
+- **D-063 · Castillos más grandes (término medio).** Todo el castillo a escala 1,2 y 140 bloques en lugar de 106: torres de 5 bloques, murallas de 4 hileras y dos contrafuertes laterales.
+  - **Isla y lava:** la isla pasa a 68 × 68 m, con los castillos a ±22 m. La lava sube por hileras de 1,2 m.
+  - **Destrozo por disparo:** de 7,9 a 8,8 bloques (menos en proporción al castillo).
+  - **Duración:** normal, 9,6 rondas (unos 5 minutos con personas apuntando); difícil, 6.
+  - **Rendimiento:** el paso de física sube de 3,3 a unos 5 ms en la escena más cargada, con más de 190 fps en una RTX 3080. El estado completo que se envía por red sigue por debajo de 64 KB.
+- **D-064 · Estado del anfitrión con versión.** Un cliente descarta un `st` o `full` más viejo que el que ya tiene (mismo `seed` y menor `v`). La red real mantiene el orden, pero no cuesta nada y protege de sorpresas.
