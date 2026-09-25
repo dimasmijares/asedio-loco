@@ -366,7 +366,8 @@ export class Sfx {
         else if (e.why === 'melt') this.sizzle(e.p);
         break;
       case 'boom':
-        this.boom(e.p, Math.min(1.3, e.r / 3), e.kind);
+        // El picotazo de la gallina ya suena con su cacareo.
+        if (e.kind !== 'peck') this.boom(e.p, Math.min(1.3, e.r / 3), e.kind);
         break;
       case 'fx':
         switch (e.kind) {

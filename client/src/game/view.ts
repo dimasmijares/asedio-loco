@@ -134,7 +134,7 @@ export class WorldView {
         break;
       case 'boom':
         this.fx.boom(e.p, e.r, e.kind);
-        this.shake = Math.min(1.2, this.shake + e.r * 0.18);
+        this.shake = Math.min(1.2, this.shake + e.r * (e.kind === 'peck' ? 0.05 : 0.18));
         break;
       case 'proj': {
         const obj = makeProjectile(e.ammo, e.scale ?? 1);

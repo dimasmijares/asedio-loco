@@ -55,15 +55,16 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.events.push({ e: 'fx', kind: 'split', p });
           const side = v3.norm([v[2], 0, -v[0]]);
           const fwd = v3.norm([v[0], 0, v[2]]);
+          // Abanico cerrado: los 4 caen repartidos sobre el mismo castillo, no por media isla.
           const offs: [number, number][] = [
-            [2.2, 0.8],
-            [-2.2, 0.8],
-            [0.9, -1.4],
-            [-0.9, -1.4],
+            [1.3, 0.5],
+            [-1.3, 0.5],
+            [0.55, -0.8],
+            [-0.55, -0.8],
           ];
           for (const [s, f] of offs) {
             const dv = v3.add(v3.scale(side, s), v3.scale(fwd, f));
-            sim.spawnProjectile(AMMO.coconuts, r.slot, v3.add(p, v3.scale(dv, 0.15)), v3.add(v, dv), { scale: 0.62, behavior: { maxLife: 5 } });
+            sim.spawnProjectile(AMMO.coconuts, r.slot, v3.add(p, v3.scale(dv, 0.15)), v3.add(v, dv), { scale: 0.72, behavior: { maxLife: 5 } });
           }
         },
       };
@@ -117,7 +118,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             if (!sim.recs.has(r.id)) return;
             const q = tv(r.body.translation());
             sim.removeRec(r, 'proj');
-            sim.explode(q, 3, 25, r.slot, 'melon');
+            sim.explode(q, 3.6, 34, r.slot, 'melon');
           });
         },
       };
@@ -140,7 +141,10 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           const h = Math.hypot(v.x, v.z) || 1;
           const fwd = Math.max(h, 6) * 1.05;
           r.body.setLinvel({ x: (v.x / h) * fwd, y: Math.max(Math.abs(v.y) * 0.8, 6.5), z: (v.z / h) * fwd }, true);
-          sim.events.push({ e: 'fx', kind: 'cluck', p: tv(r.body.translation()), id: r.id });
+          const p = tv(r.body.translation());
+          sim.events.push({ e: 'fx', kind: 'cluck', p, id: r.id });
+          // Cada bote es un picotazo: una onda pequeña que astilla lo que toca.
+          sim.explode(p, 2.4, 24, r.slot, 'peck');
         },
       };
     }
@@ -210,11 +214,15 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           touching -= dt;
           // Mientras toque algo (suelo o bloques) está rodando.
           sim.world.contactPairsWith(r.col, () => (touching = 0.1));
-          if (touching <= 0 || radius >= 1.6) return;
+          if (touching <= 0) return;
           const v = r.body.linvel();
-          if (Math.hypot(v.x, v.z) < 1.2) return;
+          const sp = Math.hypot(v.x, v.z);
+          if (sp < 1.2) return;
+          // Una bola que crece coge inercia: mientras rueda no baja de 9 m/s.
+          if (sp < 9) r.body.setLinvel({ x: (v.x / sp) * 9, y: v.y, z: (v.z / sp) * 9 }, true);
+          if (radius >= 1.6) return;
           // Crece al rodar: nuevo colisionador más grande, misma densidad (más masa).
-          radius = Math.min(1.6, radius + dt * 0.5);
+          radius = Math.min(1.6, radius + dt * 0.8);
           sim.world.removeCollider(r.col, false);
           sim.byHandle.delete(r.col.handle);
           const a = AMMO.snowball;

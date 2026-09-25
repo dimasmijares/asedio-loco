@@ -136,6 +136,12 @@ export class Fx {
   }
 
   boom(p: Vec3, radius: number, kind = 'boom') {
+    if (kind === 'peck') {
+      // Picotazo de la gallina: plumas y un poco de polvo, sin fuego.
+      for (let i = 0; i < this.n(10); i++) this.bit(p, randDir().multiplyScalar(rnd(2, 5)).add(new THREE.Vector3(0, 2, 0)), { color: i % 3 ? '#fffdf0' : '#ffd43b', size: 0.12, max: 1.4 });
+      this.ring(p, radius * 0.5);
+      return;
+    }
     const fire = kind === 'melon' ? ['#ff4d6d', '#ff8fa3', '#40c057'] : kind === 'implode' ? ['#c77dff', '#7b2cbf', '#e0aaff'] : ['#ffd23f', '#ff9f1c', '#ff5400'];
     for (let i = 0; i < this.n(22); i++) {
       this.puff(p, randDir().multiplyScalar(rnd(2, 6) * radius * 0.35), { color: fire[i % fire.length], size: rnd(0.4, 0.9), max: rnd(0.35, 0.7), grow: 1.8, drag: 4, gravity: -1 });
