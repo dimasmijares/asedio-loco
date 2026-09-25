@@ -10,7 +10,15 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'aim', null, { timeout: 30_000 });
   await canvasNotBlack(page);
   await page.screenshot({ path: info.outputPath('apuntado.png') });
-  await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'impact', null, { timeout: 60_000 });
+  // La fase de impacto (o cualquier momento posterior si ha ido muy deprisa).
+  await page.waitForFunction(
+    () => {
+      const s = (window as any).__asedio.mode.host.state;
+      return s.phase === 'impact' || s.phase === 'results' || s.phase === 'over' || s.round >= 2;
+    },
+    null,
+    { timeout: 120_000 },
+  );
   await page.waitForTimeout(1500);
   await page.screenshot({ path: info.outputPath('impacto.png') });
   await expect(page.locator('#game-over')).toBeVisible({ timeout: 800_000 });

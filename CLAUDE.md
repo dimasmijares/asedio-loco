@@ -97,6 +97,18 @@ Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1
 - Depuración de física en Node: los archivos `tests/unit/_*.test.ts` están en `.gitignore` y sirven para experimentar con `Sim` sin navegador.
 - Playwright en Chromium sin interfaz necesita estos flags para WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`.
 
+## Limitaciones conocidas
+
+- El rendimiento solo se ha medido con una RTX 3080 y con SwiftShader. En una gráfica integrada no se ha probado; la calidad adaptativa baja el nivel si no llega a 38 fps.
+- Pensado para ratón y teclado. En pantallas táctiles se puede arrastrar, pero no hay control de elevación sin rueda ni teclas.
+- Un jugador que se desconecta en plena partida no pasa a ser un bot: su catapulta dispara con la última puntería cuando se acaba el tiempo.
+- Si el anfitrión se va en plena fase de impacto, las estadísticas de esa ronda quedan incompletas.
+- En la isla, los bloques que caen sobre la superficie de lava no se funden (solo se come la hilera al subir el nivel), para que la lava no se lleve el castillo entero en cadena.
+- Las partidas varían bastante de duración: con bots difíciles o buena puntería un rey puede caer en la ronda 1; con bots fáciles se llega a la inundación (ronda 10) y más allá.
+- Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
+- La portada carga Rapier (1,1 MB comprimido) para el fondo animado.
+- La batería E2E contra producción tarda unos 30 minutos en el runner de CI (unas 4 veces más lento que un PC de sobremesa).
+
 ## Notas del entorno
 
 - Windows 11, la carpeta del proyecto está dentro de OneDrive. Si aparecen errores `EPERM`/`EBUSY` en `node_modules` o `dist`, la causa probable es la sincronización.
