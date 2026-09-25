@@ -30,6 +30,7 @@ export class Stage {
   sun: THREE.DirectionalLight;
   lava: THREE.Mesh;
   lavaMat: THREE.ShaderMaterial;
+  private embers: THREE.ShaderMaterial;
   clouds = new THREE.Group();
   private t0 = performance.now();
   lavaTarget = -3.6;
@@ -65,6 +66,10 @@ export class Stage {
     this.lava = mesh;
     this.lavaMat = mat;
     this.scene.add(mesh);
+    const embers = this.makeEmbers(quality === 'high' ? 520 : quality === 'medium' ? 320 : 140);
+    this.embers = embers.material as THREE.ShaderMaterial;
+    this.scene.add(embers);
+    this.scene.add(this.makeVignette());
     this.makeClouds();
     this.scene.add(this.clouds);
     // Decoración fusionada por material: cientos de mallas pasan a ser una docena de llamadas.
@@ -91,6 +96,7 @@ export class Stage {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    if (this.vignette) this.vignette.uniforms.uAspect.value = w / h;
   }
 
   private makeSky() {
@@ -182,7 +188,7 @@ export class Stage {
   private makeLava() {
     const mat = new THREE.ShaderMaterial({
       fog: true,
-      uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 } }]),
+      uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 }, uIsle: { value: 0 } }]),
       vertexShader: /* glsl */ `
         uniform float uTime; varying vec2 vUv; varying vec3 vW;
         #include <fog_pars_vertex>
@@ -195,19 +201,35 @@ export class Stage {
           #include <fog_vertex>
         }`,
       fragmentShader: /* glsl */ `
-        uniform float uTime; varying vec3 vW;
+        uniform float uTime; uniform float uIsle; varying vec3 vW;
         #include <fog_pars_fragment>
         float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
         float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.0-2.0*f);
           return mix(mix(hash(i), hash(i+vec2(1,0)), u.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), u.x), u.y); }
         float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i=0;i<4;i++){ v += a*noise(p); p *= 2.03; a *= 0.5; } return v; }
+        // Distancia al contorno de la isla (cuadrado redondeado) a la altura de la lava.
+        float sdIsle(vec2 p, float halfSide){ float r = ${ISLAND_CORNER_R.toFixed(1)}; vec2 q = abs(p) - vec2(halfSide - r); return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
         void main(){
-          vec2 p = vW.xz * 0.08;
-          float n = fbm(p + vec2(uTime*0.05, uTime*0.03) + fbm(p*1.7 - uTime*0.04));
-          float crust = smoothstep(0.52, 0.62, n);
-          vec3 hot = mix(vec3(1.0, 0.85, 0.2), vec3(1.0, 0.35, 0.05), smoothstep(0.2, 0.5, n));
-          vec3 c = mix(hot, vec3(0.35, 0.07, 0.04), crust);
-          c = floor(c * 6.0) / 6.0; // toon
+          vec2 p = vW.xz * 0.07;
+          float warp = fbm(p * 1.6 - uTime * 0.03);
+          float n = fbm(p + vec2(uTime * 0.04, uTime * 0.025) + warp * 0.9);
+          // Placas de costra oscura con grietas incandescentes entre ellas; lo líquido late.
+          float crust = smoothstep(0.5, 0.56, n);
+          // Junto al acantilado la lava está más caliente: sin costra y casi blanca.
+          float rim = 0.0;
+          if (uIsle > 0.0) {
+            float d = sdIsle(vW.xz, uIsle);
+            rim = clamp(exp(-max(d, 0.0) * 0.55) * (0.75 + 0.25 * sin(uTime * 2.2 + vW.x * 0.3 + vW.z * 0.2)), 0.0, 1.0);
+            crust *= 1.0 - rim;
+          }
+          float crack = 1.0 - smoothstep(0.0, 0.03, abs(n - 0.52));
+          float pulse = 0.86 + 0.14 * sin(uTime * 1.7 + warp * 9.0);
+          vec3 hot = mix(vec3(1.0, 0.9, 0.3), vec3(1.0, 0.36, 0.05), smoothstep(0.22, 0.5, n)) * pulse;
+          vec3 rock = mix(vec3(0.2, 0.05, 0.05), vec3(0.36, 0.1, 0.06), fbm(p * 5.0));
+          vec3 c = mix(hot, rock, crust);
+          c = mix(c, vec3(1.0, 0.72, 0.22), crack * crust);
+          c = mix(c, vec3(1.0, 0.96, 0.62), rim * 0.9);
+          c = floor(c * 7.0 + 0.5) / 7.0; // toon
           gl_FragColor = vec4(c, 1.0);
           #include <fog_fragment>
         }`,
@@ -218,6 +240,80 @@ export class Stage {
     mesh.position.y = this.lavaTarget;
     return { mesh, mat };
   }
+
+  // Chispas que suben del mar de lava. Todo se calcula en el shader a partir de una semilla por
+  // chispa, así que no cuestan nada de CPU.
+  private makeEmbers(n: number) {
+    const r = rng(31);
+    const pos = new Float32Array(n * 3);
+    const seed = new Float32Array(n * 2);
+    for (let i = 0; i < n; i++) {
+      const a = r.range(0, Math.PI * 2);
+      // Más chispas cerca de la isla, que es donde mira la cámara.
+      const d = ISLAND_HALF + 1 + r.next() ** 2 * 75;
+      pos.set([Math.cos(a) * d, 0, Math.sin(a) * d], i * 3);
+      seed.set([r.next(), r.range(0.6, 1.6)], i * 2);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 2));
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: { uTime: { value: 0 }, uLava: { value: this.lavaTarget }, uViewH: { value: 720 } },
+      vertexShader: /* glsl */ `
+        uniform float uTime; uniform float uLava; uniform float uViewH; attribute vec2 aSeed; varying float vLife;
+        void main(){
+          float H = 12.0;
+          float t = mod(uTime * aSeed.y + aSeed.x * H, H);
+          vLife = t / H;
+          vec3 w = position;
+          w.y = uLava + t;
+          w.x += sin(uTime * 0.9 + aSeed.x * 40.0) * vLife * 1.6;
+          w.z += cos(uTime * 0.7 + aSeed.x * 23.0) * vLife * 1.6;
+          vec4 mv = viewMatrix * vec4(w, 1.0);
+          gl_Position = projectionMatrix * mv;
+          gl_PointSize = 0.34 * projectionMatrix[1][1] * uViewH * 0.5 / max(0.5, -mv.z);
+        }`,
+      fragmentShader: /* glsl */ `
+        varying float vLife;
+        void main(){
+          float d = length(gl_PointCoord - 0.5);
+          if (d > 0.5) discard;
+          float a = (1.0 - d * 2.0) * (1.0 - vLife) * smoothstep(0.0, 0.1, vLife);
+          gl_FragColor = vec4(vec3(1.0, 0.55 + 0.35 * (1.0 - vLife), 0.15) * a, a);
+        }`,
+    });
+    const pts = new THREE.Points(geo, mat);
+    pts.frustumCulled = false;
+    return pts;
+  }
+
+  // Viñeta suave y cálida en los bordes de la pantalla: centra la mirada en la acción.
+  private makeVignette() {
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      uniforms: { uAspect: { value: 1.6 } },
+      vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+      fragmentShader: /* glsl */ `
+        uniform float uAspect; varying vec2 vUv;
+        void main(){
+          vec2 q = (vUv - 0.5) * vec2(uAspect, 1.0);
+          float v = smoothstep(0.55, 1.15, length(q) / sqrt(uAspect * uAspect + 1.0) * 2.0);
+          gl_FragColor = vec4(0.16, 0.06, 0.1, v * 0.45);
+        }`,
+    });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+    m.frustumCulled = false;
+    m.renderOrder = 1000;
+    this.vignette = mat;
+    return m;
+  }
+
+  private vignette!: THREE.ShaderMaterial;
 
   private makeClouds() {
     const r = rng(12);
@@ -335,6 +431,13 @@ export class Stage {
     this.lavaMat.uniforms.uTime.value = t;
     // La lava sube despacio hasta su nivel.
     this.lava.position.y += (this.lavaTarget - this.lava.position.y) * Math.min(1, dt * 1.5);
+    // El acantilado se estrecha hacia abajo; con la isla inundada ya no hay borde.
+    const ly = this.lava.position.y;
+    this.lavaMat.uniforms.uIsle.value = ly < 0 ? ISLAND_HALF * (1 + Math.max(-0.07, ly * 0.017)) : 0;
+    this.embers.uniforms.uTime.value = t;
+    this.embers.uniforms.uLava.value = ly;
+    const buf = this.renderer.getDrawingBufferSize(_size);
+    this.embers.uniforms.uViewH.value = buf.y;
     this.clouds.rotation.y += dt * 0.004;
   }
 
@@ -342,5 +445,7 @@ export class Stage {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
+const _size = new THREE.Vector2();
 
 export { castleOrigin };

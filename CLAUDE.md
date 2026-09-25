@@ -88,14 +88,15 @@ Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1
 ## Pruebas
 
 - `npm test`: tests unitarios (Vitest) de `tests/unit`, en menos de un segundo. Incluye las 4 escenas de física en Node (`physics.test.ts`), con la misma definición que `/#physics=` (`client/src/game/sim/scenes.ts`): para cambios de física, esto es lo primero que hay que pasar.
-- Equilibrio: `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts` simula partidas de 4 bots en Node y deja el resumen en `tests/balance/ultimo-<dif>.txt`.
+- Equilibrio: `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts balance` simula partidas de 4 bots en Node y deja el resumen en `tests/balance/ultimo-<dif>.txt`.
+- Destrozo por munición: `npx vitest run --config tests/balance/vitest.config.ts destrozo` dispara cada munición contra un castillo entero y deja en `tests/balance/destrozo.txt` los bloques rotos y desplazados por disparo. Para cualquier cambio de física o de munición, medir antes y después.
 - Parámetros de URL para pruebas: `?fast=1` (fases cortas), `?autoplay=1` (el humano juega solo), `?bots=N`, `?seed=N`, `?lag=ms&jitter=ms&loss=0..1` (red simulada), `?render=N` (dibuja como mucho N fotogramas por segundo; las pruebas de red lo usan en los clientes que no se capturan).
 - `node tests/tools/net-watch.mjs <base> <humanos> <bots>` sigue en consola una partida en red de prueba.
 - `npm run e2e`: Playwright en local (compila y levanta `wrangler dev` en el 8787).
 - `npm run e2e:prod`: Playwright contra producción. CI lo ejecuta tras cada despliegue, repartido en 7 trabajos paralelos (uno por prueba larga), y guarda las capturas como artefactos `capturas-e2e-<grupo>`. Para lanzar solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
 - `npm run ci:estado` resume la última ejecución de CI (trabajos, ✓/✘ y errores); `-- <id>` para otra y `-- --wait` para esperar a que termine.
 - Las escenas de física se abren a mano con `/#physics=ccd|tower|glass|fragments`.
-- Herramientas de captura: `node tests/tools/shot.mjs <url> <png>` y `node tests/tools/sandbox-shot.mjs <url> <prefijo> <municion> king|wall|tower <elevación>`.
+- Herramientas de captura: `node tests/tools/review.mjs <base> <carpeta>` (portada, apuntado, tirachinas tensado, impacto y resultados con GPU, para revisar la interfaz a ojo), `node tests/tools/shot.mjs <url> <png>` y `node tests/tools/sandbox-shot.mjs <url> <prefijo> <municion> king|wall|tower <elevación>`.
 - Depuración de física en Node: los archivos `tests/unit/_*.test.ts` están en `.gitignore` y sirven para experimentar con `Sim` sin navegador.
 - Playwright en Chromium sin interfaz necesita estos flags para WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`.
 

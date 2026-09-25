@@ -1,0 +1,25 @@
+import { chromium } from '@playwright/test';
+const [base, out] = process.argv.slice(2);
+const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
+const p = await (await b.newContext({ viewport: { width: 1280, height: 720 } })).newPage();
+p.on('pageerror', (e) => console.log('pageerror', e.message));
+await p.goto(`${base}/?backdrop=1`);
+await p.waitForTimeout(3000);
+await p.screenshot({ path: `${out}/1-portada.png` });
+await p.goto(`${base}/?bots=3&seed=21&quality=high#solo`);
+await p.waitForFunction(() => window.__asedio?.mode?.host?.state?.phase === 'aim');
+await p.waitForTimeout(1500);
+await p.screenshot({ path: `${out}/2-apuntar.png` });
+// Tensar el tirachinas
+await p.mouse.move(640, 420); await p.mouse.down(); await p.mouse.move(600, 560, { steps: 10 });
+await p.waitForTimeout(400);
+await p.screenshot({ path: `${out}/3-tensando.png` });
+await p.mouse.up();
+await p.keyboard.press('Space');
+await p.waitForFunction(() => window.__asedio.mode.host.state.phase === 'impact');
+await p.waitForTimeout(2500);
+await p.screenshot({ path: `${out}/4-impacto.png` });
+await p.waitForFunction(() => window.__asedio.mode.host.state.phase === 'results', null, { timeout: 30000 });
+await p.waitForTimeout(600);
+await p.screenshot({ path: `${out}/5-resultados.png` });
+await b.close();
