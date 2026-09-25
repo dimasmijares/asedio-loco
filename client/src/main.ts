@@ -1,8 +1,8 @@
 import './ui/style.css';
-import { ROOM_CODE_RE } from '../../shared/protocol';
+import { DIFFICULTIES, ROOM_CODE_RE, type Difficulty } from '../../shared/protocol';
 import { Connection } from './net/connection';
 import { h } from './ui/dom';
-import { LobbyView, savedName, showHome } from './ui/lobby';
+import { LobbyView, savedName, showHome, showSoloSetup } from './ui/lobby';
 
 const ui = h('div', { class: 'overlay', id: 'ui' });
 document.getElementById('app')!.append(ui);
@@ -42,6 +42,37 @@ async function startSandbox() {
   canvas.focus();
 }
 
+// Partida contra bots. Parámetros opcionales en la URL (útiles para las pruebas):
+// ?bots=3&dif=normal&fast=1&autoplay=1&seed=42#solo
+async function startSolo(opts: { name: string; bots: number; difficulty: Difficulty }) {
+  ui.replaceChildren();
+  const q = new URLSearchParams(location.search);
+  const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
+  document.getElementById('app')!.prepend(canvas);
+  const { Game } = await import('./game/game');
+  const { SoloMode } = await import('./game/modes/solo');
+  const game = await Game.create(canvas, []);
+  const mode = new SoloMode(game, document.getElementById('app')!, {
+    ...opts,
+    fast: q.get('fast') === '1',
+    autoplay: q.get('autoplay') === '1',
+    seed: q.get('seed') ? Number(q.get('seed')) : undefined,
+  });
+  debug.game = game;
+  debug.mode = mode;
+  canvas.focus();
+}
+
+function soloFromUrl() {
+  const q = new URLSearchParams(location.search);
+  const dif = q.get('dif');
+  return {
+    name: savedName(),
+    bots: Math.min(3, Math.max(1, Number(q.get('bots') ?? 3) || 3)),
+    difficulty: (DIFFICULTIES as readonly string[]).includes(dif ?? '') ? (dif as Difficulty) : 'normal',
+  };
+}
+
 async function startPhysicsTest(scene: string) {
   ui.replaceChildren();
   const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
@@ -55,6 +86,7 @@ async function startPhysicsTest(scene: string) {
 
 function boot() {
   if (location.hash === '#sandbox') return void startSandbox();
+  if (location.hash === '#solo') return void startSolo(soloFromUrl());
   const phys = location.hash.match(/^#physics=(\w+)$/);
   if (phys) return void startPhysicsTest(phys[1]);
   const code = codeFromHash();
@@ -76,10 +108,18 @@ function boot() {
         home.error((e as Error).message);
       }
     },
-    onSolo: () => {
-      history.replaceState(null, '', '#sandbox');
-      void startSandbox();
-    },
+    onSolo: (name) =>
+      showSoloSetup(ui, {
+        onStart: (bots, difficulty) => {
+          history.replaceState(null, '', '#solo');
+          void startSolo({ name, bots, difficulty });
+        },
+        onSandbox: () => {
+          history.replaceState(null, '', '#sandbox');
+          void startSandbox();
+        },
+        onBack: () => boot(),
+      }),
   });
 }
 

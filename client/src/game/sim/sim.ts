@@ -9,8 +9,13 @@ import { RAPIER, type Collider, type ImpulseJoint, type RigidBody, type World } 
 import { behaviorFor, type ProjectileBehavior } from './projectiles';
 
 export const DT = 1 / 60;
-const LAVA_DENSITY = 3.1;
-const KING_CRUSH_FORCE = 750;
+const LAVA_FLOOR_HALF = 2;
+const LAVA_SINK_SPEED = 0.6; // m/s a los que se hunde lo que se come la lava
+// Grupos de colisión de Rapier: 16 bits de pertenencia << 16 | 16 bits de filtro.
+// El suelo de lava pertenece al grupo 2; los bloques que se está comiendo lo excluyen.
+const FLOOR_GROUPS = (0x0002 << 16) | 0xffff;
+const DOOMED_GROUPS = (0x0001 << 16) | 0xfffd;
+const KING_CRUSH_FORCE = 600;
 const JOINT_STRAIN = 0.07; // m de separación entre anclajes que rompe una unión
 export const SHIELD_RADIUS = 7.2;
 
@@ -54,6 +59,7 @@ export interface Rec {
   lavaT: number;
   lastHitBy: number; // jugador responsable del último golpe (-1 si nadie)
   dead?: boolean;
+  doomed?: boolean; // la lava se lo está comiendo
   // Proyectiles
   ammo?: AmmoDef;
   behavior?: ProjectileBehavior;
@@ -130,6 +136,7 @@ export class Sim {
   private hitCooldown = new Map<number, number>();
   private preVel = new Map<number, Vec3>(); // velocidad antes del paso (para distinguir golpes de cargas)
   private plow = new Set<Rec>(); // proyectiles que han roto algo este paso y lo atraviesan
+  private lavaFloor!: RigidBody;
 
   constructor(readonly slots: number[]) {
     const R = RAPIER;
@@ -149,6 +156,11 @@ export class Sim {
 
   private buildIsland() {
     for (const h of addIslandColliders(this.world)) this.staticHandles.add(h);
+    // Superficie de la lava como suelo físico (sube con cada nivel).
+    const R = RAPIER;
+    this.lavaFloor = this.world.createRigidBody(R.RigidBodyDesc.fixed().setTranslation(0, this.lavaY - LAVA_FLOOR_HALF, 0));
+    const c = this.world.createCollider(R.ColliderDesc.cuboid(160, LAVA_FLOOR_HALF, 160).setFriction(1).setCollisionGroups(FLOOR_GROUPS), this.lavaFloor);
+    this.staticHandles.add(c.handle);
   }
 
   addBlock(b: BlockDef, wake = false): Rec {
@@ -505,7 +517,7 @@ export class Sim {
       }
       const p = this.pos(r);
       if (p[1] < -1.2 || (islandSdf(p[0], p[2]) > 0.2 && p[1] < 0.5)) this.killKing(k.slot, 'fell', r.lastHitBy);
-      else if (p[1] - KING_HALF_HEIGHT - KING_RADIUS < this.lavaY) this.killKing(k.slot, 'lava', r.lastHitBy);
+      else if (p[1] - KING_HALF_HEIGHT - KING_RADIUS < this.lavaY + 0.06) this.killKing(k.slot, 'lava', r.lastHitBy);
       else if (p[1] < 0.95 && !insideCastle(k.slot, p, 0.2)) this.killKing(k.slot, 'outside', r.lastHitBy);
     }
   }
@@ -526,10 +538,12 @@ export class Sim {
       r.body.addForce(rv(v3.scale(a, m)), true);
       this.forced.add(r);
       r.behavior?.onStep?.(r, DT);
-      this.checkShield(r);
+      // onStep puede haberlo eliminado (los cocos se dividen).
+      if (this.recs.get(r.id) === r) this.checkShield(r);
     }
     this.applyFields();
     if (this.stepN % 3 === 0) this.applyLava(DT * 3);
+    this.sinkDoomed();
 
     this.preVel.clear();
     for (const r of this.recs.values()) if (!r.body.isSleeping()) this.preVel.set(r.id, tv(r.body.linvel()));
@@ -634,40 +648,71 @@ export class Sim {
     this.pendingJointBreak.clear();
   }
 
-  // Lava: empuja (flotación y viscosidad) y funde lo que toca.
+  private bottomOf(r: Rec) {
+    const p = r.body.translation();
+    const hy = r.kind === 'block' ? rotYExtent(tq(r.body.rotation()), [r.size[0] / 2, r.size[1] / 2, r.size[2] / 2]) : r.size[1] / 2;
+    return p.y - hy;
+  }
+
+  // Lava. Sobre la isla, la superficie es un suelo físico: lo que cae encima se queda
+  // "flotando" y no se funde en cadena. Fuera de la isla (el mar de lava) y para los
+  // proyectiles, lo que toca la lava se hunde despacio y se funde.
   private applyLava(dt: number) {
     const ly = this.lavaY;
     for (const r of this.recs.values()) {
+      if (r.kind === 'king' || r.doomed) continue;
       const p = r.body.translation();
       if (p.y - 3 > ly) continue;
-      const q = tq(r.body.rotation());
-      const hy = r.kind === 'block' ? rotYExtent(q, [r.size[0] / 2, r.size[1] / 2, r.size[2] / 2]) : r.size[1] / 2;
-      const bottom = p.y - hy;
-      if (bottom >= ly) {
+      const bottom = this.bottomOf(r);
+      const onIsland = islandSdf(p.x, p.z) < -0.5;
+      if (bottom > ly + 0.08 || (onIsland && r.kind === 'block')) {
         r.lavaT = Math.max(0, r.lavaT - dt);
         continue;
       }
-      const sub = Math.min(1, (ly - bottom) / (2 * hy));
-      if (r.kind === 'king') continue; // checkKings se encarga
       r.body.wakeUp();
-      const vol = r.size[0] * r.size[1] * r.size[2];
-      const m = r.body.mass();
       const v = r.body.linvel();
-      const buoy = sub * vol * LAVA_DENSITY * 9.81 * (r.mat?.buoyancy ?? 1);
-      r.body.addForce({ x: -v.x * m * 2.5 * sub, y: buoy - v.y * m * 3 * sub, z: -v.z * m * 2.5 * sub }, true);
+      const m = r.body.mass();
+      r.body.addForce({ x: -v.x * m * 2.5, y: -v.y * m * 2, z: -v.z * m * 2.5 }, true);
       this.forced.add(r);
-      if (sub > 0.08) r.lavaT += dt;
+      r.lavaT += dt;
       const melt = r.kind === 'proj' ? 0.6 : r.mat!.meltTime;
-      if (r.lavaT > melt) {
-        if (r.kind === 'proj') this.removeRec(r, 'proj');
-        else this.removeRec(r, 'melt');
-      }
+      if (r.lavaT > melt) this.removeRec(r, r.kind === 'proj' ? 'proj' : 'melt');
     }
   }
 
+  // Sube la lava: se come (escalonadamente) los bloques cuya base queda por debajo y la
+  // superficie pasa a ser el nuevo suelo. Los bloques condenados no chocan con ese suelo.
   setLava(y: number) {
+    const rising = y > this.lavaY + 0.01;
     this.lavaY = y;
-    for (const r of this.recs.values()) if (r.body.translation().y - 1.5 < y) r.body.wakeUp();
+    this.lavaFloor.setTranslation({ x: 0, y: y - LAVA_FLOOR_HALF, z: 0 }, true);
+    if (!rising) return;
+    const doomed: Rec[] = [];
+    for (const r of this.recs.values()) {
+      if (r.kind !== 'block') continue;
+      if (this.bottomOf(r) < y - 0.03) doomed.push(r);
+    }
+    // Se hunden despacio (cinemáticos) y lo de encima baja con ellos sin golpes; al quedar
+    // sumergidos se funden. Si desaparecieran de golpe, el castillo caería 1 m y se rompería entero.
+    for (const r of doomed) {
+      for (const j of [...r.joints]) this.breakJoint(j, false);
+      r.doomed = true;
+      r.col.setCollisionGroups(DOOMED_GROUPS);
+      r.body.setBodyType(RAPIER.RigidBodyType.KinematicVelocityBased, true);
+      r.body.setLinvel({ x: 0, y: -LAVA_SINK_SPEED, z: 0 }, true);
+      r.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      this.events.push({ e: 'fx', kind: 'lavaEat', p: this.pos(r) });
+    }
+    for (const r of this.recs.values()) if (r.body.translation().y - 2 < y) r.body.wakeUp();
+  }
+
+  // Los bloques que se hunden en la lava se funden cuando su cara de arriba queda a ras.
+  private sinkDoomed() {
+    for (const r of this.recs.values()) {
+      if (!r.doomed) continue;
+      const top = 2 * r.body.translation().y - this.bottomOf(r);
+      if (top < this.lavaY + 0.02) this.removeRec(r, 'melt');
+    }
   }
 
   private cleanupVoid() {

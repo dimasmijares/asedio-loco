@@ -188,6 +188,9 @@ export class WorldView {
       case 'split':
         this.fx.dust(p, 4, '#8b5a2b', 0.3);
         break;
+      case 'fire':
+        if (slot !== undefined) this.catapults.get(slot)?.fire();
+        break;
       case 'stick':
         this.fx.dust(p, 4, '#e03131', 0.25);
         break;

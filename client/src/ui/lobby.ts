@@ -51,6 +51,32 @@ export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (na
   return { error: (msg: string) => ((err.textContent = msg), root.querySelectorAll('button').forEach((b) => (b.disabled = false))) };
 }
 
+// Configuración de la partida en solitario: cuántos bots y de qué dificultad.
+export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty) => void; onSandbox: () => void; onBack: () => void }) {
+  const bots = h('select', { id: 'solo-bots', 'aria-label': 'Número de bots' });
+  for (let i = 1; i <= 3; i++) bots.append(h('option', { value: String(i), selected: i === 3 }, `${i} bot${i > 1 ? 's' : ''}`));
+  const diff = h('select', { id: 'solo-difficulty', 'aria-label': 'Dificultad' });
+  for (const d of DIFFICULTIES) diff.append(h('option', { value: d, selected: d === 'normal' }, DIFF_LABEL[d]));
+  const start = h('button', { class: 'primary big', id: 'solo-start' }, '¡A la batalla!');
+  start.onclick = () => opts.onStart(Number(bots.value), diff.value as Difficulty);
+  const sandbox = h('button', { class: 'big', id: 'sandbox' }, 'Campo de pruebas (munición infinita)');
+  sandbox.onclick = () => opts.onSandbox();
+  const back = h('button', { style: 'margin-top:12px' }, '← Volver');
+  back.onclick = () => opts.onBack();
+  root.replaceChildren(
+    h(
+      'div',
+      { class: 'panel', id: 'solo-setup' },
+      h('h2', null, 'Jugar solo'),
+      h('p', { class: 'muted' }, 'Tú contra los bots. Gana el último rey en pie.'),
+      h('div', { class: 'row' }, h('div', null, h('label', { htmlFor: 'solo-bots' }, 'Rivales'), bots), h('div', null, h('label', { htmlFor: 'solo-difficulty' }, 'Dificultad'), diff)),
+      start,
+      sandbox,
+      back,
+    ),
+  );
+}
+
 export class LobbyView {
   private el: HTMLElement;
 

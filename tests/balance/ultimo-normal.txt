@@ -1,0 +1,4 @@
+dificultad normal, 6 partidas
+media: 11.0 rondas, 245.3 s
+primera eliminación en la ronda: 9, 10, 5, 1, 5, 4
+causas: {"crushed":2,"lava":10,"outside":7}

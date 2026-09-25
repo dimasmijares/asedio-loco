@@ -82,6 +82,11 @@ export class Game {
   }
 
   // Crea una simulación nueva (el anfitrión o el modo solitario).
+  setLavaVisual(y: number) {
+    this.stage.lavaTarget = y;
+    this.view.lavaY = y;
+  }
+
   startSim(slots = this.slots) {
     this.sim?.free();
     this.slots = slots;

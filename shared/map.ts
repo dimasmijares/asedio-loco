@@ -57,7 +57,8 @@ export function islandSdf(x: number, z: number): number {
   return Math.hypot(Math.max(qx, 0), Math.max(qz, 0)) + Math.min(Math.max(qx, qz), 0) - r;
 }
 
-// Alturas del mar de lava por nivel. Nivel 0: por debajo de la isla.
-export const LAVA_LEVELS = [-3.6, 0.35, 1.3, 2.25, 3.2, 4.2];
+// Alturas del mar de lava por nivel (sube cada 3 rondas). Los tres primeros quedan por debajo
+// de la isla (avisos); desde el cuarto (ronda 10) inunda el patio y se come una hilera por nivel.
+export const LAVA_LEVELS = [-3.6, -2.3, -1.0, 0.35, 1.3, 2.25, 3.2, 4.2];
 export const LAVA_RISE_EVERY = 3; // rondas
 export const WIND_FROM_ROUND = 6;

@@ -576,3 +576,86 @@ button.big {
     display: none;
   }
 }
+
+/* ---------- Resultados y fin de partida ---------- */
+.results-box {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  pointer-events: none;
+}
+
+.results-box:empty {
+  display: none;
+}
+
+.res-phrase {
+  font-family: var(--display);
+  font-size: 26px;
+  color: #ffd23f;
+  -webkit-text-stroke: 1.5px var(--ink);
+  text-align: center;
+  max-width: 90vw;
+}
+
+.res-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(29, 22, 38, 0.72);
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-size: 16px;
+}
+
+.res-row .banner {
+  width: 20px;
+  height: 25px;
+  font-size: 12px;
+}
+
+.over-overlay {
+  background: rgba(20, 14, 30, 0.35);
+  z-index: 20;
+}
+
+.over-panel {
+  text-align: center;
+  width: min(520px, calc(100vw - 32px));
+}
+
+.over-title {
+  font-size: 40px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.stats {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 6px;
+  text-align: left;
+}
+
+.stat {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.stat-icon {
+  font-size: 30px;
+}
+
+.setup-note {
+  font-size: 14px;
+  margin-top: 10px;
+}
