@@ -75,7 +75,7 @@ Los clientes solo aceptan `st`/`tk`/`full` del `hostId` actual.
 
 ## Rendimiento (sección 5.8)
 
-Escena más cargada: `/#bench`. Son los 4 castillos enteros (424 bloques) y 12 proyectiles cruzados a la vez (vacas, pianos, agujero negro, imán…); se miden 9 s. Se ejecuta con `node tests/tools/bench.mjs <base> <high|medium|low> gpu`.
+Escena más cargada: `/#bench`. Son los 4 castillos enteros (424 bloques) y 12 proyectiles cruzados a la vez (vacas, pianos, agujero negro, imán…); se miden 9 s de simulación (los fps, en tiempo real). Se ejecuta con `node tests/tools/bench.mjs <base> <high|medium|low> gpu`.
 
 | Calidad | fps medios | peor 5 % | CPU/fotograma | física/paso | llamadas | triángulos | cuerpos despiertos | fragmentos | partículas |
 |---|---|---|---|---|---|---|---|---|---|
