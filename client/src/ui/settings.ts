@@ -7,13 +7,14 @@ export interface Settings {
   quality: Quality;
   sensitivity: number; // multiplicador del arrastre del tirachinas
   bigText: boolean;
+  showFps: boolean;
 }
 
 const KEY = 'asedio.settings';
 const QUALITY_KEY = 'asedio.quality';
 
 function load(): Settings {
-  const def: Settings = { quality: 'medium', sensitivity: 1, bigText: false };
+  const def: Settings = { quality: 'medium', sensitivity: 1, bigText: false, showFps: false };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<Settings>;
     const q = localStorage.getItem(QUALITY_KEY) as Quality | null;
@@ -27,7 +28,7 @@ export const settings: Settings = load();
 
 function save() {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ sensitivity: settings.sensitivity, bigText: settings.bigText }));
+    localStorage.setItem(KEY, JSON.stringify({ sensitivity: settings.sensitivity, bigText: settings.bigText, showFps: settings.showFps }));
     localStorage.setItem(QUALITY_KEY, settings.quality);
   } catch {
     /* sin almacenamiento */
@@ -74,6 +75,11 @@ export function openSettings() {
     save();
     applyTextSize();
   };
+  const fps = h('input', { type: 'checkbox', id: 'set-fps', checked: settings.showFps });
+  fps.onchange = () => {
+    settings.showFps = fps.checked;
+    save();
+  };
   const sens = h('input', { type: 'range', id: 'set-sens', min: '0.4', max: '1.8', step: '0.1', value: String(settings.sensitivity) });
   const sensVal = h('span', { class: 'muted' }, `×${settings.sensitivity.toFixed(1)}`);
   sens.oninput = () => {
@@ -93,6 +99,7 @@ export function openSettings() {
       qRow,
       h('label', { class: 'check' }, sound, ' Sonido (tecla M)'),
       h('label', { class: 'check' }, big, ' Texto grande'),
+      h('label', { class: 'check' }, fps, ' Mostrar fps'),
       h('label', { htmlFor: 'set-sens' }, 'Sensibilidad del tirachinas ', sensVal),
       sens,
       close,

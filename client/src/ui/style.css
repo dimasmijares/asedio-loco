@@ -353,13 +353,20 @@ button.big {
   }
 }
 
-.hud-players {
+.hud-left {
   position: absolute;
   top: 12px;
   left: 12px;
   display: grid;
+  gap: 12px;
+  width: 225px;
+  justify-items: start;
+}
+
+.hud-players {
+  display: grid;
   gap: 6px;
-  width: 220px;
+  width: 100%;
 }
 
 .hp {
@@ -392,7 +399,22 @@ button.big {
   min-width: 0;
 }
 
+.hp-top {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.hp-pct {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
 .hp-name {
+  min-width: 0;
   font-weight: bold;
   font-size: 15px;
   white-space: nowrap;
@@ -525,14 +547,72 @@ button.big {
 }
 
 .hud-help {
-  position: absolute;
-  top: 120px;
-  right: 14px;
-  max-width: 260px;
+  width: max-content;
+  background: rgba(29, 22, 38, 0.72);
+  border-radius: 12px;
+  padding: 6px 10px 8px;
   font-size: 13px;
-  text-align: right;
-  opacity: 0.85;
-  white-space: pre-line;
+  backdrop-filter: blur(3px);
+}
+
+.help-toggle {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: inherit;
+  padding: 2px 0 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.help-toggle {
+  pointer-events: auto;
+}
+
+.help-toggle:hover,
+.help-toggle:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  color: #ffd23f;
+}
+
+.hud-help.closed .help-list {
+  display: none;
+}
+
+.help-list {
+  display: grid;
+  gap: 4px;
+}
+
+.help-row {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-keys {
+  display: flex;
+  gap: 3px;
+  min-width: 108px;
+  justify-content: flex-end;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #fffaf0;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  box-shadow: 0 2px 0 var(--ink);
+  font: bold 11px var(--font);
+  text-align: center;
+  text-shadow: none;
+  line-height: 16px;
 }
 
 .hud-banner {
@@ -598,7 +678,9 @@ button.big {
   font-family: var(--display);
   font-size: 26px;
   color: #ffd23f;
-  -webkit-text-stroke: 1.5px var(--ink);
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 var(--ink);
   text-align: center;
   max-width: 90vw;
 }

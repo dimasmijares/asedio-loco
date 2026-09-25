@@ -36,8 +36,9 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 | ¡Listo! | Espacio / Enter o el botón |
 | Mirar alrededor | Botón derecho y arrastrar |
 | Silenciar | M |
+| Mostrar u ocultar la ayuda de controles | H |
 
-Los puntos blancos muestran solo el primer tramo del vuelo, no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto y la sensibilidad del tirachinas.
+Los puntos blancos muestran solo el primer tramo del vuelo, no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto, la sensibilidad del tirachinas y si se muestran los fps.
 
 ## Desarrollo
 

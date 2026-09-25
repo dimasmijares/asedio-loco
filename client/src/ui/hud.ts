@@ -4,7 +4,12 @@ import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
 import { sfx } from '../game/audio';
 import { h } from './dom';
-import { openSettings } from './settings';
+import { openSettings, settings } from './settings';
+
+// Una fila de la ayuda de controles: teclas (cada una en su tecla dibujada) y qué hacen.
+export type HelpRow = [keys: string[], what: string];
+
+const HELP_KEY = 'asedio.help';
 
 export interface HudPlayer {
   slot: number;
@@ -28,6 +33,10 @@ export class Hud {
   private ammo = h('div', { class: 'hud-ammo', id: 'hud-ammo' });
   private aimInfo = h('div', { class: 'hud-aim', id: 'hud-aim' });
   private help = h('div', { class: 'hud-help', id: 'hud-help' });
+  private helpList = h('div', { class: 'help-list' });
+  private helpOpen = true;
+  // El modo de pruebas enseña siempre sus estadísticas; en partida, solo si se activan en Ajustes.
+  alwaysStats = false;
   private banner = h('div', { class: 'hud-banner', id: 'hud-banner' });
   private corner = h('div', { class: 'hud-corner' });
   private stats = h('div', { class: 'hud-stats', id: 'hud-stats' });
@@ -43,15 +52,27 @@ export class Hud {
     };
     mute.onclick = toggle;
     mute.onpointerdown = (e) => e.stopPropagation();
+    try {
+      this.helpOpen = localStorage.getItem(HELP_KEY) !== 'closed';
+    } catch {
+      /* sin almacenamiento */
+    }
+    const helpBtn = h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles (H)' }, '⌨️ Controles ', h('kbd', null, 'H'));
+    helpBtn.onclick = () => this.toggleHelp();
+    helpBtn.onpointerdown = (e) => e.stopPropagation();
+    this.help.append(helpBtn, this.helpList);
+    this.help.classList.toggle('closed', !this.helpOpen);
     this.keyHandler = (e: KeyboardEvent) => {
-      if (e.code === 'KeyM' && (e.target as HTMLElement)?.tagName !== 'INPUT') toggle();
+      if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+      if (e.code === 'KeyM') toggle();
+      if (e.code === 'KeyH') this.toggleHelp();
     };
     window.addEventListener('keydown', this.keyHandler);
     const gear = h('button', { class: 'hud-mute', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, '⚙️');
     gear.onclick = () => openSettings();
     gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.stats);
-    this.root.append(this.top, this.players, this.corner, bottom, this.help, this.banner);
+    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.banner);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
   }
@@ -118,7 +139,7 @@ export class Hud {
     this.players.replaceChildren(
       ...list.map((p) => {
         const st = PLAYER_STYLES[p.slot];
-        const pct = Math.round((p.blocks / Math.max(1, p.maxBlocks)) * 100);
+        const pct = Math.min(100, Math.round((p.blocks / Math.max(1, p.maxBlocks)) * 100));
         return h(
           'div',
           { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}`, 'data-slot': String(p.slot) },
@@ -126,7 +147,7 @@ export class Hud {
           h(
             'div',
             { class: 'hp-body' },
-            h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.connected === false ? ' 📡' : '', p.you ? ' (tú)' : ''),
+            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.connected === false ? ' 📡' : '', p.you ? ' (tú)' : ''), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
             h('div', { class: 'hp-bar' }, h('div', { style: `width:${pct}%;background:${st.color}` })),
           ),
           h('div', { class: 'hp-state' }, p.alive ? (p.locked ? '✔' : '') : '💀'),
@@ -135,8 +156,20 @@ export class Hud {
     );
   }
 
-  setHelp(text: string) {
-    this.help.textContent = text;
+  setHelp(rows: HelpRow[]) {
+    this.helpList.replaceChildren(
+      ...rows.map(([keys, what]) => h('div', { class: 'help-row' }, h('span', { class: 'help-keys' }, ...keys.map((k) => h('kbd', null, k))), h('span', null, what))),
+    );
+  }
+
+  private toggleHelp() {
+    this.helpOpen = !this.helpOpen;
+    this.help.classList.toggle('closed', !this.helpOpen);
+    try {
+      localStorage.setItem(HELP_KEY, this.helpOpen ? 'open' : 'closed');
+    } catch {
+      /* sin almacenamiento */
+    }
   }
 
   showHelp(show: boolean) {
@@ -144,7 +177,8 @@ export class Hud {
   }
 
   setStats(text: string) {
-    this.stats.textContent = text;
+    const show = this.alwaysStats || settings.showFps;
+    this.stats.textContent = show ? text : '';
   }
 
   showBanner(text: string, sub = '', ms = 1800, cls = '') {

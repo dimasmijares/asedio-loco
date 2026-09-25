@@ -39,7 +39,17 @@ export class SandboxMode implements Mode {
     this.hud.setTimer(null);
     this.hud.setWind(null);
     this.renderAmmo();
-    this.hud.setHelp('Arrastra hacia atrás y suelta para disparar\nRueda / W-S: elevación · A-D: girar\nMayús: precisión · 1-0: munición\nT: reconstruir · C: cámara libre · Botón derecho: mirar');
+    this.hud.alwaysStats = true;
+    this.hud.setHelp([
+      [['Arrastrar', 'soltar'], 'disparar'],
+      [['Rueda', 'W', 'S'], 'elevación'],
+      [['A', 'D'], 'girar'],
+      [['Mayús'], 'precisión'],
+      [['1', '…', '0'], 'munición'],
+      [['T'], 'reconstruir'],
+      [['C'], 'cámara libre'],
+      [['Clic dcho.'], 'mirar alrededor'],
+    ]);
     this.keyHandler = (e) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       const n = e.code.match(/^Digit(\d)$/)?.[1];

@@ -54,7 +54,15 @@ export class MatchUI {
     input.onCycleTarget = (d) => this.cycleTarget(d);
     input.onSelectSlot = (i) => this.selectAmmo(i);
     this.hud.confirmBtn.onclick = () => this.lock();
-    this.hud.setHelp('Arrastra hacia atrás para tensar y apuntar\nRueda / W-S: elevación · A-D: girar\nQ / E: cambiar de castillo objetivo · 1 / 2: munición\nEspacio: ¡listo! · Botón derecho: mirar');
+    this.hud.setHelp([
+      [['Arrastrar'], 'tensar y apuntar'],
+      [['Rueda', 'W', 'S'], 'elevación'],
+      [['A', 'D'], 'girar'],
+      [['Q', 'E'], 'castillo objetivo'],
+      [['1', '2'], 'munición'],
+      [['Espacio'], '¡listo!'],
+      [['Clic dcho.'], 'mirar alrededor'],
+    ]);
     const me = this.me();
     if (me) input.setAim(me.aim);
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
@@ -226,7 +234,7 @@ export class MatchUI {
           { class: 'res-row' },
           h('span', { class: 'banner', style: `background:${PLAYER_STYLES[p.slot].color};color:${PLAYER_STYLES[p.slot].ink};text-shadow:none` }, PLAYER_STYLES[p.slot].glyph),
           h('b', null, p.name),
-          h('span', null, `−${r.lost[p.slot] ?? 0} bloques`),
+          h('span', null, (r.lost[p.slot] ?? 0) > 0 ? `−${r.lost[p.slot]} bloques` : 'intacto'),
           (r.dealt[p.slot] ?? 0) > 0 ? h('span', { class: 'muted' }, ` · rompió ${r.dealt[p.slot]}`) : '',
         ),
       );
