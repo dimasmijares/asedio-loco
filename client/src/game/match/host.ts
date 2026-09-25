@@ -53,7 +53,6 @@ export class MatchHost {
   private closestMiss = new Map<number, number>();
   private roundElims: number[] = [];
   private realT = 0;
-  private slowUntil = -1;
   private blocksT = 0;
   private lockGrace = -1;
 
@@ -98,10 +97,6 @@ export class MatchHost {
 
   update(rawDt: number) {
     this.realT += rawDt;
-    if (this.slowUntil > 0 && this.realT > this.slowUntil) {
-      this.game.timeScale = 1;
-      this.slowUntil = -1;
-    }
     const s = this.state;
     this.blocksT += rawDt;
     if (this.blocksT > 0.5) {
@@ -303,9 +298,6 @@ export class MatchHost {
       if (!p?.alive) continue;
       eliminate(this.state, e.slot, e.cause, e.by);
       this.roundElims.push(e.slot);
-      // Cámara lenta para saborear la caída del rey.
-      this.game.timeScale = 0.3;
-      this.slowUntil = this.realT + 1.4;
       this.emit();
       // Si ya solo queda uno fuera de la fase de impacto (p. ej. por la lava), se cierra pronto.
       if (this.state.phase === 'aim' && alivePlayers(this.state).length <= 1) this.state.remaining = Math.min(this.state.remaining, 0.5);
