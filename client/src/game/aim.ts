@@ -46,9 +46,13 @@ export class AimInput {
     });
     window.addEventListener('pointermove', (e) => {
       if (!this.aiming) return;
+      // Con el puntero bloqueado el cursor no se mueve y el desplazamiento llega en movementX/Y.
+      // Si llega a 0 pero el cursor sí se ha movido (eventos sintéticos), se usa el cursor.
       const locked = document.pointerLockElement === dom;
-      const dx = locked ? e.movementX : e.clientX - this.lx;
-      const dy = locked ? e.movementY : e.clientY - this.ly;
+      const cdx = e.clientX - this.lx;
+      const cdy = e.clientY - this.ly;
+      const dx = locked ? e.movementX || cdx : cdx;
+      const dy = locked ? e.movementY || cdy : cdy;
       this.lx = e.clientX;
       this.ly = e.clientY;
       if (!this.enabled) return;
