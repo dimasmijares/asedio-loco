@@ -930,3 +930,39 @@ html.big-text .ammo-name {
   padding: 2px 8px;
   box-shadow: 0 2px 0 var(--ink);
 }
+
+/* ---------- Repetición ---------- */
+
+.hud.replaying::before,
+.hud.replaying::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 9vh;
+  background: #0b0710;
+  pointer-events: none;
+  animation: bars 0.35s ease-out;
+}
+
+.hud.replaying::before {
+  top: 0;
+}
+
+.hud.replaying::after {
+  bottom: 0;
+  content: '▶ REPETICIÓN';
+  color: #ffd23f;
+  font: bold 16px var(--display);
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 24px;
+}
+
+@keyframes bars {
+  from {
+    transform: scaleY(0);
+  }
+}

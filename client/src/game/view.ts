@@ -11,6 +11,7 @@ import { toon } from './render/materials';
 import { Catapult, makeKing, makeProjectile } from './render/models';
 import type { Stage } from './render/stage';
 import { Debris } from './sim/debris';
+import { ReplayPlayer, ReplayRecorder } from './replay';
 import { SHIELD_RADIUS, type SimEvent } from './sim/sim';
 
 export interface ProjView {
@@ -40,6 +41,14 @@ export class WorldView {
   shake = 0;
   time = 0;
   lavaY = -3.6;
+  // Repetición: se graba todo lo que llega en directo. Mientras se reproduce, lo que sigue
+  // llegando se aparta (live) y se aplica al terminar.
+  recorder = new ReplayRecorder();
+  replaying: ReplayPlayer | null = null;
+  private live = new Map<number, [Vec3, Quat]>();
+  private liveDuring = new Map<number, [Vec3, Quat]>();
+  private pendingLive: SimEvent[] = [];
+  private replayUndo: (() => void)[] = [];
 
   constructor(readonly stage: Stage, readonly slots: number[]) {
     stage.scene.add(this.root);
@@ -80,8 +89,18 @@ export class WorldView {
     }
   }
 
-  // Estado de un cuerpo (bloque, rey o proyectil).
+  // Estado de un cuerpo (bloque, rey o proyectil), en directo.
   setBody(id: number, p: Vec3, q: Quat) {
+    if (this.replaying) {
+      this.liveDuring.set(id, [p, q]);
+      return;
+    }
+    this.live.set(id, [p, q]);
+    this.recorder.pose(this.time, id, p, q);
+    this.poseDirect(id, p, q);
+  }
+
+  private poseDirect(id: number, p: Vec3, q: Quat) {
     if (id < KING_ID_BASE) {
       this.blocks.set(id, p, q);
       this.debris.moveProxy(id, p, q);
@@ -115,7 +134,18 @@ export class WorldView {
     this.listeners.push(fn);
   }
 
+  // Evento en directo.
   apply(e: SimEvent) {
+    if (this.replaying) {
+      this.pendingLive.push(e);
+      return;
+    }
+    this.recorder.event(this.time, e);
+    if (e.e === 'rm' || e.e === 'projEnd') this.live.delete(e.id);
+    this.applyDirect(e);
+  }
+
+  private applyDirect(e: SimEvent) {
     for (const fn of this.listeners) fn(e);
     switch (e.e) {
       case 'rm':
@@ -274,6 +304,81 @@ export class WorldView {
     });
     for (const s of this.shields.values()) (s.material as THREE.MeshToonMaterial).opacity = 0.18 + Math.sin(t * 3) * 0.05;
     this.shake = Math.max(0, this.shake - dt * 1.8);
+  }
+
+  // ---------- repetición ----------
+
+  // Empieza a reproducir [t0, t1] de lo grabado. Devuelve false si no hay nada grabado.
+  startReplay(t0: number, t1: number, speed: number, slots: number[]) {
+    this.endReplay();
+    const player = new ReplayPlayer(this.recorder, t0, t1, speed);
+    const since = this.recorder.eventsBetween(t0, this.time);
+    if (!player.initialPoses().size && !since.length) return false;
+    const undo: (() => void)[] = [];
+    const first = player.initialPoses();
+    // Bloques que se rompieron desde t0: vuelven a su sitio (la repetición los romperá otra
+    // vez en su momento). Los que se rompan después de t1 se quitan al terminar.
+    for (const x of since) {
+      const e = x.e;
+      if (e.e === 'rm') {
+        const f = first.get(e.id);
+        this.addBlock(e.id, e.mat, e.size, f?.p ?? e.p, f?.q ?? e.q);
+        if (x.t > t1) undo.push(() => this.removeBlock(e.id));
+      } else if (e.e === 'spawn') {
+        this.removeBlock(e.id);
+        if (x.t > t1) undo.push(() => this.addBlock(e.id, e.mat, e.size, e.p, e.q));
+      }
+    }
+    // Proyectiles: fuera los de ahora y dentro los que volaban en t0.
+    for (const pr of [...this.projs.values()]) this.applyDirect({ e: 'projEnd', id: pr.id });
+    const ended = new Set(this.recorder.eventsBetween(t0 - 15, t0).flatMap((x) => (x.e.e === 'projEnd' ? [x.e.id] : [])));
+    for (const x of this.recorder.eventsBetween(t0 - 15, t0)) if (x.e.e === 'proj' && !ended.has(x.e.id)) this.applyDirect(x.e);
+    // Reyes que van a caer: otra vez vivos, con corona.
+    for (const slot of slots) {
+      const k = this.kings.get(slot);
+      if (!k) continue;
+      const crown = k.getObjectByName('crown');
+      const was = { alive: this.kingAlive.get(slot) ?? false, visible: k.visible, crown: crown?.visible ?? true };
+      this.kingAlive.set(slot, true);
+      k.visible = true;
+      if (crown) crown.visible = true;
+      undo.push(() => {
+        this.kingAlive.set(slot, was.alive);
+        k.visible = was.visible;
+        if (crown) crown.visible = was.crown;
+      });
+    }
+    for (const [id, f] of first) this.poseDirect(id, f.p, f.q);
+    this.replayUndo = undo;
+    this.replaying = player;
+    return true;
+  }
+
+  // Avanza la repetición en curso (llamar cada fotograma).
+  stepReplay(dt: number) {
+    const r = this.replaying;
+    if (!r) return;
+    r.step(dt, {
+      time: this.time,
+      applyPose: (id, p, q) => this.poseDirect(id, p, q),
+      // El daño y los escudos son estado, no espectáculo: se quedan como están ahora.
+      applyEvent: (e) => e.e !== 'dmg' && e.e !== 'shield' && this.applyDirect(e),
+    });
+  }
+
+  // Vuelve al directo: poses, bloques, reyes y lo que haya llegado mientras tanto.
+  endReplay() {
+    if (!this.replaying) return;
+    this.replaying = null;
+    for (const pr of [...this.projs.values()]) this.applyDirect({ e: 'projEnd', id: pr.id });
+    for (const fn of this.replayUndo) fn();
+    this.replayUndo = [];
+    for (const [id, pq] of this.liveDuring) this.live.set(id, pq);
+    this.liveDuring.clear();
+    for (const [id, [p, q]] of this.live) this.poseDirect(id, p, q);
+    const pending = this.pendingLive;
+    this.pendingLive = [];
+    for (const e of pending) this.apply(e);
   }
 
   blockCount(slot?: number) {

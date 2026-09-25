@@ -20,11 +20,18 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   await canvasNotBlack(page);
 
   // Clic derecho mantenido: el ratón a la derecha gira, hacia arriba sube la elevación.
+  // Se registran los movimientos para diagnosticar el bloqueo del puntero en CI.
+  await page.evaluate(() => {
+    const w = window as any;
+    w.__moves = [];
+    window.addEventListener('pointermove', (e) => w.__moves.push([e.clientX, e.movementX, !!document.pointerLockElement]), true);
+  });
   await page.mouse.move(480, 300);
   await page.mouse.down({ button: 'right' });
   await page.mouse.move(600, 240, { steps: 12 });
   await page.mouse.up({ button: 'right' });
   const aimed = await me();
+  console.log('movimientos', JSON.stringify(await page.evaluate(() => (window as any).__moves)));
   expect(aimed.yaw, 'gira hacia la derecha').toBeLessThan(start.yaw - 0.2);
   expect(aimed.pitch, 'sube la elevación').toBeGreaterThan(start.pitch + 0.1);
 

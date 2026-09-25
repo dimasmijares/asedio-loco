@@ -7,7 +7,7 @@ import { hashString, rng, type Vec3 } from './math';
 import { BOT_NAMES } from './players';
 import type { Difficulty, RoomState } from './protocol';
 
-export type Phase = 'intro' | 'aim' | 'impact' | 'results' | 'over';
+export type Phase = 'intro' | 'aim' | 'impact' | 'replay' | 'results' | 'over';
 
 export interface PlayerStats {
   dealt: number; // bloques rivales destruidos
@@ -61,6 +61,7 @@ export interface MatchState {
   seed: number;
   fast: boolean;
   elimCount: number;
+  replay: number[] | null; // reyes caídos en la ronda cuya caída se repite (fase 'replay')
 }
 
 export const MAX_ROUNDS = 24;
@@ -108,6 +109,7 @@ export function createMatch(players: { slot: number; id: string; name: string; b
     seed,
     fast,
     elimCount: 0,
+    replay: null,
   };
 }
 
@@ -123,6 +125,12 @@ export function isDuel(s: MatchState) {
 // Si todos confirman antes, la ronda arranca en cuanto están listos.
 export function aimDuration(s: MatchState) {
   return s.fast ? 3 : 20;
+}
+
+// Repetición a cámara lenta de cada rey caído en la ronda (como mucho dos seguidas).
+export const REPLAY_MAX = 2;
+export function replayDuration(s: MatchState) {
+  return s.fast ? 1.5 : 5;
 }
 
 export function resultsDuration(s: MatchState) {

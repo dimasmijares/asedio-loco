@@ -4,7 +4,7 @@ import { botDecide, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
 import { hashString, lerp, rng, type Vec3 } from '../../../../shared/math';
-import { alivePlayers, buildResults, checkWinner, consumeAmmo, eliminate, impactMaxDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
+import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, eliminate, impactMaxDuration, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
 
 // Lo que el anfitrión necesita del juego. Lo implementa Game y, en las pruebas de
@@ -14,6 +14,7 @@ export interface HostEnv {
   timeScale: number;
   startSim(slots: number[]): Sim;
   setLavaVisual(y: number): void;
+  simPaused?: boolean; // la física se para durante la repetición
 }
 
 export interface PlayerInput {
@@ -126,6 +127,10 @@ export class MatchHost {
       case 'impact':
         this.updateImpact();
         break;
+      case 'replay':
+        s.remaining -= rawDt;
+        if (s.remaining <= 0) this.beginResults();
+        break;
       case 'results':
         s.remaining -= rawDt;
         if (s.remaining <= 0) this.endResults();
@@ -143,6 +148,8 @@ export class MatchHost {
     if (s.phase === 'impact') {
       this.shots = [];
       this.endImpact();
+    } else if (s.phase === 'replay') {
+      this.beginResults();
     } else if (s.phase === 'aim') {
       this.lockGrace = -1;
       this.planBots();
@@ -258,8 +265,24 @@ export class MatchHost {
     }
     this.closestMiss.clear();
     s.results = buildResults(s, lost, dealt, this.roundElims);
+    // Si ha caído algún rey, antes de los resultados se repite su caída en todos los clientes.
+    if (this.roundElims.length) {
+      s.phase = 'replay';
+      s.replay = this.roundElims.slice(0, REPLAY_MAX);
+      s.remaining = replayDuration(s) * s.replay.length;
+      this.game.simPaused = true;
+      this.emit();
+      return;
+    }
+    this.beginResults();
+  }
+
+  private beginResults() {
+    const s = this.state;
     s.phase = 'results';
+    s.replay = null;
     s.remaining = resultsDuration(s);
+    this.game.simPaused = false;
     this.emit();
   }
 

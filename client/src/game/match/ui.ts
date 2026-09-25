@@ -3,13 +3,14 @@ import { AMMO } from '../../../../shared/ammo';
 import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
-import type { MatchState, PlayerState } from '../../../../shared/match';
+import { replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
+import { replayCamera } from '../replay';
 import type { Game } from '../game';
 import { causeText } from '../modes/sandbox';
 import type { SimEvent } from '../sim/sim';
@@ -50,6 +51,11 @@ export class MatchUI {
   private lastTick = -1;
   tutorial: Tutorial | null = null;
   private pendingAim: Aim | null = null;
+  // Repetición de reyes caídos (fase 'replay').
+  private replayQueue: number[] = [];
+  private replaySlot = -1;
+  private replayT = 0;
+  private replayCam = { from: new THREE.Vector3(), at: new THREE.Vector3() };
 
   constructor(readonly game: Game, readonly src: MatchSource, readonly parent: HTMLElement, readonly opts: MatchUIOptions = {}) {
     this.hud = new Hud(parent);
@@ -171,9 +177,21 @@ export class MatchUI {
     }
 
     // Cámara.
-    // Durante los disparos, plano panorámico (director); la repetición de un rey caído va aparte.
+    // Repetición: la vista reproduce lo grabado y la cámara gira despacio alrededor del rey.
+    if (g.view.replaying) {
+      this.replayT += dt;
+      g.view.stepReplay(dt);
+      const k = g.view.kingPos(this.replaySlot);
+      if (k) {
+        replayCamera(k, this.replayT, this.replayCam);
+        g.rig.watch(this.replayCam.at, this.replayCam.from);
+        g.rig.sharpness = this.replayT < 0.05 ? 50 : 5;
+      }
+      if (g.view.replaying.done && this.replayT > 0.3) this.nextReplay(s);
+    }
+    // Durante los disparos, plano panorámico (director).
     const directing = s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
-    if (!directing) {
+    if (!directing && !g.view.replaying) {
       if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
       else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
         const o = castleOrigin(s.winner);
@@ -198,9 +216,36 @@ export class MatchUI {
     this.hud.setStats(`${g.fps} fps`);
   }
 
+  // Siguiente rey de la cola de repeticiones (si no hay nada grabado de él, se salta).
+  private nextReplay(s: MatchState) {
+    const view = this.game.view;
+    while (this.replayQueue.length) {
+      const slot = this.replayQueue.shift()!;
+      const t = view.recorder.deathTime(slot);
+      if (t === null) continue;
+      // 2,6 s antes de la caída y 0,8 s después, estirados para llenar su parte de la fase.
+      const t0 = t - 2.6;
+      const t1 = t + 0.8;
+      const speed = (t1 - t0) / Math.max(0.5, replayDuration(s) - 0.4);
+      if (!view.startReplay(t0, t1, speed, [slot])) continue;
+      this.replaySlot = slot;
+      this.replayT = 0;
+      this.hud.showBanner('REPETICIÓN', `¡Cae el rey de ${nameOf(s, slot)}!`, 1800);
+      return;
+    }
+  }
+
   private onPhase(s: MatchState) {
     const prev = this.last.phase;
     this.last.phase = s.phase;
+    if (s.phase === 'replay' && prev !== 'replay') {
+      this.replayQueue = [...(s.replay ?? [])];
+      this.hud.root.classList.add('replaying');
+      this.nextReplay(s);
+    } else if (s.phase !== 'replay' && prev === 'replay') {
+      this.game.view.endReplay();
+      this.hud.root.classList.remove('replaying');
+    }
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
@@ -209,11 +254,13 @@ export class MatchUI {
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
       sfx.fanfare();
       this.director.reset();
+      this.game.view.recorder.rebase(this.game.view.time);
       this.resultsBox.replaceChildren();
       const me = this.me();
       if (me) this.game.input.setAim(me.aim);
     }
     if (s.phase === 'impact') this.hud.setPhase(`Ronda ${s.round}`, '¡Fuego!');
+    else if (s.phase === 'replay') this.hud.setPhase(`Ronda ${s.round}`, 'Repetición');
     else if (s.phase === 'aim') this.hud.setPhase(`Ronda ${s.round}`, 'Fase de apuntado');
     else if (s.phase === 'intro') this.hud.setPhase('¡Preparados!', 'La partida va a empezar');
     else if (s.phase === 'results') {

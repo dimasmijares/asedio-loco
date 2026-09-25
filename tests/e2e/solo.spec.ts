@@ -14,7 +14,7 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   await page.waitForFunction(
     () => {
       const s = (window as any).__asedio.mode.host.state;
-      return s.phase === 'impact' || s.phase === 'results' || s.phase === 'over' || s.round >= 2;
+      return s.phase === 'impact' || s.phase === 'replay' || s.phase === 'results' || s.phase === 'over' || s.round >= 2;
     },
     null,
     { timeout: 120_000 },

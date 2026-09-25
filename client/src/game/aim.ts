@@ -27,6 +27,7 @@ export class AimInput {
   onSelectSlot: (i: number) => void = () => {};
   private lx = 0;
   private ly = 0;
+  private skipMove = false; // el primer movimiento tras bloquear el puntero trae un salto falso
   private keys = new Set<string>();
 
   constructor(readonly dom: HTMLElement) {
@@ -51,10 +52,15 @@ export class AimInput {
       const locked = document.pointerLockElement === dom;
       const cdx = e.clientX - this.lx;
       const cdy = e.clientY - this.ly;
-      const dx = locked ? e.movementX || cdx : cdx;
-      const dy = locked ? e.movementY || cdy : cdy;
+      const lim = (v: number) => Math.max(-200, Math.min(200, v));
+      const dx = lim(locked ? e.movementX || cdx : cdx);
+      const dy = lim(locked ? e.movementY || cdy : cdy);
       this.lx = e.clientX;
       this.ly = e.clientY;
+      if (locked && this.skipMove) {
+        this.skipMove = false;
+        return;
+      }
       if (!this.enabled) return;
       const k = (e.shiftKey ? 0.25 : 1) * settings.sensitivity;
       this.aim = clampAim({ ...this.aim, yaw: this.aim.yaw - dx * 0.0035 * k, pitch: this.aim.pitch - dy * 0.0028 * k });
@@ -66,7 +72,10 @@ export class AimInput {
       if (document.pointerLockElement === dom) document.exitPointerLock?.();
     };
     window.addEventListener('pointerup', (e) => e.button === 2 && endAim());
-    document.addEventListener('pointerlockchange', () => document.pointerLockElement !== dom && endAim());
+    document.addEventListener('pointerlockchange', () => {
+      if (document.pointerLockElement === dom) this.skipMove = true;
+      else endAim();
+    });
     window.addEventListener('keydown', (e) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.code === 'Space') e.preventDefault();

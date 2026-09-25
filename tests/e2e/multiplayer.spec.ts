@@ -127,11 +127,13 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
   const checked = new Set<number>();
   let spectator: Page | null = null;
   let reconnected = false;
+  const replays = new Set<number>(); // rondas en las que anfitrión y clientes repitieron una caída
   const t0 = Date.now();
   while (Date.now() - t0 < 480_000) {
     all = (await Promise.all(players.map(summary))) as Summary[];
     const h = all[0];
     if (h.phase === 'over') break;
+    if (h.phase === 'replay' && all.slice(1).some((s) => s.phase === 'replay')) replays.add(h.round);
     if (h.phase === 'results' && !checked.has(h.round)) {
       const again = await settledResults(players, 4000);
       if (again) {
@@ -192,9 +194,10 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
   expect(checked.size).toBeGreaterThanOrEqual(1);
   expect(spectator, 'hubo espectador').not.toBeNull();
   expect(reconnected, 'hubo reconexión').toBe(true);
+  expect(replays.size, 'se repitió al menos una caída de rey en todos a la vez').toBeGreaterThan(0);
   await expect(guests[0].locator('#game-over')).toBeVisible();
   await guests[0].screenshot({ path: info.outputPath('final.png') });
-  console.log(`fin: gana ${w} en ${finals[0].round} rondas; rondas comprobadas ${[...checked].join(',')}`);
+  console.log(`fin: gana ${w} en ${finals[0].round} rondas; rondas comprobadas ${[...checked].join(',')}; repeticiones en ${[...replays].join(',')}`);
   for (const p of [...players, ...(spectator ? [spectator] : [])]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
   expect(errors).toEqual([]);
 });

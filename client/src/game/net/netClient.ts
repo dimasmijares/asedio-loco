@@ -94,6 +94,8 @@ export class NetClient implements MatchSource {
   // Estado completo: se ajusta la vista para que coincida exactamente con el anfitrión.
   private applyFull(m: FullMsg) {
     const view = this.game.view;
+    // El estado completo manda sobre lo que se vea: si había una repetición, se corta.
+    view.endReplay();
     this.interp.observeClock(m.t);
     // Los eventos pendientes ya están incluidos en el estado completo.
     const pending = this.evQueue.flatMap((q) => q.e).filter((e) => e.e !== 'rm' && e.e !== 'spawn' && e.e !== 'proj' && e.e !== 'projEnd');
