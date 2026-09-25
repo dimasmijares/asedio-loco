@@ -65,7 +65,7 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 - Antes y después: `tests/balance/destrozo`, el equilibrio de las tres dificultades y el banco de rendimiento con GPU y en CI. Si la partida se alarga de más, se compensa con la munición o la lava.
 - Capturas nuevas para el README.
 
-### Etapa 6 · Estudio para móviles (después de la 5)
+### Etapa 6 · Estudio para móviles (después de la 5) ✅ hecho: ver `docs/MOVILES.md`
 
 - Estudiar si el juego puede ser apto para móviles y montar un plan. Hay que mirar:
   - **Control táctil:** equivalentes al clic derecho, a Espacio y a la rueda.
