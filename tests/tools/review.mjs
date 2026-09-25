@@ -10,12 +10,12 @@ await p.goto(`${base}/?bots=3&seed=21&quality=high#solo`);
 await p.waitForFunction(() => window.__asedio?.mode?.host?.state?.phase === 'aim');
 await p.waitForTimeout(1500);
 await p.screenshot({ path: `${out}/2-apuntar.png` });
-// Tensar el tirachinas
-await p.mouse.move(640, 420); await p.mouse.down(); await p.mouse.move(600, 560, { steps: 10 });
-await p.waitForTimeout(400);
-await p.screenshot({ path: `${out}/3-tensando.png` });
-await p.mouse.up();
-await p.keyboard.press('Space');
+// Apuntar con el clic derecho y cargar con Espacio
+await p.mouse.move(640, 420); await p.mouse.down({ button: 'right' }); await p.mouse.move(700, 380, { steps: 10 }); await p.mouse.up({ button: 'right' });
+await p.keyboard.down('Space');
+await p.waitForTimeout(900);
+await p.screenshot({ path: `${out}/3-cargando.png` });
+await p.keyboard.up('Space');
 await p.waitForFunction(() => window.__asedio.mode.host.state.phase === 'impact');
 await p.waitForTimeout(2500);
 await p.screenshot({ path: `${out}/4-impacto.png` });

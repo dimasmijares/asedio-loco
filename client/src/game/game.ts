@@ -84,9 +84,10 @@ export class Game {
     canvas.addEventListener(
       'wheel',
       (e) => {
-        if (!this.input.enabled) this.rig.zoom(Math.sign(e.deltaY) * 0.08);
+        e.preventDefault();
+        this.rig.zoom(Math.sign(e.deltaY) * 0.08);
       },
-      { passive: true },
+      { passive: false },
     );
     window.addEventListener('resize', () => this.stage.resize());
     setQualityTarget((q) => this.stage.setQuality(q));
@@ -246,8 +247,8 @@ export class Game {
     this.mode = null;
     // Los escuchadores de teclado y ratón siguen vivos: se desactivan para que no actúen.
     this.input.enabled = false;
-    this.input.onChange = this.input.onRelease = () => {};
-    this.input.onConfirm = () => {};
+    this.input.onChange = this.input.onFire = () => {};
+    this.input.cancelCharge();
     this.sim?.free();
     this.sim = null;
     this.stage.renderer.dispose();

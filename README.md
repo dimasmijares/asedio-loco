@@ -14,31 +14,30 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 
 ## Cómo se juega
 
-- **Rondas simultáneas.** Todos apuntáis a la vez durante 12 s (9 s cuando quedan 2) y pulsáis «¡Listo!». Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.
+- **Rondas simultáneas.** Todos apuntáis a la vez durante 20 s y disparáis soltando Espacio; si todos estáis listos antes, la ronda empieza en el momento. Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.
 - **Eliminación.** Un rey cae si sale despedido fuera de su castillo y toca el suelo, si lo aplastan o si toca la lava. Se ve al momento: cámara lenta, confeti y la calavera en el marcador.
-- **Munición loca.** Cada ronda te toca una munición al azar y siempre tienes dos en la mano. Son 12 tipos:
+- **Munición loca.** Cada ronda te tocan 3 municiones distintas al azar y eliges una; las que no usas se pierden. Son 12 tipos:
   - **Comunes:** pedrusco, tronco rodante, racimo de cocos (se divide en 4).
   - **Raras:** vaca explosiva, sandía pegajosa, gallina saltarina, piano (cae en vertical donde apuntes).
   - **Épicas:** agujero negro, imán (arranca el hierro), bola de nieve (crece al rodar).
   - **Defensivas:** andamio (reconstruye hasta 10 bloques) y burbuja (absorbe un impacto).
-- **Escalada.** Cada 3 rondas sube la lava. Desde la ronda 10 inunda el patio y se come una hilera de cada castillo por nivel. Desde la ronda 6 sopla el viento, con una flecha que indica hacia dónde. Con 2 supervivientes, las rondas se acortan y la munición es más rara.
+- **Escalada.** Cada 3 rondas sube la lava. Desde la ronda 10 inunda el patio y se come una hilera de cada castillo por nivel. Desde la ronda 6 sopla el viento, con una flecha que indica hacia dónde. Con 2 supervivientes, la munición es más rara.
 - **Materiales.** La madera se astilla, la piedra aguanta, el cristal estalla en esquirlas y el hierro pesa mucho y casi no se rompe. Los bloques dañados se oscurecen.
 
 ## Controles
 
 | Acción | Control |
 |---|---|
-| Tensar y apuntar (tirachinas) | Pulsa y arrastra hacia atrás: la distancia da la potencia y tirar hacia un lado gira el tiro |
-| Elevación | Rueda del ratón o W / S |
-| Ajuste fino del rumbo / potencia | A / D · R / F (Mayúsculas: modo precisión) |
+| Apuntar | Mantén el **clic derecho** y mueve el ratón: a los lados gira, arriba y abajo cambia la elevación |
+| Cargar y disparar | Mantén **Espacio**: la fuerza sube de 0 a 100 % en 1,5 s y la parábola crece. Al soltar, el disparo queda listo y ya no cambia (también se puede mantener pulsado el botón de disparo) |
+| Afinar | A / D (rumbo) · W / S (elevación). Mayúsculas: modo precisión |
 | Cambiar de castillo objetivo | Q / E (o Tab) |
-| Elegir munición | 1 / 2 (o clic en la tarjeta) |
-| ¡Listo! | Espacio / Enter o el botón |
-| Mirar alrededor | Botón derecho y arrastrar |
+| Elegir munición | 1 / 2 / 3 (o clic en la tarjeta) |
+| Acercar o alejar la cámara | Rueda del ratón |
 | Silenciar | M |
 | Mostrar u ocultar la ayuda de controles | H |
 
-Los puntos blancos muestran solo el primer tramo del vuelo, no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto, la sensibilidad del tirachinas y si se muestran los fps.
+Los puntos muestran solo el primer tramo del vuelo (sobre el 60 % mientras cargas), no dónde vas a caer. En Ajustes se puede cambiar la calidad gráfica (baja, media, alta), el sonido, el tamaño del texto, la sensibilidad del tirachinas y si se muestran los fps.
 
 ## Desarrollo
 

@@ -6,7 +6,7 @@ import { castleOrigin, launchPoint } from '../../../../shared/map';
 import type { MatchState, PlayerState } from '../../../../shared/match';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
-import { Hud } from '../../ui/hud';
+import { Hud, type HelpRow } from '../../ui/hud';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
@@ -29,6 +29,15 @@ export interface MatchUIOptions {
   canRematch?: () => boolean;
 }
 
+export const AIM_HELP: HelpRow[] = [
+  [['Clic dcho.', 'ratón'], 'apuntar'],
+  [['Espacio'], 'mantener: fuerza · soltar: ¡fuego!'],
+  [['A', 'D', 'W', 'S'], 'afinar el tiro'],
+  [['Q', 'E'], 'castillo objetivo'],
+  [['1', '2', '3'], 'munición'],
+  [['Rueda'], 'acercar la cámara'],
+];
+
 const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot === slot)?.name ?? '¿?';
 
 export class MatchUI {
@@ -49,20 +58,12 @@ export class MatchUI {
     this.hud.root.append(this.resultsBox);
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
-    input.onRelease = (a) => this.onAim(a, true);
-    input.onConfirm = () => this.lock();
+    input.onFire = (a) => this.fire(a);
+    input.onTooShort = () => this.hud.showBanner('Mantén Espacio', 'cuanto más tiempo, más fuerza', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
     input.onSelectSlot = (i) => this.selectAmmo(i);
-    this.hud.confirmBtn.onclick = () => this.lock();
-    this.hud.setHelp([
-      [['Arrastrar'], 'tensar y apuntar'],
-      [['Rueda', 'W', 'S'], 'elevación'],
-      [['A', 'D'], 'girar'],
-      [['Q', 'E'], 'castillo objetivo'],
-      [['1', '2'], 'munición'],
-      [['Espacio'], '¡listo!'],
-      [['Clic dcho.'], 'mirar alrededor'],
-    ]);
+    this.hud.bindCharge(input);
+    this.hud.setHelp(AIM_HELP);
     const me = this.me();
     if (me) input.setAim(me.aim);
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
@@ -80,13 +81,12 @@ export class MatchUI {
     return !!me && me.alive && !me.locked && this.src.state.phase === 'aim';
   }
 
-  private onAim(a: Aim, release = false) {
+  private onAim(a: Aim) {
     if (!this.canAim()) return;
-    if (release) this.tutorial?.event('drag');
-    else if (!this.game.input.dragging) this.tutorial?.event('adjust');
+    if (this.game.input.aiming) this.tutorial?.event('aim');
     this.pendingAim = a;
-    // Se manda a ~10 Hz (y siempre al soltar).
-    if (release || performance.now() - this.aimSent > 100) this.flushAim();
+    // Se manda a ~10 Hz: los demás ven tu catapulta girar y tensarse mientras cargas.
+    if (performance.now() - this.aimSent > 100) this.flushAim();
   }
 
   private flushAim() {
@@ -96,10 +96,12 @@ export class MatchUI {
     this.pendingAim = null;
   }
 
-  lock() {
+  // Al soltar Espacio: el disparo queda preparado y ya no se puede cambiar en esta ronda.
+  fire(a: Aim) {
     if (!this.canAim()) return;
-    this.tutorial?.event('lock');
-    this.src.send({ aim: this.game.input.aim, locked: true });
+    this.tutorial?.event('fire');
+    this.pendingAim = null;
+    this.src.send({ aim: a, locked: true });
   }
 
   selectAmmo(i: number) {
@@ -157,11 +159,13 @@ export class MatchUI {
     }
 
     input.enabled = this.canAim();
+    g.rig.lookEnabled = !this.canAim();
+    this.hud.setCharge(input.charging ? input.aim.power : null);
     this.hud.showHelp(this.canAim());
     this.tutorial?.update(dt, this.canAim());
     if (this.tutorial?.done) this.tutorial = null;
     if (this.canAim() && me) {
-      g.preview.show(launchPoint(me.slot), input.aim, me.ammo[me.selected] ?? 'rock', s.wind, PLAYER_STYLES[me.slot].color);
+      g.preview.show(launchPoint(me.slot), input.aim, me.ammo[me.selected] ?? 'rock', s.wind, PLAYER_STYLES[me.slot].color, input.charging ? 'charge' : 'guide');
       this.hud.setAimInfo(input.aim, me.ammo[me.selected]);
     } else {
       g.preview.hide();
@@ -201,7 +205,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Apunta y pulsa ¡Listo!' : 'Eres espectador';
+      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Clic derecho para apuntar · mantén Espacio para disparar' : 'Eres espectador';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
       sfx.fanfare();

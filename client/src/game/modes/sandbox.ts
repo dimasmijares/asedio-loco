@@ -32,8 +32,11 @@ export class SandboxMode implements Mode {
     const to = castleOrigin(this.target);
     input.setAim({ yaw: Math.atan2(to[0] - lp[0], to[2] - lp[2]), pitch: 0.7, power: 0.72 });
     input.onChange = (a) => this.onAim(a);
-    input.onRelease = (a) => this.fire(a);
-    input.onConfirm = () => this.fire(input.aim);
+    input.onFire = (a) => this.fire(a);
+    input.onTooShort = () => this.hud.showBanner('Mantén Espacio', 'cuanto más tiempo, más fuerza', 1300);
+    this.hud.bindCharge(input);
+    this.hud.showConfirm(true);
+    game.rig.lookEnabled = false;
     this.onAim(input.aim);
     this.hud.setPhase('Campo de pruebas', 'Derriba el castillo como más te guste');
     this.hud.setTimer(null);
@@ -41,14 +44,14 @@ export class SandboxMode implements Mode {
     this.renderAmmo();
     this.hud.alwaysStats = true;
     this.hud.setHelp([
-      [['Arrastrar', 'soltar'], 'disparar'],
-      [['Rueda', 'W', 'S'], 'elevación'],
-      [['A', 'D'], 'girar'],
+      [['Clic dcho.', 'ratón'], 'apuntar'],
+      [['Espacio'], 'mantener: fuerza · soltar: ¡fuego!'],
+      [['A', 'D', 'W', 'S'], 'afinar el tiro'],
       [['Mayús'], 'precisión'],
       [['1', '…', '0'], 'munición'],
+      [['Rueda'], 'acercar la cámara'],
       [['T'], 'reconstruir'],
       [['C'], 'cámara libre'],
-      [['Clic dcho.'], 'mirar alrededor'],
     ]);
     this.keyHandler = (e) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
@@ -83,7 +86,10 @@ export class SandboxMode implements Mode {
     const cat = this.game.view.catapults.get(this.slot)!;
     cat.setYaw(a.yaw);
     cat.setPull(a.power);
-    this.game.preview.show(launchPoint(this.slot), a, this.ammo, this.game.sim?.wind ?? [0, 0, 0]);
+    const input = this.game.input;
+    this.game.preview.show(launchPoint(this.slot), a, this.ammo, this.game.sim?.wind ?? [0, 0, 0], '#ffffff', input.charging ? 'charge' : 'guide');
+    this.hud.setCharge(input.charging ? a.power : null);
+    if (!input.charging) this.hud.showConfirm(true);
     this.hud.setAimInfo(a, this.ammo);
   }
 
@@ -92,6 +98,7 @@ export class SandboxMode implements Mode {
     if (!sim) return;
     this.game.view.catapults.get(this.slot)!.fire();
     sim.launch(this.slot, this.ammo, a);
+    this.onAim(a);
   }
 
   // Apunta con precisión a una parte del castillo diana (para pruebas y depuración).

@@ -43,7 +43,7 @@ jobs:
       matrix:
         include:
           - grupo: basicas
-            args: lobby smoke perf
+            args: lobby smoke perf controls
           - grupo: fisica
             args: physics
           - grupo: solitario

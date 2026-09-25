@@ -12,12 +12,12 @@ export function tutorialPending() {
   }
 }
 
-type Step = 'drag' | 'adjust' | 'lock';
+type Step = 'aim' | 'adjust' | 'fire';
 
 const STEPS: { id: Step; title: string; text: string }[] = [
-  { id: 'drag', title: '1 · Tensa el tirachinas', text: 'Pulsa en cualquier punto y arrastra hacia atrás. Cuanto más lejos, más potencia; tira hacia un lado para girar. Suelta para fijar la puntería.' },
-  { id: 'adjust', title: '2 · Afina el tiro', text: 'Rueda del ratón o W/S: elevación. Q/E: apuntar a otro castillo. 1/2: elegir munición. Los puntos blancos muestran el inicio del vuelo.' },
-  { id: 'lock', title: '3 · ¡Fuego!', text: 'Pulsa «¡Listo!» o Espacio. Si se acaba el tiempo, dispararás con lo que tengas apuntado.' },
+  { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
+  { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta). Q/E apuntan a otro castillo.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo. Si se acaba el tiempo, sale con lo que tengas.' },
 ];
 
 // Tutorial de 3 pasos en la primera partida: cada paso avanza al hacer lo que pide.

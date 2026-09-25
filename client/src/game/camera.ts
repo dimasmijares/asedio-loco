@@ -29,6 +29,9 @@ export class CameraRig {
   private lastFollow = new THREE.Vector3();
   shake = 0;
   slowmo = 1;
+  // Mirar alrededor con el clic derecho. Se desactiva mientras se apunta, porque entonces el
+  // clic derecho mueve la catapulta.
+  lookEnabled = true;
   sharpness = 3;
 
   constructor(readonly camera: THREE.PerspectiveCamera, readonly dom: HTMLElement) {
@@ -37,7 +40,7 @@ export class CameraRig {
     let ly = 0;
     dom.addEventListener('contextmenu', (e) => e.preventDefault());
     dom.addEventListener('pointerdown', (e) => {
-      if (e.button !== 2) return;
+      if (e.button !== 2 || !this.lookEnabled) return;
       dragging = true;
       lx = e.clientX;
       ly = e.clientY;
@@ -115,13 +118,14 @@ export class CameraRig {
         const yaw = this.aimYaw + this.userYaw * 0.6;
         const d = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
         const right = new THREE.Vector3(-d.z, 0, d.x).negate();
-        const back = 8 * this.userZoom;
+        // Más atrás y mirando más alto que antes: la parábola que crece al cargar cabe entera.
+        const back = 12 * this.userZoom;
         this.wantPos
           .copy(this.aimFrom)
           .addScaledVector(d, -back)
-          .addScaledVector(right, 2.4)
-          .add(new THREE.Vector3(0, 6.2 * this.userZoom + this.userPitch * 6, 0));
-        this.wantTarget.copy(this.aimFrom).addScaledVector(d, 26).add(new THREE.Vector3(0, -2.5, 0));
+          .addScaledVector(right, 3)
+          .add(new THREE.Vector3(0, 6 * this.userZoom + this.userPitch * 6, 0));
+        this.wantTarget.copy(this.aimFrom).addScaledVector(d, 22).add(new THREE.Vector3(0, 3.5, 0));
         break;
       }
       case 'follow': {

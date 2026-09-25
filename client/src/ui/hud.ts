@@ -2,6 +2,7 @@ import { AMMO, RARITY_COLOR, RARITY_LABEL, type AmmoId } from '../../../shared/a
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
 import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
+import type { AimInput } from '../game/aim';
 import { sfx } from '../game/audio';
 import { h } from './dom';
 import { openSettings, settings } from './settings';
@@ -40,7 +41,8 @@ export class Hud {
   private banner = h('div', { class: 'hud-banner', id: 'hud-banner' });
   private corner = h('div', { class: 'hud-corner' });
   private stats = h('div', { class: 'hud-stats', id: 'hud-stats' });
-  confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '¡Listo! (Espacio)');
+  // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
+  confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
   private bannerTimer = 0;
 
   constructor(parent: HTMLElement) {
@@ -190,10 +192,32 @@ export class Hud {
     this.bannerTimer = window.setTimeout(() => this.banner.classList.remove('show'), ms);
   }
 
+  bindCharge(input: AimInput) {
+    const b = this.confirmBtn;
+    b.onpointerdown = (e) => {
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      b.setPointerCapture?.(e.pointerId);
+      input.startCharge();
+    };
+    b.onpointerup = () => input.releaseCharge();
+    b.onpointercancel = () => input.cancelCharge();
+  }
+
+  // Fuerza que se está cargando (0..1), o null si no se carga.
+  setCharge(p: number | null) {
+    const b = this.confirmBtn;
+    b.classList.toggle('charging', p !== null);
+    b.style.setProperty('--p', `${Math.round((p ?? 0) * 100)}%`);
+    if (p !== null) b.textContent = `Fuerza ${Math.round(p * 100)} %`;
+  }
+
   showConfirm(show: boolean, locked = false) {
-    this.confirmBtn.style.display = show ? '' : 'none';
-    this.confirmBtn.disabled = locked;
-    this.confirmBtn.textContent = locked ? '¡Listo! Esperando a los demás…' : '¡Listo! (Espacio)';
+    const b = this.confirmBtn;
+    b.style.display = show ? '' : 'none';
+    b.disabled = locked;
+    if (b.classList.contains('charging')) return;
+    b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio para cargar';
   }
 
   dispose() {

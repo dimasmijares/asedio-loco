@@ -366,7 +366,7 @@ button.big {
 .hud-players {
   display: grid;
   gap: 6px;
-  width: 100%;
+  width: 225px;
 }
 
 .hp {
@@ -544,6 +544,17 @@ button.big {
 .hud-confirm {
   font-size: 20px;
   padding: 10px 26px;
+  min-width: 320px;
+  touch-action: none;
+}
+
+/* Mientras se carga, el botón se llena de izquierda a derecha con la fuerza. */
+.hud-confirm.charging {
+  background: linear-gradient(to right, #ffd23f var(--p), var(--accent) var(--p));
+  color: var(--ink);
+  text-shadow: none;
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
 }
 
 .hud-help {
