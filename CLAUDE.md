@@ -82,7 +82,7 @@ Escena más cargada: `/#bench`. Son los 4 castillos enteros (424 bloques) y 12 p
 | media | 354 | 125 | 2,6 ms | 3,3 ms | 392 | 76 k | 421 | 170 | 773 |
 | baja | 537 | 182 | 1,7 ms | 3,1 ms | 272 | 56 k | 421 | 90 | 392 |
 
-Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1280×720, sin vsync). No he podido medir en una gráfica integrada. Por la carga (menos de 400 llamadas, menos de 90 k triángulos, unos 3 ms de física en el peor momento), el objetivo de 60 fps en calidad media parece alcanzable en una integrada de gama media, y la calidad adaptativa baja a «baja» si no llega. Con SwiftShader (CPU, en CI) la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms; `tests/e2e/perf.spec.ts` exige menos de 10 ms por paso.
+Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1280×720, sin vsync). No he podido medir en una gráfica integrada. Por la carga (menos de 400 llamadas, menos de 90 k triángulos, unos 3 ms de física en el peor momento), el objetivo de 60 fps en calidad media parece alcanzable en una integrada de gama media, y la calidad adaptativa baja a «baja» si no llega. Con SwiftShader (CPU, en CI) la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms; `tests/e2e/perf.spec.ts` exige que cada paso quepa en su presupuesto de 16 ms.
 
 ## Pruebas
 

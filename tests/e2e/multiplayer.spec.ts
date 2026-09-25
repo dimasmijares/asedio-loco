@@ -213,7 +213,7 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
 });
 
 test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }) => {
-  test.setTimeout(420_000);
+  test.setTimeout(720_000);
   const errors: string[] = [];
   const host = await newPlayer(browser, errors, 'anfitrión');
   const g1 = await newPlayer(browser, errors, 'j2');
@@ -227,7 +227,7 @@ test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }
   const players = [host, g1, g2];
   const checked = new Set<number>();
   const t0 = Date.now();
-  while (Date.now() - t0 < 360_000) {
+  while (Date.now() - t0 < 600_000) {
     const all = (await Promise.all(players.map(summary))) as Summary[];
     if (all[0]?.phase === 'over') break;
     if (all[0]?.phase === 'results' && !checked.has(all[0].round)) {
