@@ -141,8 +141,16 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
       const [after] = await waitAll([g], (s) => s.fulls > 0);
       expect(after.you).toBe(before.you);
       expect(after.spectator).toBe(false);
-      const hv = (await summary(host))!;
-      expect(Math.abs(after.perSlot[String(after.you)] - hv.perSlot[String(after.you)])).toBeLessThanOrEqual(3);
+      // Se compara con el anfitrión en un momento quieto (apuntado o resultados de la misma
+      // ronda): en plena fase de impacto los bloques siguen cayendo y las cuentas bailan.
+      const slot = String(after.you);
+      const still = (s: Summary) => s.phase === 'aim' || s.phase === 'results' || s.phase === 'over';
+      let pair: Summary[] = [];
+      for (const t1 = Date.now(); Date.now() - t1 < 120_000; await host.waitForTimeout(300)) {
+        pair = (await Promise.all([host, g].map(summary))) as Summary[];
+        if (pair.every(still) && pair[0].round === pair[1].round && pair[0].phase === pair[1].phase) break;
+      }
+      expect(Math.abs(pair[1].perSlot[slot] - pair[0].perSlot[slot]), `bloques del hueco ${slot} (fase ${pair[0].phase})`).toBeLessThanOrEqual(3);
       reconnected = true;
       console.log('reconexión: recupera el hueco', after.you);
     }
