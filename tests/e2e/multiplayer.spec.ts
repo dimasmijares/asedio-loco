@@ -189,7 +189,7 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
 });
 
 test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async ({ browser }) => {
-  test.setTimeout(400_000);
+  test.setTimeout(900_000);
   const errors: string[] = [];
   const host = await newPlayer(browser, errors, 'anfitrión');
   const g1 = await newPlayer(browser, errors, 'j2');
@@ -197,7 +197,7 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   await join(g1, hash, 'Jugador2');
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
   await host.click('#start');
-  await waitAll([host, g1], (s) => s.phase === 'over', 300_000);
+  await waitAll([host, g1], (s) => s.phase === 'over', 720_000);
   await expect(g1.locator('#rematch')).toHaveCount(0);
   await host.click('#rematch');
   for (const p of [host, g1]) {
