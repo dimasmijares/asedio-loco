@@ -104,3 +104,13 @@ Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de 
   - **Duración:** normal, 9,6 rondas (unos 5 minutos con personas apuntando); difícil, 6.
   - **Rendimiento:** el paso de física sube de 3,3 a unos 5 ms en la escena más cargada, con más de 190 fps en una RTX 3080. El estado completo que se envía por red sigue por debajo de 64 KB.
 - **D-064 · Estado del anfitrión con versión.** Un cliente descarta un `st` o `full` más viejo que el que ya tiene (mismo `seed` y menor `v`). La red real mantiene el orden, pero no cuesta nada y protege de sorpresas.
+
+## Plan de móviles (docs/MOVILES.md)
+
+- **D-065 · El anfitrión en segundo plano cede la partida.** Con la pestaña o la app oculta el navegador deja de ejecutar `requestAnimationFrame`, así que el anfitrión dejaba de simular y la partida se congelaba para todos.
+  - **Cesión:** a los 2 s en segundo plano, el anfitrión manda `yield`. El servidor elige a otro jugador conectado, primero los ordenadores, y reparte la sala; ese jugador hereda la partida con la migración de siempre.
+  - **El que se va:** pasa a cliente sin desconectarse (suelta su simulación y pide el estado completo). Al volver a primer plano, pide otra vez el estado completo para ponerse al día.
+  - **Sin relevo:** si no hay otro humano conectado, no pasa nada: la partida espera.
+  - **Detección de móvil:** el saludo dice si el dispositivo es móvil (`pointer: coarse` sin ratón; `?mobile=1/0` lo fuerza en las pruebas). Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión desde el principio.
+  - **Protocolo v5.**
+

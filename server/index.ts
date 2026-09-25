@@ -41,6 +41,7 @@ interface Attach {
   pid: string | null;
   role: Role | null;
   name?: string;
+  mobile?: boolean; // dispositivo táctil: mejor que no haga de anfitrión si hay un ordenador
 }
 
 const EMPTY_ROOM_TTL_MS = 60_000;
@@ -150,10 +151,17 @@ export class Room extends DurableObject<Env> {
     return l;
   }
 
-  private pickNewHost(except?: WebSocket) {
+  // Nuevo anfitrión entre los jugadores conectados (sin contar `notId`): primero los ordenadores,
+  // luego por hueco. Devuelve false si no hay a quién pasárselo.
+  private pickNewHost(except?: WebSocket, notId?: string) {
     const s = this.s!;
-    const candidates = s.players.filter((p) => this.isConnected(p.id, except)).sort((a, b) => a.slot - b.slot);
-    if (candidates.length) s.hostId = candidates[0].id;
+    const mobile = (id: string) => this.sockets(except).some((w) => this.attach(w).pid === id && this.attach(w).mobile);
+    const candidates = s.players
+      .filter((p) => p.id !== notId && this.isConnected(p.id, except))
+      .sort((a, b) => Number(mobile(a.id)) - Number(mobile(b.id)) || a.slot - b.slot);
+    if (!candidates.length) return false;
+    s.hostId = candidates[0].id;
+    return true;
   }
 
   // ---------- eventos del WebSocket ----------
@@ -202,7 +210,7 @@ export class Room extends DurableObject<Env> {
     if (!player) role = 'spectator';
 
     const pid = player ? player.id : `s${hex(4)}`;
-    ws.serializeAttachment({ pid, role, name } satisfies Attach);
+    ws.serializeAttachment({ pid, role, name, mobile: m.mobile === true } satisfies Attach);
     if (role === 'player' && (!s.hostId || !this.isConnected(s.hostId, ws) || !s.players.some((p) => p.id === s.hostId))) s.hostId = pid;
     this.save();
     this.send(ws, { t: 'welcome', you: { id: pid, token: player?.token ?? '', role }, room: this.view() });
@@ -233,6 +241,11 @@ export class Room extends DurableObject<Env> {
         s.players = s.players.filter((p) => this.isConnected(p.id));
         s.config.bots = Math.min(s.config.bots, MAX_PLAYERS - s.players.length);
         if (s.players.length + s.config.bots < 2) return this.send(ws, { t: 'error', code: 'pocos', msg: 'Hacen falta al menos 2 castillos (añade bots)' });
+        // Si el anfitrión es un móvil y hay un ordenador en la sala, la física la lleva el ordenador.
+        if (a.mobile) {
+          const desktop = s.players.find((p) => this.sockets().some((w) => this.attach(w).pid === p.id && !this.attach(w).mobile));
+          if (desktop) s.hostId = desktop.id;
+        }
         s.inGame = true;
         this.save();
         return this.broadcastRoom();
@@ -254,6 +267,14 @@ export class Room extends DurableObject<Env> {
         this.save();
         return this.broadcastRoom();
       }
+      case 'yield':
+        // El anfitrión se va a segundo plano: otro jugador conectado hereda la partida.
+        if (!isHost || !s.inGame) return;
+        if (this.pickNewHost(undefined, a.pid!)) {
+          this.save();
+          this.broadcastRoom();
+        }
+        return;
       case 'relay': {
         if (a.role === 'spectator') return this.send(ws, { t: 'error', code: 'espectador', msg: 'Los espectadores no pueden jugar' });
         if (!isHost && m.to !== 'all' && m.to !== 'host') return;

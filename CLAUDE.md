@@ -10,6 +10,7 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 - **Fase 4 (contenido y sensación)** terminada: 12 municiones, sonido procedural, cámara lenta y foco en el rey que cae, estadísticas divertidas.
 - **Fase 5 (rendimiento y robustez)** terminada: benchmark, instancing y geometría fusionada, compresión de instantáneas, pruebas con red mala, migración de anfitrión.
 - **Fase 6 (pulido)** terminada: portada animada, «Cómo se juega», tutorial de 3 pasos, ajustes (calidad, sonido, texto grande, sensibilidad) y colores accesibles.
+- **Plan de móviles** (`docs/MOVILES.md`): M1 terminada (el anfitrión en segundo plano cede la partida; si el creador es un móvil, el anfitrión es un ordenador). Quedan M2-M5.
 - **Plan de cambios tras la primera prueba del usuario** (`PLAN.md`): etapas 1-5 terminadas y en producción (20 s y 3 municiones por ronda, control con clic derecho y Espacio, plano panorámico, repetición al caer un rey, castillos de 140 bloques). Queda la etapa 6: estudio de viabilidad para móviles.
 - **Fase 3 (multijugador)** terminada: salas, anfitrión autoritativo, interpolación, espectadores, reconexión, migración de anfitrión y revancha, con pruebas E2E de 4-5 clientes.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
@@ -58,7 +59,8 @@ client/src/
 
 Servidor (`shared/protocol.ts`, JSON sobre WebSocket en `/ws/ABCD`):
 
-- Cliente → servidor: `hello {v, name, token?}`, `name`, `config {bots, difficulty, fast}` (anfitrión, lobby), `start` (anfitrión), `lobby` (anfitrión, revancha), `relay {to: 'all'|'host'|id, d}`, `ping`.
+- Cliente → servidor: `hello {v, name, token?, mobile?}`, `name`, `config {bots, difficulty, fast}` (anfitrión, lobby), `start` (anfitrión), `lobby` (anfitrión, revancha), `yield` (anfitrión en partida: cede el papel), `relay {to: 'all'|'host'|id, d}`, `ping`.
+- Elección de anfitrión: el creador de la sala. Al empezar, si es un móvil (`mobile`) y hay un ordenador, pasa al ordenador. Si el anfitrión se desconecta o manda `yield`, lo hereda otro jugador conectado, primero los ordenadores.
 - Servidor → cliente: `welcome {you:{id, token, role}, room}`, `room {room}`, `relay {from, d}`, `pong`, `error {code, msg}`.
 - El servidor valida el tamaño (64 KB) y los campos, limita la frecuencia (30/s, o 80/s el anfitrión), sanea nombres (16 caracteres) y rechaza `relay` de espectadores. Los que no son anfitrión solo pueden mandar a `all` o `host`.
 

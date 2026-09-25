@@ -72,7 +72,7 @@ Un manifiesto web para «Añadir a pantalla de inicio», con orientación horizo
 
 | Etapa | Contenido | Coste | Pruebas |
 |---|---|---|---|
-| M1 | Ceder el anfitrión al pasar a segundo plano (arregla también el PC) y anfitrión preferente de escritorio | Pequeño | E2E: el anfitrión oculta la pestaña y otro hereda la partida |
+| M1 ✅ | Ceder el anfitrión al pasar a segundo plano (arregla también el PC) y anfitrión preferente de escritorio | Pequeño | E2E: el anfitrión oculta la pestaña y otro hereda la partida |
 | M2 | Control táctil (opción A), pantalla completa, aviso de «Gira el móvil» y tutorial con textos táctiles | Medio | E2E con emulación táctil (`hasTouch`) de un Pixel y un iPhone: apuntar, cargar y disparar |
 | M3 | HUD compacto para alturas menores de 500 px | Medio | Capturas en 3 tamaños de móvil y comprobación de que nada se solapa |
 | M4 | Perfil de rendimiento móvil y límite de 30 fps fuera del impacto | Pequeño | Banco de rendimiento con la CPU frenada 4× en Chromium, y prueba en un móvil real |

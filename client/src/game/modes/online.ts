@@ -22,7 +22,9 @@ export class OnlineMode implements Mode {
   ui: MatchUI;
   auto: AutoPlayer | null = null;
   migrations = 0;
+  demotions = 0; // veces que hemos cedido el papel de anfitrión
   private off: (() => void)[] = [];
+  private yieldTimer = 0;
 
   constructor(readonly game: Game, readonly conn: Connection, readonly parent: HTMLElement, opts: { autoplay?: boolean } = {}) {
     const room = conn.room!;
@@ -50,6 +52,9 @@ export class OnlineMode implements Mode {
     });
     if (opts.autoplay) this.auto = new AutoPlayer(src, game.view);
     this.off.push(conn.on('room', (r) => this.onRoom(r)));
+    const onVis = () => this.onVisibility();
+    document.addEventListener('visibilitychange', onVis);
+    this.off.push(() => document.removeEventListener('visibilitychange', onVis), () => clearTimeout(this.yieldTimer));
     game.mode = this;
   }
 
@@ -82,8 +87,23 @@ export class OnlineMode implements Mode {
     this.netClient.onEvents = (e) => this.ui?.onSimEvents(e);
   }
 
+  // Con la pestaña o la app en segundo plano el navegador deja de dibujar y, con ello, de
+  // simular: si somos el anfitrión, la partida se congelaría para todos. A los 2 s se cede el
+  // papel a otro jugador. Al volver se pide el estado completo para ponerse al día.
+  private onVisibility() {
+    clearTimeout(this.yieldTimer);
+    if (document.visibilityState === 'hidden') {
+      if (this.role !== 'host' || this.state.phase === 'over') return;
+      this.yieldTimer = window.setTimeout(() => {
+        if (document.visibilityState === 'hidden' && this.role === 'host') this.conn.send({ t: 'yield' });
+      }, 2000);
+    } else if (this.role === 'client') this.netClient?.hello();
+  }
+
   private onRoom(r: RoomState) {
     if (!r.inGame) return;
+    // Hemos cedido el papel (o nos lo han quitado): pasamos a reproducir lo que mande el nuevo.
+    if (this.role === 'host' && r.hostId && r.hostId !== this.conn.you?.id) return this.demote();
     // Nos toca ser anfitrión a mitad de partida: heredamos lo que vemos.
     if (this.role === 'client' && r.hostId === this.conn.you?.id) this.migrate();
     // Si hemos vuelto a conectar tras un corte, pedimos el estado completo.
@@ -120,6 +140,23 @@ export class OnlineMode implements Mode {
     toast('El anfitrión se ha ido: ahora la partida la llevas tú');
   }
 
+  demote() {
+    const host = this.netHost!;
+    const state = structuredClone(host.state);
+    const you = this.you;
+    host.dispose();
+    this.netHost = null;
+    // La física la lleva ahora otro: aquí solo se reproduce lo que llega.
+    this.game.sim?.free();
+    this.game.sim = null;
+    this.game.simPaused = false;
+    this.role = 'client';
+    this.netClient = new NetClient(this.game, this.conn, state, you);
+    this.netClient.onEvents = (e) => this.ui?.onSimEvents(e);
+    this.demotions++;
+    toast('Otro jugador lleva ahora la partida mientras no estás');
+  }
+
   // Resumen para las pruebas: lo que este cliente ve ahora mismo.
   summary() {
     const s = this.state;
@@ -131,7 +168,7 @@ export class OnlineMode implements Mode {
     }
     const perSlot: Record<number, number> = {};
     for (const p of s.players) perSlot[p.slot] = view.blockCount(p.slot);
-    return { role: this.role, you: this.you, spectator: this.conn.you?.role === 'spectator', round: s.round, phase: s.phase, winner: s.winner, blocks: view.blockCount(), perSlot, kings, alive: s.players.filter((p) => p.alive).map((p) => p.slot), migrations: this.migrations, v: s.v, replays: this.ui.replaysSeen, fulls: this.netClient?.fullsReceived ?? 0 };
+    return { role: this.role, you: this.you, spectator: this.conn.you?.role === 'spectator', round: s.round, phase: s.phase, winner: s.winner, blocks: view.blockCount(), perSlot, kings, alive: s.players.filter((p) => p.alive).map((p) => p.slot), migrations: this.migrations, demotions: this.demotions, v: s.v, replays: this.ui.replaysSeen, fulls: this.netClient?.fullsReceived ?? 0 };
   }
 
   onSimEvents(events: SimEvent[]) {

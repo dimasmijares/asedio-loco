@@ -2,7 +2,7 @@
 // mensajes de control (hello, config, start…). Todo lo relativo a la partida
 // viaja dentro de `relay` y el servidor lo retransmite sin interpretarlo.
 
-export const PROTOCOL_VERSION = 4;
+export const PROTOCOL_VERSION = 5;
 export const MAX_PLAYERS = 4;
 export const MAX_NAME_LEN = 16;
 export const MAX_MSG_BYTES = 64 * 1024;
@@ -37,11 +37,12 @@ export interface RoomState {
 export type Role = 'player' | 'spectator';
 
 export type ClientMsg =
-  | { t: 'hello'; v: number; name: string; token?: string }
+  | { t: 'hello'; v: number; name: string; token?: string; mobile?: boolean }
   | { t: 'name'; name: string }
   | { t: 'config'; config: Partial<RoomConfig> }
   | { t: 'start' }
   | { t: 'lobby' } // revancha: vuelve al lobby con los mismos jugadores
+  | { t: 'yield' } // el anfitrión cede el papel (p. ej. al pasar a segundo plano)
   | { t: 'relay'; to: string; d: RelayData }
   | { t: 'ping'; n: number };
 
@@ -105,7 +106,8 @@ export function parseClientMsg(raw: unknown): ClientMsg | null {
     case 'hello':
       if (typeof m.v !== 'number' || typeof m.name !== 'string' || m.name.length > 200) return null;
       if (m.token !== undefined && (typeof m.token !== 'string' || !/^[a-f0-9]{32}$/.test(m.token))) return null;
-      return { t: 'hello', v: m.v, name: m.name, token: m.token as string | undefined };
+      if (m.mobile !== undefined && typeof m.mobile !== 'boolean') return null;
+      return { t: 'hello', v: m.v, name: m.name, token: m.token as string | undefined, mobile: m.mobile as boolean | undefined };
     case 'name':
       if (typeof m.name !== 'string' || m.name.length > 200) return null;
       return { t: 'name', name: m.name };
@@ -115,6 +117,7 @@ export function parseClientMsg(raw: unknown): ClientMsg | null {
     }
     case 'start':
     case 'lobby':
+    case 'yield':
       return { t: m.t };
     case 'relay':
       if (typeof m.to !== 'string' || m.to.length > 40) return null;

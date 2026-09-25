@@ -16,6 +16,7 @@ type Summary = {
   kings: Record<string, [number, number, number]>;
   alive: number[];
   migrations: number;
+  demotions: number;
   replays: number;
   fulls: number;
 };
@@ -231,6 +232,59 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   expect(finals[1].winner).toBe(finals[0].winner);
   expect(finals[1].round).toBe(finals[0].round);
   for (const p of [g1, g2]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
+// Simula que la pestaña pasa a segundo plano (o vuelve): Playwright no la oculta de verdad.
+const setHidden = (p: Page, hidden: boolean) =>
+  p.evaluate((h) => {
+    Object.defineProperty(document, 'visibilityState', { value: h ? 'hidden' : 'visible', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  }, hidden);
+
+test('el anfitrión pasa a segundo plano y otro jugador sigue llevando la partida', async ({ browser }) => {
+  test.setTimeout(600_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const g1 = await newPlayer(browser, errors, 'j2');
+  const hash = await createRoom(host, '&bots=1');
+  await join(g1, hash, 'Jugador2', SLOW);
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
+  await host.click('#start');
+  const [before] = await waitAll([host, g1], (s) => s.round >= 2 && s.phase !== 'over', 240_000);
+  await setHidden(host, true);
+  // A los 2 s cede el papel: el otro jugador hereda la partida y el que se fue pasa a cliente.
+  const [h, g] = await waitAll([host, g1], (s) => s.role === (s.demotions > 0 ? 'client' : 'host') && (s.demotions > 0 || s.migrations > 0), 60_000);
+  expect(h.role).toBe('client');
+  expect(h.demotions).toBe(1);
+  expect(g.role).toBe('host');
+  expect(g.migrations).toBe(1);
+  console.log('segundo plano: cede el anfitrión en la ronda', before.round);
+  // La partida sigue sin él y, al volver, se pone al día.
+  await waitAll([g1], (s) => s.round > before.round || s.phase === 'over', 240_000);
+  await setHidden(host, false);
+  const finals = await waitAll([host, g1], (s) => s.phase === 'over', 480_000);
+  expect(finals[0].winner).not.toBeNull();
+  expect(finals[0].winner).toBe(finals[1].winner);
+  expect(finals[0].round).toBe(finals[1].round);
+  for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
+test('un móvil que crea la sala cede el papel de anfitrión a un ordenador', async ({ browser }) => {
+  test.setTimeout(240_000);
+  const errors: string[] = [];
+  const phone = await newPlayer(browser, errors, 'móvil');
+  const pc = await newPlayer(browser, errors, 'ordenador');
+  const hash = await createRoom(phone, '&bots=1&mobile=1');
+  await join(pc, hash, 'Ordenador', `${SLOW}&mobile=0`);
+  await expect(phone.locator('#player-list li[data-player]')).toHaveCount(2);
+  await phone.click('#start');
+  const [a, b] = await waitAll([phone, pc], (s) => s.round >= 1, 120_000);
+  expect(a.role, 'el móvil reproduce').toBe('client');
+  expect(b.role, 'el ordenador simula').toBe('host');
+  expect(a.migrations + b.migrations, 'desde el principio, sin migración').toBe(0);
+  for (const p of [phone, pc]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
   expect(errors).toEqual([]);
 });
 

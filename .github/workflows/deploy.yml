@@ -51,7 +51,7 @@ jobs:
           - grupo: cuatro-jugadores
             args: multiplayer -g "4 jugadores"
           - grupo: migracion
-            args: multiplayer -g "anfitrión se va"
+            args: multiplayer -g "anfitrión"
           - grupo: revancha
             args: multiplayer -g "revancha"
           - grupo: red-mala

@@ -81,7 +81,7 @@ export class Connection {
     ws.onopen = () => {
       this.retry = 0;
       const token = localStorage.getItem(tokenKey(this.code)) ?? undefined;
-      this.rawSend({ t: 'hello', v: PROTOCOL_VERSION, name: this.name, token: token || undefined });
+      this.rawSend({ t: 'hello', v: PROTOCOL_VERSION, name: this.name, token: token || undefined, mobile: isMobileDevice() });
       clearInterval(this.pingTimer);
       this.pingTimer = window.setInterval(() => this.rawSend({ t: 'ping', n: performance.now() }), 5000);
     };
@@ -168,4 +168,11 @@ export class Connection {
     this.stopped = true;
     this.ws?.close();
   }
+}
+
+// Móvil o tableta: pantalla táctil sin ratón. ?mobile=1 o ?mobile=0 lo fuerzan (pruebas).
+export function isMobileDevice() {
+  const q = new URLSearchParams(location.search).get('mobile');
+  if (q === '1' || q === '0') return q === '1';
+  return matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
 }

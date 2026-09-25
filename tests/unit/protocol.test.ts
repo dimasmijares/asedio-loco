@@ -18,7 +18,10 @@ describe('sanitizeName', () => {
 
 describe('parseClientMsg', () => {
   it('acepta mensajes válidos', () => {
-    expect(parseClientMsg('{"t":"hello","v":1,"name":"Ana"}')).toEqual({ t: 'hello', v: 1, name: 'Ana', token: undefined });
+    expect(parseClientMsg('{"t":"hello","v":1,"name":"Ana"}')).toEqual({ t: 'hello', v: 1, name: 'Ana', token: undefined, mobile: undefined });
+    expect(parseClientMsg('{"t":"hello","v":1,"name":"Ana","mobile":true}')).toMatchObject({ t: 'hello', mobile: true });
+    expect(parseClientMsg('{"t":"hello","v":1,"name":"Ana","mobile":"sí"}')).toBeNull();
+    expect(parseClientMsg('{"t":"yield"}')).toEqual({ t: 'yield' });
     expect(parseClientMsg('{"t":"relay","to":"all","d":{"k":"aim","yaw":1}}')).toEqual({ t: 'relay', to: 'all', d: { k: 'aim', yaw: 1 } });
     expect(parseClientMsg('{"t":"config","config":{"bots":2}}')).toEqual({ t: 'config', config: { bots: 2 } });
   });
