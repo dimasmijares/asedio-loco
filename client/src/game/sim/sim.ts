@@ -1,6 +1,6 @@
 import { AMMO, type AmmoDef, type AmmoId } from '../../../../shared/ammo';
 import { launchVelocity, aeroAccel, type Aim } from '../../../../shared/ballistics';
-import { KING_HALF_HEIGHT, KING_RADIUS, buildCastle, kingId, type BlockDef } from '../../../../shared/castle';
+import { KING_HALF_HEIGHT, KING_RADIUS, buildCastle, kingId, slotOfBlock, type BlockDef } from '../../../../shared/castle';
 import { CASTLE_HALF, castleOrigin, insideCastle, islandSdf, launchPoint } from '../../../../shared/map';
 import { addIslandColliders } from './island';
 import { CHIP_RATIO, MATERIALS, type Material, type MaterialId } from '../../../../shared/materials';
@@ -217,10 +217,39 @@ export class Sim {
     return [w * bx + x * bw + y * bz - z * by, w * by - x * bz + y * bw + z * bx, w * bz + x * by - y * bx + z * bw, w * bw - x * bx - y * by - z * bz];
   }
 
-  private addKing(slot: number, p: Vec3) {
+  // Reconstruye una simulación a partir de lo que ve un cliente (migración de anfitrión):
+  // bloques donde están ahora, uniones del plano que sigan intactas y reyes vivos.
+  static restore(slots: number[], blocks: { id: number; mat: MaterialId; size: Vec3; p: Vec3; q: Quat }[], kings: { slot: number; p: Vec3; q: Quat; alive: boolean }[], lavaY: number) {
+    const sim = new Sim([]);
+    for (const b of blocks) sim.addBlock({ ...b, slot: slotOfBlock(b.id), part: 'wall' });
+    for (const slot of slots) {
+      for (const [a, b] of buildCastle(slot).joints) {
+        const ra = sim.recs.get(a);
+        const rb = sim.recs.get(b);
+        if (!ra || !rb) continue;
+        // Solo si siguen casi como en el plano relativo (no se habían separado).
+        const def = buildCastle(slot).blocks;
+        const da = def.find((x) => x.id === a)!;
+        const db = def.find((x) => x.id === b)!;
+        const d0 = v3.dist(da.p, db.p);
+        if (Math.abs(v3.dist(sim.pos(ra), sim.pos(rb)) - d0) < 0.05) sim.addJoint(ra, rb);
+      }
+    }
+    for (const k of kings) {
+      if (!k.alive) continue;
+      sim.addKing(k.slot, k.p, k.q);
+    }
+    for (const slot of slots) if (!sim.kings.has(slot)) sim.kings.set(slot, { slot, alive: false });
+    sim.lavaY = lavaY;
+    sim.lavaFloor.setTranslation({ x: 0, y: lavaY - LAVA_FLOOR_HALF, z: 0 }, true);
+    sim.settle(0.3);
+    return sim;
+  }
+
+  private addKing(slot: number, p: Vec3, q: Quat = [0, 0, 0, 1]) {
     const R = RAPIER;
     const body = this.world.createRigidBody(
-      R.RigidBodyDesc.dynamic().setTranslation(p[0], p[1], p[2]).setLinearDamping(0.1).setAngularDamping(0.6).setSleeping(true),
+      R.RigidBodyDesc.dynamic().setTranslation(p[0], p[1], p[2]).setRotation(rq(q)).setLinearDamping(0.1).setAngularDamping(0.6).setSleeping(true),
     );
     const col = this.world.createCollider(
       R.ColliderDesc.capsule(KING_HALF_HEIGHT, KING_RADIUS)

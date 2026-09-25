@@ -6,6 +6,8 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 
 - **Fase 0 (preparación)** terminada.
 - **Fase 1 (sandbox)** terminada: `/#sandbox` con las 12 municiones, física completa y escenas de física en verde.
+- **Fase 2 (partida contra bots)** terminada: `/#solo` (en la portada, «Jugar solo»). Equilibrio medido con `tests/balance`.
+- **Fase 3 (multijugador)** terminada: salas, anfitrión autoritativo, interpolación, espectadores, reconexión, migración de anfitrión y revancha, con pruebas E2E de 4-5 clientes.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).
   - [x] 0.3 Servidor de salas: Cloudflare Workers + Durable Objects (cuenta con subdominio `dimasmijares.workers.dev`, wrangler con sesión)
@@ -38,7 +40,9 @@ client/src/
     view.ts      Todo lo visible; se alimenta de eventos SimEvent y poses de cuerpos
     render/      Three.js: stage (cielo, isla, lava), blocks (instancing), models, fx, toon
     camera.ts, director.ts, aim.ts   Cámara, dirección de cámara en impactos, tirachinas
-    modes/       sandbox.ts (campo de pruebas), physicsTest.ts (escenas de la sección 5.7)
+    match/       host.ts (MatchHost, autoritativo), ui.ts (MatchUI, HUD y cámara), autoplay.ts
+    net/         netHost.ts, netClient.ts, interp.ts, messages.ts (partida en red)
+    modes/       sandbox, physicsTest, solo (contra bots), online (en red, con migración)
 ```
 
 - La simulación emite `SimEvent` (rm, spawn, proj, boom, king, fx, dmg…) que la vista consume. En red serán los mismos eventos más instantáneas de poses.
@@ -46,11 +50,31 @@ client/src/
 
 ## Protocolo de mensajes
 
-_Pendiente._
+Servidor (`shared/protocol.ts`, JSON sobre WebSocket en `/ws/ABCD`):
+
+- Cliente → servidor: `hello {v, name, token?}`, `name`, `config {bots, difficulty, fast}` (anfitrión, lobby), `start` (anfitrión), `lobby` (anfitrión, revancha), `relay {to: 'all'|'host'|id, d}`, `ping`.
+- Servidor → cliente: `welcome {you:{id, token, role}, room}`, `room {room}`, `relay {from, d}`, `pong`, `error {code, msg}`.
+- El servidor valida el tamaño (64 KB) y los campos, limita la frecuencia (30/s, o 80/s el anfitrión), sanea nombres (16 caracteres) y rechaza `relay` de espectadores. Los que no son anfitrión solo pueden mandar a `all` o `host`.
+
+Partida (`client/src/game/net/messages.ts`, dentro de `relay.d`):
+
+| k | de → a | contenido |
+|---|---|---|
+| `st` | anfitrión → todos | `MatchState` cuando cambia |
+| `tk` | anfitrión → todos | 15 Hz: `t` (hora del anfitrión), `b` poses cuantizadas (cm, 1e-4), `e` eventos, `a` punterías de bots |
+| `full` | anfitrión → uno/todos | todo: bloques (con material y tamaño), reyes, proyectiles, escudos, lava y estado |
+| `aim` | jugador → todos | puntería propia a ~10 Hz |
+| `in` | jugador → anfitrión | puntería, munición elegida, objetivo, ¡listo! |
+| `hi` | cliente → anfitrión | "acabo de llegar": el anfitrión responde con `full` |
+
+Los clientes solo aceptan `st`/`tk`/`full` del `hostId` actual.
 
 ## Pruebas
 
 - `npm test`: tests unitarios (Vitest) de `tests/unit`.
+- Equilibrio: `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts` simula partidas de 4 bots en Node y deja el resumen en `tests/balance/ultimo-<dif>.txt`.
+- Parámetros de URL para pruebas: `?fast=1` (fases cortas), `?autoplay=1` (el humano juega solo), `?bots=N`, `?seed=N`, `?lag=ms&jitter=ms&loss=0..1` (red simulada).
+- `node tests/tools/net-watch.mjs <base> <humanos> <bots>` sigue en consola una partida en red de prueba.
 - `npm run e2e`: Playwright en local (compila y levanta `wrangler dev` en el 8787).
 - `npm run e2e:prod`: Playwright contra producción. CI lo ejecuta tras cada despliegue y guarda las capturas como artefacto.
 - Las escenas de física se abren a mano con `/#physics=ccd|tower|glass|fragments`.

@@ -27,6 +27,46 @@ function enterRoom(code: string, name: string) {
   const conn = new Connection(code, name);
   debug.conn = conn;
   new LobbyView(ui, conn);
+  const app = document.getElementById('app')!;
+  let online: { game: { dispose(): void }; mode: { dispose(): void }; canvas: HTMLElement } | null = null;
+  let starting = false;
+  // La sala manda: en partida se monta el juego; de vuelta al lobby (revancha) se desmonta.
+  const sync = async () => {
+    const room = conn.room;
+    if (!room || !conn.you) return;
+    if (room.inGame && !online && !starting) {
+      starting = true;
+      ui.replaceChildren();
+      const canvas = h('canvas', { id: 'game-canvas', tabIndex: 0 });
+      app.prepend(canvas);
+      const { Game } = await import('./game/game');
+      const { OnlineMode } = await import('./game/modes/online');
+      const game = await Game.create(canvas, []);
+      const mode = new OnlineMode(game, conn, app, { autoplay: new URLSearchParams(location.search).get('autoplay') === '1' });
+      online = { game, mode, canvas };
+      debug.game = game;
+      debug.mode = mode;
+      starting = false;
+      canvas.focus();
+      void sync();
+    } else if (!room.inGame && online) {
+      online.game.dispose();
+      online.canvas.remove();
+      online = null;
+      debug.game = debug.mode = undefined;
+      new LobbyView(ui, conn);
+    }
+  };
+  conn.on('room', () => void sync());
+  // Para pruebas: ?fast=1&bots=N configuran la sala si eres el anfitrión.
+  const q = new URLSearchParams(location.search);
+  conn.on('welcome', () => {
+    if (!conn.isHost || conn.room?.inGame) return;
+    const config: { fast?: boolean; bots?: number } = {};
+    if (q.get('fast') === '1') config.fast = true;
+    if (q.get('bots')) config.bots = Math.min(3, Math.max(0, Number(q.get('bots')) || 0));
+    if (Object.keys(config).length) conn.send({ t: 'config', config });
+  });
 }
 
 async function startSandbox() {

@@ -4,7 +4,8 @@ import { drawAmmo, type AmmoId } from './ammo';
 import { PITCH_DEFAULT, type Aim } from './ballistics';
 import { LAVA_LEVELS, LAVA_RISE_EVERY, WIND_FROM_ROUND, castleOrigin, launchPoint } from './map';
 import { hashString, rng, type Vec3 } from './math';
-import type { Difficulty } from './protocol';
+import { BOT_NAMES } from './players';
+import type { Difficulty, RoomState } from './protocol';
 
 export type Phase = 'intro' | 'aim' | 'impact' | 'results' | 'over';
 
@@ -63,6 +64,19 @@ export interface MatchState {
 
 export const MAX_ROUNDS = 24;
 export const HAND = 2;
+
+// Jugadores de una partida en red: los humanos de la sala en sus huecos y los bots de
+// relleno en los huecos libres más bajos. Anfitrión y clientes lo calculan igual.
+export function matchPlayersFromRoom(room: RoomState) {
+  const humans = room.players.map((p) => ({ slot: p.slot, id: p.id, name: p.name, bot: false as boolean, difficulty: undefined as Difficulty | undefined }));
+  const used = new Set(humans.map((p) => p.slot));
+  const bots: typeof humans = [];
+  for (let slot = 0; slot < 4 && bots.length < room.config.bots; slot++) {
+    if (used.has(slot)) continue;
+    bots.push({ slot, id: `bot${slot}`, name: BOT_NAMES[slot % BOT_NAMES.length], bot: true, difficulty: room.config.difficulty });
+  }
+  return [...humans, ...bots].sort((a, b) => a.slot - b.slot);
+}
 
 export function newStats(): PlayerStats {
   return { dealt: 0, lost: 0, kills: 0, bestShot: 0, whiffs: 0, selfHits: 0, shots: 0 };

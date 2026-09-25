@@ -1,0 +1,206 @@
+import { expect, test, type Browser, type Page } from '@playwright/test';
+import { canvasNotBlack, watchErrors } from './helpers';
+
+// Secciones 5.2-5.6: partida completa con 4 clientes, consistencia entre clientes,
+// espectador, reconexión y anfitrión caído.
+
+type Summary = {
+  role: string;
+  you: number | null;
+  spectator: boolean;
+  round: number;
+  phase: string;
+  winner: number | null;
+  blocks: number;
+  perSlot: Record<string, number>;
+  kings: Record<string, [number, number, number]>;
+  alive: number[];
+  migrations: number;
+  fulls: number;
+};
+
+const VIEW = { width: 420, height: 270 };
+
+async function newPlayer(browser: Browser, errors: string[], tag: string) {
+  const ctx = await browser.newContext({ viewport: VIEW });
+  const page = await ctx.newPage();
+  const errs = watchErrors(page);
+  page.on('close', () => errors.push(...errs.map((e) => `[${tag}] ${e}`)));
+  (page as Page & { errs?: string[] }).errs = errs;
+  return page;
+}
+
+const summary = (p: Page) => p.evaluate(() => (window as any).__asedio?.mode?.summary?.() ?? null) as Promise<Summary | null>;
+
+async function createRoom(host: Page, extra = '') {
+  await host.goto(`/?fast=1&autoplay=1${extra}`);
+  await host.fill('#name', 'Anfitrión');
+  await host.click('#create');
+  await expect(host.locator('#room-link')).toBeVisible();
+  return new URL(await host.inputValue('#room-link')).hash;
+}
+
+async function join(p: Page, hash: string, name: string) {
+  await p.goto(`/?autoplay=1${hash}`);
+  await p.fill('#name', name);
+  await p.click('#join');
+}
+
+async function waitAll(pages: Page[], pred: (s: Summary) => boolean, timeout = 120_000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeout) {
+    const all = await Promise.all(pages.map(summary));
+    if (all.every((s) => s && pred(s))) return all as Summary[];
+    await pages[0].waitForTimeout(400);
+  }
+  throw new Error('tiempo agotado esperando a los clientes');
+}
+
+// Compara la vista de cada cliente con la del anfitrión en la fase de resultados.
+function compare(host: Summary, other: Summary, label: string) {
+  expect(other.round, `${label}: ronda`).toBe(host.round);
+  expect(Math.abs(other.blocks - host.blocks), `${label}: bloques en pie (${other.blocks} vs ${host.blocks})`).toBeLessThanOrEqual(2);
+  for (const [slot, k] of Object.entries(host.kings)) {
+    const o = other.kings[slot];
+    expect(o, `${label}: rey ${slot} vivo en ambos`).toBeTruthy();
+    const d = Math.hypot(o[0] - k[0], o[1] - k[1], o[2] - k[2]);
+    expect(d, `${label}: posición del rey ${slot}`).toBeLessThan(0.3);
+  }
+}
+
+test('4 jugadores hasta el final: consistencia, espectador y reconexión', async ({ browser }, info) => {
+  test.setTimeout(600_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const guests = [await newPlayer(browser, errors, 'j2'), await newPlayer(browser, errors, 'j3'), await newPlayer(browser, errors, 'j4')];
+  const hash = await createRoom(host);
+  for (const [i, g] of guests.entries()) await join(g, hash, `Jugador${i + 2}`);
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(4);
+  await host.click('#start');
+  const players = [host, ...guests];
+  let all = await waitAll(players, (s) => s.phase === 'aim' && s.round === 1);
+  expect(all[0].role).toBe('host');
+  expect(all.slice(1).every((s) => s.role === 'client')).toBe(true);
+  expect(new Set(all.map((s) => s.you)).size).toBe(4);
+  await canvasNotBlack(guests[0]);
+  await guests[0].screenshot({ path: info.outputPath('cliente-apuntando.png') });
+
+  // Consistencia al final de cada ronda.
+  const checked = new Set<number>();
+  let spectator: Page | null = null;
+  let reconnected = false;
+  const t0 = Date.now();
+  while (Date.now() - t0 < 480_000) {
+    all = (await Promise.all(players.map(summary))) as Summary[];
+    const h = all[0];
+    if (h.phase === 'over') break;
+    if (h.phase === 'results' && !checked.has(h.round)) {
+      await host.waitForTimeout(250);
+      const again = (await Promise.all(players.map(summary))) as Summary[];
+      if (again.every((s) => s.phase === 'results' && s.round === again[0].round)) {
+        for (let i = 1; i < again.length; i++) compare(again[0], again[i], `ronda ${again[0].round}, jugador ${i + 1}`);
+        checked.add(again[0].round);
+        console.log(`ronda ${again[0].round}: consistente (${again[0].blocks} bloques, reyes ${again[0].alive.join(',')})`);
+      }
+    }
+    // Espectador a mitad de partida (ronda 2).
+    if (!spectator && h.round >= 2 && h.phase === 'aim') {
+      spectator = await newPlayer(browser, errors, 'espectador');
+      await spectator.goto(`/${hash}`);
+      await spectator.fill('#name', 'Mirón');
+      await spectator.click('#join');
+      const [sv] = await waitAll([spectator], (s) => s.fulls > 0);
+      expect(sv.spectator).toBe(true);
+      expect(sv.you).toBeNull();
+      const hv = (await summary(host))!;
+      expect(Math.abs(sv.round - hv.round)).toBeLessThanOrEqual(1);
+      expect(Math.abs(sv.blocks - hv.blocks)).toBeLessThanOrEqual(10);
+      await expect(spectator.locator('#confirm')).toBeHidden();
+      // Si intenta disparar, el servidor lo rechaza.
+      await spectator.evaluate(() => (window as any).__asedio.conn.relay('host', { k: 'in', lk: true }));
+      await expect.poll(() => spectator!.evaluate(() => (window as any).__asedio.conn.lastError)).toContain('espectadores');
+      await spectator.screenshot({ path: info.outputPath('espectador.png') });
+      console.log('espectador: ve la ronda', sv.round, 'y no puede disparar');
+    }
+    // Reconexión: un jugador recarga la página y recupera su castillo.
+    if (spectator && !reconnected && h.round >= 2 && h.phase === 'aim') {
+      const g = guests[1];
+      const before = (await summary(g))!;
+      await g.reload();
+      const [after] = await waitAll([g], (s) => s.fulls > 0);
+      expect(after.you).toBe(before.you);
+      expect(after.spectator).toBe(false);
+      const hv = (await summary(host))!;
+      expect(Math.abs(after.perSlot[String(after.you)] - hv.perSlot[String(after.you)])).toBeLessThanOrEqual(3);
+      reconnected = true;
+      console.log('reconexión: recupera el hueco', after.you);
+    }
+    await host.waitForTimeout(300);
+  }
+  const finals = await waitAll([...players, ...(spectator ? [spectator] : [])], (s) => s.phase === 'over', 120_000);
+  const w = finals[0].winner;
+  expect(w).not.toBeNull();
+  for (const f of finals) {
+    expect(f.winner, 'mismo ganador en todos').toBe(w);
+    expect(f.round, 'mismo número de rondas en todos').toBe(finals[0].round);
+  }
+  expect(checked.size).toBeGreaterThanOrEqual(1);
+  expect(spectator, 'hubo espectador').not.toBeNull();
+  expect(reconnected, 'hubo reconexión').toBe(true);
+  await expect(guests[2].locator('#game-over')).toBeVisible();
+  await guests[2].screenshot({ path: info.outputPath('final.png') });
+  console.log(`fin: gana ${w} en ${finals[0].round} rondas; rondas comprobadas ${[...checked].join(',')}`);
+  for (const p of [...players, ...(spectator ? [spectator] : [])]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
+test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({ browser }) => {
+  test.setTimeout(400_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const g1 = await newPlayer(browser, errors, 'j2');
+  const g2 = await newPlayer(browser, errors, 'j3');
+  const hash = await createRoom(host, '&bots=1');
+  await join(g1, hash, 'Jugador2');
+  await join(g2, hash, 'Jugador3');
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
+  await host.click('#start');
+  await waitAll([host, g1, g2], (s) => s.round >= 2 && s.phase === 'aim');
+  const before = (await summary(g1))!;
+  await host.context().close();
+  const [a, b] = await waitAll([g1, g2], (s) => s.role === 'host' || s.fulls > before.fulls, 30_000);
+  const newHost = a.role === 'host' ? a : b;
+  expect(newHost.role, 'alguien toma el relevo').toBe('host');
+  expect(newHost.migrations).toBe(1);
+  console.log('migración: nuevo anfitrión en la ronda', newHost.round);
+  const finals = await waitAll([g1, g2], (s) => s.phase === 'over', 300_000);
+  expect(finals[0].winner).not.toBeNull();
+  expect(finals[1].winner).toBe(finals[0].winner);
+  expect(finals[1].round).toBe(finals[0].round);
+  for (const p of [g1, g2]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
+test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async ({ browser }) => {
+  test.setTimeout(400_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const g1 = await newPlayer(browser, errors, 'j2');
+  const hash = await createRoom(host, '&bots=2');
+  await join(g1, hash, 'Jugador2');
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
+  await host.click('#start');
+  await waitAll([host, g1], (s) => s.phase === 'over', 300_000);
+  await expect(g1.locator('#rematch')).toHaveCount(0);
+  await host.click('#rematch');
+  for (const p of [host, g1]) {
+    await expect(p.locator('#lobby')).toBeVisible();
+    await expect(p.locator('#player-list li[data-player]')).toHaveCount(2);
+    await expect(p.locator('#lobby h2')).toHaveText(`Sala ${hash.slice(1)}`);
+  }
+  await host.click('#start');
+  const again = await waitAll([host, g1], (s) => s.round === 1 && s.phase === 'aim');
+  expect(again[0].role).toBe('host');
+  for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});

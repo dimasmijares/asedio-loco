@@ -136,6 +136,21 @@ export class MatchHost {
     }
   }
 
+  // Tras heredar la partida de otro anfitrión (migración): si se estaba resolviendo un
+  // impacto se da por terminado; si se apuntaba, los bots vuelven a decidir.
+  resume() {
+    const s = this.state;
+    this.sim.wind = s.wind;
+    if (s.phase === 'impact') {
+      this.shots = [];
+      this.endImpact();
+    } else if (s.phase === 'aim') {
+      this.lockGrace = -1;
+      this.planBots();
+    }
+    this.emit();
+  }
+
   private beginRound() {
     const s = this.state;
     const prevLevel = s.lavaLevel;
@@ -145,7 +160,13 @@ export class MatchHost {
     this.game.setLavaVisual(s.lavaY);
     this.sim.wind = s.wind;
     if (s.lavaLevel !== prevLevel) this.sim.events.push({ e: 'fx', kind: 'lavaRise', p: [0, s.lavaY, 0] });
-    // Los bots deciden al empezar y "apuntan" poco a poco.
+    this.planBots();
+    this.emit();
+  }
+
+  // Los bots deciden al empezar la ronda y "apuntan" poco a poco.
+  private planBots() {
+    const s = this.state;
     this.bots.clear();
     const kingPos: Record<number, Vec3> = {};
     for (const p of s.players) {
@@ -160,7 +181,6 @@ export class MatchHost {
       const r = rng((s.seed ^ hashString(`bot:${s.round}:${p.slot}`)) >>> 0);
       this.bots.set(p.slot, { d: botDecide(s, p, kingPos, r), from: { ...p.aim }, t: 0 });
     }
-    this.emit();
   }
 
   private updateBots(dt: number) {

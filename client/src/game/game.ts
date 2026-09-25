@@ -82,6 +82,14 @@ export class Game {
   }
 
   // Crea una simulación nueva (el anfitrión o el modo solitario).
+  // Adopta una simulación ya construida (migración de anfitrión).
+  adoptSim(sim: Sim) {
+    this.sim?.free();
+    this.sim = sim;
+    this.awake.clear();
+    this.acc = 0;
+  }
+
   setLavaVisual(y: number) {
     this.stage.lavaTarget = y;
     this.view.lavaY = y;
@@ -173,7 +181,13 @@ export class Game {
     this.stopped = true;
     cancelAnimationFrame(this.raf);
     this.mode?.dispose?.();
+    this.mode = null;
+    // Los escuchadores de teclado y ratón siguen vivos: se desactivan para que no actúen.
+    this.input.enabled = false;
+    this.input.onChange = this.input.onRelease = () => {};
+    this.input.onConfirm = () => {};
     this.sim?.free();
+    this.sim = null;
     this.stage.renderer.dispose();
   }
 }
