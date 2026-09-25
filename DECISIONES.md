@@ -68,3 +68,10 @@ Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de 
 - **D-044 · Tutorial de 3 pasos que avanza haciendo.** Tensar y soltar, afinar (rueda, Q/E, 1/2; avanza solo a los 7 s) y confirmar. Aparece en la primera partida (se guarda en `localStorage`), se puede saltar y en solitario da 10 s más de apuntado en la ronda 1. Para las pruebas se fuerza con `?tutorial=1`.
 - **D-045 · Accesibilidad.** Colores Okabe-Ito más un emblema distinto por jugador (☀ ☾ ★ ϟ) en estandartes, HUD y lobby, con tinta oscura sobre los colores claros. Opción de texto grande, silencio (M o botón) y sensibilidad del tirachinas ajustable.
 - **D-046 · Ajustes de calidad al momento.** Baja, media y alta cambian la resolución interna y las sombras en el acto. Los topes de partículas y fragmentos se aplican a partir de la siguiente partida.
+
+## Después de la entrega: pruebas más rápidas
+
+- **D-047 · La CCD no es lo que para al pedrusco.** Con Rapier 0.20, un cuerpo sin CCD tampoco atraviesa un muro de 8 cm, ni a 1000 m/s ni con radio 10 cm (probado en un mundo de Rapier sin nada más). Se deja la CCD activada en los proyectiles y la escena sigue comprobando que el muro aguanta, que es lo que pide la sección 5.7.
+- **D-048 · Escenas de física también en Node.** Las 4 escenas se definen una vez (`sim/scenes.ts`) y se ejecutan en el navegador (Playwright, con capturas) y en Vitest (0,7 s en total). Los fragmentos usan el mismo `Debris` con un material plano en lugar de las texturas de canvas.
+- **D-049 · Dibujo limitado en las pruebas de red.** Con 4 o 5 navegadores dibujando por software en el mismo runner, cada fotograma costaba tanto que la física del anfitrión iba más lenta que el reloj (como mucho 4 pasos por fotograma). `?render=N` limita el dibujo a N fotogramas por segundo. En las pruebas, solo el cliente que se captura dibuja a ritmo normal.
+- **D-050 · E2E en paralelo.** CI reparte la batería en 7 trabajos (básicas, física, solitario y las 4 de red), cada uno en su propio runner. El tiempo total pasa a ser el de la prueba más lenta más la instalación, en lugar de la suma (unos 30 minutos).

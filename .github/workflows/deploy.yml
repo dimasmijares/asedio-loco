@@ -32,10 +32,31 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
+  # Las pruebas E2E van repartidas en trabajos paralelos (cada uno en su propio runner),
+  # así la batería tarda lo que la prueba más lenta y no la suma de todas.
   e2e-prod:
     needs: deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - grupo: basicas
+            args: lobby smoke perf
+          - grupo: fisica
+            args: physics
+          - grupo: solitario
+            args: solo
+          - grupo: cuatro-jugadores
+            args: multiplayer -g "4 jugadores"
+          - grupo: migracion
+            args: multiplayer -g "anfitrión se va"
+          - grupo: revancha
+            args: multiplayer -g "revancha"
+          - grupo: red-mala
+            args: multiplayer -g "red mala"
+    name: e2e (${{ matrix.grupo }})
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -45,10 +66,10 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Pruebas E2E contra producción
-        run: npm run e2e:prod
+        run: npm run e2e:prod -- ${{ matrix.args }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: capturas-e2e
+          name: capturas-e2e-${{ matrix.grupo }}
           path: test-results/
           retention-days: 7

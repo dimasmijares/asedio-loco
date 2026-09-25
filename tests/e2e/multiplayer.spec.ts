@@ -20,6 +20,9 @@ type Summary = {
 };
 
 const VIEW = { width: 420, height: 270 };
+// Los clientes que no hace falta ver dibujan 1 fotograma por segundo: con 4 navegadores
+// renderizando por software en el runner de CI, el dibujo dejaba sin CPU a la física.
+const SLOW = '&render=1';
 
 async function newPlayer(browser: Browser, errors: string[], tag: string) {
   const ctx = await browser.newContext({ viewport: VIEW });
@@ -33,7 +36,7 @@ async function newPlayer(browser: Browser, errors: string[], tag: string) {
 const summary = (p: Page) => p.evaluate(() => (window as any).__asedio?.mode?.summary?.() ?? null) as Promise<Summary | null>;
 
 async function createRoom(host: Page, extra = '') {
-  await host.goto(`/?fast=1&autoplay=1${extra}`);
+  await host.goto(`/?fast=1&autoplay=1${SLOW}${extra}`);
   await host.fill('#name', 'Anfitrión');
   await host.click('#create');
   await expect(host.locator('#room-link')).toBeVisible();
@@ -81,7 +84,8 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
   const host = await newPlayer(browser, errors, 'anfitrión');
   const guests = [await newPlayer(browser, errors, 'j2'), await newPlayer(browser, errors, 'j3'), await newPlayer(browser, errors, 'j4')];
   const hash = await createRoom(host);
-  for (const [i, g] of guests.entries()) await join(g, hash, `Jugador${i + 2}`);
+  // Solo el primer invitado dibuja a ritmo normal: es el que se captura y se revisa.
+  for (const [i, g] of guests.entries()) await join(g, hash, `Jugador${i + 2}`, i === 0 ? '' : SLOW);
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(4);
   await host.click('#start');
   const players = [host, ...guests];
@@ -113,7 +117,7 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     // Espectador a mitad de partida (ronda 2).
     if (!spectator && h.round >= 2 && h.phase === 'aim') {
       spectator = await newPlayer(browser, errors, 'espectador');
-      await spectator.goto(`/${hash}`);
+      await spectator.goto(`/?render=1${hash}`);
       await spectator.fill('#name', 'Mirón');
       await spectator.click('#join');
       const [sv] = await waitAll([spectator], (s) => s.fulls > 0);
@@ -154,8 +158,8 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
   expect(checked.size).toBeGreaterThanOrEqual(1);
   expect(spectator, 'hubo espectador').not.toBeNull();
   expect(reconnected, 'hubo reconexión').toBe(true);
-  await expect(guests[2].locator('#game-over')).toBeVisible();
-  await guests[2].screenshot({ path: info.outputPath('final.png') });
+  await expect(guests[0].locator('#game-over')).toBeVisible();
+  await guests[0].screenshot({ path: info.outputPath('final.png') });
   console.log(`fin: gana ${w} en ${finals[0].round} rondas; rondas comprobadas ${[...checked].join(',')}`);
   for (const p of [...players, ...(spectator ? [spectator] : [])]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
   expect(errors).toEqual([]);
@@ -168,8 +172,8 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   const g1 = await newPlayer(browser, errors, 'j2');
   const g2 = await newPlayer(browser, errors, 'j3');
   const hash = await createRoom(host, '&bots=1');
-  await join(g1, hash, 'Jugador2');
-  await join(g2, hash, 'Jugador3');
+  await join(g1, hash, 'Jugador2', SLOW);
+  await join(g2, hash, 'Jugador3', SLOW);
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
   await host.click('#start');
   await waitAll([host, g1, g2], (s) => s.round >= 2 && s.phase !== 'over', 240_000);
@@ -194,7 +198,7 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   const host = await newPlayer(browser, errors, 'anfitrión');
   const g1 = await newPlayer(browser, errors, 'j2');
   const hash = await createRoom(host, '&bots=2');
-  await join(g1, hash, 'Jugador2');
+  await join(g1, hash, 'Jugador2', SLOW);
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
   await host.click('#start');
   await waitAll([host, g1], (s) => s.phase === 'over', 720_000);
@@ -220,8 +224,8 @@ test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }
   const g2 = await newPlayer(browser, errors, 'j3');
   const hash = await createRoom(host, '&bots=1');
   // 150 ms de retraso en cada sentido, ±80 ms de variación y 20 % de instantáneas perdidas.
-  await join(g1, hash, 'Lento', '&lag=150&jitter=80&loss=0.2');
-  await join(g2, hash, 'Lentísimo', '&lag=250&jitter=120&loss=0.3');
+  await join(g1, hash, 'Lento', `${SLOW}&lag=150&jitter=80&loss=0.2`);
+  await join(g2, hash, 'Lentísimo', `${SLOW}&lag=250&jitter=120&loss=0.3`);
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
   await host.click('#start');
   const players = [host, g1, g2];

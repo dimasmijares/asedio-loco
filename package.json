@@ -10,7 +10,8 @@
     "deploy": "npm run build && wrangler deploy",
     "test": "vitest run",
     "e2e": "playwright test",
-    "e2e:prod": "cross-env BASE_URL=https://asedio-loco.dimasmijares.workers.dev playwright test"
+    "e2e:prod": "cross-env BASE_URL=https://asedio-loco.dimasmijares.workers.dev playwright test",
+    "ci:estado": "node tests/tools/ci-status.mjs"
   },
   "license": "ISC",
   "devDependencies": {

@@ -40,6 +40,7 @@ client/src/
     game.ts      Bucle: física a paso fijo de 60 Hz (máx. 4 pasos/fotograma), vista, cámara
     sim/         Solo en el anfitrión: sim.ts (Rapier), projectiles.ts (municiones),
                  island.ts (suelo), debris.ts (fragmentos locales, en todos los clientes)
+                 scenes.ts (escenas de prueba de física, para el navegador y Vitest)
     view.ts      Todo lo visible; se alimenta de eventos SimEvent y poses de cuerpos
     render/      Three.js: stage (cielo, isla, lava), blocks (instancing), models, fx, toon
     camera.ts, director.ts, aim.ts   Cámara, dirección de cámara en impactos, tirachinas
@@ -86,12 +87,13 @@ Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1
 
 ## Pruebas
 
-- `npm test`: tests unitarios (Vitest) de `tests/unit`.
+- `npm test`: tests unitarios (Vitest) de `tests/unit`, en menos de un segundo. Incluye las 4 escenas de física en Node (`physics.test.ts`), con la misma definición que `/#physics=` (`client/src/game/sim/scenes.ts`): para cambios de física, esto es lo primero que hay que pasar.
 - Equilibrio: `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts` simula partidas de 4 bots en Node y deja el resumen en `tests/balance/ultimo-<dif>.txt`.
-- Parámetros de URL para pruebas: `?fast=1` (fases cortas), `?autoplay=1` (el humano juega solo), `?bots=N`, `?seed=N`, `?lag=ms&jitter=ms&loss=0..1` (red simulada).
+- Parámetros de URL para pruebas: `?fast=1` (fases cortas), `?autoplay=1` (el humano juega solo), `?bots=N`, `?seed=N`, `?lag=ms&jitter=ms&loss=0..1` (red simulada), `?render=N` (dibuja como mucho N fotogramas por segundo; las pruebas de red lo usan en los clientes que no se capturan).
 - `node tests/tools/net-watch.mjs <base> <humanos> <bots>` sigue en consola una partida en red de prueba.
 - `npm run e2e`: Playwright en local (compila y levanta `wrangler dev` en el 8787).
-- `npm run e2e:prod`: Playwright contra producción. CI lo ejecuta tras cada despliegue y guarda las capturas como artefacto.
+- `npm run e2e:prod`: Playwright contra producción. CI lo ejecuta tras cada despliegue, repartido en 7 trabajos paralelos (uno por prueba larga), y guarda las capturas como artefactos `capturas-e2e-<grupo>`. Para lanzar solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
+- `npm run ci:estado` resume la última ejecución de CI (trabajos, ✓/✘ y errores); `-- <id>` para otra y `-- --wait` para esperar a que termine.
 - Las escenas de física se abren a mano con `/#physics=ccd|tower|glass|fragments`.
 - Herramientas de captura: `node tests/tools/shot.mjs <url> <png>` y `node tests/tools/sandbox-shot.mjs <url> <prefijo> <municion> king|wall|tower <elevación>`.
 - Depuración de física en Node: los archivos `tests/unit/_*.test.ts` están en `.gitignore` y sirven para experimentar con `Sim` sin navegador.
@@ -107,7 +109,8 @@ Medido el 25-09-2026 en Chromium sin interfaz con GPU (NVIDIA RTX 3080, D3D11, 1
 - Las partidas varían bastante de duración: con bots difíciles o buena puntería un rey puede caer en la ronda 1; con bots fáciles se llega a la inundación (ronda 10) y más allá.
 - Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - La portada carga Rapier (1,1 MB comprimido) para el fondo animado.
-- La batería E2E contra producción tarda unos 30 minutos en el runner de CI (unas 4 veces más lento que un PC de sobremesa).
+- El runner de CI es unas 4 veces más lento que un PC de sobremesa y dibuja por software. Por eso las pruebas de red limitan el dibujo (`?render=1`) y la batería va en paralelo.
+- La escena de CCD pasa también con la CCD desactivada: Rapier 0.20 no deja atravesar el muro ni a 1000 m/s (D-047). La prueba confirma que no se atraviesa, no que sea gracias a la CCD.
 
 ## Notas del entorno
 

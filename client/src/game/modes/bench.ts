@@ -11,6 +11,7 @@ export class BenchMode implements Mode {
   phase: 'warmup' | 'running' | 'done' = 'warmup';
   result: Record<string, number | string> | null = null;
   private t = 0;
+  private last = performance.now();
   private frames: number[] = [];
   private simMs: number[] = [];
   private maxBodies = 0;
@@ -43,7 +44,12 @@ export class BenchMode implements Mode {
     }
   }
 
-  update(dt: number) {
+  update() {
+    // Tiempo real, sin el tope de 0,1 s por fotograma del bucle: en un equipo sin GPU cada
+    // fotograma puede tardar casi un segundo y la medida no debe alargarse por eso.
+    const now = performance.now();
+    const dt = (now - this.last) / 1000;
+    this.last = now;
     this.t += dt;
     const g = this.game;
     if (this.phase === 'warmup' && this.t > 1.5) {

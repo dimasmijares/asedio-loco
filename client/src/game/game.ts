@@ -61,6 +61,10 @@ export class Game {
   private raf = 0;
   private awake = new Set<number>();
   private stopped = false;
+  // ?render=N: dibuja como mucho N fotogramas por segundo. Sirve para las pruebas con varios
+  // clientes en un mismo equipo sin GPU, para que el dibujo no le robe CPU a la física.
+  private renderEvery = 1 / Math.max(0.1, Number(new URLSearchParams(location.search).get('render')) || Infinity);
+  private renderT = Infinity;
 
   static async create(canvas: HTMLCanvasElement, slots: number[], quality = savedQuality()) {
     await loadRapier();
@@ -226,7 +230,11 @@ export class Game {
     this.view.shake = 0;
     this.rig.update(rawDt);
     this.stage.update(rawDt);
-    this.stage.render();
+    this.renderT += rawDt;
+    if (this.renderT >= this.renderEvery) {
+      this.renderT = 0;
+      this.stage.render();
+    }
     this.frameMs = performance.now() - t0;
   }
 

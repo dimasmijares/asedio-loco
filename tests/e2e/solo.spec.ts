@@ -5,7 +5,7 @@ import { canvasNotBlack, watchErrors } from './helpers';
 test('partida local contra bots hasta que hay ganador', async ({ page }, info) => {
   test.setTimeout(900_000);
   const errors = watchErrors(page);
-  await page.goto('/?bots=3&fast=1&autoplay=1&seed=11#solo');
+  await page.goto('/?bots=3&fast=1&autoplay=1&seed=11&render=4#solo');
   await page.waitForFunction(() => (window as any).__asedio?.mode?.host, null, { timeout: 30_000 });
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'aim', null, { timeout: 30_000 });
   await canvasNotBlack(page);

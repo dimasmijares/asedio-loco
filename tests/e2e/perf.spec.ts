@@ -6,9 +6,9 @@ import { writeFileSync } from 'node:fs';
 // representativos; lo que se exige aquí es que la física quepa en el presupuesto.
 // Las cifras con GPU real están en CLAUDE.md (node tests/tools/bench.mjs).
 test('rendimiento: escena más cargada', async ({ page }, info) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   await page.goto('/?quality=medium#bench');
-  await page.waitForFunction(() => (window as any).__asedio?.bench?.phase === 'done', null, { timeout: 150_000 });
+  await page.waitForFunction(() => (window as any).__asedio?.bench?.phase === 'done', null, { timeout: 270_000 });
   const r = await page.evaluate(() => (window as any).__asedio.bench.result);
   console.log('rendimiento', JSON.stringify(r));
   writeFileSync(info.outputPath('rendimiento.json'), JSON.stringify(r, null, 2));
