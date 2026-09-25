@@ -6,7 +6,8 @@ import { canvasNotBlack, watchErrors } from './helpers';
 test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, info) => {
   test.setTimeout(120_000);
   const errors = watchErrors(page);
-  await page.goto('/?bots=1&seed=5#solo');
+  // Sin bloqueo de puntero: en Chromium sin interfaz los movimientos sintéticos bloqueados no son fiables.
+  await page.goto('/?bots=1&seed=5&nolock=1#solo');
   await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
   const me = () =>
     page.evaluate(() => {
@@ -20,18 +21,11 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   await canvasNotBlack(page);
 
   // Clic derecho mantenido: el ratón a la derecha gira, hacia arriba sube la elevación.
-  // Se registran los movimientos para diagnosticar el bloqueo del puntero en CI.
-  await page.evaluate(() => {
-    const w = window as any;
-    w.__moves = [];
-    window.addEventListener('pointermove', (e) => w.__moves.push([e.clientX, e.movementX, !!document.pointerLockElement]), true);
-  });
   await page.mouse.move(480, 300);
   await page.mouse.down({ button: 'right' });
   await page.mouse.move(600, 240, { steps: 12 });
   await page.mouse.up({ button: 'right' });
   const aimed = await me();
-  console.log('movimientos', JSON.stringify(await page.evaluate(() => (window as any).__moves)));
   expect(aimed.yaw, 'gira hacia la derecha').toBeLessThan(start.yaw - 0.2);
   expect(aimed.pitch, 'sube la elevación').toBeGreaterThan(start.pitch + 0.1);
 

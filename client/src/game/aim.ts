@@ -7,6 +7,9 @@ import { toon } from './render/materials';
 
 // Segundos que tarda la fuerza en llenarse del todo manteniendo Espacio.
 export const CHARGE_TIME = 1.5;
+// ?nolock=1 desactiva el bloqueo del puntero. Las pruebas lo necesitan: en Chromium sin
+// interfaz, con el puntero bloqueado, los movimientos sintéticos llegan como +x, −x y 0.
+const NO_LOCK = new URLSearchParams(location.search).has('nolock');
 // Una pulsación más corta que esto no dispara (evita un tiro al 5 % por un toque sin querer).
 const MIN_CHARGE = 0.12;
 
@@ -38,11 +41,13 @@ export class AimInput {
       this.ly = e.clientY;
       dom.setPointerCapture?.(e.pointerId);
       // Con el puntero bloqueado el ratón no choca con los bordes de la pantalla.
-      try {
-        const r = dom.requestPointerLock?.() as unknown;
-        if (r instanceof Promise) r.catch(() => {});
-      } catch {
-        /* sin bloqueo de puntero: se usan las coordenadas del ratón */
+      if (!NO_LOCK) {
+        try {
+          const r = dom.requestPointerLock?.() as unknown;
+          if (r instanceof Promise) r.catch(() => {});
+        } catch {
+          /* sin bloqueo de puntero: se usan las coordenadas del ratón */
+        }
       }
     });
     window.addEventListener('pointermove', (e) => {
