@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Quat, Vec3 } from '../../../shared/math';
 import { TrajectoryPreview, AimInput } from './aim';
+import { sfx } from './audio';
 import { CameraRig } from './camera';
 import { Stage, type Quality } from './render/stage';
 import { loadRapier } from './sim/rapier';
@@ -67,6 +68,8 @@ export class Game {
     this.input = new AimInput(canvas);
     this.preview = new TrajectoryPreview(this.stage.scene);
     this.preview.hide();
+    sfx.camera = this.stage.camera;
+    this.view.onEvent((e) => sfx.onSimEvent(e));
     canvas.addEventListener(
       'wheel',
       (e) => {

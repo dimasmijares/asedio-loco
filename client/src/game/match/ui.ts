@@ -7,6 +7,7 @@ import type { MatchState, PlayerState } from '../../../../shared/match';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud } from '../../ui/hud';
+import { sfx } from '../audio';
 import { Director } from '../director';
 import type { Game } from '../game';
 import { causeText } from '../modes/sandbox';
@@ -36,6 +37,7 @@ export class MatchUI {
   private overPanel: HTMLElement | null = null;
   private resultsBox: HTMLElement;
   private aimSent = 0;
+  private lastTick = -1;
   private pendingAim: Aim | null = null;
 
   constructor(readonly game: Game, readonly src: MatchSource, readonly parent: HTMLElement, readonly opts: MatchUIOptions = {}) {
@@ -157,6 +159,10 @@ export class MatchUI {
 
     // HUD.
     const rem = this.src.remaining();
+    // Cuenta atrás sonora en los últimos segundos del apuntado.
+    const sec = Math.ceil(rem);
+    if (s.phase === 'aim' && sec <= 3 && sec >= 1 && sec !== this.lastTick) sfx.tick(sec === 1);
+    this.lastTick = s.phase === 'aim' ? sec : -1;
     this.hud.setTimer(s.phase === 'aim' ? rem : null, s.phase === 'aim' && rem < 4);
     this.hud.setWind(s.wind, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
     this.hud.setPlayers(
@@ -177,6 +183,7 @@ export class MatchUI {
       const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Apunta y pulsa ¡Listo!' : 'Eres espectador';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
+      sfx.fanfare();
       this.director.reset();
       this.resultsBox.replaceChildren();
       const me = this.me();
@@ -221,8 +228,9 @@ export class MatchUI {
     const best = (f: (p: PlayerState) => number) => [...s.players].sort((a, b) => f(b) - f(a))[0];
     const destroyer = best((p) => p.stats.dealt);
     const sniper = best((p) => p.stats.bestShot);
-    const clown = best((p) => p.stats.whiffs);
+    const clown = best((p) => p.stats.worstMiss * 10 + p.stats.whiffs);
     const tank = best((p) => p.blocks);
+    const selfie = best((p) => p.stats.selfHits);
     const stat = (icon: string, label: string, p: PlayerState | undefined, value: string) =>
       p ? h('div', { class: 'stat' }, h('span', { class: 'stat-icon' }, icon), h('div', null, h('div', { class: 'muted' }, label), h('b', null, p.name), ` · ${value}`)) : '';
     const buttons: Node[] = [];
@@ -249,13 +257,17 @@ export class MatchUI {
           { class: 'stats' },
           stat('💥', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
           stat('🎯', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques de golpe`),
-          clown && clown.stats.whiffs > 0 ? stat('🤡', 'Disparos más ridículos', clown, `${clown.stats.whiffs} al aire`) : '',
+          clown && clown.stats.whiffs > 0
+            ? stat('🤡', 'Disparo más ridículo', clown, clown.stats.worstMiss > 0 ? `falló por ${clown.stats.worstMiss} m (${clown.stats.whiffs} al aire)` : `${clown.stats.whiffs} disparos al aire`)
+            : '',
+          selfie && selfie.stats.selfHits > 0 ? stat('🙈', 'Autogol', selfie, `se cargó ${selfie.stats.selfHits} bloques propios`) : '',
           stat('🏰', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
         ),
         ...buttons,
       ),
     );
     this.parent.append(this.overPanel);
+    sfx.fanfare(true);
     if (winner) this.game.view.fx.confetti([...castleOrigin(winner.slot).slice(0, 1), 8, castleOrigin(winner.slot)[2]] as [number, number, number], ['#ffd23f', PLAYER_STYLES[winner.slot].color, '#ffffff']);
   }
 

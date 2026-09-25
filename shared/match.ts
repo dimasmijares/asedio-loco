@@ -17,6 +17,7 @@ export interface PlayerStats {
   whiffs: number; // disparos que no rompieron nada
   selfHits: number; // bloques propios rotos por su culpa
   shots: number;
+  worstMiss: number; // metros por los que falló su peor disparo (sin romper nada)
 }
 
 export interface PlayerState {
@@ -79,7 +80,7 @@ export function matchPlayersFromRoom(room: RoomState) {
 }
 
 export function newStats(): PlayerStats {
-  return { dealt: 0, lost: 0, kills: 0, bestShot: 0, whiffs: 0, selfHits: 0, shots: 0 };
+  return { dealt: 0, lost: 0, kills: 0, bestShot: 0, whiffs: 0, selfHits: 0, shots: 0, worstMiss: 0 };
 }
 
 export function defaultAim(slot: number, target: number): Aim {

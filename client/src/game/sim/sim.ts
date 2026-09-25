@@ -28,7 +28,7 @@ export type SimEvent =
   | { e: 'hit'; p: Vec3; f: number; mat: MaterialId | 'king' | 'ground' }
   | { e: 'boom'; p: Vec3; r: number; kind: string }
   | { e: 'proj'; id: number; ammo: AmmoId; owner: number; p: Vec3; scale?: number }
-  | { e: 'projEnd'; id: number }
+  | { e: 'projEnd'; id: number; p?: Vec3 }
   | { e: 'king'; slot: number; cause: KingCause; by: number }
   | { e: 'joint'; p: Vec3 }
   | { e: 'fx'; kind: string; p: Vec3; id?: number; slot?: number }
@@ -85,6 +85,7 @@ export interface KingInfo {
 export interface Stats {
   destroyed: number[]; // bloques destruidos por cada jugador
   lost: number[]; // bloques perdidos por cada castillo
+  self: number[]; // bloques propios rotos por el propio jugador (autogoles)
 }
 
 const rotYExtent = (q: Quat, h: Vec3) => {
@@ -125,7 +126,7 @@ export class Sim {
   lavaY = -3.6;
   wind: Vec3 = [0, 0, 0];
   breaking = true;
-  stats: Stats = { destroyed: [0, 0, 0, 0], lost: [0, 0, 0, 0] };
+  stats: Stats = { destroyed: [0, 0, 0, 0], lost: [0, 0, 0, 0], self: [0, 0, 0, 0] };
   private nextProj = 2000;
   private fracSeed = 1;
   private pendingFrac = new Map<Rec, Vec3 | null>();
@@ -387,10 +388,11 @@ export class Sim {
     this.byHandle.delete(r.col.handle);
     this.world.removeRigidBody(r.body);
     if (r.kind === 'proj') {
-      this.events.push({ e: 'projEnd', id: r.id });
+      this.events.push({ e: 'projEnd', id: r.id, p });
     } else if (r.kind === 'block' && why !== 'proj') {
       this.events.push({ e: 'rm', id: r.id, why, p, q, v, mat: r.mat!.id, size: r.size, seed: r.id * 7919 + this.fracSeed++ });
       this.stats.lost[r.slot]++;
+      if (r.lastHitBy === r.slot) this.stats.self[r.slot]++;
       if (r.lastHitBy >= 0 && r.lastHitBy !== r.slot) this.stats.destroyed[r.lastHitBy]++;
     }
     this.wakeAround(p, Math.max(r.size[0], r.size[1], r.size[2]) * 0.75 + 0.4);

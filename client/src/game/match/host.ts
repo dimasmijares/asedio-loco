@@ -2,6 +2,7 @@ import { AMMO, type AmmoId } from '../../../../shared/ammo';
 import { clampAim, type Aim } from '../../../../shared/ballistics';
 import { botDecide, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
+import { castleOrigin } from '../../../../shared/map';
 import { hashString, lerp, rng, type Vec3 } from '../../../../shared/math';
 import { alivePlayers, buildResults, checkWinner, consumeAmmo, eliminate, impactMaxDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
@@ -46,7 +47,9 @@ export class MatchHost {
   private bots = new Map<number, BotPlan>();
   private shots: Shot[] = [];
   private impactStart = 0;
-  private before = { lost: [0, 0, 0, 0], destroyed: [0, 0, 0, 0] };
+  private before = { lost: [0, 0, 0, 0], destroyed: [0, 0, 0, 0], self: [0, 0, 0, 0] };
+  private projOwner = new Map<number, number>();
+  private closestMiss = new Map<number, number>();
   private roundElims: number[] = [];
   private realT = 0;
   private slowUntil = -1;
@@ -209,7 +212,7 @@ export class MatchHost {
     this.shots = [];
     this.roundElims = [];
     const st = this.sim.stats;
-    this.before = { lost: [...st.lost], destroyed: [...st.destroyed] };
+    this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self] };
     let i = 0;
     for (const p of alivePlayers(s).sort((a, b) => a.slot - b.slot)) {
       p.locked = true;
@@ -248,9 +251,15 @@ export class MatchHost {
       p.stats.dealt += dealt[p.slot];
       p.stats.bestShot = Math.max(p.stats.bestShot, dealt[p.slot]);
       const shot = this.shots.find((x) => x.slot === p.slot);
-      if (shot && !AMMO[shot.ammo].defensive && dealt[p.slot] === 0) p.stats.whiffs++;
+      if (shot && !AMMO[shot.ammo].defensive && dealt[p.slot] === 0) {
+        p.stats.whiffs++;
+        const miss = this.closestMiss.get(p.slot);
+        if (miss !== undefined) p.stats.worstMiss = Math.max(p.stats.worstMiss, Math.round(miss));
+      }
+      p.stats.selfHits += st.self[p.slot] - this.before.self[p.slot];
       p.blocks = this.sim.blocksAlive(p.slot);
     }
+    this.closestMiss.clear();
     s.results = buildResults(s, lost, dealt, this.roundElims);
     s.phase = 'results';
     s.remaining = resultsDuration(s);
@@ -273,6 +282,20 @@ export class MatchHost {
 
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
+      if (e.e === 'proj') this.projOwner.set(e.id, e.owner);
+      if (e.e === 'projEnd' && e.p) {
+        // A qué distancia del castillo rival más cercano acabó (para el "disparo más ridículo").
+        const owner = this.projOwner.get(e.id);
+        if (owner === undefined) continue;
+        let best = Infinity;
+        for (const q of this.state.players) {
+          if (q.slot === owner) continue;
+          const o = castleOrigin(q.slot);
+          best = Math.min(best, Math.max(0, Math.hypot(e.p[0] - o[0], e.p[2] - o[2]) - 6.5));
+        }
+        this.closestMiss.set(owner, Math.min(this.closestMiss.get(owner) ?? Infinity, best));
+        continue;
+      }
       if (e.e !== 'king') continue;
       const p = this.player(e.slot);
       if (!p?.alive) continue;

@@ -2,6 +2,7 @@ import { AMMO, RARITY_COLOR, RARITY_LABEL, type AmmoId } from '../../../shared/a
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
 import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
+import { sfx } from '../game/audio';
 import { h } from './dom';
 
 export interface HudPlayer {
@@ -35,11 +36,23 @@ export class Hud {
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
     const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, this.ammo, this.confirmBtn);
-    this.corner.append(this.wind, this.stats);
+    const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
+    const toggle = () => {
+      mute.textContent = sfx.toggleMute() ? '🔇' : '🔊';
+    };
+    mute.onclick = toggle;
+    mute.onpointerdown = (e) => e.stopPropagation();
+    this.keyHandler = (e: KeyboardEvent) => {
+      if (e.code === 'KeyM' && (e.target as HTMLElement)?.tagName !== 'INPUT') toggle();
+    };
+    window.addEventListener('keydown', this.keyHandler);
+    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute), this.stats);
     this.root.append(this.top, this.players, this.corner, bottom, this.help, this.banner);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
   }
+
+  private keyHandler: (e: KeyboardEvent) => void;
 
   setPhase(text: string, sub = '') {
     this.phase.replaceChildren(h('b', null, text), sub ? h('span', null, sub) : '');
@@ -142,6 +155,7 @@ export class Hud {
   }
 
   dispose() {
+    window.removeEventListener('keydown', this.keyHandler);
     this.root.remove();
   }
 }

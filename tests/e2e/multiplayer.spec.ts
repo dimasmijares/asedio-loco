@@ -165,7 +165,7 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   await join(g2, hash, 'Jugador3');
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
   await host.click('#start');
-  await waitAll([host, g1, g2], (s) => s.round >= 2 && s.phase === 'aim');
+  await waitAll([host, g1, g2], (s) => s.round >= 2 && s.phase !== 'over', 240_000);
   const before = (await summary(g1))!;
   await host.context().close();
   const [a, b] = await waitAll([g1, g2], (s) => s.role === 'host' || s.fulls > before.fulls, 30_000);

@@ -430,6 +430,7 @@ button.big {
 }
 
 .hud-wind {
+  white-space: nowrap;
   background: rgba(29, 22, 38, 0.7);
   border-radius: 10px;
   padding: 6px 12px;
@@ -658,4 +659,11 @@ button.big {
 .setup-note {
   font-size: 14px;
   margin-top: 10px;
+}
+
+.hud-mute {
+  font-size: 18px;
+  padding: 4px 10px;
+  box-shadow: 0 3px 0 var(--ink);
+  background: rgba(255, 250, 240, 0.92);
 }
