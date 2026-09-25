@@ -64,7 +64,7 @@ export interface MatchState {
 }
 
 export const MAX_ROUNDS = 24;
-export const HAND = 2;
+export const HAND = 3; // municiones distintas para elegir en cada ronda
 
 // Jugadores de una partida en red: los humanos de la sala en sus huecos y los bots de
 // relleno en los huecos libres más bajos. Anfitrión y clientes lo calculan igual.
@@ -119,9 +119,10 @@ export function isDuel(s: MatchState) {
   return alivePlayers(s).length === 2;
 }
 
+// 20 s para apuntar en todas las rondas (el usuario lo prefiere al acortarlas en el duelo).
+// Si todos confirman antes, la ronda arranca en cuanto están listos.
 export function aimDuration(s: MatchState) {
-  if (s.fast) return 3;
-  return isDuel(s) ? 9 : 12;
+  return s.fast ? 3 : 20;
 }
 
 export function resultsDuration(s: MatchState) {
@@ -150,7 +151,7 @@ export function ammoRng(seed: number, round: number, slot: number) {
   return rng((seed ^ hashString(`ammo:${round}:${slot}`)) >>> 0);
 }
 
-// Empieza una ronda: lava, viento y munición (siempre 2 en la mano).
+// Empieza una ronda: lava, viento y 3 municiones distintas nuevas (las de la ronda anterior se pierden).
 export function startRound(s: MatchState): MatchState {
   s.round++;
   s.phase = 'aim';
@@ -164,8 +165,12 @@ export function startRound(s: MatchState): MatchState {
     p.locked = false;
     if (!p.alive) continue;
     const r = ammoRng(s.seed, s.round, p.slot);
-    while (p.ammo.length < HAND) p.ammo.push(drawAmmo(r, duel));
-    p.selected = Math.min(p.selected, p.ammo.length - 1);
+    p.ammo = [];
+    for (let tries = 0; p.ammo.length < HAND && tries < 50; tries++) {
+      const a = drawAmmo(r, duel);
+      if (!p.ammo.includes(a)) p.ammo.push(a);
+    }
+    p.selected = 0;
     if (!s.players.some((q) => q.alive && q.slot === p.target && q.slot !== p.slot)) p.target = nearestRival(p.slot, alivePlayers(s).map((q) => q.slot));
   }
   s.v++;

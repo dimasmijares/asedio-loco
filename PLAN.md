@@ -65,6 +65,16 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 - Antes y después: `tests/balance/destrozo`, el equilibrio de las tres dificultades y el banco de rendimiento con GPU y en CI. Si la partida se alarga de más, se compensa con la munición o la lava.
 - Capturas nuevas para el README.
 
+### Etapa 6 · Estudio para móviles (después de la 5)
+
+- Estudiar si el juego puede ser apto para móviles y montar un plan. Hay que mirar:
+  - **Control táctil:** equivalentes al clic derecho, a Espacio y a la rueda.
+  - **Rendimiento:** medirlo en un móvil de gama media, con los castillos ya más grandes.
+  - **Interfaz:** HUD en pantalla estrecha y en vertical.
+  - **Red:** WebSocket con datos móviles, y qué pasa al cambiar de app.
+  - **Batería y temperatura.**
+- Entregable: documento de viabilidad con opciones y coste, y un plan por etapas como este.
+
 ## Cómo se despliega cada etapa
 
 1. Cambios en commits pequeños. `npm test`, `npm run typecheck` y la batería E2E en local.

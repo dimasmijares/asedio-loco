@@ -11,16 +11,20 @@ const four = () =>
   );
 
 describe('rondas', () => {
-  it('cada ronda reparte hasta tener 2 municiones', () => {
+  it('cada ronda reparte 3 municiones distintas y nuevas', () => {
     const s = four();
-    startRound(s);
-    expect(s.round).toBe(1);
-    expect(s.phase).toBe('aim');
-    for (const p of s.players) expect(p.ammo).toHaveLength(2);
-    consumeAmmo(s.players[0]);
-    expect(s.players[0].ammo).toHaveLength(1);
-    startRound(s);
-    expect(s.players[0].ammo).toHaveLength(2);
+    for (let round = 1; round <= 12; round++) {
+      startRound(s);
+      expect(s.round).toBe(round);
+      expect(s.phase).toBe('aim');
+      for (const p of s.players) {
+        expect(p.ammo).toHaveLength(3);
+        expect(new Set(p.ammo).size).toBe(3);
+        expect(p.selected).toBe(0);
+      }
+      consumeAmmo(s.players[0]);
+      expect(s.players[0].ammo).toHaveLength(2);
+    }
   });
 
   it('la lava sube cada 3 rondas', () => {
@@ -37,13 +41,13 @@ describe('rondas', () => {
     expect(Math.hypot(w[0], w[2])).toBeGreaterThan(1.5);
   });
 
-  it('las rondas son más cortas en el duelo', () => {
+  it('20 s para apuntar, también en el duelo', () => {
     const s = four();
     startRound(s);
-    const normal = aimDuration(s);
+    expect(aimDuration(s)).toBe(20);
     eliminate(s, 1, 'lava', 0);
     eliminate(s, 2, 'lava', 0);
-    expect(aimDuration(s)).toBeLessThan(normal);
+    expect(aimDuration(s)).toBe(20);
   });
 });
 

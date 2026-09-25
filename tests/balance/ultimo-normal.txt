@@ -1,4 +1,4 @@
 dificultad normal, 8 partidas
-media: 10.5 rondas, 237.3 s
-primera eliminación en la ronda: 10, 8, 8, 1, 10, 8, 10, 5
-causas: {"lava":14,"outside":5,"crushed":6}
+media: 7.5 rondas, 231.4 s
+primera eliminación en la ronda: 5, 4, 4, 1, 1, 2, 3, 1
+causas: {"outside":12,"lava":7,"crushed":7}
