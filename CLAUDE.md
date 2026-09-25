@@ -10,6 +10,7 @@ La especificación completa del proyecto está en `PROMPT_asedio_loco.md`. Las d
 - **Fase 4 (contenido y sensación)** terminada: 12 municiones, sonido procedural, cámara lenta y foco en el rey que cae, estadísticas divertidas.
 - **Fase 5 (rendimiento y robustez)** terminada: benchmark, instancing y geometría fusionada, compresión de instantáneas, pruebas con red mala, migración de anfitrión.
 - **Fase 6 (pulido)** terminada: portada animada, «Cómo se juega», tutorial de 3 pasos, ajustes (calidad, sonido, texto grande, sensibilidad) y colores accesibles.
+- **Plan de cambios tras la primera prueba del usuario** (`PLAN.md`): etapas 1-5 terminadas y en producción (20 s y 3 municiones por ronda, control con clic derecho y Espacio, plano panorámico, repetición al caer un rey, castillos de 140 bloques). Queda la etapa 6: estudio de viabilidad para móviles.
 - **Fase 3 (multijugador)** terminada: salas, anfitrión autoritativo, interpolación, espectadores, reconexión, migración de anfitrión y revancha, con pruebas E2E de 4-5 clientes.
   - [x] 0.1 Entorno: Node 22 LTS, npm 10, git, gh, Playwright 1.63 + Chromium. WebGL2 sin interfaz verificado con SwiftShader.
   - [x] 0.2 Repo de GitHub `dimasmijares/asedio-loco` (público).
@@ -104,7 +105,8 @@ Medido el 25-09-2026, con los castillos de 140 bloques, en Chromium sin interfaz
 ## Limitaciones conocidas
 
 - El rendimiento solo se ha medido con una RTX 3080 y con SwiftShader. En una gráfica integrada no se ha probado; la calidad adaptativa baja el nivel si no llega a 38 fps.
-- Pensado para ratón y teclado. En pantallas táctiles se puede arrastrar, pero no hay control de elevación sin rueda ni teclas.
+- Pensado para ratón y teclado: apuntar necesita el clic derecho y cargar, Espacio (o mantener el botón de disparo). En pantallas táctiles no se puede apuntar; es la etapa 6 del plan.
+- Solo hay repetición de los reyes que caen durante la fase de impacto. Los que se lleva la lava al empezar la ronda no la tienen, y un espectador que entra tarde tampoco ve las anteriores a su llegada.
 - Un jugador que se desconecta en plena partida no pasa a ser un bot: su catapulta dispara con la última puntería cuando se acaba el tiempo.
 - Si el anfitrión se va en plena fase de impacto, las estadísticas de esa ronda quedan incompletas.
 - En la isla, los bloques que caen sobre la superficie de lava no se funden (solo se come la hilera al subir el nivel), para que la lava no se lleve el castillo entero en cadena.

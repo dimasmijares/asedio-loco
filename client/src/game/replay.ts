@@ -129,10 +129,11 @@ export class ReplayPlayer {
   }
 }
 
-// Cámara de la repetición: cerca del rey, girando despacio a su alrededor.
+// Cámara de la repetición: cerca del rey, girando despacio a su alrededor y desde lo bastante
+// alto para ver por encima de las murallas (miden 4,8 m).
 export function replayCamera(king: THREE.Vector3, t: number, out: { from: THREE.Vector3; at: THREE.Vector3 }) {
   const a = 0.6 + t * 0.35;
-  out.at.copy(king).add(new THREE.Vector3(0, 0.6, 0));
-  out.from.copy(king).add(new THREE.Vector3(Math.cos(a) * 11, 6.5, Math.sin(a) * 11));
+  out.at.copy(king).add(new THREE.Vector3(0, 0.4, 0));
+  out.from.copy(king).add(new THREE.Vector3(Math.cos(a) * 9, Math.max(9, 7.5 - king.y + 5), Math.sin(a) * 9));
   return out;
 }

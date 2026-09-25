@@ -24,7 +24,7 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 
 ## Etapas
 
-### Etapa 1 · Ritmo y munición (pequeña)
+### Etapa 1 · Ritmo y munición (pequeña) ✅ hecha
 
 - Apuntado de 20 s, también en duelo. El modo `?fast=1` de las pruebas sigue en 3 s. La ronda arranca antes si todos están listos (ya funciona así).
 - 3 municiones distintas por ronda, elegidas al azar con la semilla de siempre y sin repetidas. Las que no se usan se pierden y la ronda siguiente trae 3 nuevas (D5). Se eligen con 1/2/3 o con un clic en la tarjeta.
@@ -33,7 +33,7 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 - Pruebas: los unitarios de `match.test.ts` (reparto de 3 sin repetir y duración) y el equilibrio, que se vuelve a medir porque con más tiempo y más munición cambia la duración de la partida.
 - Se sube `PROTOCOL_VERSION` para que una pestaña con la versión anterior pida recargar.
 
-### Etapa 2 · Control nuevo (la más importante)
+### Etapa 2 · Control nuevo (la más importante) ✅ hecha
 
 - **Clic derecho mantenido + ratón:** horizontal = rumbo, vertical = elevación. El cursor se oculta mientras se apunta (Pointer Lock) para no chocar con los bordes de la pantalla. La cámara sigue la dirección del tiro, detrás de la catapulta.
 - **Espacio mantenido:** la potencia sube de 0 a 100 % en unos 1,5 s y se queda al máximo (D2). La vista previa enseña el primer tramo de la parábola, que se alarga con la fuerza y se corta antes de caer, sobre el 60 % del vuelo (D3). Al soltar, el disparo queda preparado y es definitivo para esa ronda (D1): el botón «¡Listo!» desaparece y el HUD lo marca con ✔.
@@ -43,14 +43,14 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 - En red, las demás personas ven la parábola crecer mientras cargas (ya se envía la puntería a 10 Hz).
 - Pruebas: una E2E nueva que apunta con el clic derecho, carga con Espacio y comprueba que el disparo sale con esa potencia. `autoplay` no cambia (manda la puntería directamente).
 
-### Etapa 3 · Cámara panorámica
+### Etapa 3 · Cámara panorámica ✅ hecha
 
 - Durante el impacto, un plano general que encuadra a la vez todos los proyectiles en vuelo y los castillos a los que van. Se mueve despacio, sin saltos de un disparo a otro. Si solo hay un disparo, se acerca más.
 - Sin cámara lenta durante el impacto normal.
 - El `director` se simplifica: se queda en encuadrar y deja de «perseguir».
 - Revisión con capturas y con un vídeo corto de una ronda de 4 jugadores.
 
-### Etapa 4 · Repetición cuando muere un rey
+### Etapa 4 · Repetición cuando muere un rey ✅ hecha
 
 - Cada cliente guarda los últimos ~5 s de lo que ve (poses de bloques, reyes y proyectiles, y efectos) en un búfer circular. En la escena más cargada son unos 2 MB.
 - Cuando cae un rey, al acabar la fase de impacto y antes de los resultados, hay una fase nueva, `replay` (D4). La marca el anfitrión, así que todos la ven a la vez. Muestra los últimos 3-4 s antes de la muerte, a cámara lenta, desde cerca y en un ángulo que mira al rey, con un rótulo («¡Cae el rey de Conde Clic!»).
@@ -59,7 +59,7 @@ Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se des
 - Se sube `PROTOCOL_VERSION` (fase nueva en `MatchState`).
 - Pruebas: unitarios del búfer, y en la E2E de 4 jugadores, comprobar que todos entran y salen de `replay` en la misma ronda.
 
-### Etapa 5 · Castillos más grandes
+### Etapa 5 · Castillos más grandes ✅ hecha
 
 - Término medio (D6): bloques un 20 % más grandes y unos 140 por castillo (hoy 106), con murallas más altas y una torre más. Se espera un ~30 % más de coste de física. Isla más grande para que quepan. Se ajustan las posiciones de las catapultas, los puntos a los que apuntan los bots, los niveles de lava y la cámara.
 - Antes y después: `tests/balance/destrozo`, el equilibrio de las tres dificultades y el banco de rendimiento con GPU y en CI. Si la partida se alarga de más, se compensa con la munición o la lava.
