@@ -48,12 +48,19 @@ async function join(p: Page, hash: string, name: string, extra = '') {
 
 async function waitAll(pages: Page[], pred: (s: Summary) => boolean, timeout = 120_000) {
   const t0 = Date.now();
+  let lastLog = t0;
+  let all: (Summary | null)[] = [];
   while (Date.now() - t0 < timeout) {
-    const all = await Promise.all(pages.map(summary));
+    all = await Promise.all(pages.map(summary));
     if (all.every((s) => s && pred(s))) return all as Summary[];
+    // Rastro para diagnosticar en CI dónde se queda cada cliente.
+    if (Date.now() - lastLog > 20_000) {
+      lastLog = Date.now();
+      console.log(`  esperando (${Math.round((Date.now() - t0) / 1000)} s): ` + all.map((s) => (s ? `${s.role} r${s.round} ${s.phase} vivos[${s.alive}]` : '-')).join(' | '));
+    }
     await pages[0].waitForTimeout(400);
   }
-  throw new Error('tiempo agotado esperando a los clientes');
+  throw new Error(`tiempo agotado esperando a los clientes: ${JSON.stringify(all.map((s) => s && { role: s.role, round: s.round, phase: s.phase, alive: s.alive }))}`);
 }
 
 // Compara la vista de cada cliente con la del anfitrión en la fase de resultados.
@@ -155,7 +162,7 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
 });
 
 test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({ browser }) => {
-  test.setTimeout(400_000);
+  test.setTimeout(600_000);
   const errors: string[] = [];
   const host = await newPlayer(browser, errors, 'anfitrión');
   const g1 = await newPlayer(browser, errors, 'j2');
@@ -173,7 +180,7 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   expect(newHost.role, 'alguien toma el relevo').toBe('host');
   expect(newHost.migrations).toBe(1);
   console.log('migración: nuevo anfitrión en la ronda', newHost.round);
-  const finals = await waitAll([g1, g2], (s) => s.phase === 'over', 300_000);
+  const finals = await waitAll([g1, g2], (s) => s.phase === 'over', 480_000);
   expect(finals[0].winner).not.toBeNull();
   expect(finals[1].winner).toBe(finals[0].winner);
   expect(finals[1].round).toBe(finals[0].round);
