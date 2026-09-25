@@ -66,6 +66,33 @@ async function waitAll(pages: Page[], pred: (s: Summary) => boolean, timeout = 1
   throw new Error(`tiempo agotado esperando a los clientes: ${JSON.stringify(all.map((s) => s && { role: s.role, round: s.round, phase: s.phase, alive: s.alive }))}`);
 }
 
+// ¿Coincide la vista de un cliente con la del anfitrión? (sin fallar, para ir sondeando)
+function agrees(host: Summary, other: Summary) {
+  if (other.round !== host.round || Math.abs(other.blocks - host.blocks) > 2) return false;
+  return Object.entries(host.kings).every(([slot, k]) => {
+    const o = other.kings[slot];
+    return !!o && Math.hypot(o[0] - k[0], o[1] - k[1], o[2] - k[2]) < 0.3;
+  });
+}
+
+// Resultados de una ronda vistos por todos. Algo puede seguir moviéndose al empezar la fase
+// (un rey que aún rueda) y un cliente con retraso lo ve más tarde, así que se exige que las
+// vistas converjan: se sondea hasta `ms` y se devuelve la primera instantánea en la que
+// todos coinciden (o la última, para que compare() diga qué falla). null si la fase acaba antes.
+async function settledResults(pages: Page[], ms: number) {
+  let last: Summary[] | null = null;
+  for (const t1 = Date.now(); Date.now() - t1 < ms; await pages[0].waitForTimeout(250)) {
+    const all = (await Promise.all(pages.map(summary))) as Summary[];
+    if (!all.every((s) => s?.phase === 'results' && s.round === all[0].round)) {
+      if (last) break;
+      continue;
+    }
+    last = all;
+    if (all.slice(1).every((o) => agrees(all[0], o))) break;
+  }
+  return last;
+}
+
 // Compara la vista de cada cliente con la del anfitrión en la fase de resultados.
 function compare(host: Summary, other: Summary, label: string) {
   expect(other.round, `${label}: ronda`).toBe(host.round);
@@ -106,9 +133,8 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     const h = all[0];
     if (h.phase === 'over') break;
     if (h.phase === 'results' && !checked.has(h.round)) {
-      await host.waitForTimeout(250);
-      const again = (await Promise.all(players.map(summary))) as Summary[];
-      if (again.every((s) => s.phase === 'results' && s.round === again[0].round)) {
+      const again = await settledResults(players, 4000);
+      if (again) {
         for (let i = 1; i < again.length; i++) compare(again[0], again[i], `ronda ${again[0].round}, jugador ${i + 1}`);
         checked.add(again[0].round);
         console.log(`ronda ${again[0].round}: consistente (${again[0].blocks} bloques, reyes ${again[0].alive.join(',')})`);
@@ -243,9 +269,9 @@ test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }
     const all = (await Promise.all(players.map(summary))) as Summary[];
     if (all[0]?.phase === 'over') break;
     if (all[0]?.phase === 'results' && !checked.has(all[0].round)) {
-      await host.waitForTimeout(900); // margen para que llegue el estado completo con retraso
-      const again = (await Promise.all(players.map(summary))) as Summary[];
-      if (again.every((s) => s.phase === 'results' && s.round === again[0].round)) {
+      // Más margen: con 250 ms ±120 de retraso, el estado completo tarda en llegar.
+      const again = await settledResults(players, 6000);
+      if (again) {
         for (let i = 1; i < again.length; i++) compare(again[0], again[i], `red mala, ronda ${again[0].round}, jugador ${i + 1}`);
         checked.add(again[0].round);
         console.log(`red mala, ronda ${again[0].round}: consistente`);
