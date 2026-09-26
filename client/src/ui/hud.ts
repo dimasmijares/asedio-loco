@@ -11,6 +11,8 @@ import { openSettings, settings } from './settings';
 export type HelpRow = [keys: string[], what: string];
 
 const HELP_KEY = 'asedio.help';
+// Tecla de cada tarjeta de munición (el campo de pruebas tiene 12: 1-9, 0, − y =).
+const AMMO_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '−', '='];
 
 export interface HudPlayer {
   slot: number;
@@ -47,6 +49,7 @@ export class Hud {
   // Cuenta atrás antes de disparar (3-2-1 y «¡FUEGO!»), en el centro de la pantalla.
   private countdown = h('div', { class: 'hud-countdown', id: 'hud-countdown', 'aria-live': 'assertive' });
   private countdownText = '';
+  private ammoKey = '';
   private countdownTimer = 0;
 
   constructor(parent: HTMLElement) {
@@ -95,7 +98,12 @@ export class Hud {
     this.timer.style.display = sec === null ? 'none' : '';
   }
 
+  // Tarjetas de munición. Se llama en cada fotograma, pero solo se rehacen si cambia algo: si
+  // se rehicieran siempre, un clic que empieza en una tarjeta y acaba en su sustituta se perdía.
   setAmmo(list: AmmoId[], selected: number, onSelect: (i: number) => void, keys = true) {
+    const key = `${list.join(',')}|${selected}|${keys}`;
+    if (key === this.ammoKey) return;
+    this.ammoKey = key;
     this.ammo.replaceChildren(
       ...list.map((id, i) => {
         const a = AMMO[id];
@@ -104,13 +112,17 @@ export class Hud {
           { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]}` },
           h('span', { class: 'ammo-icon' }, a.icon),
           h('span', { class: 'ammo-name' }, a.name),
-          keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, String(i + 1 === 10 ? 0 : i + 1)) : null,
+          keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,
         );
+        // Se elige al pulsar, sin esperar a soltar encima; el clic queda para el teclado (Intro).
+        b.onpointerdown = (e) => {
+          e.stopPropagation();
+          if (e.button === 0) onSelect(i);
+        };
         b.onclick = (e) => {
           e.stopPropagation();
-          onSelect(i);
+          if (e.detail === 0) onSelect(i);
         };
-        b.onpointerdown = (e) => e.stopPropagation();
         return b;
       }),
     );

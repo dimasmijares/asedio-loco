@@ -92,8 +92,9 @@ export class AimInput {
         this.onCycleTarget(e.shiftKey ? -1 : 1);
       }
       if (e.code === 'KeyQ') this.onCycleTarget(-1);
-      const digit = ['Digit1', 'Digit2', 'Digit3'].indexOf(e.code);
-      if (digit >= 0) this.onSelectSlot(digit);
+      // 1/2/3 de la fila de números o del teclado numérico.
+      const digit = e.code.match(/^(?:Digit|Numpad)([1-3])$/)?.[1];
+      if (digit) this.onSelectSlot(Number(digit) - 1);
     });
     window.addEventListener('keyup', (e) => {
       this.keys.delete(e.code);

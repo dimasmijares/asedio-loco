@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -46,7 +46,7 @@ Hace falta un sitio donde probar cada munición sin partida, y escenas fijas par
 | Input | Type | Required | Notes |
 |---|---|---|---|
 | Controles de apuntado | FEAT-CONTROL-001 | Sandbox | Clic derecho, Espacio, A/D, W/S, Mayús, rueda |
-| 1…9, 0, −, = | Teclado | Sandbox | Las 12 municiones en orden de `AMMO_IDS` (o clic en la tarjeta) |
+| 1…9, 0, −, = (también en el teclado numérico) | Teclado | Sandbox | Las 12 municiones en orden de `AMMO_IDS` (o clic en la tarjeta) |
 | T / C | Teclado | Sandbox | Reconstruir los castillos / cámara libre (órbita sobre la diana) |
 | `physics.run()` | Gancho de prueba | Escenas | Lanza la escena tras la captura «antes» |
 | `?quality=` | URL | Banco | Fija la calidad; sin él, la guardada |
@@ -115,4 +115,3 @@ Hace falta un sitio donde probar cada munición sin partida, y escenas fijas par
 
 ## Open Questions
 
-- Las tarjetas 11 y 12 enseñan «11» y «12» como tecla (`Hud.setAmmo`), pero las teclas reales son − e =, que tampoco salen en la ayuda. — dimas

@@ -28,7 +28,6 @@ Quitar textos y código que describen el tirachinas o la cámara lenta en direct
 - `shared/ballistics.ts`: `PREVIEW_TIME`, si no se usa.
 - `shared/match.ts`: el comentario de `ammo` dice «máx. 2» y `HAND` vale 3.
 - `client/src/game/match/autoplay.ts`: el comentario dice «como un bot difícil» y usa `normal`. Se corrige el comentario, no el comportamiento, porque las pruebas dependen de él.
-- `client/src/game/modes/sandbox.ts` (o donde se pinten): las tarjetas 11 y 12 muestran «11» y «12», pero las teclas son − y =.
 
 Fuera: cualquier cambio de comportamiento.
 
@@ -36,7 +35,6 @@ Fuera: cualquier cambio de comportamiento.
 
 - [ ] Ninguna cadena visible ni comentario menciona el tirachinas.
 - [ ] No queda código de cámara lenta en directo sin uso, y la repetición sigue a cámara lenta.
-- [ ] Las tarjetas del campo de pruebas enseñan las teclas reales.
 - [ ] `npm run verify` y las E2E `controls` y `solo` en verde.
 
 ## Test Plan
@@ -49,3 +47,5 @@ Fuera: cualquier cambio de comportamiento.
 ## Evidence
 
 Pendiente.
+
+Nota: las teclas de las tarjetas 11 y 12 del campo de pruebas ya se arreglaron en WRK-TASK-024.

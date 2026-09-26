@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -47,7 +47,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 | W/S (o ↑/↓) | Teclado | No | Elevación a 0,5 rad/s |
 | Mayúsculas | Modificador | No | Modo precisión: ×0,25 en ratón y teclado |
 | Q / E, Tab (Mayús+Tab al revés) | Teclado | No | Castillo objetivo anterior / siguiente; gira el rumbo hacia él |
-| 1 / 2 / 3 o clic en la tarjeta | Teclado / ratón | No | Munición de la mano (3 por ronda) |
+| 1 / 2 / 3 (fila de números o teclado numérico) o clic en la tarjeta | Teclado / ratón | No | Munición de la mano (3 por ronda). La tarjeta se elige al pulsar, sin esperar a soltar |
 | Rueda | Ratón | No | Zoom de la cámara (FEAT-CAMARA-001) |
 | `settings.sensitivity` | número 0,4-1,8 | No | Multiplica el movimiento del ratón (Ajustes) |
 | `?nolock=1` | URL | No | Desactiva el bloqueo del puntero (pruebas) |

@@ -20,6 +20,25 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   expect(start.ammo).toBe(3);
   await canvasNotBlack(page);
 
+  // Munición: clic en la tarjeta (aunque el ratón se mueva un poco entre pulsar y soltar),
+  // 1/2/3 de la fila de números y del teclado numérico.
+  const selected = () => page.evaluate(() => (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot).selected as number);
+  const card = page.locator('#hud-ammo .ammo').nth(1);
+  const box = (await card.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(120);
+  await page.mouse.move(box.x + box.width / 2 + 4, box.y + box.height / 2 + 2);
+  await page.mouse.up();
+  await expect.poll(selected, { message: 'clic en la segunda tarjeta' }).toBe(1);
+  await page.keyboard.press('Digit3');
+  await expect.poll(selected, { message: 'tecla 3' }).toBe(2);
+  await page.keyboard.press('Numpad1');
+  await expect.poll(selected, { message: 'tecla 1 del teclado numérico' }).toBe(0);
+  await page.keyboard.press('Numpad2');
+  await expect.poll(selected, { message: 'tecla 2 del teclado numérico' }).toBe(1);
+  expect((await me()).locked, 'elegir munición no dispara').toBe(false);
+
   // Clic derecho mantenido: el ratón a la derecha gira, hacia arriba sube la elevación.
   await page.mouse.move(480, 300);
   await page.mouse.down({ button: 'right' });

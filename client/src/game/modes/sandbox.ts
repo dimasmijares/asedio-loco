@@ -55,13 +55,13 @@ export class SandboxMode implements Mode {
     ]);
     this.keyHandler = (e) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
-      const n = e.code.match(/^Digit(\d)$/)?.[1];
+      const n = e.code.match(/^(?:Digit|Numpad)(\d)$/)?.[1];
       if (n !== undefined) {
         const i = n === '0' ? 9 : Number(n) - 1;
         if (i < AMMO_IDS.length) this.selectAmmo(i);
       }
-      if (e.code === 'Minus') this.selectAmmo(10);
-      if (e.code === 'Equal') this.selectAmmo(11);
+      if (e.code === 'Minus' || e.code === 'NumpadSubtract') this.selectAmmo(10);
+      if (e.code === 'Equal' || e.code === 'NumpadAdd') this.selectAmmo(11);
       if (e.code === 'KeyT') this.reset();
       if (e.code === 'KeyC') this.freeCam = !this.freeCam;
     };
