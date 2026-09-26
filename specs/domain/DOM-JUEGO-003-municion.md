@@ -52,9 +52,9 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
 | Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
 | Piano | rara | 6 | Martillo: se marca dónde caería, cae en vertical desde 22 m a los 1,1 s, atraviesa pisos y al tocar el suelo o pararse suelta un acorde final | densidad 6, viento 0,2; conserva el 90 % de la velocidad al romper (`plowKeep`); acorde de 2,8 m y fuerza 85 |
-| Agujero negro | épica | 3 | Atrae y se traga lo cercano | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,1 m se rompe; al final, implosión de 4 m |
-| Imán | épica | 3 | Arranca el hierro | campo de 10 m y 2,3 s, fuerza 26 (3 % sobre lo que no es hierro); rompe las uniones del hierro |
-| Bola de nieve | épica | 3 | Crece mientras rueda | radio de 0,45 a 1,6 m (+0,8 m/s), no baja de 9 m/s rodando |
+| Agujero negro | épica | 3 | Borrador: atrae y se traga lo cercano y, al cerrarse, escupe lo que no se ha tragado | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,6 m del núcleo desaparece; al final, onda de 5 m y fuerza 80 |
+| Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 30 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 4,5 m sale a 22 m/s |
+| Bola de nieve | épica | 3 | Alud: crece mientras rueda en línea recta en la dirección en que llegó | radio de 0,45 a 1,5 m (+0,9 m/s), no baja de 9 m/s rodando |
 | Andamio | defensiva | 7 | Reconstruye hasta 10 bloques propios | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
 

@@ -142,6 +142,12 @@ export class Fx {
       this.ring(p, radius * 0.5);
       return;
     }
+    if (kind === 'recoil') {
+      // Retroceso del imán: anillo rojo y chispas.
+      this.ring(p, radius, '#e63946');
+      for (let i = 0; i < this.n(14); i++) this.bit(p, randDir().multiplyScalar(rnd(4, 9)), { color: i % 2 ? '#e63946' : '#dee2e6', size: 0.1, max: 0.8 });
+      return;
+    }
     if (kind === 'chord') {
       // Acorde final del piano: onda de polvo a ras de suelo y teclas saltando.
       this.ring(p, radius);

@@ -10,6 +10,7 @@ import { behaviorFor, type ProjectileBehavior } from './projectiles';
 
 export const DT = 1 / 60;
 const LAVA_FLOOR_HALF = 2;
+const BLACKHOLE_CORE = 1.6; // m: lo que llega al núcleo del agujero negro desaparece (WRK-TASK-031)
 const LAVA_SINK_SPEED = 0.6; // m/s a los que se hunde lo que se come la lava
 // Grupos de colisión de Rapier: 16 bits de pertenencia << 16 | 16 bits de filtro.
 // El suelo de lava pertenece al grupo 2; los bloques que se está comiendo lo excluyen.
@@ -400,7 +401,7 @@ export class Sim {
 
   // Recoge los registros que tocan una bola. No se modifica el mundo dentro del callback
   // de la consulta: Rapier ignora en silencio los cambios hechos ahí.
-  private recsInBall(p: Vec3, radius: number): Rec[] {
+  recsInBall(p: Vec3, radius: number): Rec[] {
     const found: Rec[] = [];
     this.world.intersectionsWithShape(rv(p), rq([0, 0, 0, 1]), new RAPIER.Ball(radius), (c) => {
       const r = this.byHandle.get(c.handle);
@@ -516,7 +517,7 @@ export class Sim {
           if (r.kind === 'block') {
             if (r.slot !== f.owner) r.lastHitBy = f.owner;
             // Lo que llega al núcleo desaparece; lo cercano se despega.
-            if (dist < 1.1) this.pendingFrac.set(r, null);
+            if (dist < BLACKHOLE_CORE) this.pendingFrac.set(r, null);
             else if (dist < 3.5) for (const j of r.joints) this.pendingJointBreak.add(j);
           }
         } else {

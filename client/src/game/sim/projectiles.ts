@@ -35,7 +35,13 @@ const EGG_FORCE = 72;
 const EGG_KING = 0.25; // los huevos apenas le hacen daño al rey: es munición de destrozo
 const EGG_FUSE = 1.5; // s: si no toca nada antes, explota igual
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
-const MAGNET_STRENGTH = 26;
+const MAGNET_STRENGTH = 30;
+// Épicas (WRK-TASK-031).
+const SPIT_RADIUS = 5; // el agujero negro, al cerrarse, escupe lo que no se ha tragado
+const SPIT_FORCE = 80;
+const MAGNET_RECOIL = 22; // m/s: el imán, al acabar, lanza el hierro que ha arrancado contra el castillo
+const SNOW_MAX = 1.5; // m de radio que alcanza la bola de nieve
+const SNOW_GROW = 0.9; // m/s de crecimiento mientras rueda
 // Vaca: cráter que rompe piedra cerca del centro. Sandía: carga pegada que revienta desde dentro.
 const COW_RADIUS = 4.8;
 const COW_FORCE = 120;
@@ -264,7 +270,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.removeRec(r, 'proj');
           sim.addField({ kind: 'blackhole', p, until: sim.time + 2.2, radius: 5.5, strength: 50, owner: r.slot });
           sim.events.push({ e: 'fx', kind: 'blackhole', p, slot: r.slot });
-          sim.later(2.2, () => sim.explode(p, 4, 9, r.slot, 'implode'));
+          sim.later(2.2, () => sim.explode(p, SPIT_RADIUS, SPIT_FORCE, r.slot, 'implode'));
         },
       };
     }
@@ -278,14 +284,34 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           on = true;
           const p = v3.add(tv(r.body.translation()), [0, 1.5, 0]);
           sim.removeRec(r, 'proj');
-          sim.addField({ kind: 'magnet', p, until: sim.time + MAGNET_TIME, radius: 10, strength: MAGNET_STRENGTH, owner: r.slot });
-          sim.events.push({ e: 'fx', kind: 'magnet', p, slot: r.slot });
+          const owner = r.slot;
+          sim.addField({ kind: 'magnet', p, until: sim.time + MAGNET_TIME, radius: 10, strength: MAGNET_STRENGTH, owner });
+          sim.events.push({ e: 'fx', kind: 'magnet', p, slot: owner });
+          // Retroceso: el hierro pegado al imán sale disparado contra el castillo rival más cercano.
+          sim.later(MAGNET_TIME, () => {
+            let best: Vec3 | null = null;
+            for (const k of sim.kings.values()) {
+              if (k.slot === owner) continue;
+              const c = castleOrigin(k.slot);
+              if (!best || Math.hypot(c[0] - p[0], c[2] - p[2]) < Math.hypot(best[0] - p[0], best[2] - p[2])) best = c;
+            }
+            if (!best) return;
+            const aimAt: Vec3 = [best[0], best[1] + 2, best[2]];
+            for (const b of sim.recsInBall(p, 4.5)) {
+              if (b.kind !== 'block' || b.mat?.id !== 'iron') continue;
+              const d = v3.norm(v3.sub(aimAt, sim.pos(b)));
+              b.body.setLinvel({ x: d[0] * MAGNET_RECOIL, y: d[1] * MAGNET_RECOIL, z: d[2] * MAGNET_RECOIL }, true);
+              if (b.slot !== owner) b.lastHitBy = owner;
+            }
+            sim.events.push({ e: 'boom', p, r: 2, kind: 'recoil' });
+          });
         },
       };
     }
 
     case 'snowball': {
       let touching = 0;
+      let dir: Vec3 | null = null;
       let radius = AMMO.snowball.radius;
       return {
         maxLife: 8,
@@ -298,13 +324,17 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.world.contactPairsWith(r.col, () => (touching = 0.1));
           if (touching <= 0) return;
           const v = r.body.linvel();
-          const sp = Math.hypot(v.x, v.z);
-          if (sp < 1.2) return;
-          // Una bola que crece coge inercia: mientras rueda no baja de 9 m/s.
-          if (sp < 9) r.body.setLinvel({ x: (v.x / sp) * 9, y: v.y, z: (v.z / sp) * 9 }, true);
-          if (radius >= 1.6) return;
+          // Alud: rueda recto en la dirección en que llegó y no baja de 9 m/s.
+          if (!dir) {
+            const sp = Math.hypot(v.x, v.z);
+            if (sp < 1.2) return;
+            dir = [v.x / sp, 0, v.z / sp];
+          }
+          const along = v.x * dir[0] + v.z * dir[2];
+          if (along < 9) r.body.setLinvel({ x: dir[0] * 9, y: v.y, z: dir[2] * 9 }, true);
+          if (radius >= SNOW_MAX) return;
           // Crece al rodar: nuevo colisionador más grande, misma densidad (más masa).
-          radius = Math.min(1.6, radius + dt * 0.8);
+          radius = Math.min(SNOW_MAX, radius + dt * SNOW_GROW);
           sim.world.removeCollider(r.col, false);
           sim.byHandle.delete(r.col.handle);
           const a = AMMO.snowball;

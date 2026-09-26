@@ -158,6 +158,12 @@ export class Sfx {
     const o = this.out(p, 0.9 * size);
     if (!o) return;
     const t = this.ctx!.currentTime;
+    if (kind === 'recoil') {
+      // Retroceso del imán: zumbido metálico que sube de golpe.
+      this.tone(o, t, 0.5, 'sawtooth', 90, 900, 0.35, 0.01);
+      this.noise(o, t + 0.05, 0.4, 'bandpass', 2500, 5000, 4, 0.002, 0.4);
+      return;
+    }
     if (kind === 'chord') {
       // Acorde final del piano: un golpe grave con un racimo de notas bajas.
       this.noise(o, t, 0.8, 'lowpass', 900, 80, 0.9, 0.003, 1);
