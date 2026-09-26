@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { canvasNotBlack, watchErrors } from './helpers';
 
-// Control de la catapulta: clic derecho + ratón para apuntar, Espacio mantenido para cargar la
+// Control de la catapulta: clic derecho + ratón para apuntar, Espacio (o clic izquierdo) mantenido para cargar la
 // fuerza (la parábola crece) y al soltar el disparo queda listo y ya no cambia.
 test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, info) => {
   test.setTimeout(180_000);
@@ -86,5 +86,46 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   expect(leave.phase, 'tras el apuntado viene la cuenta atrás').toBe('countdown');
   expect(leave.aimLeft, 'la cuenta atrás empieza antes de agotar el apuntado').toBeGreaterThan(0);
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'impact', null, { timeout: 30_000 });
+  expect(errors).toEqual([]);
+});
+
+// Disparo con el clic izquierdo mantenido sobre la escena, igual que con Espacio. Un clic en la
+// interfaz (tarjetas de munición) no carga nada.
+test('control: cargar y disparar manteniendo el clic izquierdo', async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors = watchErrors(page);
+  await page.goto('/?bots=1&seed=5&nolock=1#solo');
+  await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
+  const me = () =>
+    page.evaluate(() => {
+      const p = (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot);
+      const input = (window as any).__asedio.game.input;
+      return { locked: p.locked, power: p.aim.power, charging: input.charging, inputPower: input.aim.power };
+    });
+
+  // Clic en una tarjeta: elige munición, no carga.
+  const card = page.locator('#hud-ammo .ammo').nth(2);
+  await card.hover();
+  await page.mouse.down();
+  await page.waitForTimeout(300);
+  expect((await me()).charging, 'la interfaz no carga el disparo').toBe(false);
+  await page.mouse.up();
+
+  // Un toque corto sobre la escena no dispara.
+  await page.mouse.move(900, 420);
+  await page.mouse.down();
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  expect((await me()).locked).toBe(false);
+
+  // Mantenido: carga y, al soltar, el disparo queda listo con esa fuerza.
+  await page.mouse.down();
+  await page.waitForTimeout(900);
+  const mid = await me();
+  expect(mid.charging).toBe(true);
+  expect(mid.inputPower).toBeGreaterThan(0.2);
+  await page.mouse.up();
+  await page.waitForFunction(() => (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot).locked, null, { timeout: 5000 });
+  expect((await me()).power).toBeGreaterThanOrEqual(mid.inputPower);
   expect(errors).toEqual([]);
 });

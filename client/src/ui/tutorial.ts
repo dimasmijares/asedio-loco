@@ -17,7 +17,7 @@ type Step = 'aim' | 'adjust' | 'fire';
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
   { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta). Q/E apuntan a otro castillo.' },
-  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo. Si se acaba el tiempo, sale con lo que tengas.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio o el clic izquierdo: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo. Si se acaba el tiempo, sale con lo que tengas.' },
 ];
 
 // Tutorial de 3 pasos en la primera partida: cada paso avanza al hacer lo que pide.

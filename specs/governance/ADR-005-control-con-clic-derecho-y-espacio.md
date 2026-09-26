@@ -4,7 +4,7 @@ type: adr
 layer: governance
 status: accepted
 confidence: high
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -30,7 +30,7 @@ El control original era un tirachinas: arrastrar con el clic izquierdo fijaba ru
 - **Clic derecho mantenido + ratón:** horizontal = rumbo, vertical = elevación, con el puntero bloqueado (Pointer Lock).
 - **Espacio mantenido:** la fuerza sube de 0 a 100 % en 1,5 s y se queda al máximo. La parábola de la vista previa (el primer 60 % del vuelo) crece con ella.
 - **Al soltar, el disparo es definitivo** para esa ronda. Una pulsación de menos de 0,12 s no dispara. El botón de disparo también se mantiene pulsado para cargar.
-- Clic izquierdo solo para la interfaz; la rueda acerca la cámara. A/D, W/S y Q/E quedan como alternativa; 1/2/3 eligen munición.
+- **Clic izquierdo:** sobre la interfaz, elige (tarjetas, botones). Sobre la escena, carga y dispara igual que Espacio (ampliación del 26-09-2026 a petición del usuario, WRK-TASK-025). La rueda acerca la cámara. A/D, W/S y Q/E quedan como alternativa; 1/2/3 eligen munición.
 - Bloqueo del puntero con dos salvaguardas: se ignora el primer movimiento y cada movimiento se limita a 200 px.
 
 ## Consequences

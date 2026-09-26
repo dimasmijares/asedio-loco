@@ -15,14 +15,19 @@ const MIN_CHARGE = 0.12;
 
 // Control de la catapulta:
 //  - Clic derecho mantenido + ratón: horizontal = rumbo, vertical = elevación (Mayús: precisión).
-//  - Espacio mantenido: la fuerza sube de 0 a 100 % en CHARGE_TIME y se queda. Al soltar, dispara.
-//  - A/D y W/S: rumbo y elevación con el teclado. Q/E: castillo objetivo. 1/2/3: munición.
+//  - Espacio o clic izquierdo mantenidos: la fuerza sube de 0 a 100 % en CHARGE_TIME y se queda.
+//    Al soltar, dispara.
+//  - A/D y W/S: rumbo y elevación con el teclado. Q/E: castillo objetivo. 1/2/3 (o el teclado
+//    numérico): munición.
 export class AimInput {
   aim: Aim = { yaw: 0, pitch: PITCH_DEFAULT, power: 0 };
   enabled = false;
   aiming = false; // clic derecho mantenido
-  charging = false; // Espacio mantenido
+  charging = false; // Espacio, clic izquierdo o botón de disparo mantenidos
   chargeT = 0;
+  // Qué empezó la carga: solo la suelta esa misma entrada (soltar un clic en una tarjeta
+  // mientras se mantiene Espacio no dispara).
+  private chargeBy = '';
   onChange: (a: Aim) => void = () => {};
   onFire: (a: Aim) => void = () => {};
   onTooShort: () => void = () => {};
@@ -35,7 +40,15 @@ export class AimInput {
 
   constructor(readonly dom: HTMLElement) {
     dom.addEventListener('pointerdown', (e) => {
-      if (!this.enabled || e.button !== 2) return;
+      if (!this.enabled) return;
+      // Clic izquierdo mantenido sobre la escena: carga la fuerza, igual que Espacio. Los
+      // botones y tarjetas del HUD no llegan aquí (cortan el evento).
+      if (e.button === 0) {
+        dom.setPointerCapture?.(e.pointerId);
+        this.startCharge('mouse');
+        return;
+      }
+      if (e.button !== 2) return;
       this.aiming = true;
       this.lx = e.clientX;
       this.ly = e.clientY;
@@ -76,7 +89,10 @@ export class AimInput {
       this.aiming = false;
       if (document.pointerLockElement === dom) document.exitPointerLock?.();
     };
-    window.addEventListener('pointerup', (e) => e.button === 2 && endAim());
+    window.addEventListener('pointerup', (e) => {
+      if (e.button === 2) endAim();
+      if (e.button === 0) this.releaseCharge('mouse');
+    });
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement === dom) this.skipMove = true;
       else endAim();
@@ -86,7 +102,7 @@ export class AimInput {
       if (e.code === 'Space') e.preventDefault();
       if (!this.enabled) return;
       this.keys.add(e.code);
-      if (e.code === 'Space' && !e.repeat) this.startCharge();
+      if (e.code === 'Space' && !e.repeat) this.startCharge('space');
       if (e.code === 'Tab' || e.code === 'KeyE') {
         e.preventDefault();
         this.onCycleTarget(e.shiftKey ? -1 : 1);
@@ -98,7 +114,7 @@ export class AimInput {
     });
     window.addEventListener('keyup', (e) => {
       this.keys.delete(e.code);
-      if (e.code === 'Space') this.releaseCharge();
+      if (e.code === 'Space') this.releaseCharge('space');
     });
     window.addEventListener('blur', () => {
       this.keys.clear();
@@ -108,16 +124,17 @@ export class AimInput {
   }
 
   // También lo usa el botón de disparo (mantener pulsado con el ratón o el dedo).
-  startCharge() {
+  startCharge(by = 'button') {
     if (!this.enabled || this.charging) return;
     this.charging = true;
+    this.chargeBy = by;
     this.chargeT = 0;
     this.aim = { ...this.aim, power: 0 };
     this.onChange(this.aim);
   }
 
-  releaseCharge() {
-    if (!this.charging) return;
+  releaseCharge(by = 'button') {
+    if (!this.charging || by !== this.chargeBy) return;
     this.charging = false;
     if (!this.enabled) return;
     if (this.chargeT < MIN_CHARGE) {

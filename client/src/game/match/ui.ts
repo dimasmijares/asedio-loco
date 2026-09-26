@@ -32,7 +32,7 @@ export interface MatchUIOptions {
 
 export const AIM_HELP: HelpRow[] = [
   [['Clic dcho.', 'ratón'], 'apuntar'],
-  [['Espacio'], 'mantener: fuerza · soltar: ¡fuego!'],
+  [['Espacio', 'clic izdo.'], 'mantener: fuerza · soltar: ¡fuego!'],
   [['A', 'D', 'W', 'S'], 'afinar el tiro'],
   [['Q', 'E'], 'castillo objetivo'],
   [['1', '2', '3'], 'munición'],
@@ -66,7 +66,7 @@ export class MatchUI {
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén Espacio', 'cuanto más tiempo, más fuerza', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
     input.onSelectSlot = (i) => this.selectAmmo(i);
     this.hud.bindCharge(input);
@@ -103,7 +103,7 @@ export class MatchUI {
     this.pendingAim = null;
   }
 
-  // Al soltar Espacio: el disparo queda preparado y ya no se puede cambiar en esta ronda.
+  // Al soltar Espacio o el clic izquierdo: el disparo queda preparado y ya no se puede cambiar en esta ronda.
   fire(a: Aim) {
     if (!this.canAim()) return;
     this.tutorial?.event('fire');
@@ -264,7 +264,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Clic derecho para apuntar · mantén Espacio para disparar' : 'Eres espectador';
+      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
       sfx.fanfare();

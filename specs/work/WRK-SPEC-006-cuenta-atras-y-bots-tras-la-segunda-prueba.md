@@ -3,9 +3,9 @@ id: WRK-SPEC-006
 type: spec
 layer: work-spec
 scope: ephemeral
-status: active
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -75,10 +75,14 @@ Tras probar la versión actual (26-09-2026), el usuario pide:
 
 ## Acceptance Criteria
 
-- [ ] Con todos listos antes de tiempo, pasan 3 s de cuenta atrás y luego se dispara; lo mismo al agotarse los 20 s.
-- [ ] Al disparar, la cámara ya está en el plano general, sin saltos.
-- [ ] Con 1 humano y 3 bots, los 3 bots coinciden en el mismo objetivo en menos del 25 % de las rondas (medido con semillas).
-- [ ] Los bots fijan su ataque en 1-3 s.
-- [ ] Un clic en una tarjeta de munición la selecciona siempre, y también las teclas 1/2/3 y Numpad 1/2/3.
-- [ ] Mantener el clic izquierdo sobre la escena carga la fuerza y al soltar dispara, igual que Espacio.
-- [ ] Equilibrio medido antes y después (RULE-001) y `PROTOCOL_VERSION` subida (RULE-002).
+- [x] Con todos listos antes de tiempo, cuenta atrás 3, 2, 1 y los disparos salen con ¡FUEGO!; lo mismo al agotarse los 20 s.
+- [x] Al disparar, la cámara ya está en el plano general, sin saltos.
+- [x] Con 1 humano y 3 bots, los 3 bots coinciden en el mismo objetivo en menos del 25 % de las rondas (medido con semillas).
+- [x] Los bots fijan su ataque en 1-3 s.
+- [x] Un clic en una tarjeta de munición la selecciona siempre, y también las teclas 1/2/3 y Numpad 1/2/3.
+- [x] Mantener el clic izquierdo sobre la escena carga la fuerza y al soltar dispara, igual que Espacio.
+- [x] Equilibrio medido antes y después (RULE-001) y `PROTOCOL_VERSION` subida (RULE-002).
+
+## Evidence
+
+Ver `WRK-PLAN-006` y las tareas 022-025. Pendiente de la prueba del usuario para archivar.

@@ -247,7 +247,7 @@ export class Hud {
     b.style.display = show ? '' : 'none';
     b.disabled = locked;
     if (b.classList.contains('charging')) return;
-    b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio para cargar';
+    b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio o clic izquierdo';
   }
 
   dispose() {

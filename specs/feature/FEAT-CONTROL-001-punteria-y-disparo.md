@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -42,7 +42,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 | Input | Type | Required | Notes |
 |---|---|---|---|
 | Clic derecho mantenido + ratón | Pointer Events | Sí | Horizontal = rumbo (0,0035 rad/px), vertical = elevación (0,0028 rad/px) |
-| Espacio mantenido | Teclado | Sí | Carga la fuerza. También el botón de disparo `#confirm` mantenido con el clic izquierdo |
+| Espacio o clic izquierdo mantenidos | Teclado / ratón | Sí | Carga la fuerza. El clic izquierdo cuenta sobre la escena (el lienzo), no sobre el HUD. También el botón de disparo `#confirm`. Solo suelta la carga la misma entrada que la empezó (WRK-TASK-025) |
 | A/D (o ←/→) | Teclado | No | Rumbo a 0,6 rad/s |
 | W/S (o ↑/↓) | Teclado | No | Elevación a 0,5 rad/s |
 | Mayúsculas | Modificador | No | Modo precisión: ×0,25 en ratón y teclado |

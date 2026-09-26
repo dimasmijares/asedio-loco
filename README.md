@@ -14,7 +14,7 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 
 ## Cómo se juega
 
-- **Rondas simultáneas.** Todos apuntáis a la vez durante 20 s y disparáis soltando Espacio; si todos estáis listos antes, la ronda empieza en el momento. Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.
+- **Rondas simultáneas.** Todos apuntáis a la vez durante 20 s y disparáis soltando Espacio o el clic izquierdo. En cuanto todos estáis listos (o se acaba el tiempo), cuenta atrás: 3, 2, 1, ¡fuego!, mientras la cámara se aleja para verlo todo. Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.
 - **Eliminación.** Un rey cae si sale despedido fuera de su castillo y toca el suelo, si lo aplastan o si toca la lava. Se ve al momento: cámara lenta, confeti y la calavera en el marcador.
 - **Munición loca.** Cada ronda te tocan 3 municiones distintas al azar y eliges una; las que no usas se pierden. Son 12 tipos:
   - **Comunes:** pedrusco, tronco rodante, racimo de cocos (se divide en 4).
@@ -29,10 +29,10 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 | Acción | Control |
 |---|---|
 | Apuntar | Mantén el **clic derecho** y mueve el ratón: a los lados gira, arriba y abajo cambia la elevación |
-| Cargar y disparar | Mantén **Espacio**: la fuerza sube de 0 a 100 % en 1,5 s y la parábola crece. Al soltar, el disparo queda listo y ya no cambia (también se puede mantener pulsado el botón de disparo) |
+| Cargar y disparar | Mantén **Espacio** o el **clic izquierdo**: la fuerza sube de 0 a 100 % en 1,5 s y la parábola crece. Al soltar, el disparo queda listo y ya no cambia (también se puede mantener pulsado el botón de disparo) |
 | Afinar | A / D (rumbo) · W / S (elevación). Mayúsculas: modo precisión |
 | Cambiar de castillo objetivo | Q / E (o Tab) |
-| Elegir munición | 1 / 2 / 3 (o clic en la tarjeta) |
+| Elegir munición | 1 / 2 / 3, también en el teclado numérico (o clic en la tarjeta) |
 | Acercar o alejar la cámara | Rueda del ratón |
 | Silenciar | M |
 | Mostrar u ocultar la ayuda de controles | H |
