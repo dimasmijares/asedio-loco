@@ -438,10 +438,12 @@ export class Sim {
 
   // ---------- explosiones y campos de fuerza ----------
 
-  // `pierce`: la carga está pegada o metida en el castillo; para los bloques, los que están a menos
-  // de esa distancia del centro no hacen de escudo (la sandía revienta desde dentro). Al rey lo
-  // siguen protegiendo.
-  explode(p: Vec3, radius: number, strength: number, owner: number, kind = 'boom', pierce = 0) {
+  // Opciones:
+  //   pierce  la carga está pegada o metida en el castillo; para los bloques, los que están a menos
+  //           de esa distancia del centro no hacen de escudo (la sandía revienta desde dentro). Al
+  //           rey lo siguen protegiendo.
+  //   king    cuánto daño y empuje le da al rey (1 por defecto; los huevos de la gallina, menos).
+  explode(p: Vec3, radius: number, strength: number, owner: number, kind = 'boom', { pierce = 0, king = 1 } = {}) {
     const R = RAPIER;
     this.events.push({ e: 'boom', p, r: radius, kind });
     const hits: Rec[] = [];
@@ -467,7 +469,7 @@ export class Sim {
         if (blocker && blocker.kind === 'block' && blocker !== r && (r.kind !== 'block' || v3.len(v3.sub(this.pos(blocker), p)) >= pierce)) occl = blocker.mat!.id === 'glass' ? 0.8 : 0.35;
       }
       const mass = r.body.mass();
-      const j = strength * falloff * occl;
+      const j = strength * falloff * occl * (r.kind === 'king' ? king : 1);
       const push = v3.scale(v3.norm([dir[0], dir[1] + 0.35, dir[2]]), j * Math.min(1, 0.4 + mass * 0.3));
       r.body.applyImpulse(rv(push), true);
       r.body.applyTorqueImpulse(rv([(Math.random() - 0.5) * j * 0.2, (Math.random() - 0.5) * j * 0.2, (Math.random() - 0.5) * j * 0.2]), true);

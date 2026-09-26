@@ -41,7 +41,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 6. Al disparar se gasta la munición elegida. Si nadie elige, sale la primera de la mano.
 7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013).
 8. Todas las que vuelan notan el arrastre del aire y el viento (DOM-JUEGO-002). Tienen CCD.
-9. Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027).
+9. `explode` acepta `pierce` (los bloques cercanos no hacen de escudo) y `king` (factor de daño y empuje sobre el rey). Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027).
 
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
@@ -50,7 +50,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Racimo de cocos | común | 14 | Se divide en 4 en el punto más alto | abanico cerrado, cocos al 72 % de tamaño, densidad 7 |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 120 (rompe piedra cerca del centro) |
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
-| Gallina saltarina | rara | 7 | Rebota 4 veces; cada bote es un picotazo | onda de 3,2 m y fuerza 50 por bote |
+| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 30 % del daño y del empuje; mecha de 1,5 s |
 | Piano | rara | 6 | Se marca dónde caería y cae en vertical desde 22 m a los 1,1 s | densidad 3, viento 0,2 |
 | Agujero negro | épica | 3 | Atrae y se traga lo cercano | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,1 m se rompe; al final, implosión de 4 m |
 | Imán | épica | 3 | Arranca el hierro | campo de 10 m y 2,3 s, fuerza 26 (3 % sobre lo que no es hierro); rompe las uniones del hierro |

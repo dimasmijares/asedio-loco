@@ -269,6 +269,13 @@ function buildProjectile(ammo: AmmoId, scale = 1): THREE.Object3D {
       break;
     }
     case 'chicken': {
+      if (scale < 0.6) {
+        // Huevo bomba de la gallina (WRK-TASK-028).
+        const egg = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), toon('#fff4d6'));
+        egg.scale.set(0.85, 1.15, 0.85);
+        g.add(egg);
+        break;
+      }
       const body = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), toon('#fffdf0'));
       g.add(body);
       const comb = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 5), toon('#e63946'));

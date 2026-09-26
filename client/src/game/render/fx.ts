@@ -142,6 +142,13 @@ export class Fx {
       this.ring(p, radius * 0.5);
       return;
     }
+    if (kind === 'egg') {
+      // Huevo bomba: yema, cáscara y un fogonazo pequeño.
+      for (let i = 0; i < this.n(10); i++) this.puff(p, randDir().multiplyScalar(rnd(2, 5) * radius * 0.35), { color: i % 3 ? '#ffd23f' : '#ff9f1c', size: rnd(0.3, 0.6), max: rnd(0.3, 0.5), grow: 1.8, drag: 4, gravity: -1 });
+      for (let i = 0; i < this.n(8); i++) this.bit(p, randDir().multiplyScalar(rnd(3, 6)).add(new THREE.Vector3(0, 2, 0)), { color: '#fff4d6', size: 0.1, max: 1.2 });
+      this.ring(p, radius * 0.6);
+      return;
+    }
     const fire = kind === 'melon' ? ['#ff4d6d', '#ff8fa3', '#40c057'] : kind === 'implode' ? ['#c77dff', '#7b2cbf', '#e0aaff'] : ['#ffd23f', '#ff9f1c', '#ff5400'];
     for (let i = 0; i < this.n(22); i++) {
       this.puff(p, randDir().multiplyScalar(rnd(2, 6) * radius * 0.35), { color: fire[i % fire.length], size: rnd(0.4, 0.9), max: rnd(0.35, 0.7), grow: 1.8, drag: 4, gravity: -1 });

@@ -3,9 +3,9 @@ id: WRK-TASK-028
 type: spec
 layer: work-task
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -31,9 +31,9 @@ Decisión del usuario: huevos bomba **a lo bomba de racimo**, con **poco rebote*
 
 ## Acceptance Criteria
 
-- [ ] Gallina en 12-16 bloques, con más dispersión que la vaca.
-- [ ] Los botes se quedan sobre el castillo rival en al menos 9 de 12 disparos.
-- [ ] Banco sin bajar del presupuesto (RULE-004).
+- [x] Gallina en 12-16 bloques, con más dispersión que la vaca.
+- [x] Los botes se quedan sobre el castillo rival en al menos 9 de 12 disparos.
+- [x] Banco sin bajar del presupuesto (RULE-004).
 
 ## Test Plan
 
@@ -44,4 +44,10 @@ Decisión del usuario: huevos bomba **a lo bomba de racimo**, con **poco rebote*
 
 ## Evidence
 
-Pendiente.
+- **Mecánica:** 3 botes de 2,5 m/s en horizontal y 4,5 m/s hacia arriba hacia el castillo rival más cercano (antes, 4 botes que la lanzaban hacia delante a 6 m/s o más). En cada bote suelta un racimo de 6, 5 y 5 huevos en corona; cada huevo explota al tocar algo o a los 1,5 s (radio 2,2 m, fuerza 72). En el tercer bote la gallina desaparece en plumas.
+- **Rey:** `explode` acepta `king`, un factor sobre el daño y el empuje al rey (huevos: 0,3). Sin él, los huevos mataban o echaban al rey en 5-6 de 12.
+- **Vista:** el huevo es una gallina a escala 0,45 con modelo propio (no cambia el protocolo). Explosión de yema y cáscara, petardo agudo y temblor pequeño.
+- **Destrozo (12 disparos):** de 5,2 a 13,8 bloques (14,2-16,8 en ejecuciones sueltas: los huevos salen con dirección aleatoria), 3 de 12 reyes, dispersión de 1,0 a 2,3 m (la mayor de las raras) y piedra de 0,7 a 5,2.
+- **Equilibrio (8 partidas):** normal 7,0 rondas y 136 s (antes de la tarea, 9,6-10,0); difícil 6,1 rondas y 118 s (6,0-6,9). El usuario aceptó partidas más cortas.
+- La comprobación de que los botes se quedan sobre el castillo se hace con la dispersión (2,3 m frente a los 3 m del alud) y con capturas del campo de pruebas.
+- E2E de física y solitario en local: 5 de 5.

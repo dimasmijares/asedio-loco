@@ -158,6 +158,12 @@ export class Sfx {
     const o = this.out(p, 0.9 * size);
     if (!o) return;
     const t = this.ctx!.currentTime;
+    if (kind === 'egg') {
+      // Huevo bomba: petardo corto y agudo.
+      this.noise(o, t, 0.35, 'lowpass', 2400, 300, 0.9, 0.002, 0.7);
+      this.tone(o, t, 0.2, 'sine', 160, 60, 0.6);
+      return;
+    }
     if (kind === 'implode') {
       this.noise(o, t, 0.8, 'lowpass', 200, 2000, 1, 0.3, 0.8);
       this.tone(o, t, 0.8, 'sine', 60, 200, 0.6, 0.3);

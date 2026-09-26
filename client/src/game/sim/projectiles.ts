@@ -1,7 +1,7 @@
 import { AMMO, type AmmoId } from '../../../../shared/ammo';
 import { landingPoint, launchVelocity, type Aim } from '../../../../shared/ballistics';
 import { buildCastle } from '../../../../shared/castle';
-import { launchPoint } from '../../../../shared/map';
+import { castleOrigin, launchPoint } from '../../../../shared/map';
 import { v3, type Vec3 } from '../../../../shared/math';
 import { RAPIER } from './rapier';
 import type { Rec, Sim } from './sim';
@@ -19,9 +19,16 @@ const tv = (v: { x: number; y: number; z: number }): Vec3 => [v.x, v.y, v.z];
 
 // Ajustes de equilibrio (WRK-TASK-021, medidos con tests/balance/destrozo).
 const LOG_SPIN = 12; // rad/s que mantiene el tronco al rodar
-const CHICKEN_BOUNCES = 4;
-const PECK_RADIUS = 3.2;
-const PECK_FORCE = 50;
+// Gallina bombardera (WRK-TASK-028): botes cortos y bajos hacia el castillo más cercano y, en
+// cada uno, un racimo de huevos que explotan al tocar algo.
+const CHICKEN_BOUNCES = 3;
+const CHICKEN_HOP: [number, number] = [2.5, 4.5]; // m/s en horizontal y hacia arriba en cada bote
+const EGGS = [6, 5, 5]; // huevos por bote
+export const EGG_SCALE = 0.45; // un proyectil de gallina a esta escala es un huevo
+const EGG_RADIUS = 2.2;
+const EGG_FORCE = 72;
+const EGG_KING = 0.3; // los huevos apenas le hacen daño al rey: es munición de destrozo
+const EGG_FUSE = 1.5; // s: si no toca nada antes, explota igual
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
 const MAGNET_STRENGTH = 26;
 // Vaca: cráter que rompe piedra cerca del centro. Sandía: carga pegada que revienta desde dentro.
@@ -132,7 +139,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             if (!sim.recs.has(r.id)) return;
             const q = tv(r.body.translation());
             sim.removeRec(r, 'proj');
-            sim.explode(q, MELON_RADIUS, MELON_FORCE, r.slot, 'melon', MELON_PIERCE);
+            sim.explode(q, MELON_RADIUS, MELON_FORCE, r.slot, 'melon', { pierce: MELON_PIERCE });
           });
         },
       };
@@ -141,24 +148,55 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
     case 'chicken': {
       let bounces = 0;
       let lastBounce = -1;
+      const egg = (r: Rec): ProjectileBehavior => {
+        const boom = (e: Rec) => {
+          const p = tv(e.body.translation());
+          sim.removeRec(e, 'proj');
+          sim.explode(p, EGG_RADIUS, EGG_FORCE, r.slot, 'egg', { king: EGG_KING });
+        };
+        return {
+          maxLife: EGG_FUSE + 0.5,
+          onStep: (e) => void (sim.time - e.born! > EGG_FUSE && boom(e)),
+          onContact: (e) => void (sim.time - e.born! > 0.05 && boom(e)),
+        };
+      };
       return {
         maxLife: 7,
         onSpawn(r) {
           sim.events.push({ e: 'fx', kind: 'cluck', p: tv(r.body.translation()), id: r.id });
         },
         onContact(r) {
-          if (bounces >= CHICKEN_BOUNCES || sim.time - lastBounce < 0.15) return;
-          bounces++;
+          if (sim.time - lastBounce < 0.2) return;
           lastBounce = sim.time;
-          const v = r.body.linvel();
-          // Salto con mala leche: sube y sigue hacia delante.
-          const h = Math.hypot(v.x, v.z) || 1;
-          const fwd = Math.max(h, 6) * 1.05;
-          r.body.setLinvel({ x: (v.x / h) * fwd, y: Math.max(Math.abs(v.y) * 0.8, 6.5), z: (v.z / h) * fwd }, true);
           const p = tv(r.body.translation());
           sim.events.push({ e: 'fx', kind: 'cluck', p, id: r.id });
-          // Cada bote es un picotazo: una onda pequeña que astilla lo que toca.
-          sim.explode(p, PECK_RADIUS, PECK_FORCE, r.slot, 'peck');
+          // Racimo: los huevos salen en corona hacia fuera y hacia arriba.
+          const n = EGGS[bounces];
+          const turn = Math.random() * Math.PI * 2;
+          for (let i = 0; i < n; i++) {
+            const a = turn + (i / n) * Math.PI * 2;
+            const h = 1.5 + Math.random() * 2;
+            sim.spawnProjectile(AMMO.chicken, r.slot, v3.add(p, [0, 0.35, 0]), [Math.cos(a) * h, 2.5 + Math.random() * 1.5, Math.sin(a) * h], { scale: EGG_SCALE, behavior: egg(r) });
+          }
+          bounces++;
+          if (bounces >= CHICKEN_BOUNCES) {
+            sim.removeRec(r, 'proj');
+            sim.events.push({ e: 'boom', p, r: 1.2, kind: 'peck' });
+            return;
+          }
+          // Bote corto y bajo hacia el castillo rival más cercano: se queda encima soltando huevos.
+          let best: Vec3 | null = null;
+          for (const k of sim.kings.values()) {
+            if (k.slot === r.slot) continue;
+            const c = castleOrigin(k.slot);
+            if (!best || Math.hypot(c[0] - p[0], c[2] - p[2]) < Math.hypot(best[0] - p[0], best[2] - p[2])) best = c;
+          }
+          const v = r.body.linvel();
+          const to = best ? v3.norm([best[0] - p[0], 0, best[2] - p[2]]) : v3.norm([v.x, 0, v.z]);
+          const d = best ? Math.hypot(best[0] - p[0], best[2] - p[2]) : 9;
+          const hop = Math.min(CHICKEN_HOP[0], d);
+          r.body.setLinvel({ x: to[0] * hop, y: CHICKEN_HOP[1], z: to[2] * hop }, true);
+          r.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
         },
       };
     }
