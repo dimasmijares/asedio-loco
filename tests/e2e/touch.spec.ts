@@ -67,13 +67,3 @@ test('táctil: apuntar arrastrando, flechas, tarjetas, pellizco y botón redondo
   expect((await state(page)).power).toBeGreaterThan(0.2);
   expect(errors).toEqual([]);
 });
-
-test('táctil: en vertical se pide girar el móvil', async ({ page }) => {
-  test.setTimeout(90_000);
-  await page.setViewportSize({ width: 360, height: 780 });
-  await page.goto('/?bots=1&seed=5#solo');
-  await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase, null, { timeout: 60_000 });
-  await expect(page.locator('.rotate-hint')).toBeVisible();
-  await page.setViewportSize({ width: 780, height: 360 });
-  await expect(page.locator('.rotate-hint')).toBeHidden();
-});

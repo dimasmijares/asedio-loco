@@ -84,7 +84,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - flechas ◀ ▶ de castillo objetivo;
   - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
-  - pantalla completa al entrar (Android) y aviso de «Gira el móvil» en vertical durante la partida.
+  - pantalla completa al entrar (Android), sin bloquear la orientación: se juega en vertical o en horizontal. En vertical el HUD se recoloca (marcador compacto, viento bajo los botones, fila de tarjetas abajo y botón de disparo encima a la derecha) y la cámara abre el campo de visión para no bajar de 40° de ancho.
 - Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):

@@ -191,14 +191,8 @@ function boot() {
   });
 }
 
-// Móvil: clase para los estilos táctiles y aviso de «gira el móvil» en vertical.
-if (isMobileDevice()) {
-  document.body.classList.add('touch');
-  const hint = document.createElement('div');
-  hint.className = 'rotate-hint';
-  hint.innerHTML = '<div class="rotate-icon">📱</div><div>Gira el móvil para jugar en horizontal</div>';
-  document.body.append(hint);
-}
+// Móvil: clase para los estilos táctiles.
+if (isMobileDevice()) document.body.classList.add('touch');
 
 window.addEventListener('hashchange', () => location.reload());
 boot();

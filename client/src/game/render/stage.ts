@@ -95,6 +95,11 @@ export class Stage {
     const h = this.canvas.clientHeight || window.innerHeight;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
+    // En vertical (móvil) se abre el campo vertical para no bajar de 40° en horizontal: si no,
+    // con 55° en vertical el ancho se queda en ~25° y los castillos se salen por los lados.
+    const minH = Math.tan((40 * Math.PI) / 360);
+    const v = Math.max(Math.tan((55 * Math.PI) / 360), minH / this.camera.aspect);
+    this.camera.fov = (Math.atan(v) * 360) / Math.PI;
     this.camera.updateProjectionMatrix();
     if (this.vignette) this.vignette.uniforms.uAspect.value = w / h;
   }

@@ -7,16 +7,14 @@ export function isMobileDevice() {
   return matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
 }
 
-// En móvil, pantalla completa y en horizontal. Necesita un gesto del usuario (llamar desde un
-// clic). En iPhone no hay pantalla completa fuera de una app instalada: se queda como está.
+// En móvil, pantalla completa, sin bloquear la orientación: se juega en vertical o en horizontal.
+// Necesita un gesto del usuario (llamar desde un clic). En iPhone no hay pantalla completa fuera
+// de una app instalada: se queda como está.
 export function enterFullscreen() {
   if (!isMobileDevice() || document.fullscreenElement) return;
   const el = document.documentElement;
   try {
-    const r = el.requestFullscreen?.({ navigationUI: 'hide' });
-    void r
-      ?.then(() => (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape'))
-      .catch(() => {});
+    void el.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
   } catch {
     /* sin pantalla completa */
   }

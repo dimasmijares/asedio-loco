@@ -518,45 +518,6 @@ button.big {
   display: none;
 }
 
-/* Móvil en vertical durante la partida: se pide girarlo (en iPhone no se puede bloquear). */
-.rotate-hint {
-  display: none;
-}
-
-@media (orientation: portrait) {
-  body.touch.in-game .rotate-hint {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 24px;
-    text-align: center;
-    background: rgba(29, 22, 38, 0.94);
-    color: #fff;
-    font-size: 22px;
-  }
-
-  .rotate-hint .rotate-icon {
-    font-size: 72px;
-    animation: rotate-phone 1.6s ease-in-out infinite;
-  }
-}
-
-@keyframes rotate-phone {
-  0%,
-  30% {
-    transform: rotate(0deg);
-  }
-  70%,
-  100% {
-    transform: rotate(-90deg);
-  }
-}
-
 .hud-ammo {
   display: flex;
   gap: 8px;
@@ -928,6 +889,155 @@ kbd {
   }
   .stat-icon {
     font-size: 20px;
+  }
+}
+
+/* ---------- HUD en vertical (móvil de pie, ~360 × 780) ----------
+   Arriba: marcador compacto a la izquierda, reloj y fase en el centro, botones y viento a la
+   derecha. Abajo: flechas y tarjetas en una fila y, encima a la derecha, el botón de disparo. */
+@media (orientation: portrait) and (max-width: 600px) {
+  .hud-top {
+    top: 6px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hud-phase {
+    padding: 2px 8px;
+    border-width: 2px;
+    border-radius: 9px;
+  }
+  .hud-phase b {
+    font-size: 14px;
+  }
+  .hud-phase span {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .hud-timer {
+    font-size: 24px;
+    min-width: 42px;
+    height: 42px;
+    line-height: 36px;
+    border-width: 3px;
+  }
+  .hud-left {
+    top: 6px;
+    left: 6px;
+    gap: 6px;
+    width: auto;
+  }
+  .hud-players {
+    width: auto;
+    gap: 3px;
+  }
+  .hp {
+    padding: 2px 6px;
+    gap: 5px;
+    border-radius: 8px;
+  }
+  .hp .banner {
+    width: 18px;
+    height: 22px;
+    font-size: 11px;
+    padding-top: 1px;
+  }
+  .hp-body {
+    flex: none;
+    width: 40px;
+  }
+  .hp-name {
+    display: none;
+  }
+  .hp-pct {
+    margin-left: 0;
+    font-size: 11px;
+    opacity: 1;
+  }
+  .hp-bar {
+    height: 4px;
+    margin-top: 1px;
+  }
+  .hp-state {
+    font-size: 13px;
+    width: 14px;
+  }
+  .hud-corner {
+    top: 6px;
+    right: 6px;
+    gap: 4px;
+  }
+  .hud-mute {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 18px;
+  }
+  /* El viento baja debajo de los botones para no montarse sobre la fase. */
+  .hud-corner > .row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    justify-items: end;
+  }
+  .hud-corner > .row > .hud-wind {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+  .hud-wind {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+  .hud-bottom {
+    bottom: 8px;
+    gap: 6px;
+  }
+  .hud-aim {
+    font-size: 12px;
+    gap: 10px;
+    padding: 2px 10px;
+  }
+  .hud-row {
+    gap: 6px;
+  }
+  .hud-ammo {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .ammo {
+    min-width: 0;
+    width: 68px;
+    padding: 3px 4px 2px;
+  }
+  .ammo-icon {
+    font-size: 22px;
+  }
+  .ammo-name {
+    font-size: 10px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .target-btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 18px;
+  }
+  body.touch .hud-confirm {
+    width: 88px;
+    height: 88px;
+    font-size: 32px;
+    right: 14px;
+    bottom: 104px;
+  }
+  .banner-text {
+    font-size: clamp(30px, 11vw, 60px);
+  }
+  .banner-sub {
+    font-size: 15px;
+    padding: 0 12px;
+  }
+  .results-box {
+    top: 150px;
+    width: calc(100vw - 20px);
   }
 }
 

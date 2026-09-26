@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// HUD compacto (menos de 500 px de alto): en tres móviles en horizontal ningún elemento del
-// HUD se cruza con otro ni se sale de la pantalla. Por encima de 500 px no cambia.
+// HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y dos en vertical ningún
+// elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia.
 const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
 
 async function rects(page: Page) {
@@ -21,6 +21,8 @@ for (const [w, h] of [
   [863, 360],
   [740, 360],
   [915, 412],
+  [360, 780],
+  [412, 915],
 ]) {
   test.describe(`${w}×${h}`, () => {
     test.use({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true });
