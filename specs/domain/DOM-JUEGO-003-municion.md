@@ -41,14 +41,15 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 6. Al disparar se gasta la munición elegida. Si nadie elige, sale la primera de la mano.
 7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013).
 8. Todas las que vuelan notan el arrastre del aire y el viento (DOM-JUEGO-002). Tienen CCD.
+9. Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027).
 
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
 | Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s |
 | Tronco rodante | común | 14 | Al tocar algo sigue rodando | r 0,36 m, largo 1,9 m, densidad 3, giro mínimo 12 rad/s, vida 7,5 s |
 | Racimo de cocos | común | 14 | Se divide en 4 en el punto más alto | abanico cerrado, cocos al 72 % de tamaño, densidad 7 |
-| Vaca explosiva | rara | 8 | Muge y explota al tocar algo | radio 3,6 m, fuerza 28 |
-| Sandía pegajosa | rara | 7 | Se pega y explota a los 2 s | radio 3,6 m, fuerza 34 |
+| Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 120 (rompe piedra cerca del centro) |
+| Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
 | Gallina saltarina | rara | 7 | Rebota 4 veces; cada bote es un picotazo | onda de 3,2 m y fuerza 50 por bote |
 | Piano | rara | 6 | Se marca dónde caería y cae en vertical desde 22 m a los 1,1 s | densidad 3, viento 0,2 |
 | Agujero negro | épica | 3 | Atrae y se traga lo cercano | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,1 m se rompe; al final, implosión de 4 m |
@@ -96,7 +97,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
   | Bola de nieve | 9,8 | 3,0 | 4,1 | 0,9 | 3,6 |
 
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
-- La vaca (2,3) y la sandía (2,6) siguen flojas: el usuario solo pidió ajustar el imán, el tronco y la gallina.
+- Tras WRK-TASK-027 (12 disparos): vaca 16,5 bloques (3 de 12 reyes) y sandía 15,0 (2 de 12), las dos con más de 7 piedras rotas por disparo. La sandía es la que más baja llega (altura 2,9 m).
 
 ## Acceptance Criteria
 

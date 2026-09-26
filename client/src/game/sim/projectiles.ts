@@ -24,6 +24,12 @@ const PECK_RADIUS = 3.2;
 const PECK_FORCE = 50;
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
 const MAGNET_STRENGTH = 26;
+// Vaca: cráter que rompe piedra cerca del centro. Sandía: carga pegada que revienta desde dentro.
+const COW_RADIUS = 4.8;
+const COW_FORCE = 120;
+const MELON_RADIUS = 4.0;
+const MELON_FORCE = 130;
+const MELON_PIERCE = 2;
 
 export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior {
   switch (id) {
@@ -95,7 +101,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           if (sim.time - r.born! < 0.08) return;
           const p = tv(r.body.translation());
           sim.removeRec(r, 'proj');
-          sim.explode(p, 3.6, 28, r.slot, 'cow');
+          sim.explode(p, COW_RADIUS, COW_FORCE, r.slot, 'cow');
         },
       };
     }
@@ -126,7 +132,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             if (!sim.recs.has(r.id)) return;
             const q = tv(r.body.translation());
             sim.removeRec(r, 'proj');
-            sim.explode(q, 3.6, 34, r.slot, 'melon');
+            sim.explode(q, MELON_RADIUS, MELON_FORCE, r.slot, 'melon', MELON_PIERCE);
           });
         },
       };

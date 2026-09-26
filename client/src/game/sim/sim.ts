@@ -438,7 +438,10 @@ export class Sim {
 
   // ---------- explosiones y campos de fuerza ----------
 
-  explode(p: Vec3, radius: number, strength: number, owner: number, kind = 'boom') {
+  // `pierce`: la carga está pegada o metida en el castillo; para los bloques, los que están a menos
+  // de esa distancia del centro no hacen de escudo (la sandía revienta desde dentro). Al rey lo
+  // siguen protegiendo.
+  explode(p: Vec3, radius: number, strength: number, owner: number, kind = 'boom', pierce = 0) {
     const R = RAPIER;
     this.events.push({ e: 'boom', p, r: radius, kind });
     const hits: Rec[] = [];
@@ -461,7 +464,7 @@ export class Sim {
       const hit = this.world.castRay(new R.Ray(rv(p), rv(dir)), dist - 0.3, true, undefined, undefined, undefined, r.body);
       if (hit) {
         const blocker = this.byHandle.get(hit.collider.handle);
-        if (blocker && blocker.kind === 'block' && blocker !== r) occl = blocker.mat!.id === 'glass' ? 0.8 : 0.35;
+        if (blocker && blocker.kind === 'block' && blocker !== r && (r.kind !== 'block' || v3.len(v3.sub(this.pos(blocker), p)) >= pierce)) occl = blocker.mat!.id === 'glass' ? 0.8 : 0.35;
       }
       const mass = r.body.mass();
       const j = strength * falloff * occl;
@@ -475,7 +478,9 @@ export class Sim {
         else if (this.breaking) this.addDamage(r, dmg * 0.6);
         for (const jt of r.joints) if (j * 25 > jt.strength) this.pendingJointBreak.add(jt);
       } else if (r.kind === 'king') {
-        r.damage += j / 40;
+        // Una explosión que no le da de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen
+        // falta dos o un impacto directo (WRK-TASK-027).
+        r.damage += dist < 1.2 ? j / 40 : Math.min(j / 40, 0.6);
         if (r.damage >= 1) this.killKing(r.slot, 'crushed', owner);
       }
     }
