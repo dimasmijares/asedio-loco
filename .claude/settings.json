@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run kdd*)",
+      "Bash(npm run verify)",
+      "Bash(npm run budget*)",
+      "Bash(npm run ci:estado*)",
+      "Bash(npm run typecheck)",
+      "Bash(npm test)",
+      "Bash(npm test *)",
+      "Bash(node tools/spec-graph/*)",
+      "Bash(node scripts/kdd.mjs*)",
+      "Bash(node scripts/budget.mjs*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch --show-current)",
+      "Bash(gh run list*)",
+      "Bash(gh run view*)"
+    ]
+  }
+}

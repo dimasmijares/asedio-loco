@@ -23,6 +23,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Especificaciones KDD (grafo, huérfanos y ciclo de vida)
+        run: npm run kdd:check
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

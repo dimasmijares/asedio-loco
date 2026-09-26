@@ -12,3 +12,10 @@ playwright-report/
 # Depuración local
 tests/unit/_*.test.ts
 _debug.txt
+
+# Grafo KDD generado (npm run kdd -- build --html)
+_build/
+
+# Claude Code: topes de presupuesto y ajustes locales
+.claude/budget.local.json
+.claude/settings.local.json

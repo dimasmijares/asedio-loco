@@ -11,14 +11,21 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "e2e:prod": "cross-env BASE_URL=https://asedio-loco.dimasmijares.workers.dev playwright test",
-    "ci:estado": "node tests/tools/ci-status.mjs"
+    "ci:estado": "node tests/tools/ci-status.mjs",
+    "kdd": "node tools/spec-graph/spec-graph.mjs --specs specs",
+    "kdd:check": "node scripts/kdd.mjs check",
+    "kdd:pendientes": "node scripts/kdd.mjs pendientes",
+    "verify": "npm run kdd:check && npm run typecheck && npm test",
+    "budget": "node scripts/budget.mjs"
   },
   "license": "ISC",
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260924.1",
     "@playwright/test": "^1.63.0",
     "@types/three": "^0.186.0",
+    "commander": "^15.0.0",
     "cross-env": "^10.1.0",
+    "gray-matter": "^4.0.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.1",
