@@ -229,7 +229,7 @@ export class Game {
     }
     this.mode?.update(rawDt);
     this.view.update(dt);
-    this.rig.shake = Math.max(this.rig.shake, this.view.shake);
+    this.rig.shake = settings.shake ? Math.max(this.rig.shake, this.view.shake) : 0;
     this.view.shake = 0;
     this.rig.update(rawDt);
     this.stage.update(rawDt);

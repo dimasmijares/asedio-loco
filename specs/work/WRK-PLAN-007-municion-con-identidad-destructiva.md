@@ -31,8 +31,8 @@ Primero se mide la firma de cada munición, para comprobar que cada cambio da la
 | 4 | WRK-TASK-029 · Comunes: tronco apisonadora y cocos metralla | completed | 026 | Tronco que barre la base y 6 cocos que rompen |
 | 5 | WRK-TASK-030 · Piano perforador | completed | 026 | Atraviesa pisos y remata con una onda en el suelo |
 | 6 | WRK-TASK-031 · Épicas: agujero negro, imán con retroceso y alud | completed | 027 | Tres épicas en 18-26 bloques con firmas distintas |
-| 7 | WRK-TASK-032 · Sensación propia de cada munición | active | 027-031 | Temblor según destrozo, efectos, sonidos y textos |
-| 8 | WRK-TASK-033 · Bots y equilibrio final | draft | 027-032 | Bots que usan cada munición a su manera; partida medida |
+| 7 | WRK-TASK-032 · Sensación propia de cada munición | completed | 027-031 | Temblor según destrozo, efectos, sonidos y textos |
+| 8 | WRK-TASK-033 · Bots y equilibrio final | active | 027-032 | Bots que usan cada munición a su manera; partida medida |
 
 ## Risk Assessment
 

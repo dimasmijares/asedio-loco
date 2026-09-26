@@ -151,6 +151,8 @@ export class WorldView {
       case 'rm':
         this.removeBlock(e.id);
         if (e.why === 'frac') {
+          // Cada bloque roto suma temblor: cuanto más destrozo, más tiembla (WRK-TASK-032).
+          this.shake = Math.min(1.3, this.shake + 0.035);
           this.debris.burst(e.mat, e.size, e.p, e.q, e.v, e.seed);
           this.fx.shatter(e.p, e.mat);
         } else if (e.why === 'melt') this.fx.fire(e.p, 6);

@@ -36,6 +36,8 @@ export class Hud {
   private wind = h('div', { class: 'hud-wind', id: 'hud-wind' });
   private ammo = h('div', { class: 'hud-ammo', id: 'hud-ammo' });
   private aimInfo = h('div', { class: 'hud-aim', id: 'hud-aim' });
+  // Qué hace la munición elegida: en móvil no hay «title» que valga (WRK-TASK-032).
+  private ammoDesc = h('div', { class: 'hud-ammo-desc', id: 'hud-ammo-desc' });
   private help = h('div', { class: 'hud-help', id: 'hud-help' });
   private helpList = h('div', { class: 'help-list' });
   private helpOpen = true;
@@ -67,7 +69,7 @@ export class Hud {
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
     const row = h('div', { class: 'hud-row' }, this.targetBtns[0], this.ammo, this.targetBtns[1]);
-    const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, row, this.confirmBtn);
+    const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, this.ammoDesc, row, this.confirmBtn);
     const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
     const toggle = () => {
       mute.textContent = sfx.toggleMute() ? '🔇' : '🔊';
@@ -121,6 +123,8 @@ export class Hud {
     const key = `${list.join(',')}|${selected}|${keys}`;
     if (key === this.ammoKey) return;
     this.ammoKey = key;
+    const sel = list[selected];
+    this.ammoDesc.textContent = sel ? AMMO[sel].desc : '';
     this.ammo.replaceChildren(
       ...list.map((id, i) => {
         const a = AMMO[id];

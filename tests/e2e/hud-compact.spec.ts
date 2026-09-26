@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y dos en vertical ningún
 // elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia.
-const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
+const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
 
 async function rects(page: Page) {
   return page.evaluate((sel) => {

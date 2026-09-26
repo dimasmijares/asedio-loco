@@ -59,13 +59,13 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
    - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 📡 si está desconectado (en red) y 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
-   - Abajo, potencia y elevación, 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
+   - Abajo, potencia y elevación, una línea con lo que hace la munición elegida (`#hud-ammo-desc`, WRK-TASK-032: en móvil el `title` de la tarjeta no se ve; se oculta en horizontal con menos de 500 px de alto), 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
    - Rótulos: «RONDA N», «¡LA LAVA SUBE!», «¡REY ELIMINADO!» / «¡TU REY HA CAÍDO!», «REPETICIÓN».
    - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Un castillo sin daños pone «intacto» (D-055).
 5. **Ajustes** (en portada y HUD):
    - Calidad baja / media / alta, que se aplica al momento (D-046).
-   - Sonido, texto grande y mostrar fps (ocultos por defecto, D-055).
+   - Sonido, texto grande, temblor de cámara (activado salvo con `prefers-reduced-motion`, WRK-TASK-032) y mostrar fps (ocultos por defecto, D-055).
    - Sensibilidad del ratón de ×0,4 a ×1,8 (pasos de 0,1).
 6. **Accesibilidad** (D-045): colores Okabe-Ito más un emblema por jugador (☀ ☾ ★ ϟ), con tinta oscura sobre amarillo y rosa. Hay texto grande y silencio.
 7. **Pantallas estrechas** (≤ 700 px): marcador de 160 px y ayuda de controles oculta.
