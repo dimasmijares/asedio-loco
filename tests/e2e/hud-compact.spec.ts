@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { AMMO } from '../../shared/ammo';
 
 // HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y dos en vertical ningún
 // elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia.
@@ -31,6 +32,9 @@ for (const [w, h] of [
       await page.goto('/?bots=3&seed=5#solo');
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       await page.waitForTimeout(500);
+      // La descripción más larga de la munición, para comprobar el peor caso.
+      const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
+      await page.evaluate((t) => (document.querySelector('#hud-ammo-desc')!.textContent = t), longest);
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
       const r = await rects(page);
       expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(8);

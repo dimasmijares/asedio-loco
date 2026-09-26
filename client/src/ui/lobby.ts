@@ -36,7 +36,7 @@ export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (na
   create.onclick = busy(create, () => opts.onCreate(getName()));
   const solo = h('button', { class: 'big', id: 'solo' }, 'Jugar solo contra bots');
   solo.onclick = () => opts.onSolo(getName());
-  const children: Node[] = [h('label', { htmlFor: 'name' }, '¿Cómo te llamas?'), input];
+  const children: Node[] = [h('label', { htmlFor: 'name' }, 'Nombre'), input];
   if (opts.code) {
     const join = h('button', { class: 'primary big', id: 'join' }, `Entrar en la sala ${opts.code}`);
     join.onclick = busy(join, () => opts.onJoin(getName()));
@@ -62,7 +62,7 @@ export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (na
 // Resumen de cómo se juega (también accesible desde la portada).
 export function showHowTo() {
   document.getElementById('howto')?.remove();
-  const close = h('button', { class: 'primary big' }, '¡Entendido!');
+  const close = h('button', { class: 'primary big' }, 'Entendido');
   const modal = h(
     'div',
     { class: 'overlay modal', id: 'howto', role: 'dialog', 'aria-label': 'Cómo se juega' },
@@ -72,10 +72,10 @@ export function showHowTo() {
       h('h2', null, 'Cómo se juega'),
       h('p', null, '👑 Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
       isMobileDevice()
-        ? h('p', null, '🎯 Todos apuntáis a la vez durante 20 s. Arrastra el dedo por la pantalla para girar y subir o bajar el tiro. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola crece) y suelta para disparar: ya no se puede cambiar. Cuando todos están listos, cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ eligen otro castillo; pellizca para acercar la cámara.')
-        : h('p', null, '🎯 Todos apuntáis a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar y subir o bajar el tiro. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola crece) y suelta para disparar: ya no se puede cambiar. Cuando todos están listos, cuenta atrás: 3, 2, 1, ¡fuego! Q/E eligen otro castillo.'),
-      h('p', null, isMobileDevice() ? '🐄 Cada ronda te tocan 3 municiones distintas al azar: toca la tarjeta de la que quieras. Las defensivas (andamio y burbuja) protegen tu castillo.' : '🐄 Cada ronda te tocan 3 municiones distintas al azar: elige una con 1, 2 o 3 (o con un clic). Las defensivas (andamio y burbuja) protegen tu castillo.'),
-      h('p', null, '🌋 Cada 3 rondas sube la lava y, desde la ronda 6, sopla el viento. ¡Mira la flecha!'),
+        ? h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Arrastra el dedo por la pantalla para girar la catapulta y ajustar la elevación. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola se alarga) y suéltalo para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ cambian de castillo objetivo y el gesto de pellizcar acerca la cámara.')
+        : h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar la catapulta y ajustar la elevación. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola se alarga) y suelta para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Q/E cambian de castillo objetivo.'),
+      h('p', null, isMobileDevice() ? '🐄 En cada ronda recibes 3 municiones distintas al azar: toca la tarjeta de la que quieras usar. Las defensivas (andamio y burbuja) protegen tu castillo.' : '🐄 En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3, o con un clic en su tarjeta. Las defensivas (andamio y burbuja) protegen tu castillo.'),
+      h('p', null, '🌋 La lava sube cada 3 rondas y, desde la ronda 6, sopla el viento; la flecha de la esquina indica su dirección.'),
       close,
     ),
   );
@@ -90,9 +90,9 @@ export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number,
   for (let i = 1; i <= 3; i++) bots.append(h('option', { value: String(i), selected: i === 3 }, `${i} bot${i > 1 ? 's' : ''}`));
   const diff = h('select', { id: 'solo-difficulty', 'aria-label': 'Dificultad' });
   for (const d of DIFFICULTIES) diff.append(h('option', { value: d, selected: d === 'normal' }, DIFF_LABEL[d]));
-  const start = h('button', { class: 'primary big', id: 'solo-start' }, '¡A la batalla!');
+  const start = h('button', { class: 'primary big', id: 'solo-start' }, 'Empezar partida');
   start.onclick = () => opts.onStart(Number(bots.value), diff.value as Difficulty);
-  const sandbox = h('button', { class: 'big', id: 'sandbox' }, 'Campo de pruebas (munición infinita)');
+  const sandbox = h('button', { class: 'big', id: 'sandbox' }, 'Campo de pruebas (munición ilimitada)');
   sandbox.onclick = () => opts.onSandbox();
   const back = h('button', { style: 'margin-top:12px' }, '← Volver');
   back.onclick = () => opts.onBack();
@@ -101,7 +101,7 @@ export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number,
       'div',
       { class: 'panel', id: 'solo-setup' },
       h('h2', null, 'Jugar solo'),
-      h('p', { class: 'muted' }, 'Tú contra los bots. Gana el último rey en pie.'),
+      h('p', { class: 'muted' }, 'Partida contra bots. Gana el último rey en pie.'),
       h('div', { class: 'row' }, h('div', null, h('label', { htmlFor: 'solo-bots' }, 'Rivales'), bots), h('div', null, h('label', { htmlFor: 'solo-difficulty' }, 'Dificultad'), diff)),
       start,
       sandbox,
@@ -140,7 +140,7 @@ export class LobbyView {
         linkInput.select();
         document.execCommand('copy');
       }
-      toast('¡Enlace copiado! Pásaselo a tus amigos');
+      toast('Enlace copiado. Compártelo con los demás jugadores.');
     };
 
     const list = h('ul', { class: 'players', id: 'player-list' });
@@ -166,20 +166,20 @@ export class LobbyView {
         botsLeft--;
         list.append(h('li', { 'data-bot': 'true' }, banner, h('span', { class: 'name' }, `Bot (${DIFF_LABEL[room.config.difficulty]})`), h('span', { class: 'tag bot' }, 'Bot')));
       } else {
-        list.append(h('li', { class: 'empty' }, h('div', { class: 'banner', style: 'background:#bbb' }), 'Hueco libre'));
+        list.append(h('li', { class: 'empty' }, h('div', { class: 'banner', style: 'background:#bbb' }), 'Plaza libre'));
       }
     }
 
     const parts: Node[] = [
       h('h2', null, `Sala ${room.code}`),
-      h('div', { class: 'muted' }, 'Comparte este enlace para que entren tus amigos:'),
+      h('div', { class: 'muted' }, 'Comparte este enlace para invitar a otros jugadores:'),
       h('div', { class: 'link-box' }, linkInput, copy),
       list,
       h('div', { class: 'muted', id: 'spectators' }, room.spectators ? `👀 ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}` : ''),
     ];
 
     if (this.conn.you.role === 'spectator') {
-      parts.push(h('p', { class: 'muted', id: 'spectator-note' }, 'La sala está llena: miras como espectador.'));
+      parts.push(h('p', { class: 'muted', id: 'spectator-note' }, 'La sala está completa: participas como espectador.'));
     } else if (isHost) {
       const free = MAX_PLAYERS - room.players.length;
       const bots = h('select', { id: 'bots', 'aria-label': 'Bots de relleno' });
@@ -189,7 +189,7 @@ export class LobbyView {
       for (const d of DIFFICULTIES) diff.append(h('option', { value: d, selected: d === room.config.difficulty }, DIFF_LABEL[d]));
       diff.onchange = () => this.conn.send({ t: 'config', config: { difficulty: diff.value as Difficulty } });
       const total = room.players.filter((p) => p.connected).length + room.config.bots;
-      const start = h('button', { class: 'primary big', id: 'start', disabled: total < 2 }, total < 2 ? 'Faltan rivales (añade bots)' : '¡A la batalla!');
+      const start = h('button', { class: 'primary big', id: 'start', disabled: total < 2 }, total < 2 ? 'Se necesitan al menos 2 jugadores (añade bots)' : 'Empezar partida');
       start.onclick = () => this.conn.send({ t: 'start' });
       parts.push(h('div', { class: 'row' }, h('div', null, h('label', { htmlFor: 'bots' }, 'Bots'), bots), h('div', null, h('label', { htmlFor: 'difficulty' }, 'Dificultad'), diff)), start);
     } else {

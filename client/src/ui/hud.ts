@@ -271,7 +271,7 @@ export class Hud {
     if (b.classList.contains('charging')) return;
     // En táctil es un botón redondo abajo a la derecha, al alcance del pulgar.
     if (this.touchUi) b.textContent = locked ? '✔' : '🔥';
-    else b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio o clic izquierdo';
+    else b.textContent = locked ? '✔ Disparo listo · esperando al resto de jugadores' : 'Mantén Espacio o clic izquierdo';
     b.setAttribute('aria-label', locked ? 'Disparo listo' : 'Mantén pulsado para cargar y suelta para disparar');
   }
 

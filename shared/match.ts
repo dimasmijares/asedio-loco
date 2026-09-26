@@ -242,15 +242,15 @@ export function checkWinner(s: MatchState): number | null {
 }
 
 const PHRASES_HIT = [
-  '{n} se ha quedado sin muebles',
-  'El castillo de {n} ahora es un solar',
-  '{n}: «¡Eso lo pagaba el seguro!»',
-  'A {n} le han hecho una reforma sin pedirla',
-  '{n} ya tiene castillo con terraza',
-  'Los albañiles de {n} echan horas extra',
+  'El castillo de {n} es el más dañado de la ronda',
+  '{n} pierde más bloques que nadie',
+  'La muralla de {n} cede',
+  '{n} recibe el impacto más fuerte',
+  'El castillo de {n} queda muy tocado',
+  '{n} sufre los daños más graves',
 ];
-const PHRASES_CALM = ['Ronda tranquila… demasiado tranquila', 'Mucho ruido y pocas piedras', 'Los castillos respiran aliviados', 'Hoy nadie gana el premio a la puntería'];
-const PHRASES_ELIM = ['¡{n} pierde la corona!', '¡Adiós, majestad {n}!', '{n} abdica a lo bestia', 'Dios salve al rey… {n} no'];
+const PHRASES_CALM = ['Ronda con pocos daños', 'Ningún castillo sufre daños importantes', 'Los castillos resisten esta ronda', 'Pocos disparos alcanzan su objetivo'];
+const PHRASES_ELIM = ['{n} pierde a su rey', 'El rey de {n} ha caído', '{n} queda eliminado', '{n} queda fuera de la partida'];
 
 export function roundPhrase(s: MatchState, res: Omit<RoundResult, 'phrase'>) {
   const r = rng((s.seed ^ hashString(`fr${s.round}`)) >>> 0);

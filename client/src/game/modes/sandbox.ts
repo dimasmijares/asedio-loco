@@ -33,25 +33,25 @@ export class SandboxMode implements Mode {
     input.setAim({ yaw: Math.atan2(to[0] - lp[0], to[2] - lp[2]), pitch: 0.7, power: 0.72 });
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: cuanto más tiempo, más fuerza' : 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     this.hud.bindCharge(input);
     this.hud.showConfirm(true);
     game.rig.lookEnabled = false;
     this.onAim(input.aim);
-    this.hud.setPhase('Campo de pruebas', 'Derriba el castillo como más te guste');
+    this.hud.setPhase('Campo de pruebas', 'Munición ilimitada contra un castillo de prueba');
     this.hud.setTimer(null);
     this.hud.setWind(null);
     this.renderAmmo();
     this.hud.alwaysStats = true;
     this.hud.setHelp(this.hud.touchUi ? [
       [['arrastrar'], 'apuntar'],
-      [['🔥'], 'mantener: fuerza · soltar: ¡fuego!'],
+      [['🔥'], 'mantener: cargar · soltar: disparar'],
       [['tarjeta'], 'munición'],
       [['pellizcar'], 'acercar la cámara'],
     ] : [
       [['Clic dcho.', 'ratón'], 'apuntar'],
-      [['Espacio', 'clic izdo.'], 'mantener: fuerza · soltar: ¡fuego!'],
-      [['A', 'D', 'W', 'S'], 'afinar el tiro'],
+      [['Espacio', 'clic izdo.'], 'mantener: cargar · soltar: disparar'],
+      [['A', 'D', 'W', 'S'], 'ajuste fino'],
       [['Mayús'], 'precisión'],
       [['1', '…', '0'], 'munición'],
       [['Rueda'], 'acercar la cámara'],
@@ -129,7 +129,7 @@ export class SandboxMode implements Mode {
 
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
-      if (e.e === 'king') this.hud.showBanner('¡REY ELIMINADO!', causeText(e.cause), 2200);
+      if (e.e === 'king') this.hud.showBanner('REY ELIMINADO', causeText(e.cause), 2200);
     }
   }
 
@@ -145,7 +145,7 @@ export class SandboxMode implements Mode {
     }
     const alive = g.sim ? g.sim.blocksAlive(this.target) : 0;
     this.hud.setPlayers([
-      { slot: this.target, name: 'Castillo diana', alive: g.sim?.kings.get(this.target)?.alive ?? true, blocks: alive, maxBlocks: BLOCKS_PER_CASTLE },
+      { slot: this.target, name: 'Castillo objetivo', alive: g.sim?.kings.get(this.target)?.alive ?? true, blocks: alive, maxBlocks: BLOCKS_PER_CASTLE },
       { slot: this.slot, name: 'Tu castillo', alive: true, blocks: g.sim?.blocksAlive(this.slot) ?? 0, maxBlocks: BLOCKS_PER_CASTLE, you: true },
     ]);
     this.hud.setStats(`${g.fps} fps · ${g.frameMs.toFixed(1)} ms · bloques ${view.blockCount()} · trozos ${view.debris.count} · partículas ${view.fx.count}`);
@@ -160,11 +160,11 @@ export class SandboxMode implements Mode {
 export function causeText(c: string) {
   switch (c) {
     case 'crushed':
-      return 'Aplastado como una tortilla';
+      return 'Aplastado por los bloques';
     case 'fell':
-      return 'Se cayó de la isla';
+      return 'Cayó fuera de la isla';
     case 'lava':
-      return 'Se dio un bañito en la lava';
+      return 'Alcanzado por la lava';
     case 'outside':
       return 'Tocó el suelo fuera de su castillo';
     default:

@@ -62,8 +62,8 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 6. **Estadísticas finales** (D-035), en `#game-over`:
    - 💥 Mayor destrozo (bloques rivales rotos).
    - 🎯 Mejor disparo (más bloques en una ronda).
-   - 🤡 Disparo más ridículo, solo si alguien falló. Fallar es un disparo no defensivo que no rompe nada. Cuenta la distancia al castillo rival más cercano menos 6,5 m.
-   - 🙈 Autogol, solo si alguien rompió bloques propios.
+   - 💨 Disparo más desviado, solo si alguien falló. Fallar es un disparo no defensivo que no rompe nada. Cuenta la distancia al castillo rival más cercano menos 6,5 m.
+   - ⚠️ Daño propio, solo si alguien rompió bloques propios.
    - 🏰 Castillo más entero.
    - Confeti y fanfarria sobre el castillo ganador.
 
@@ -87,7 +87,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 - [ ] En la escena más cargada, las partículas y los fragmentos no pasan de su tope. El banco los registra, pero `tests/e2e/perf.spec.ts` no los comprueba.
 - [x] La pantalla final aparece con ganador y rondas al acabar una partida.
 - [ ] Sin gesto del usuario no se crea el `AudioContext` (sin prueba).
-- [ ] El «disparo más ridículo» solo aparece si algún jugador falló un disparo (sin prueba).
+- [ ] El «disparo más desviado» solo aparece si algún jugador falló un disparo (sin prueba).
 
 ## Evidence
 

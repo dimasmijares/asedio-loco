@@ -18,14 +18,14 @@ type Step = 'aim' | 'adjust' | 'fire';
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
   { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta). Q/E apuntan a otro castillo.' },
-  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio o el clic izquierdo: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo. Si se acaba el tiempo, sale con lo que tengas.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo. Si se agota el tiempo, se dispara con la puntería actual.' },
 ];
 
 // En táctil se apunta arrastrando el dedo y se dispara con el botón redondo.
 const TOUCH_STEPS: typeof STEPS = [
   { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por la pantalla: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
   { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta. Las flechas ◀ ▶ apuntan a otro castillo.' },
-  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo 🔥: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo 🔥: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo.' },
 ];
 
 // Tutorial de 3 pasos en la primera partida: cada paso avanza al hacer lo que pide.

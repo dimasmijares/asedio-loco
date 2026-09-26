@@ -34,8 +34,8 @@ export interface MatchUIOptions {
 
 export const AIM_HELP: HelpRow[] = [
   [['Clic dcho.', 'ratón'], 'apuntar'],
-  [['Espacio', 'clic izdo.'], 'mantener: fuerza · soltar: ¡fuego!'],
-  [['A', 'D', 'W', 'S'], 'afinar el tiro'],
+  [['Espacio', 'clic izdo.'], 'mantener: cargar · soltar: disparar'],
+  [['A', 'D', 'W', 'S'], 'ajuste fino'],
   [['Q', 'E'], 'castillo objetivo'],
   [['1', '2', '3'], 'munición'],
   [['Rueda'], 'acercar la cámara'],
@@ -43,7 +43,7 @@ export const AIM_HELP: HelpRow[] = [
 
 export const TOUCH_HELP: HelpRow[] = [
   [['arrastrar'], 'apuntar'],
-  [['🔥'], 'mantener: fuerza · soltar: ¡fuego!'],
+  [['🔥'], 'mantener: cargar · soltar: disparar'],
   [['◀', '▶'], 'castillo objetivo'],
   [['tarjeta'], 'munición'],
   [['pellizcar'], 'acercar la cámara'],
@@ -76,7 +76,7 @@ export class MatchUI {
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: cuanto más tiempo, más fuerza' : 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
     this.hud.onTarget = (d) => this.cycleTarget(d);
     input.onSelectSlot = (i) => this.selectAmmo(i);
@@ -146,7 +146,7 @@ export class MatchUI {
 
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
-      if (e.e === 'fx' && e.kind === 'lavaRise') this.hud.showBanner('¡LA LAVA SUBE!', 'Se come las bases de los castillos', 2200, 'bad');
+      if (e.e === 'fx' && e.kind === 'lavaRise') this.hud.showBanner('LA LAVA SUBE', 'Destruye los bloques que alcanza', 2200, 'bad');
     }
   }
 
@@ -161,7 +161,7 @@ export class MatchUI {
     if (s.phase !== this.last.phase || s.round !== this.last.round) this.onPhase(s);
     for (const p of s.players) {
       const was = this.last.alive.get(p.slot);
-      if (was && !p.alive) this.hud.showBanner(p.slot === this.src.you ? '¡TU REY HA CAÍDO!' : '¡REY ELIMINADO!', `${p.name}: ${causeText(p.cause ?? '')}`, 2600, 'bad');
+      if (was && !p.alive) this.hud.showBanner(p.slot === this.src.you ? 'TU REY HA CAÍDO' : 'REY ELIMINADO', `${p.name}: ${causeText(p.cause ?? '')}`, 2600, 'bad');
       this.last.alive.set(p.slot, p.alive);
     }
 
@@ -246,7 +246,7 @@ export class MatchUI {
       if (!view.startReplay(t0, t1, speed, [slot])) continue;
       this.replaySlot = slot;
       this.replayT = 0;
-      this.hud.showBanner('REPETICIÓN', `¡Cae el rey de ${nameOf(s, slot)}!`, 1800);
+      this.hud.showBanner('REPETICIÓN', `Caída del rey de ${nameOf(s, slot)}`, 1800);
       return;
     }
   }
@@ -276,7 +276,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
+      const sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
       sfx.fanfare();
@@ -286,11 +286,11 @@ export class MatchUI {
       const me = this.me();
       if (me) this.game.input.setAim(me.aim);
     }
-    if (s.phase === 'impact') this.hud.setPhase(`Ronda ${s.round}`, '¡Fuego!');
+    if (s.phase === 'impact') this.hud.setPhase(`Ronda ${s.round}`, 'Impacto');
     else if (s.phase === 'replay') this.hud.setPhase(`Ronda ${s.round}`, 'Repetición');
     else if (s.phase === 'aim') this.hud.setPhase(`Ronda ${s.round}`, 'Fase de apuntado');
-    else if (s.phase === 'countdown') this.hud.setPhase(`Ronda ${s.round}`, '¡Preparados!');
-    else if (s.phase === 'intro') this.hud.setPhase('¡Preparados!', 'La partida va a empezar');
+    else if (s.phase === 'countdown') this.hud.setPhase(`Ronda ${s.round}`, 'Cuenta atrás');
+    else if (s.phase === 'intro') this.hud.setPhase('Preparados', 'La partida está a punto de empezar');
     else if (s.phase === 'results') {
       this.hud.setPhase(`Ronda ${s.round}`, 'Resultados');
       this.showResults(s);
@@ -312,8 +312,8 @@ export class MatchUI {
           { class: 'res-row' },
           h('span', { class: 'banner', style: `background:${PLAYER_STYLES[p.slot].color};color:${PLAYER_STYLES[p.slot].ink};text-shadow:none` }, PLAYER_STYLES[p.slot].glyph),
           h('b', null, p.name),
-          h('span', null, (r.lost[p.slot] ?? 0) > 0 ? `−${r.lost[p.slot]} bloques` : 'intacto'),
-          (r.dealt[p.slot] ?? 0) > 0 ? h('span', { class: 'muted' }, ` · rompió ${r.dealt[p.slot]}`) : '',
+          h('span', null, (r.lost[p.slot] ?? 0) > 0 ? `−${r.lost[p.slot]} bloques` : 'sin daños'),
+          (r.dealt[p.slot] ?? 0) > 0 ? h('span', { class: 'muted' }, ` · destruyó ${r.dealt[p.slot]}`) : '',
         ),
       );
     this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows);
@@ -334,7 +334,7 @@ export class MatchUI {
       p ? h('div', { class: 'stat' }, h('span', { class: 'stat-icon' }, icon), h('div', null, h('div', { class: 'muted' }, label), h('b', null, p.name), ` · ${value}`)) : '';
     const buttons: Node[] = [];
     if (this.opts.onRematch && (this.opts.canRematch?.() ?? true)) {
-      const b = h('button', { class: 'primary big', id: 'rematch' }, '¡Revancha!');
+      const b = h('button', { class: 'primary big', id: 'rematch' }, 'Revancha');
       b.onclick = () => this.opts.onRematch!();
       buttons.push(b);
     } else if (this.opts.onRematch) buttons.push(h('p', { class: 'muted' }, 'Esperando a que el anfitrión pida la revancha…'));
@@ -349,17 +349,17 @@ export class MatchUI {
       h(
         'div',
         { class: 'panel over-panel', id: 'game-over', 'data-winner': String(w), 'data-rounds': String(s.round) },
-        h('h2', { class: 'over-title' }, winner ? (youWin ? '¡HAS GANADO!' : `¡Gana ${winner.name}!`) : '¡Empate!'),
+        h('h2', { class: 'over-title' }, winner ? (youWin ? 'HAS GANADO' : `Gana ${winner.name}`) : 'Empate'),
         h('p', { class: 'muted' }, `${s.round} rondas · ${winner ? `El rey de ${winner.name} es el último en pie` : 'No queda nadie en pie'}`),
         h(
           'div',
           { class: 'stats' },
           stat('💥', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
-          stat('🎯', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques de golpe`),
+          stat('🎯', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques en un disparo`),
           clown && clown.stats.whiffs > 0
-            ? stat('🤡', 'Disparo más ridículo', clown, clown.stats.worstMiss > 0 ? `falló por ${clown.stats.worstMiss} m (${clown.stats.whiffs} al aire)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} al aire`)
+            ? stat('💨', 'Disparo más desviado', clown, clown.stats.worstMiss > 0 ? `a ${clown.stats.worstMiss} m del objetivo (${clown.stats.whiffs} sin impacto)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} sin impacto`)
             : '',
-          selfie && selfie.stats.selfHits > 0 ? stat('🙈', 'Autogol', selfie, `se cargó ${selfie.stats.selfHits} bloques propios`) : '',
+          selfie && selfie.stats.selfHits > 0 ? stat('⚠️', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios destruidos`) : '',
           stat('🏰', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
         ),
         ...buttons,

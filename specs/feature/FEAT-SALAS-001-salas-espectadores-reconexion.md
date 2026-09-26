@@ -54,7 +54,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 
 1. **Crear y entrar:** quien crea la sala es el anfitrión. Si al recargar hay token de esa sala, se entra directo sin pasar por la portada.
 2. **Lobby:** lista de 4 huecos con color y emblema, «Anfitrión», «Tú», «Desconectado» y huecos de bot. Botón «Copiar enlace».
-   - El anfitrión elige bots y dificultad. «¡A la batalla!» exige al menos 2 castillos (jugadores conectados + bots).
+   - El anfitrión elige bots y dificultad. «Empezar partida» exige al menos 2 castillos (jugadores conectados + bots).
    - En el lobby, un jugador desconectado cede su hueco a uno nuevo si la sala está llena.
 3. **Empezar:** se quitan los desconectados. Si el anfitrión es un móvil y hay un ordenador, el ordenador pasa a ser el anfitrión antes de la primera ronda (D-065).
 4. **Espectadores** (D-033): quien entra con la partida empezada o con la sala llena es espectador. Pide `hi` y recibe un `full`. El servidor rechaza sus `relay` («Los espectadores no pueden jugar»).
@@ -66,7 +66,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - Si se estaba resolviendo un impacto, se da por terminado. Si se apuntaba, los bots vuelven a decidir y quedan al menos 3 s.
    - En el lobby, el anfitrión tiene 8 s de gracia para recargar sin perder el papel.
 7. **Cesión en segundo plano** (D-065): a los 2 s con la pestaña oculta, el anfitrión manda `yield` y pasa a cliente sin desconectarse. Al volver pide un `full`. Si no hay otro humano conectado, la partida espera. No se cede en `over`.
-8. **Revancha:** solo el anfitrión ve «¡Revancha!». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
+8. **Revancha:** solo el anfitrión ve «Revancha». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
 9. **Sala vacía:** se borra a los 60 s sin conexiones.
 
 ### Outputs

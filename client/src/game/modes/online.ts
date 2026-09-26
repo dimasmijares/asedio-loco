@@ -138,7 +138,7 @@ export class OnlineMode implements Mode {
     this.role = 'host';
     this.migrations++;
     this.netHost.host.resume();
-    toast('El anfitrión se ha ido: ahora la partida la llevas tú');
+    toast('El anfitrión se ha desconectado: ahora tu dispositivo gestiona la partida');
   }
 
   demote() {
@@ -155,7 +155,7 @@ export class OnlineMode implements Mode {
     this.netClient = new NetClient(this.game, this.conn, state, you);
     this.netClient.onEvents = (e) => this.ui?.onSimEvents(e);
     this.demotions++;
-    toast('Otro jugador lleva ahora la partida mientras no estás');
+    toast('Otro jugador gestiona la partida mientras estás ausente');
   }
 
   // Resumen para las pruebas: lo que este cliente ve ahora mismo.

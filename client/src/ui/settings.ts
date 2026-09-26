@@ -49,7 +49,7 @@ export function setQualityTarget(fn: ((q: Quality) => void) | null) {
 export function openSettings() {
   document.getElementById('settings')?.remove();
   const qualities: [Quality, string, string][] = [
-    ['low', 'Baja', 'Sin sombras, menos partículas: para portátiles modestos'],
+    ['low', 'Baja', 'Sin sombras y con menos partículas: para equipos con menos potencia'],
     ['medium', 'Media', 'Sombras y efectos equilibrados'],
     ['high', 'Alta', 'Sombras finas y más partículas y fragmentos'],
   ];
