@@ -39,7 +39,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 4. En el duelo (2 reyes vivos) los pesos se multiplican: común 0,55, rara 1,5, épica 2,6, defensiva 0,9.
 5. Por sorteo, sin duelo: común 50 %, rara 28 %, épica 9 %, defensiva 13 %. En el duelo: común 26 %, rara 40 %, épica 22 %, defensiva 11 %.
 6. Al disparar se gasta la munición elegida. Si nadie elige, sale la primera de la mano.
-7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013).
+7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013), o lo que diga su `plowKeep` (el piano, el 90 %).
 8. Todas las que vuelan notan el arrastre del aire y el viento (DOM-JUEGO-002). Tienen CCD.
 9. `explode` acepta `pierce` (los bloques cercanos no hacen de escudo) y `king` (factor de daño y empuje sobre el rey). Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027).
 
@@ -50,8 +50,8 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 10 |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 120 (rompe piedra cerca del centro) |
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
-| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 30 % del daño y del empuje; mecha de 1,5 s |
-| Piano | rara | 6 | Se marca dónde caería y cae en vertical desde 22 m a los 1,1 s | densidad 3, viento 0,2 |
+| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
+| Piano | rara | 6 | Martillo: se marca dónde caería, cae en vertical desde 22 m a los 1,1 s, atraviesa pisos y al tocar el suelo o pararse suelta un acorde final | densidad 6, viento 0,2; conserva el 90 % de la velocidad al romper (`plowKeep`); acorde de 2,8 m y fuerza 85 |
 | Agujero negro | épica | 3 | Atrae y se traga lo cercano | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,1 m se rompe; al final, implosión de 4 m |
 | Imán | épica | 3 | Arranca el hierro | campo de 10 m y 2,3 s, fuerza 26 (3 % sobre lo que no es hierro); rompe las uniones del hierro |
 | Bola de nieve | épica | 3 | Crece mientras rueda | radio de 0,45 a 1,6 m (+0,8 m/s), no baja de 9 m/s rodando |

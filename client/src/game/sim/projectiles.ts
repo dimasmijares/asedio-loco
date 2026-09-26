@@ -2,12 +2,13 @@ import { AMMO, type AmmoId } from '../../../../shared/ammo';
 import { landingPoint, launchVelocity, type Aim } from '../../../../shared/ballistics';
 import { buildCastle } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
-import { v3, type Vec3 } from '../../../../shared/math';
+import { rng, v3, type Vec3 } from '../../../../shared/math';
 import { RAPIER } from './rapier';
 import type { Rec, Sim } from './sim';
 
 export interface ProjectileBehavior {
   maxLife?: number;
+  plowKeep?: number; // parte de la velocidad que conserva al atravesar lo que rompe (0,6 por defecto)
   onLaunch?(owner: number): void; // munición sin cuerpo (defensiva, piano)
   onSpawn?(r: Rec): void;
   onStep?(r: Rec, dt: number): void;
@@ -31,7 +32,7 @@ const EGGS = [6, 5, 5]; // huevos por bote
 export const EGG_SCALE = 0.45; // un proyectil de gallina a esta escala es un huevo
 const EGG_RADIUS = 2.2;
 const EGG_FORCE = 72;
-const EGG_KING = 0.3; // los huevos apenas le hacen daño al rey: es munición de destrozo
+const EGG_KING = 0.25; // los huevos apenas le hacen daño al rey: es munición de destrozo
 const EGG_FUSE = 1.5; // s: si no toca nada antes, explota igual
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
 const MAGNET_STRENGTH = 26;
@@ -41,6 +42,10 @@ const COW_FORCE = 120;
 const MELON_RADIUS = 4.0;
 const MELON_FORCE = 130;
 const MELON_PIERCE = 2;
+// Piano (WRK-TASK-030): atraviesa pisos y, al tocar el suelo o pararse, remata con un acorde.
+const PIANO_KEEP = 0.9;
+const CHORD_RADIUS = 2.8;
+const CHORD_FORCE = 85;
 
 export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior {
   switch (id) {
@@ -179,12 +184,14 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           const p = tv(r.body.translation());
           sim.events.push({ e: 'fx', kind: 'cluck', p, id: r.id });
           // Racimo: los huevos salen en corona hacia fuera y hacia arriba.
+          // Con semilla (el id de la gallina y el bote): mismo racimo en cada partida con la misma semilla.
+          const g = rng(r.id * 131 + bounces);
           const n = EGGS[bounces];
-          const turn = Math.random() * Math.PI * 2;
+          const turn = g.range(0, Math.PI * 2);
           for (let i = 0; i < n; i++) {
             const a = turn + (i / n) * Math.PI * 2;
-            const h = 1.5 + Math.random() * 2;
-            sim.spawnProjectile(AMMO.chicken, r.slot, v3.add(p, [0, 0.35, 0]), [Math.cos(a) * h, 2.5 + Math.random() * 1.5, Math.sin(a) * h], { scale: EGG_SCALE, behavior: egg(r) });
+            const h = g.range(1.5, 3.5);
+            sim.spawnProjectile(AMMO.chicken, r.slot, v3.add(p, [0, 0.35, 0]), [Math.cos(a) * h, g.range(2.5, 4), Math.sin(a) * h], { scale: EGG_SCALE, behavior: egg(r) });
           }
           bounces++;
           if (bounces >= CHICKEN_BOUNCES) {
@@ -214,6 +221,11 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
         // El piano no vuela: cae en vertical sobre el punto donde caería el disparo.
         onLaunch(owner) {
           const a = aim!;
+          let chord = false;
+          const chordAt = (r: Rec) => {
+            chord = true;
+            sim.explode(tv(r.body.translation()), CHORD_RADIUS, CHORD_FORCE, owner, 'chord');
+          };
           const p0 = launchPoint(owner);
           const land = landingPoint(p0, launchVelocity(a), 1.5, { drag: AMMO.piano.drag, windFactor: AMMO.piano.windFactor, wind: sim.wind }) ?? p0;
           sim.events.push({ e: 'fx', kind: 'pianoMark', p: land, slot: owner });
@@ -221,9 +233,19 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             sim.spawnProjectile(AMMO.piano, owner, [land[0], land[1] + 22, land[2]], [0, -4, 0], {
               behavior: {
                 maxLife: 6,
+                plowKeep: PIANO_KEEP,
                 onSpawn: (r) => {
                   r.body.setAngvel({ x: 0.3, y: 0.8, z: 0.2 }, true);
                   sim.events.push({ e: 'fx', kind: 'piano', p: land, id: r.id });
+                },
+                onContact: (r, other) => {
+                  // Suelo o pedestal (sin registro): acorde final.
+                  if (!other && !chord) chordAt(r);
+                },
+                onStep: (r) => {
+                  if (chord || sim.time - r.born! < 0.5) return;
+                  const v = r.body.linvel();
+                  if (Math.hypot(v.x, v.y, v.z) < 1.5) chordAt(r);
                 },
               },
             });

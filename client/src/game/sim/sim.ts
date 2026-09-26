@@ -619,7 +619,7 @@ export class Sim {
       const v = this.preVel.get(r.id);
       if (!v || !this.recs.has(r.id) || r.body.bodyType() !== RAPIER.RigidBodyType.Dynamic) continue;
       const cur = r.body.linvel();
-      const k = 0.6;
+      const k = r.behavior?.plowKeep ?? 0.6;
       if (Math.hypot(cur.x, cur.y, cur.z) < v3.len(v) * k) r.body.setLinvel(rv(v3.scale(v, k)), true);
     }
     this.plow.clear();

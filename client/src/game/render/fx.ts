@@ -142,6 +142,13 @@ export class Fx {
       this.ring(p, radius * 0.5);
       return;
     }
+    if (kind === 'chord') {
+      // Acorde final del piano: onda de polvo a ras de suelo y teclas saltando.
+      this.ring(p, radius);
+      this.dust(p, 14, '#d9c7a8', 0.7);
+      for (let i = 0; i < this.n(10); i++) this.bit(p, randDir().multiplyScalar(rnd(3, 7)).add(new THREE.Vector3(0, 3, 0)), { color: i % 2 ? '#ffffff' : '#222222', size: 0.14, max: 1.4 });
+      return;
+    }
     if (kind === 'egg') {
       // Huevo bomba: yema, cáscara y un fogonazo pequeño.
       for (let i = 0; i < this.n(10); i++) this.puff(p, randDir().multiplyScalar(rnd(2, 5) * radius * 0.35), { color: i % 3 ? '#ffd23f' : '#ff9f1c', size: rnd(0.3, 0.6), max: rnd(0.3, 0.5), grow: 1.8, drag: 4, gravity: -1 });

@@ -158,6 +158,12 @@ export class Sfx {
     const o = this.out(p, 0.9 * size);
     if (!o) return;
     const t = this.ctx!.currentTime;
+    if (kind === 'chord') {
+      // Acorde final del piano: un golpe grave con un racimo de notas bajas.
+      this.noise(o, t, 0.8, 'lowpass', 900, 80, 0.9, 0.003, 1);
+      for (const n of [0, 1, 6, 7]) this.tone(o, t, 1.4, 'triangle', 55 * 2 ** (n / 12), 55 * 2 ** (n / 12), 0.25, 0.004);
+      return;
+    }
     if (kind === 'egg') {
       // Huevo bomba: petardo corto y agudo.
       this.noise(o, t, 0.35, 'lowpass', 2400, 300, 0.9, 0.002, 0.7);
