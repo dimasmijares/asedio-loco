@@ -1,11 +1,11 @@
-rock       rotos  10.7  movidos   1.7  reyes   2/6  disp  0.8  alt  2.6  base  2.5  piedra  6.2
-log        rotos   9.7  movidos   5.5  reyes   0/6  disp  2.7  alt  4.3  base  0.8  piedra  3.5 ! (10-13)
-coconuts   rotos  12.7  movidos   3.2  reyes   0/6  disp  2.0  alt  3.3  base  1.7  piedra  4.7
-cow        rotos  16.8  movidos   2.5  reyes   3/6  disp  1.6  alt  3.0  base  3.3  piedra  8.5
-melon      rotos  14.2  movidos   0.5  reyes   1/6  disp  1.1  alt  3.0  base  2.7  piedra  8.7
-chicken    rotos  13.0  movidos   3.2  reyes   1/6  disp  2.0  alt  3.3  base  2.0  piedra  4.7
-piano      rotos  17.8  movidos   4.5  reyes   0/6  disp  1.8  alt  2.4  base  5.0  piedra 11.5
-blackhole  rotos  20.3  movidos   9.0  reyes   2/6  disp  2.3  alt  3.7  base  3.5  piedra  7.5
-magnet     rotos  25.0  movidos   7.3  reyes   0/6  disp  2.4  alt  2.6  base  5.7  piedra 14.8 ! (18-24)
-snowball   rotos  15.3  movidos   6.5  reyes   0/6  disp  3.3  alt  4.3  base  1.5  piedra  7.3 ! (18-24)
-media      rotos  15.6  movidos   4.4  reyes  9/60
+rock       rotos   9.8  movidos   1.6  reyes  5/12  disp  0.8  alt  2.6  base  2.4  piedra  5.7
+log        rotos  10.4  movidos   5.3  reyes  0/12  disp  3.1  alt  4.3  base  0.8  piedra  3.5
+coconuts   rotos  12.8  movidos   3.1  reyes  0/12  disp  2.2  alt  3.2  base  2.0  piedra  5.6
+cow        rotos  16.4  movidos   2.3  reyes  3/12  disp  1.6  alt  3.4  base  2.8  piedra  7.2
+melon      rotos  15.5  movidos   0.8  reyes  2/12  disp  1.3  alt  2.9  base  3.0  piedra  8.6
+chicken    rotos  14.9  movidos   4.0  reyes  3/12  disp  2.2  alt  3.3  base  1.8  piedra  5.7
+piano      rotos  17.6  movidos   3.0  reyes  0/12  disp  1.6  alt  2.3  base  4.9  piedra 10.9
+blackhole  rotos  22.8  movidos   7.8  reyes  2/12  disp  2.5  alt  3.6  base  2.5  piedra  9.1
+magnet     rotos  21.3  movidos   5.8  reyes  3/12  disp  2.1  alt  2.6  base  4.5  piedra 12.0
+snowball   rotos  19.8  movidos   6.8  reyes  1/12  disp  3.0  alt  3.9  base  2.8  piedra 10.3
+media      rotos  16.1  movidos   4.0  reyes 19/120

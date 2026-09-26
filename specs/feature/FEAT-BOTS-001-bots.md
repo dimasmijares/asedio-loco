@@ -60,7 +60,7 @@ Decidir por cada bot, al empezar la ronda, a quién dispara, con qué munición 
 2. **Munición** (de las 3 de la mano):
    - Defensiva (andamio o burbuja) si su castillo está por debajo del 80 % y sale un 75 %, o si todas son defensivas. Con una defensiva no cambia la puntería.
    - Si no, la de mayor rareza: épica > rara > común.
-3. **Punto de mira:** con probabilidad `pKing` el rey (+0,2 m); si no, uno de 6 puntos de la estructura (murallas, torres, torreón), a escala 1,2.
+3. **Punto de mira** según la munición (WRK-TASK-033): con probabilidad `pKing` (+0,3 con sandía y piano, +0,1 con el pedrusco) el rey (+0,2 m); si no, un punto propio de la munición: tronco, bola de nieve e imán a la base de la muralla de delante (donde está el portón de hierro); vaca, cocos y gallina al centro o a las torres; el resto, uno de 6 puntos de la estructura (murallas, torres, torreón), a escala 1,2.
 4. **Puntería:** `solveAim` con el mismo modelo balístico del juego (arrastre de la munición y viento). Elevación al azar: 0,35-0,55 rad para tronco y bola de nieve, que ruedan; 0,55-0,95 rad para el resto. Después, un error gaussiano en el rumbo y en la fuerza.
 5. **Ritmo:** la catapulta gira suavemente hacia la solución y confirma tras un retraso al azar (×0,25 con `?fast=1`).
 

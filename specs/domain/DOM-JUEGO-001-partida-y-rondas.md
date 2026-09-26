@@ -59,7 +59,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 
 ### Examples
 
-- 4 bots en normal: de media 9,1 rondas y unos 165 s (`ultimo-normal.txt`, 8 partidas, tras WRK-TASK-021). Hasta WRK-TASK-022 las cifras eran mucho mayores (274 s) porque el adelanto con todos listos casi nunca funcionaba: cada ronda esperaba los 20 s enteros.
+- 4 bots (8 partidas, `ultimo-*.txt`), tras WRK-PLAN-007: normal 6,8 rondas y 132 s; difícil 6,5 y 123 s; fácil 7,0 y 140 s. Antes del plan, en normal, 9,1 rondas y 165 s: más destrozo por disparo acorta las partidas y el usuario lo aceptó (mínimo de unas 6 rondas en normal). Hasta WRK-TASK-022 las cifras eran mucho mayores (274 s) porque el adelanto con todos listos casi nunca funcionaba: cada ronda esperaba los 20 s enteros.
 - Dos jugadores confirman a los 5 s y un tercero no: la ronda sigue hasta los 20 s.
 - Borde: un humano desconectado sigue vivo y nunca confirma (`client/src/game/match/host.ts` solo marca `locked` a los bots y a quien manda su disparo), así que con un desconectado en la partida la ronda nunca se adelanta y agota los 20 s.
 - Borde: un rey sale despedido y cae de pie en el patio de su propio castillo: sigue vivo (está dentro de su zona). Si cae en el césped, fuera de la zona, queda eliminado (`outside`).

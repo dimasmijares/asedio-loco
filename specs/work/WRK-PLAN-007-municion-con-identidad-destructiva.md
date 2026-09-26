@@ -3,9 +3,9 @@ id: WRK-PLAN-007
 type: spec
 layer: work-plan
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -32,7 +32,7 @@ Primero se mide la firma de cada munición, para comprobar que cada cambio da la
 | 5 | WRK-TASK-030 · Piano perforador | completed | 026 | Atraviesa pisos y remata con una onda en el suelo |
 | 6 | WRK-TASK-031 · Épicas: agujero negro, imán con retroceso y alud | completed | 027 | Tres épicas en 18-26 bloques con firmas distintas |
 | 7 | WRK-TASK-032 · Sensación propia de cada munición | completed | 027-031 | Temblor según destrozo, efectos, sonidos y textos |
-| 8 | WRK-TASK-033 · Bots y equilibrio final | active | 027-032 | Bots que usan cada munición a su manera; partida medida |
+| 8 | WRK-TASK-033 · Bots y equilibrio final | completed | 027-032 | Bots que usan cada munición a su manera; partida medida |
 
 ## Risk Assessment
 
@@ -46,4 +46,4 @@ Primero se mide la firma de cada munición, para comprobar que cada cambio da la
 
 ## Evidence
 
-Pendiente.
+Las 8 tareas están completadas y subidas a `main`, cada una en su commit con `npm run verify`, la prueba de destrozo, el equilibrio y las E2E que le tocan. La media de destrozo por disparo pasa de 8,4 a 16,1 bloques y las 10 municiones ofensivas quedan en su franja y con firma propia (`DOM-JUEGO-003` 3.0.0). Las partidas en normal bajan de 9,1 a unas 7 rondas, como aceptó el usuario. Queda que el usuario lo pruebe.

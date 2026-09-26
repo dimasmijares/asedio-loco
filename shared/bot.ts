@@ -89,6 +89,19 @@ const STRUCTURE: Vec3[] = (
   ] as Vec3[]
 ).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE]);
 
+// Cada munición a su manera (WRK-TASK-033): las de demolición precisa van más a por el rey; las
+// que ruedan, a la base de la muralla de delante; las de área, al centro o a las torres.
+const L = (x: number, y: number, z: number): Vec3 => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE];
+const KING_BONUS: Partial<Record<AmmoId, number>> = { melon: 0.3, piano: 0.3, rock: 0.1 };
+const AIM_POINTS: Partial<Record<AmmoId, Vec3[]>> = {
+  log: [L(0, 2.5, 3.3)],
+  snowball: [L(0, 2.5, 3.3)],
+  magnet: [L(0, 2.5, 3.3)], // el portón de hierro
+  cow: [L(0, 3.4, 0), L(0, 2.5, 3.3)],
+  coconuts: [L(0, 3.4, 0)],
+  chicken: [L(0, 3.4, 0), L(3.25, 3.5, 3.25), L(-3.25, 3.5, 3.25)],
+};
+
 export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number, Vec3>, r: Rng, ctx: TargetContext = {}): BotDecision {
   const skill = BOT_SKILL[me.difficulty ?? 'normal'];
   const rivals = s.players.filter((p) => p.alive && p.slot !== me.slot);
@@ -113,11 +126,11 @@ export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number
 
   // Punto de mira.
   let point: Vec3;
-  if (r.next() < skill.pKing && kingPos[target]) {
+  if (r.next() < skill.pKing + (KING_BONUS[ammo] ?? 0) && kingPos[target]) {
     const k = kingPos[target];
     point = [k[0], k[1] + 0.2, k[2]];
   } else {
-    point = toWorld(target, r.pick(STRUCTURE));
+    point = toWorld(target, r.pick(AIM_POINTS[ammo] ?? STRUCTURE));
   }
   const a = AMMO[ammo];
   const pitch = ammo === 'log' || ammo === 'snowball' ? r.range(0.35, 0.55) : r.range(0.55, 0.95);

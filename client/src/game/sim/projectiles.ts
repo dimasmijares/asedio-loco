@@ -38,10 +38,12 @@ const MAGNET_TIME = 2.3; // s que dura el campo del imán
 const MAGNET_STRENGTH = 30;
 // Épicas (WRK-TASK-031).
 const SPIT_RADIUS = 5; // el agujero negro, al cerrarse, escupe lo que no se ha tragado
-const SPIT_FORCE = 80;
+const SPIT_FORCE = 90;
 const MAGNET_RECOIL = 22; // m/s: el imán, al acabar, lanza el hierro que ha arrancado contra el castillo
 const SNOW_MAX = 1.5; // m de radio que alcanza la bola de nieve
-const SNOW_GROW = 0.9; // m/s de crecimiento mientras rueda
+const SNOW_GROW = 0.9;
+// Andamio: con el destrozo de WRK-PLAN-007 (15 bloques por disparo de media) reconstruye 15.
+const SCAFFOLD_BLOCKS = 15; // m/s de crecimiento mientras rueda
 // Vaca: cráter que rompe piedra cerca del centro. Sandía: carga pegada que revienta desde dentro.
 const COW_RADIUS = 4.8;
 const COW_FORCE = 120;
@@ -363,7 +365,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             .sort((a, b) => a.p[1] - b.p[1]);
           let built = 0;
           for (const b of missing) {
-            if (built >= 10) break;
+            if (built >= SCAFFOLD_BLOCKS) break;
             let blocked = false;
             sim.world.intersectionsWithShape({ x: b.p[0], y: b.p[1], z: b.p[2] }, { x: b.q[0], y: b.q[1], z: b.q[2], w: b.q[3] }, new RAPIER.Cuboid(b.size[0] * 0.45, b.size[1] * 0.45, b.size[2] * 0.45), (c) => {
               if (sim.byHandle.has(c.handle) || sim.staticHandles.has(c.handle)) blocked = true;

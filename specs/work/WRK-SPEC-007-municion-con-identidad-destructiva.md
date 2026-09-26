@@ -3,9 +3,9 @@ id: WRK-SPEC-007
 type: spec
 layer: work-spec
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -76,3 +76,14 @@ Cada munición ofensiva tiene una **identidad** (qué destroza y cómo) y un **o
 1. **Duración:** se aceptan partidas más cortas; solo se vigila que no bajen de unas 6 rondas en normal.
 2. **Gallina:** huevos bomba **a lo bomba de racimo**, con **poco rebote** para que haga daño (no sale despedida).
 3. **Orden:** las flojas primero (medición, vaca y sandía, gallina), luego comunes, piano, épicas, sensación y bots.
+
+## Evidence
+
+Hecho en WRK-PLAN-007 (tareas 026-033), el 26-09-2026:
+
+- **Destrozo:** media de 8,4 a 16,1 bloques por disparo, con las 10 municiones ofensivas en su franja.
+- **Firmas en la prueba:** cráter (vaca), hueco profundo (sandía), racimos repartidos (gallina), columna hasta el suelo (piano), surcos en línea (tronco y bola de nieve), segunda oleada de hierro (imán) y borrado con escupitajo (agujero negro).
+- **Reyes:** ninguna rara ni épica pasa de 3 de 12 en la prueba de destrozo.
+- **Partidas:** normal de 9,1 a 6,8 rondas y difícil de 7,3 a 6,5, aceptado por el usuario.
+- **Rendimiento:** paso de física de 5,2 ms en el banco.
+- **Móvil:** la descripción de la munición elegida se ve en el HUD, también en vertical.

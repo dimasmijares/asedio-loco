@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 2.0.0
+version: 3.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -55,7 +55,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Agujero negro | épica | 3 | Borrador: atrae y se traga lo cercano y, al cerrarse, escupe lo que no se ha tragado | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,6 m del núcleo desaparece; al final, onda de 5 m y fuerza 80 |
 | Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 30 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 4,5 m sale a 22 m/s |
 | Bola de nieve | épica | 3 | Alud: crece mientras rueda en línea recta en la dirección en que llegó | radio de 0,45 a 1,5 m (+0,9 m/s), no baja de 9 m/s rodando |
-| Andamio | defensiva | 7 | Reconstruye hasta 10 bloques propios | los más bajos primero; no si el hueco está ocupado o bajo la lava |
+| Andamio | defensiva | 7 | Reconstruye hasta 15 bloques propios (10 hasta WRK-TASK-033) | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
 
 ### Constraints
@@ -65,39 +65,25 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 
 ### Examples
 
-- Destrozo medio por disparo contra un castillo entero, 6 disparos por munición (`tests/balance/destrozo.txt`):
+- **Cada munición destroza a su manera (WRK-PLAN-007).** La prueba de destrozo (12 disparos por munición, la mitad al rey) mide cuánto y dónde, y marca con «!» la que sale de su franja de bloques rotos. Antes del plan → después:
 
-  | Munición | Rotos | Movidos | Reyes |
-  |---|---|---|---|
-  | Pedrusco | 10,7 | 1,7 | 2/6 |
-  | Tronco | 1,7 | 2,2 | 0/6 |
-  | Cocos | 8,0 | 2,0 | 0/6 |
-  | Vaca | 3,8 | 1,5 | 0/6 |
-  | Sandía | 3,2 | 1,3 | 0/6 |
-  | Gallina | 2,5 | 1,3 | 0/6 |
-  | Piano | 10,5 | 2,2 | 0/6 |
-  | Agujero negro | 14,2 | 16,2 | 0/6 |
-  | Imán | 24,2 | 10,2 | 4/6 |
-  | Bola de nieve | 9,5 | 6,3 | 0/6 |
-  | **Media** | **8,8** | **4,5** | 6/60 |
+  | Munición | Identidad | Franja | Rotos | Disp. (m) | Altura (m) | Fila baja | Piedra/hierro | Reyes |
+  |---|---|---|---|---|---|---|---|---|
+  | Pedrusco | El fiable | 9-11 | 9,8 → 9,8 | 0,8 | 2,6 | 2,4 | 5,7 | 5/12 |
+  | Tronco | Apisonadora en línea | 10-13 | 6,5 → 10,4 | 3,1 | 4,3 | 0,8 | 3,5 | 0/12 |
+  | Cocos | Metralla repartida | 10-13 | 6,5 → 12,8 | 2,2 | 3,2 | 2,0 | 5,6 | 0/12 |
+  | Vaca | Bomba: cráter | 14-18 | 2,4 → 16,4 | 1,6 | 3,4 | 2,8 | 7,2 | 3/12 |
+  | Sandía | Carga de demolición | 14-18 | 2,8 → 15,5 | 1,3 | 2,9 | 3,0 | 8,6 | 2/12 |
+  | Gallina | Bomba de racimo | 12-16 | 5,5 → 14,9 | 2,2 | 3,3 | 1,8 | 5,7 | 3/12 |
+  | Piano | Martillo vertical | 15-20 | 10,8 → 17,6 | 1,6 | 2,3 | 4,9 | 10,9 | 0/12 |
+  | Agujero negro | Borrador que escupe | 20-26 | 17,2 → 22,8 | 2,5 | 3,6 | 2,5 | 9,1 | 2/12 |
+  | Imán | Desmontador con retroceso | 18-24 | 13,1 → 21,3 | 2,1 | 2,6 | 4,5 | 12,0 | 3/12 |
+  | Bola de nieve | Alud en línea | 18-24 | 9,8 → 19,8 | 3,0 | 3,9 | 2,8 | 10,3 | 1/12 |
+  | **Media** | | | **8,4 → 16,1** | | | | | 19/120 |
 
-- **Firma y objetivos (WRK-SPEC-007, en curso).** Desde WRK-TASK-026 la prueba de destrozo mide también la dispersión, la altura del daño, la fila baja afectada y la piedra o el hierro rotos, y marca con «!» la munición que queda fuera de su franja de bloques rotos. Franjas: pedrusco 9-11, tronco 10-13, cocos 10-13, vaca 14-18, sandía 14-18, gallina 12-16, piano 15-20, agujero negro 20-26, imán 18-24 y bola de nieve 18-24. Línea base con 12 disparos:
-
-  | Munición | Rotos | Disp. (m) | Altura (m) | Fila baja | Piedra/hierro |
-  |---|---|---|---|---|---|
-  | Pedrusco | 9,8 | 0,8 | 2,6 | 2,4 | 5,7 |
-  | Tronco | 6,5 | 1,0 | 4,3 | 0,6 | 2,9 |
-  | Cocos | 6,5 | 1,2 | 3,4 | 0,8 | 1,8 |
-  | Vaca | 2,4 | 0,6 | 3,4 | 0,4 | 0,8 |
-  | Sandía | 2,8 | 0,7 | 4,1 | 0,0 | 0,0 |
-  | Gallina | 5,5 | 0,9 | 3,8 | 0,3 | 0,9 |
-  | Piano | 10,8 | 1,3 | 2,5 | 2,8 | 5,7 |
-  | Agujero negro | 17,2 | 2,5 | 3,5 | 2,8 | 6,3 |
-  | Imán | 13,1 | 1,6 | 2,4 | 3,8 | 7,3 |
-  | Bola de nieve | 9,8 | 3,0 | 4,1 | 0,9 | 3,6 |
+  Firmas: el pedrusco, el daño más concentrado (0,8 m); el piano, el más bajo (2,3 m) y el que más base rompe; la bola de nieve y el tronco, los más alargados; el imán, el que más piedra y hierro rompe.
 
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
-- Tras WRK-TASK-027 (12 disparos): vaca 16,5 bloques (3 de 12 reyes) y sandía 15,0 (2 de 12), las dos con más de 7 piedras rotas por disparo. La sandía es la que más baja llega (altura 2,9 m).
 
 ## Acceptance Criteria
 
@@ -106,6 +92,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 - [x] Las rarezas se respetan aproximadamente.
 - [x] En el duelo sale munición más rara.
 - [x] La media de destrozo por disparo está medida y guardada en `tests/balance/destrozo.txt`.
+- [x] Cada munición ofensiva está en su franja y tiene una firma reconocible en la prueba (WRK-PLAN-007).
 
 ## Evidence
 
@@ -129,5 +116,4 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 
 ## Open Questions
 
-- El imán rompe 24 bloques de media y mata al rey en 4 de 6 disparos directos. ¿Es demasiado fuerte para una épica? — dimas
-- El tronco (1,7 bloques) y la gallina (2,5) siguen siendo flojos para su rareza. — dimas
+- Resueltas en WRK-PLAN-007: el imán y los débiles tienen ya su franja. Queda ver en partidas reales si 6-7 rondas en normal se hacen cortas.

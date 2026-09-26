@@ -36,7 +36,7 @@ export const AMMO: Record<AmmoId, AmmoDef> = {
   blackhole: { id: 'blackhole', name: 'Agujero negro', rarity: 'epica', icon: '🕳️', color: '#3c096c', desc: 'Se traga lo cercano 2 s y escupe lo que sobra.', weight: 3, shape: 'ball', radius: 0.35, density: 3, restitution: 0, friction: 1, drag: 0.004, windFactor: 0.2 },
   magnet: { id: 'magnet', name: 'Imán', rarity: 'epica', icon: '🧲', color: '#e63946', desc: 'Arranca el hierro y lo lanza de vuelta al castillo.', weight: 3, shape: 'ball', radius: 0.4, density: 3.5, restitution: 0, friction: 1, drag: 0.004, windFactor: 0.2 },
   snowball: { id: 'snowball', name: 'Bola de nieve', rarity: 'epica', icon: '❄️', color: '#e0fbfc', desc: 'Rueda en línea recta y crece. Y crece. Y crece.', weight: 3, shape: 'ball', radius: 0.45, density: 2.2, restitution: 0.05, friction: 1, drag: 0.004, windFactor: 0.3 },
-  scaffold: { id: 'scaffold', name: 'Andamio', rarity: 'defensiva', icon: '🏗️', color: '#f4a261', desc: 'Reconstruye hasta 10 bloques de tu castillo.', weight: 7, shape: 'none', radius: 0, density: 0, restitution: 0, friction: 0, drag: 0, windFactor: 0, defensive: true },
+  scaffold: { id: 'scaffold', name: 'Andamio', rarity: 'defensiva', icon: '🏗️', color: '#f4a261', desc: 'Reconstruye hasta 15 bloques de tu castillo.', weight: 7, shape: 'none', radius: 0, density: 0, restitution: 0, friction: 0, drag: 0, windFactor: 0, defensive: true },
   bubble: { id: 'bubble', name: 'Burbuja', rarity: 'defensiva', icon: '🫧', color: '#72ddf7', desc: 'Un escudo que absorbe el próximo impacto.', weight: 6, shape: 'none', radius: 0, density: 0, restitution: 0, friction: 0, drag: 0, windFactor: 0, defensive: true },
 };
 
