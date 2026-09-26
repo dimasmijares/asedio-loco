@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -59,8 +59,9 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 
 ### Examples
 
-- 4 bots en normal: de media 9,6 rondas y unos 307 s (`ultimo-normal.txt`, 8 partidas).
+- 4 bots en normal: de media 8,6 rondas y unos 274 s (`ultimo-normal.txt`, 8 partidas, tras WRK-TASK-023).
 - Dos jugadores confirman a los 5 s y un tercero no: la ronda sigue hasta los 20 s.
+- Borde: un humano desconectado sigue vivo y nunca confirma (`client/src/game/match/host.ts` solo marca `locked` a los bots y a quien manda su disparo), así que con un desconectado en la partida la ronda nunca se adelanta y agota los 20 s.
 - Borde: un rey sale despedido y cae de pie en el patio de su propio castillo: sigue vivo (está dentro de su zona). Si cae en el césped, fuera de la zona, queda eliminado (`outside`).
 - Borde: los dos últimos reyes caen en la misma ronda: gana quien conserva más bloques, aunque su rey cayera primero.
 - Contraejemplo: un castillo sin bloques con el rey en pie sigue en la partida; no hay barra de vida.
@@ -68,11 +69,12 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 ## Acceptance Criteria
 
 - [x] Se apunta durante 20 s también en el duelo.
-- [x] Gana el último rey en pie; si caen todos, desempatan los bloques y el orden de caída.
+- [x] Gana el último rey en pie; si caen todos, desempata el orden de caída.
+- [ ] Si caen todos, desempatan antes los bloques en pie (sin prueba: `match.test.ts` solo prueba castillos con los mismos bloques).
 - [x] Eliminar dos veces a un jugador no cuenta doble.
 - [x] Una partida de 4 jugadores en red llega a un ganador y todos los clientes ven el mismo ganador y el mismo número de rondas.
 - [x] Una partida en solitario contra bots llega a un ganador.
-- [x] Todos los clientes entran y salen de `replay` en la misma ronda.
+- [x] Todos los clientes ven el mismo número de repeticiones.
 - [ ] El adelanto por «todos listos» (0,6 s) tiene prueba propia.
 
 ## Evidence
@@ -81,7 +83,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 |------|-----------|------|-------------------|
 | Testing | `tests/unit/match.test.ts` (rondas, eliminación y victoria) | 2026-09-26 | low → medium |
 | Testing | `tests/e2e/multiplayer.spec.ts`, `tests/e2e/solo.spec.ts` | 2026-09-26 | — |
-| Production data | `tests/balance/ultimo-facil.txt` (12,5 rondas, 271 s), `ultimo-normal.txt` (9,6, 307 s), `ultimo-dificil.txt` (6,0, 202 s) | 2026-09-26 | — |
+| Production data | `tests/balance/ultimo-facil.txt` (12,5 rondas, 271 s), `ultimo-normal.txt` (8,6, 274 s), `ultimo-dificil.txt` (7,4, 244 s; tras WRK-TASK-023) | 2026-09-26 | — |
 
 ## Traceability
 

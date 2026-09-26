@@ -1,9 +1,9 @@
 import { AMMO, type AmmoId } from '../../../../shared/ammo';
 import { clampAim, type Aim } from '../../../../shared/ballistics';
-import { botDecide, type BotDecision } from '../../../../shared/bot';
+import { aimedAt, decideBots, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
-import { hashString, lerp, rng, type Vec3 } from '../../../../shared/math';
+import { lerp, type Vec3 } from '../../../../shared/math';
 import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, eliminate, impactMaxDuration, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
 
@@ -47,6 +47,8 @@ export class MatchHost {
   onAim: (slot: number, p: PlayerState) => void = () => {};
   firstAimBonus = 0; // segundos extra en la primera ronda (tutorial en solitario)
   private bots = new Map<number, BotPlan>();
+  // A quién apuntaba cada jugador en la ronda anterior (para que los bots devuelvan el golpe).
+  private lastTargets = new Map<number, number>();
   private shots: Shot[] = [];
   private impactStart = 0;
   private before = { lost: [0, 0, 0, 0], destroyed: [0, 0, 0, 0], self: [0, 0, 0, 0] };
@@ -183,10 +185,8 @@ export class MatchHost {
         kingPos[p.slot] = [t.x, t.y, t.z];
       }
     }
-    for (const p of s.players) {
-      if (!p.alive || !p.bot) continue;
-      const r = rng((s.seed ^ hashString(`bot:${s.round}:${p.slot}`)) >>> 0);
-      this.bots.set(p.slot, { d: botDecide(s, p, kingPos, r), from: { ...p.aim }, t: 0 });
+    for (const [slot, d] of decideBots(s, kingPos, this.lastTargets)) {
+      this.bots.set(slot, { d, from: { ...this.player(slot)!.aim }, t: 0 });
     }
   }
 
@@ -218,8 +218,10 @@ export class MatchHost {
     const st = this.sim.stats;
     this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self] };
     let i = 0;
+    this.lastTargets.clear();
     for (const p of alivePlayers(s).sort((a, b) => a.slot - b.slot)) {
       p.locked = true;
+      this.lastTargets.set(p.slot, aimedAt(s, p));
       const ammo = consumeAmmo(p);
       if (!ammo) continue;
       p.stats.shots++;
