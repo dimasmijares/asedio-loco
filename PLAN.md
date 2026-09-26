@@ -1,5 +1,7 @@
 # Plan de cambios: control, cámara, ritmo y castillos
 
+> **Histórico.** Este plan está cerrado y archivado como `WRK-SPEC-002` y `WRK-PLAN-002` en `specs/work/`. El trabajo pendiente se consulta con `npm run kdd:pendientes`.
+
 Plan acordado tras la primera prueba del usuario (25-09-2026). Cada etapa se despliega sola: pruebas en local, push a `main`, CI contra producción en verde y revisión con capturas antes de empezar la siguiente. Las decisiones del usuario están al final.
 
 ## Lo que pide el usuario

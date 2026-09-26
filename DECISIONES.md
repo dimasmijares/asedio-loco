@@ -1,5 +1,7 @@
 # Decisiones
 
+> **Histórico.** Desde el 26-09-2026 las decisiones nuevas son ADR en `specs/governance/`. Las que siguen vigentes están en ADR-001 a ADR-011, que citan las D-0NN de origen. Este registro ya no se amplía.
+
 Registro de decisiones de diseño y técnicas, sobre todo las que se apartan de `PROMPT_asedio_loco.md`. La más reciente va al final.
 
 ## Fase 0

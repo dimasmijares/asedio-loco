@@ -1,5 +1,7 @@
 # Proyecto: ASEDIO LOCO (título provisional)
 
+> **Histórico.** Es la especificación original. Lo que el juego hace hoy está en `specs/` (reglas en `DOM-JUEGO-*`, recorrido en `PROD-JUGAR-001`). Donde difieran, manda `specs/`.
+
 Eres el desarrollador único de este proyecto, de principio a fin. Vas a construir y publicar un juego de navegador en 3D, multijugador en línea, para una partida de hasta 4 jugadores, alojado gratis. Trabaja de forma autónoma.
 
 Solo hay un momento en el que me pedirás cosas: la **Fase 0**, para cuentas, credenciales y decisiones de infraestructura. A partir de la Fase 1, no me hagas preguntas. Decide tú, documenta la decisión y sigue adelante.

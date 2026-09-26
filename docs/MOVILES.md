@@ -1,5 +1,7 @@
 # Asedio Loco en móviles: viabilidad y plan
 
+> **Histórico.** El plan de móviles vive en `specs/work/` como `WRK-SPEC-004` y `WRK-PLAN-004`, con una `WRK-TASK` por etapa. Este estudio se conserva como contexto y ya no se actualiza.
+
 Estudio de la etapa 6 de `PLAN.md` (25-09-2026). Se basa en:
 
 - capturas del juego actual en un Pixel 7 emulado (412 × 839 en vertical y 863 × 360 en horizontal, densidad 2,6);
