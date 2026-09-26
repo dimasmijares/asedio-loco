@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.4.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -87,7 +87,15 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - pantalla completa al entrar (Android) y aviso de «Gira el móvil» en vertical durante la partida.
 - Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
-- En un móvil en horizontal (360 px de alto) el marcador ocupa media altura: lo compacta M3 (WRK-TASK-007). En vertical no se juega.
+- **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
+  - el marcador se queda en estandarte, porcentaje, barra y ✔/💀, sin nombres (tu fila, con borde blanco);
+  - la fase, el reloj, el viento, la potencia y las tarjetas se encogen;
+  - la ayuda empieza plegada;
+  - el botón de disparo baja a la esquina inferior derecha: redondo de 84 px en táctil, más pequeño con ratón;
+  - la cuenta atrás y los rótulos se miden en `vh`;
+  - la pantalla final pone las estadísticas en dos columnas y se desplaza si no cabe.
+
+  Por encima de 500 px no cambia nada. En vertical no se juega (aviso de girar).
 
 ## Acceptance Criteria
 

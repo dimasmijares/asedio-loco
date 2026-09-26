@@ -3,9 +3,9 @@ id: WRK-TASK-007
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: low
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -58,11 +58,11 @@ Va después de M2 porque las dos tocan `hud.ts` y `style.css`, y M2 fija qué bo
 
 ## Acceptance Criteria
 
-- [ ] Con 863 × 360, 740 × 360 y 915 × 412 ningún elemento del HUD se solapa con otro.
-- [ ] La lista de jugadores compacta muestra estandarte, porcentaje y calavera.
-- [ ] El panel de controles solo aparece al pulsar «?».
-- [ ] El botón de disparo queda en la esquina inferior derecha en alturas menores de 500 px.
-- [ ] Por encima de 500 px de alto el HUD no cambia.
+- [x] Con 863 × 360, 740 × 360 y 915 × 412 ningún elemento del HUD se solapa con otro.
+- [x] La lista de jugadores compacta muestra estandarte, porcentaje y calavera.
+- [x] El panel de controles solo aparece al pulsar «?».
+- [x] El botón de disparo queda en la esquina inferior derecha en alturas menores de 500 px.
+- [x] Por encima de 500 px de alto el HUD no cambia.
 
 ## Test Plan
 
@@ -74,4 +74,10 @@ Va después de M2 porque las dos tocan `hud.ts` y `style.css`, y M2 fija qué bo
 
 ## Evidence
 
-Pendiente.
+- **Código:**
+  - `style.css`: `@media (max-height: 500px)` para el marcador sin nombres, la fase, el reloj y el viento más pequeños, las tarjetas y las flechas, el botón de disparo en la esquina (redondo en táctil), la cuenta atrás y los rótulos en `vh`, y la pantalla final en dos columnas con desplazamiento.
+  - `Hud`: con poca altura, la ayuda empieza plegada.
+- **E2E `tests/e2e/hud-compact.spec.ts`** (en el grupo `basicas` de CI): en 863 × 360, 740 × 360 y 915 × 412 táctiles, 9 piezas del HUD, sin cruces por `getBoundingClientRect` y todas dentro de la pantalla. El marcador no enseña nombres. En 1280 × 720 sí los enseña.
+- **Revisión visual** (capturas en 740 × 360): apuntado, resultados y pantalla final. La pantalla final no cabía y ahora sí, con «¡Revancha!» a la vista. De paso, «1 disparos al aire» pasa a singular.
+- **Puertas en local (2026-09-26):** `npm run verify` y las E2E `touch`, `hud-compact`, `controls` y `solo`, 9 en verde.
+- **Consolidación:** `FEAT-INTERFAZ-001` 1.4.0.

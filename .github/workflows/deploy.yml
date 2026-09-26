@@ -45,7 +45,7 @@ jobs:
       matrix:
         include:
           - grupo: basicas
-            args: lobby smoke perf controls touch
+            args: lobby smoke perf controls touch hud-compact
           - grupo: fisica
             args: physics
           - grupo: solitario

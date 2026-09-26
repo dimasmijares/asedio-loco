@@ -355,7 +355,7 @@ export class MatchUI {
           stat('💥', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
           stat('🎯', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques de golpe`),
           clown && clown.stats.whiffs > 0
-            ? stat('🤡', 'Disparo más ridículo', clown, clown.stats.worstMiss > 0 ? `falló por ${clown.stats.worstMiss} m (${clown.stats.whiffs} al aire)` : `${clown.stats.whiffs} disparos al aire`)
+            ? stat('🤡', 'Disparo más ridículo', clown, clown.stats.worstMiss > 0 ? `falló por ${clown.stats.worstMiss} m (${clown.stats.whiffs} al aire)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} al aire`)
             : '',
           selfie && selfie.stats.selfHits > 0 ? stat('🙈', 'Autogol', selfie, `se cargó ${selfie.stats.selfHits} bloques propios`) : '',
           stat('🏰', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),

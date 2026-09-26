@@ -79,8 +79,8 @@ export class Hud {
     } catch {
       /* sin almacenamiento */
     }
-    // En táctil la ayuda empieza plegada: la pantalla es pequeña y el tutorial ya lo explica.
-    if (this.touchUi) this.helpOpen = false;
+    // En táctil o con poca altura la ayuda empieza plegada: el tutorial ya lo explica.
+    if (this.touchUi || matchMedia('(max-height: 500px)').matches) this.helpOpen = false;
     const helpBtn = this.touchUi
       ? h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles' }, '❔ Controles')
       : h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles (H)' }, '⌨️ Controles ', h('kbd', null, 'H'));
