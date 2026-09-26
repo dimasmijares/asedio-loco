@@ -13,6 +13,41 @@ export function toon(color: THREE.ColorRepresentation, o: { map?: THREE.Texture;
   return m;
 }
 
+// Desvanecido por tramado de lo que está muy cerca de la cámara (WRK-TASK-034): al apuntar, los
+// muros propios que quedan entre la cámara y la catapulta no tapan la vista. `NEAR_FADE.value`
+// es la distancia (m) a partir de la cual empieza; 0 lo desactiva. Patrón ordenado de 4×4: no
+// hace falta ordenar transparencias y sirve con el instancing.
+export const NEAR_FADE = { value: 0 };
+const FADE_FRAG = /* glsl */ `
+  uniform float uFadeNear;
+  varying vec3 vFadeW;
+  const float BAYER4[16] = float[16](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9., 15., 7., 13., 5.);
+  void nearFade() {
+    if (uFadeNear <= 0.0) return;
+    float k = clamp((uFadeNear - distance(vFadeW, cameraPosition)) / 4.0, 0.0, 1.0) * 0.9;
+    ivec2 c = ivec2(mod(gl_FragCoord.xy, 4.0));
+    if (k > (BAYER4[c.x + c.y * 4] + 0.5) / 16.0) discard;
+  }
+`;
+const FADE_WORLD = /* glsl */ `
+  #ifdef USE_INSTANCING
+    vFadeW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+  #else
+    vFadeW = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  #endif
+`;
+
+// Añade el desvanecido cercano a un material estándar de three (el de los bloques).
+export function withNearFade<T extends THREE.Material>(m: T): T {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uFadeNear = NEAR_FADE;
+    sh.vertexShader = sh.vertexShader.replace('void main() {', 'varying vec3 vFadeW;\nvoid main() {').replace('#include <project_vertex>', `#include <project_vertex>\n${FADE_WORLD}`);
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', `${FADE_FRAG}\nvoid main() {\n  nearFade();`);
+  };
+  m.customProgramCacheKey = () => 'nearFade';
+  return m;
+}
+
 const OUTLINE_COLOR = new THREE.Color('#1d1626');
 
 // Contorno de cajas instanciadas: una caja agrandada un grosor constante en el mundo,
@@ -20,11 +55,12 @@ const OUTLINE_COLOR = new THREE.Color('#1d1626');
 // depende del tamaño del bloque.
 export function boxOutlineMaterial(width = 0.04) {
   return new THREE.ShaderMaterial({
-    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uWidth: { value: width }, uColor: { value: OUTLINE_COLOR } }]),
+    uniforms: { ...THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uWidth: { value: width }, uColor: { value: OUTLINE_COLOR } }]), uFadeNear: NEAR_FADE },
     side: THREE.BackSide,
     fog: true,
     vertexShader: /* glsl */ `
       uniform float uWidth;
+      varying vec3 vFadeW;
       #include <fog_pars_vertex>
       void main() {
         mat4 m = modelMatrix;
@@ -36,6 +72,7 @@ export function boxOutlineMaterial(width = 0.04) {
         float d = distance(wc.xyz, cameraPosition);
         float w = uWidth * (1.0 + d * 0.012);
         vec3 p = position + sign(position) * w / max(s, vec3(0.001));
+        vFadeW = (m * vec4(p, 1.0)).xyz;
         vec4 mvPosition = viewMatrix * m * vec4(p, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
@@ -43,7 +80,9 @@ export function boxOutlineMaterial(width = 0.04) {
     fragmentShader: /* glsl */ `
       uniform vec3 uColor;
       #include <fog_pars_fragment>
+      ${FADE_FRAG}
       void main() {
+        nearFade();
         gl_FragColor = vec4(uColor, 1.0);
         #include <fog_fragment>
       }`,

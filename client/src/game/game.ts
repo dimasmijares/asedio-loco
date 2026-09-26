@@ -3,6 +3,7 @@ import type { Quat, Vec3 } from '../../../shared/math';
 import { TrajectoryPreview, AimInput } from './aim';
 import { AMMO, AMMO_IDS } from '../../../shared/ammo';
 import { sfx } from './audio';
+import { NEAR_FADE } from './render/materials';
 import { makeProjectile } from './render/models';
 import { setQualityTarget, settings } from '../ui/settings';
 import { CameraRig } from './camera';
@@ -232,6 +233,11 @@ export class Game {
     this.rig.shake = settings.shake ? Math.max(this.rig.shake, this.view.shake) : 0;
     this.view.shake = 0;
     this.rig.update(rawDt);
+    // Al apuntar, se desvanecen los bloques que están más cerca de la cámara que la catapulta
+    // (menos 1,5 m de margen): los muros propios no tapan la vista (WRK-TASK-034).
+    const fade = this.rig.mode === 'aim' ? Math.max(0, this.rig.camera.position.distanceTo(this.rig.aimFrom) - 1.5) : 0;
+    NEAR_FADE.value += (fade - NEAR_FADE.value) * Math.min(1, rawDt * 4);
+    if (NEAR_FADE.value < 0.5 && fade === 0) NEAR_FADE.value = 0;
     this.stage.update(rawDt);
     this.renderT += rawDt;
     if (this.renderT >= this.renderEvery) {

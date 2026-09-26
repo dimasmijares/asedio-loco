@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { MATERIAL_IDS, type MaterialId } from '../../../../shared/materials';
 import type { Quat, Vec3 } from '../../../../shared/math';
-import { boxOutlineMaterial, toon } from './materials';
+import { boxOutlineMaterial, toon, withNearFade } from './materials';
 import { tex } from './textures';
 
 const BOX = new THREE.BoxGeometry(1, 1, 1);
@@ -44,7 +44,7 @@ export class BlockMeshes {
 
   constructor(parent: THREE.Object3D, capacity = 520, outlineWidth = 0.035, shadows = true) {
     for (const mat of MATERIAL_IDS) {
-      const mesh = new THREE.InstancedMesh(BOX, blockMaterial(mat), capacity);
+      const mesh = new THREE.InstancedMesh(BOX, withNearFade(blockMaterial(mat)), capacity);
       mesh.count = 0;
       mesh.castShadow = shadows && mat !== 'glass';
       mesh.receiveShadow = shadows;

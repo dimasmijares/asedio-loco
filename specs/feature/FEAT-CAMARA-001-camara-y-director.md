@@ -54,6 +54,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 1. **Apuntado** (`rig.aim`), jugador vivo en fase `aim`:
    - 12 m detrás de la catapulta (×zoom), 3 m a la derecha y 8 m arriba (×zoom).
    - Mira a un punto 22 m por delante y 3,5 m arriba, para que quepa la parábola que crece al cargar.
+   - Los bloques que están más cerca de la cámara que la catapulta (menos 1,5 m) se desvanecen por tramado (`NEAR_FADE`, WRK-TASK-034): el castillo propio no tapa la vista.
 2. **Cuenta atrás** (`Director.startCountdown` y `countdown`): en los 3 s de la fase `countdown` la cámara va de la vista de apuntado a un plano general que encuadra todos los castillos en juego (radio: el que ocupan + 6 m, hasta 34 m), visto desde detrás de tu castillo. El movimiento es continuo y suave (`smoothstep`): sale despacio y frena al llegar. En pantalla, 3-2-1 y «¡FUEGO!» (FEAT-INTERFAZ-001).
 3. **Impacto y resultados:** manda el director mientras tenga algo que encuadrar. Parte del plano general de la cuenta atrás y, durante los primeros 2,5 s del impacto, sigue encuadrando los castillos en juego (radio de hasta 34 m) para que se vean los disparos de todos. Después se cierra despacio sobre la acción.
    - Encuadra a la vez todo lo que vuela y los puntos de impacto de los últimos 2,2 s. No persigue a ningún proyectil.
