@@ -70,7 +70,7 @@ Orden recomendado, de más barato o más útil a menos:
 | 9 | WRK-TASK-018 · `full` viejo sin efecto | completed | — | Hecho el 26-09-2026 |
 | 10 | WRK-TASK-020 · Desconectados en el marcador | completed | — | Hecho el 26-09-2026 |
 | 11 | WRK-TASK-017 · Restos del control y la cámara | completed | — | Hecho el 26-09-2026 |
-| 12 | WRK-TASK-021 · Equilibrio del imán | draft | — | — |
+| 12 | WRK-TASK-021 · Equilibrio del imán | completed | — | Hecho el 26-09-2026 |
 
 ## Architecture Impact
 

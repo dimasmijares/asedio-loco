@@ -1,5 +1,5 @@
 // Cuánto destroza cada munición de un disparo contra un castillo entero, sin navegador.
-//   npx vitest run --config tests/balance/vitest.config.ts destrozo
+//   npx vitest run --config tests/balance/vitest.config.ts destrozo      (SHOTS=12, AMMO=magnet,log)
 // Deja el resumen en tests/balance/destrozo.txt (bloques rotos, bloques desplazados más de
 // medio metro y reyes caídos, de media por disparo).
 import { writeFileSync } from 'node:fs';
@@ -16,6 +16,9 @@ const OFFENSIVE: AmmoId[] = ['rock', 'log', 'coconuts', 'cow', 'melon', 'chicken
 // Los mismos puntos de la estructura a los que apuntan los bots.
 const STRUCTURE = ([[0, 2.5, 3.3], [3.25, 3.5, 3.25], [-3.25, 3.5, 3.25], [0, 3.4, 0]] as [number, number, number][]).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE] as [number, number, number]);
 const SHOTS = Number(process.env.SHOTS ?? 6);
+// AMMO=magnet,log mide solo esas (para iterar) y lo deja en destrozo-parcial.txt.
+const ONLY = process.env.AMMO?.split(',') as AmmoId[] | undefined;
+const LIST = ONLY?.length ? OFFENSIVE.filter((a) => ONLY.includes(a)) : OFFENSIVE;
 
 test('destrozo por munición', async () => {
   await loadRapier();
@@ -23,7 +26,7 @@ test('destrozo por munición', async () => {
   let totalBroken = 0;
   let totalMoved = 0;
   let totalKings = 0;
-  for (const ammo of OFFENSIVE) {
+  for (const ammo of LIST) {
     let broken = 0;
     let moved = 0;
     let kings = 0;
@@ -60,8 +63,8 @@ test('destrozo por munición', async () => {
     totalKings += kings;
     lines.push(`${ammo.padEnd(10)} rotos ${(broken / SHOTS).toFixed(1).padStart(5)}  movidos ${(moved / SHOTS).toFixed(1).padStart(5)}  reyes ${kings}/${SHOTS}`);
   }
-  const n = OFFENSIVE.length * SHOTS;
+  const n = LIST.length * SHOTS;
   lines.push(`${'media'.padEnd(10)} rotos ${(totalBroken / n).toFixed(1).padStart(5)}  movidos ${(totalMoved / n).toFixed(1).padStart(5)}  reyes ${totalKings}/${n}`);
-  writeFileSync('tests/balance/destrozo.txt', lines.join('\n') + '\n');
+  writeFileSync(ONLY?.length ? 'tests/balance/destrozo-parcial.txt' : 'tests/balance/destrozo.txt', lines.join('\n') + '\n');
   console.log(lines.join('\n'));
 });

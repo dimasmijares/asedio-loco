@@ -17,6 +17,14 @@ export interface ProjectileBehavior {
 const tv = (v: { x: number; y: number; z: number }): Vec3 => [v.x, v.y, v.z];
 
 
+// Ajustes de equilibrio (WRK-TASK-021, medidos con tests/balance/destrozo).
+const LOG_SPIN = 12; // rad/s que mantiene el tronco al rodar
+const CHICKEN_BOUNCES = 4;
+const PECK_RADIUS = 3.2;
+const PECK_FORCE = 50;
+const MAGNET_TIME = 2.3; // s que dura el campo del imán
+const MAGNET_STRENGTH = 26;
+
 export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior {
   switch (id) {
     case 'rock':
@@ -34,8 +42,8 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           // Sigue rodando: mantiene el giro alrededor de su eje largo.
           const w = r.body.angvel();
           const sp = Math.hypot(w.x, w.y, w.z);
-          if (sp < 7 && sp > 0.01) {
-            const k = 7 / sp;
+          if (sp < LOG_SPIN && sp > 0.01) {
+            const k = LOG_SPIN / sp;
             r.body.setAngvel({ x: w.x * k, y: w.y * k, z: w.z * k }, true);
           }
         },
@@ -133,7 +141,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.events.push({ e: 'fx', kind: 'cluck', p: tv(r.body.translation()), id: r.id });
         },
         onContact(r) {
-          if (bounces >= 3 || sim.time - lastBounce < 0.15) return;
+          if (bounces >= CHICKEN_BOUNCES || sim.time - lastBounce < 0.15) return;
           bounces++;
           lastBounce = sim.time;
           const v = r.body.linvel();
@@ -144,7 +152,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           const p = tv(r.body.translation());
           sim.events.push({ e: 'fx', kind: 'cluck', p, id: r.id });
           // Cada bote es un picotazo: una onda pequeña que astilla lo que toca.
-          sim.explode(p, 2.4, 24, r.slot, 'peck');
+          sim.explode(p, PECK_RADIUS, PECK_FORCE, r.slot, 'peck');
         },
       };
     }
@@ -196,7 +204,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           on = true;
           const p = v3.add(tv(r.body.translation()), [0, 1.5, 0]);
           sim.removeRec(r, 'proj');
-          sim.addField({ kind: 'magnet', p, until: sim.time + 2.6, radius: 10, strength: 34, owner: r.slot });
+          sim.addField({ kind: 'magnet', p, until: sim.time + MAGNET_TIME, radius: 10, strength: MAGNET_STRENGTH, owner: r.slot });
           sim.events.push({ e: 'fx', kind: 'magnet', p, slot: r.slot });
         },
       };

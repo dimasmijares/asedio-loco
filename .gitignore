@@ -19,3 +19,4 @@ _build/
 # Claude Code: topes de presupuesto y ajustes locales
 .claude/budget.local.json
 .claude/settings.local.json
+tests/balance/destrozo-parcial.txt

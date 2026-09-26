@@ -27,7 +27,7 @@ export const RARITY_COLOR: Record<Rarity, string> = { comun: '#8d99ae', rara: '#
 
 export const AMMO: Record<AmmoId, AmmoDef> = {
   rock: { id: 'rock', name: 'Pedrusco', rarity: 'comun', icon: '🪨', color: '#8a8f98', desc: 'Una bola de piedra de toda la vida.', weight: 22, shape: 'ball', radius: 0.45, density: 6, restitution: 0.1, friction: 0.8, drag: 0.004, windFactor: 0.25 },
-  log: { id: 'log', name: 'Tronco rodante', rarity: 'comun', icon: '🪵', color: '#a0522d', desc: 'Al caer sigue rodando y arrasa lo que pilla.', weight: 14, shape: 'log', radius: 0.36, length: 1.9, density: 2, restitution: 0.1, friction: 0.9, drag: 0.005, windFactor: 0.3 },
+  log: { id: 'log', name: 'Tronco rodante', rarity: 'comun', icon: '🪵', color: '#a0522d', desc: 'Al caer sigue rodando y arrasa lo que pilla.', weight: 14, shape: 'log', radius: 0.36, length: 1.9, density: 3, restitution: 0.1, friction: 0.9, drag: 0.005, windFactor: 0.3 },
   coconuts: { id: 'coconuts', name: 'Racimo de cocos', rarity: 'comun', icon: '🥥', color: '#6b4226', desc: 'Se divide en 4 cocos en el punto más alto.', weight: 14, shape: 'ball', radius: 0.42, density: 7, restitution: 0.3, friction: 0.6, drag: 0.004, windFactor: 0.3 },
   cow: { id: 'cow', name: 'Vaca explosiva', rarity: 'rara', icon: '🐄', color: '#f4f1de', desc: 'Muge al volar y explota al tocar algo.', weight: 8, shape: 'box', radius: 0.45, length: 1.2, density: 1.4, restitution: 0.1, friction: 0.6, drag: 0.006, windFactor: 0.45 },
   melon: { id: 'melon', name: 'Sandía pegajosa', rarity: 'rara', icon: '🍉', color: '#2a9d3f', desc: 'Se pega a lo que toca y explota a los 2 s.', weight: 7, shape: 'ball', radius: 0.42, density: 1.2, restitution: 0, friction: 1, drag: 0.004, windFactor: 0.35 },

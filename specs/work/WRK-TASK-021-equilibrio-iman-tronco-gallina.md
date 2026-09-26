@@ -3,9 +3,9 @@ id: WRK-TASK-021
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -33,9 +33,9 @@ Decisión previa del usuario: ¿el imán debe ser la épica que más destroza, o
 
 ## Acceptance Criteria
 
-- [ ] Destrozo, equilibrio (normal y difícil) medidos antes y después, con las cifras en Evidence (RULE-001).
-- [ ] Ninguna munición rompe más del doble de la media salvo decisión explícita del usuario.
-- [ ] `DOM-JUEGO-003` actualizada con la tabla nueva.
+- [x] Destrozo, equilibrio (normal y difícil) medidos antes y después, con las cifras en Evidence (RULE-001).
+- [x] Ninguna munición rompe más del doble de la media salvo decisión explícita del usuario.
+- [x] `DOM-JUEGO-003` actualizada con la tabla nueva.
 
 ## Test Plan
 
@@ -45,4 +45,22 @@ Decisión previa del usuario: ¿el imán debe ser la épica que más destroza, o
 
 ## Evidence
 
-Pendiente.
+- **Decisión del usuario (26-09-2026):** bajar el imán y subir los débiles (tronco y gallina).
+- **Cambios:**
+  - imán: campo de 2,6 → 2,3 s y fuerza de 34 → 26;
+  - tronco: densidad de 2 → 3 y giro de 7 → 12 rad/s;
+  - gallina: 3 → 4 botes y picotazo de 2,4 m/24 → 3,2 m/50.
+
+  Van como constantes con nombre en `projectiles.ts`.
+- **Destrozo con 12 disparos por munición, antes → después:**
+  - imán: de 24,2 a 13,1 bloques, y de 7 reyes de 12 a 0;
+  - tronco: de 3,0 a 6,5;
+  - gallina: de 2,3 a 5,1;
+  - media: de 8,8 a 8,3.
+
+  Con 6 disparos la prueba bailaba ±1,5, así que se midió con 12. `destrozo.test.ts` acepta ahora `AMMO=a,b` para medir solo algunas (lo deja en `destrozo-parcial.txt`, que se ignora).
+- **Equilibrio con 8 partidas, sobre el mismo código salvo la munición:**
+  - normal: de 8,3 rondas y 150 s a 9,1 rondas y 165 s;
+  - difícil: de 7,1 rondas y 140 s a 7,3 rondas y 139 s.
+- **Hallazgo de la medición:** las cifras de equilibrio anteriores a WRK-TASK-022 (274 s) estaban infladas por un fallo del adelanto con todos listos. Queda anotado en WRK-TASK-022 y en `DOM-JUEGO-001`.
+- **Consolidación:** `DOM-JUEGO-003` 2.0.0, que cambia una regla (los parámetros de 3 municiones); `DOM-JUEGO-001` y `RULE-001` con las referencias nuevas.

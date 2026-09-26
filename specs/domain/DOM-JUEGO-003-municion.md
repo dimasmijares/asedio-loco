@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.0.0
+version: 2.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -45,14 +45,14 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
 | Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s |
-| Tronco rodante | común | 14 | Al tocar algo sigue rodando | r 0,36 m, largo 1,9 m, giro mínimo 7 rad/s, vida 7,5 s |
+| Tronco rodante | común | 14 | Al tocar algo sigue rodando | r 0,36 m, largo 1,9 m, densidad 3, giro mínimo 12 rad/s, vida 7,5 s |
 | Racimo de cocos | común | 14 | Se divide en 4 en el punto más alto | abanico cerrado, cocos al 72 % de tamaño, densidad 7 |
 | Vaca explosiva | rara | 8 | Muge y explota al tocar algo | radio 3,6 m, fuerza 28 |
 | Sandía pegajosa | rara | 7 | Se pega y explota a los 2 s | radio 3,6 m, fuerza 34 |
-| Gallina saltarina | rara | 7 | Rebota 3 veces; cada bote es un picotazo | onda de 2,4 m y fuerza 24 por bote |
+| Gallina saltarina | rara | 7 | Rebota 4 veces; cada bote es un picotazo | onda de 3,2 m y fuerza 50 por bote |
 | Piano | rara | 6 | Se marca dónde caería y cae en vertical desde 22 m a los 1,1 s | densidad 3, viento 0,2 |
 | Agujero negro | épica | 3 | Atrae y se traga lo cercano | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,1 m se rompe; al final, implosión de 4 m |
-| Imán | épica | 3 | Arranca el hierro | campo de 10 m y 2,6 s, fuerza 34 (3 % sobre lo que no es hierro); rompe las uniones del hierro |
+| Imán | épica | 3 | Arranca el hierro | campo de 10 m y 2,3 s, fuerza 26 (3 % sobre lo que no es hierro); rompe las uniones del hierro |
 | Bola de nieve | épica | 3 | Crece mientras rueda | radio de 0,45 a 1,6 m (+0,8 m/s), no baja de 9 m/s rodando |
 | Andamio | defensiva | 7 | Reconstruye hasta 10 bloques propios | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
@@ -81,7 +81,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
   | **Media** | **8,8** | **4,5** | 6/60 |
 
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
-- Contraejemplo: ninguna rara ha eliminado a un rey en la prueba de destrozo (0 de 24 disparos).
+- La vaca (2,3) y la sandía (2,6) siguen flojas: el usuario solo pidió ajustar el imán, el tronco y la gallina.
 
 ## Acceptance Criteria
 

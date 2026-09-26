@@ -44,7 +44,7 @@ La física es la seña de identidad del juego y sus efectos no son intuitivos:
 
 Sin medir, estas consecuencias se descubren jugando, tarde.
 
-Referencia actual (26-09-2026): 8,8 bloques rotos por disparo de media; en normal, 8,6 rondas y 274 s; en difícil, 7,4 rondas y 244 s; paso de física de unos 5 ms en `/#bench`.
+Referencia actual (26-09-2026, WRK-TASK-021): 8,3 bloques rotos por disparo de media (12 disparos por munición); en normal, 9,1 rondas y 165 s; en difícil, 7,3 rondas y 139 s; paso de física de unos 5 ms en `/#bench`.
 
 ## Enforcement
 

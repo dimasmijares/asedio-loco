@@ -59,7 +59,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 
 ### Examples
 
-- 4 bots en normal: de media 8,6 rondas y unos 274 s (`ultimo-normal.txt`, 8 partidas, tras WRK-TASK-023).
+- 4 bots en normal: de media 9,1 rondas y unos 165 s (`ultimo-normal.txt`, 8 partidas, tras WRK-TASK-021). Hasta WRK-TASK-022 las cifras eran mucho mayores (274 s) porque el adelanto con todos listos casi nunca funcionaba: cada ronda esperaba los 20 s enteros.
 - Dos jugadores confirman a los 5 s y un tercero no: la ronda sigue hasta los 20 s.
 - Borde: un humano desconectado sigue vivo y nunca confirma (`client/src/game/match/host.ts` solo marca `locked` a los bots y a quien manda su disparo), así que con un desconectado en la partida la ronda nunca se adelanta y agota los 20 s.
 - Borde: un rey sale despedido y cae de pie en el patio de su propio castillo: sigue vivo (está dentro de su zona). Si cae en el césped, fuera de la zona, queda eliminado (`outside`).
@@ -83,7 +83,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 |------|-----------|------|-------------------|
 | Testing | `tests/unit/match.test.ts` (rondas, eliminación y victoria) | 2026-09-26 | low → medium |
 | Testing | `tests/e2e/multiplayer.spec.ts`, `tests/e2e/solo.spec.ts` | 2026-09-26 | — |
-| Production data | `tests/balance/ultimo-facil.txt` (12,5 rondas, 271 s), `ultimo-normal.txt` (8,6, 274 s), `ultimo-dificil.txt` (7,4, 244 s; tras WRK-TASK-023) | 2026-09-26 | — |
+| Production data | `tests/balance/ultimo-facil.txt` (12,5 rondas, 271 s), `ultimo-normal.txt` (9,1, 165 s), `ultimo-dificil.txt` (7,3, 139 s; tras WRK-TASK-021) | 2026-09-26 | — |
 
 ## Traceability
 
