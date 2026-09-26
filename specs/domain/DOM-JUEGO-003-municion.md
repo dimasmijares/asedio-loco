@@ -80,6 +80,21 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
   | Bola de nieve | 9,5 | 6,3 | 0/6 |
   | **Media** | **8,8** | **4,5** | 6/60 |
 
+- **Firma y objetivos (WRK-SPEC-007, en curso).** Desde WRK-TASK-026 la prueba de destrozo mide también la dispersión, la altura del daño, la fila baja afectada y la piedra o el hierro rotos, y marca con «!» la munición que queda fuera de su franja de bloques rotos. Franjas: pedrusco 9-11, tronco 10-13, cocos 10-13, vaca 14-18, sandía 14-18, gallina 12-16, piano 15-20, agujero negro 20-26, imán 18-24 y bola de nieve 18-24. Línea base con 12 disparos:
+
+  | Munición | Rotos | Disp. (m) | Altura (m) | Fila baja | Piedra/hierro |
+  |---|---|---|---|---|---|
+  | Pedrusco | 9,8 | 0,8 | 2,6 | 2,4 | 5,7 |
+  | Tronco | 6,5 | 1,0 | 4,3 | 0,6 | 2,9 |
+  | Cocos | 6,5 | 1,2 | 3,4 | 0,8 | 1,8 |
+  | Vaca | 2,4 | 0,6 | 3,4 | 0,4 | 0,8 |
+  | Sandía | 2,8 | 0,7 | 4,1 | 0,0 | 0,0 |
+  | Gallina | 5,5 | 0,9 | 3,8 | 0,3 | 0,9 |
+  | Piano | 10,8 | 1,3 | 2,5 | 2,8 | 5,7 |
+  | Agujero negro | 17,2 | 2,5 | 3,5 | 2,8 | 6,3 |
+  | Imán | 13,1 | 1,6 | 2,4 | 3,8 | 7,3 |
+  | Bola de nieve | 9,8 | 3,0 | 4,1 | 0,9 | 3,6 |
+
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
 - La vaca (2,3) y la sandía (2,6) siguen flojas: el usuario solo pidió ajustar el imán, el tronco y la gallina.
 

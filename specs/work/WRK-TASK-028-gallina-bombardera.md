@@ -27,7 +27,7 @@ Que la gallina rebote **por el castillo** y rompa en cada bote: 12-16 bloques re
 
 ## Implementation Notes
 
-Propuesta (a confirmar con el usuario): en cada bote pone un **huevo** que explota a los 0,4 s (onda pequeña que rompe madera y cristal y astilla piedra), y el siguiente salto se dirige al bloque rival más cercano, más corto y más alto, en vez de salir despedida. Tope de 4 huevos. Alternativas: un picotazo que rompe seguro el bloque que toca, o una explosión grande en el último bote.
+Decisión del usuario: huevos bomba **a lo bomba de racimo**, con **poco rebote** para que haga daño. Al tocar el castillo suelta un racimo de huevos que se reparten alrededor y explotan casi a la vez (ondas pequeñas que rompen madera y cristal y astillan piedra). Los botes son cortos y bajos, así que la gallina se queda encima del castillo y suelta otro racimo más pequeño en cada uno.
 
 ## Acceptance Criteria
 

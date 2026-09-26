@@ -3,7 +3,7 @@ id: WRK-SPEC-007
 type: spec
 layer: work-spec
 scope: ephemeral
-status: draft
+status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-26
@@ -71,8 +71,8 @@ Cada munición ofensiva tiene una **identidad** (qué destroza y cómo) y un **o
 - Presupuesto de rendimiento (RULE-004): más destrozo son más cuerpos y partículas. Se mide con el banco (`#bench`) en las tareas que multiplican cuerpos (cocos, huevos, imán).
 - El móvil se juega en vertical por defecto: efectos y textos se comprueban ahí primero.
 
-## Decisiones pendientes del usuario
+## Decisiones del usuario (26-09-2026)
 
-1. Más destrozo acorta las partidas (de unas 9 rondas en normal a quizá 6-7). ¿Se acepta o se compensa?
-2. La mecánica de la gallina.
-3. El orden de las tareas.
+1. **Duración:** se aceptan partidas más cortas; solo se vigila que no bajen de unas 6 rondas en normal.
+2. **Gallina:** huevos bomba **a lo bomba de racimo**, con **poco rebote** para que haga daño (no sale despedida).
+3. **Orden:** las flojas primero (medición, vaca y sandía, gallina), luego comunes, piano, épicas, sensación y bots.

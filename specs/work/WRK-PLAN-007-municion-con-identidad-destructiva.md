@@ -3,7 +3,7 @@ id: WRK-PLAN-007
 type: spec
 layer: work-plan
 scope: ephemeral
-status: draft
+status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-26
@@ -25,8 +25,8 @@ Primero se mide la firma de cada munición, para comprobar que cada cambio da la
 
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
-| 1 | WRK-TASK-026 · Firma de cada munición en la prueba de destrozo | draft | — | Dispersión, altura, piedra rota y objetivos por munición |
-| 2 | WRK-TASK-027 · Explosiones que rompen piedra: vaca y sandía | draft | 026 | Vaca cráter y sandía carga de demolición |
+| 1 | WRK-TASK-026 · Firma de cada munición en la prueba de destrozo | completed | — | Dispersión, altura, piedra rota y objetivos por munición |
+| 2 | WRK-TASK-027 · Explosiones que rompen piedra: vaca y sandía | active | 026 | Vaca cráter y sandía carga de demolición |
 | 3 | WRK-TASK-028 · Gallina bombardera | draft | 027 | Botes que se quedan en el castillo y huevos que explotan |
 | 4 | WRK-TASK-029 · Comunes: tronco apisonadora y cocos metralla | draft | 026 | Tronco que barre la base y 6 cocos que rompen |
 | 5 | WRK-TASK-030 · Piano perforador | draft | 026 | Atraviesa pisos y remata con una onda en el suelo |

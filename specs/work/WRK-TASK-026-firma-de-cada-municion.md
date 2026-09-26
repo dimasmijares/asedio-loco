@@ -3,9 +3,9 @@ id: WRK-TASK-026
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -31,9 +31,9 @@ Sin cambios de física. La prueba sigue sin navegador. Se imprime una línea por
 
 ## Acceptance Criteria
 
-- [ ] La prueba saca rotos, movidos, reyes, dispersión, altura, piedra y hierro rotos y fila baja por munición.
-- [ ] `destrozo.txt` actualizado como línea base.
-- [ ] Objetivos de WRK-SPEC-007 escritos en DOM-JUEGO-003.
+- [x] La prueba saca rotos, movidos, reyes, dispersión, altura, piedra y hierro rotos y fila baja por munición.
+- [x] `destrozo.txt` actualizado como línea base.
+- [x] Objetivos de WRK-SPEC-007 escritos en DOM-JUEGO-003.
 
 ## Test Plan
 
@@ -44,4 +44,6 @@ Sin cambios de física. La prueba sigue sin navegador. Se imprime una línea por
 
 ## Evidence
 
-Pendiente.
+- `tests/balance/destrozo.test.ts` saca por munición: rotos, movidos, reyes, dispersión (m), altura (m), fila baja y piedra o hierro rotos, y marca con «!» lo que queda fuera de la franja. Tarda unos 45 s con `SHOTS=12`.
+- Línea base (12 disparos) en `destrozo.txt` y en `DOM-JUEGO-003`: solo el pedrusco está en su franja. La sandía no rompe ni una piedra (0,0) y la vaca 0,8: confirma que las explosiones no fracturan piedra.
+- Sin cambios de física: el equilibrio no cambia.
