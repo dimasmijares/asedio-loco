@@ -3,7 +3,6 @@ import { islandSdf } from '../../../shared/map';
 import type { CameraRig } from './camera';
 import type { WorldView } from './view';
 
-const HALF_FOV = (55 / 2) * THREE.MathUtils.DEG2RAD;
 // Radio del plano general (cuenta atrás y primeros segundos del impacto): caben los 4 castillos.
 const MAX_WIDE = 34;
 
@@ -75,12 +74,21 @@ export class Director {
     return true;
   }
 
-  // Punto de mira y posición de la cámara para el centro y el radio actuales.
+  // Punto de mira y posición de la cámara para el centro y el radio actuales. La distancia es la
+  // que pide el eje más estrecho del campo de visión (WRK-TASK-035): en una pantalla apaisada
+  // manda el vertical (con 0,8 veces la distancia justa aún cabe todo) y en un móvil en vertical,
+  // el horizontal. En vertical la cámara sube más para aprovechar el alto de la pantalla.
   private frame() {
-    // La pantalla es más ancha que alta: con 0,8 veces la distancia justa aún cabe todo.
-    const dist = (this.radius / Math.tan(HALF_FOV)) * 0.8 + 4;
+    const cam = this.rig.camera;
+    const vHalf = (cam.fov / 2) * THREE.MathUtils.DEG2RAD;
+    const hHalf = Math.atan(Math.tan(vHalf) * cam.aspect);
+    const dist = Math.max((this.radius / Math.tan(vHalf)) * 0.8, (this.radius / Math.tan(hHalf)) * 1.1) + 4;
+    const tall = cam.aspect < 1;
     const at = this.center.clone().setY(Math.max(1.5, this.center.y * 0.6));
-    const from = at.clone().addScaledVector(this.dir, dist * 0.82).add(new THREE.Vector3(0, Math.max(9, dist * 0.55), 0));
+    const from = at
+      .clone()
+      .addScaledVector(this.dir, dist * (tall ? 0.62 : 0.82))
+      .add(new THREE.Vector3(0, Math.max(9, dist * (tall ? 0.78 : 0.55)), 0));
     return { at, from };
   }
 

@@ -26,8 +26,8 @@ Tres tareas independientes y en serie, de menor a mayor alcance visual. Cada una
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
 | 1 | WRK-TASK-034 · El castillo propio no tapa la vista al apuntar | completed | — | Desvanecido por tramado de los bloques cercanos a la cámara |
-| 2 | WRK-TASK-035 · Plano general que encuadra todos los castillos en cualquier pantalla | active | — | `Director.frame` con los dos ejes del campo de visión |
-| 3 | WRK-TASK-036 · Daño de la ronda sobre cada castillo | draft | — | Número flotante con los bloques perdidos |
+| 2 | WRK-TASK-035 · Plano general que encuadra todos los castillos en cualquier pantalla | completed | — | `Director.frame` con los dos ejes del campo de visión |
+| 3 | WRK-TASK-036 · Daño de la ronda sobre cada castillo | active | — | Número flotante con los bloques perdidos |
 
 ## Risk Assessment
 
