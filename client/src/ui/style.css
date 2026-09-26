@@ -35,6 +35,8 @@ body {
   height: 100%;
   display: block;
   outline: none;
+  /* Los dedos apuntan y pellizcan: el navegador no debe desplazar ni ampliar la página. */
+  touch-action: none;
 }
 
 .overlay {
@@ -497,6 +499,64 @@ button.big {
   display: none;
 }
 
+.hud-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.target-btn {
+  pointer-events: auto;
+  touch-action: manipulation;
+  min-width: 52px;
+  min-height: 52px;
+  font-size: 22px;
+  padding: 0;
+}
+
+.target-btn[hidden] {
+  display: none;
+}
+
+/* Móvil en vertical durante la partida: se pide girarlo (en iPhone no se puede bloquear). */
+.rotate-hint {
+  display: none;
+}
+
+@media (orientation: portrait) {
+  body.touch.in-game .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+    background: rgba(29, 22, 38, 0.94);
+    color: #fff;
+    font-size: 22px;
+  }
+
+  .rotate-hint .rotate-icon {
+    font-size: 72px;
+    animation: rotate-phone 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes rotate-phone {
+  0%,
+  30% {
+    transform: rotate(0deg);
+  }
+  70%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
 .hud-ammo {
   display: flex;
   gap: 8px;
@@ -555,6 +615,42 @@ button.big {
   text-shadow: none;
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--ink);
+}
+
+/* Táctil: botón de disparo redondo abajo a la derecha. Se mantiene para cargar; el borde se
+   llena como un reloj con la fuerza. */
+body.touch .hud-confirm {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: 18px;
+  width: 96px;
+  height: 96px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 36px;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+body.touch .hud-confirm::after {
+  content: 'mantén';
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+body.touch .hud-confirm.charging {
+  background: conic-gradient(#ffd23f var(--p), var(--accent) var(--p));
+  font-size: 24px;
+  transform: scale(1.06);
+}
+
+body.touch .hud-confirm.charging::after,
+body.touch .hud-confirm:disabled::after {
+  content: none;
 }
 
 .hud-help {

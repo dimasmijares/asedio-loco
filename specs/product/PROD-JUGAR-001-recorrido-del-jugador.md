@@ -5,7 +5,7 @@ layer: product
 domain: juego
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -54,7 +54,7 @@ Que un grupo de hasta 4 amigos pueda jugar una partida de unos 5 minutos en el n
 10. **Revancha:** en red, solo el anfitrión ve «¡Revancha!»; los demás, «Esperando a que el anfitrión pida la revancha…». Todos vuelven al lobby con la misma sala y los mismos jugadores. En solitario empieza otra partida. «Salir» recarga la página.
 11. **Espectador que entra tarde:** recibe el estado completo al llegar, ve la partida en directo y no puede disparar. No ve la repetición de reyes que cayeron antes de su llegada.
 12. **Recargar a mitad de partida:** se vuelve al mismo hueco con el token y se pide el estado completo.
-13. **Móvil hoy:** se puede entrar, mirar y cargar el disparo con el botón, pero **no se puede apuntar** (no hay clic derecho ni Espacio). Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión. Si el anfitrión pasa a segundo plano 2 s, cede la partida a otro jugador. El plan está en `docs/MOVILES.md` (M2-M5 pendientes).
+13. **Móvil:** en horizontal se apunta arrastrando el dedo y se dispara manteniendo el botón redondo (WRK-TASK-006). Al entrar se pide pantalla completa (Android) y en vertical se pide girar el móvil. Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión. Si el anfitrión pasa a segundo plano 2 s, cede la partida a otro jugador. El plan está en `docs/MOVILES.md` (M2-M5 pendientes).
 
 ### Acceptance Criteria
 
@@ -68,7 +68,7 @@ Que un grupo de hasta 4 amigos pueda jugar una partida de unos 5 minutos en el n
 - [x] Un móvil que crea la sala cede el papel de anfitrión a un ordenador.
 - [x] Apuntar con el clic derecho y cargar con Espacio dispara con esa potencia.
 - [ ] El tutorial de 3 pasos y «Cómo se juega» tienen prueba automática.
-- [ ] Se puede apuntar en una pantalla táctil.
+- [x] Se puede apuntar y disparar en una pantalla táctil (`tests/e2e/touch.spec.ts`).
 
 ## Evidence
 
@@ -96,5 +96,4 @@ Que un grupo de hasta 4 amigos pueda jugar una partida de unos 5 minutos en el n
 
 ## Open Questions
 
-- ¿El creador de una sala en móvil debería ver un aviso de que no podrá apuntar hasta que llegue M2? — dimas
 - Si el anfitrión se desconecta en el lobby tiene 8 s para volver (D-031); no está claro qué ven los demás mientras tanto.

@@ -3,9 +3,9 @@ id: WRK-TASK-006
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: low
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -59,13 +59,13 @@ Fuera: física, red, servidor y el HUD compacto (WRK-TASK-007).
 
 ## Acceptance Criteria
 
-- [ ] Con emulación táctil, arrastrar sobre la escena cambia rumbo y elevación.
-- [ ] Mantener el botón de disparo carga la fuerza y al soltar el disparo queda listo con esa potencia.
-- [ ] Dos flechas cambian el castillo objetivo; tocar una tarjeta elige la munición.
-- [ ] Pellizcar acerca y aleja la cámara.
-- [ ] En vertical se ve el aviso de «Gira el móvil» y la partida no se puede jugar tapada.
-- [ ] Tutorial y «Cómo se juega» muestran textos táctiles en un dispositivo táctil.
-- [ ] La E2E de control con ratón (`controls.spec.ts`) sigue pasando.
+- [x] Con emulación táctil, arrastrar sobre la escena cambia rumbo y elevación.
+- [x] Mantener el botón de disparo carga la fuerza y al soltar el disparo queda listo con esa potencia.
+- [x] Dos flechas cambian el castillo objetivo; tocar una tarjeta elige la munición.
+- [x] Pellizcar acerca y aleja la cámara.
+- [x] En vertical se ve el aviso de «Gira el móvil» y la partida no se puede jugar tapada.
+- [x] Tutorial y «Cómo se juega» muestran textos táctiles en un dispositivo táctil.
+- [x] La E2E de control con ratón (`controls.spec.ts`) sigue pasando.
 
 ## Test Plan
 
@@ -77,4 +77,20 @@ Fuera: física, red, servidor y el HUD compacto (WRK-TASK-007).
 
 ## Evidence
 
-Pendiente.
+- **Código:**
+  - `client/src/device.ts`: `isMobileDevice`, que sale de `connection.ts`, y `enterFullscreen`, que pide pantalla completa y la orientación horizontal en Android al pulsar «Crear sala», «Entrar», «Empezar» o «Campo de pruebas».
+  - `AimInput`: un dedo apunta y dos pellizcan (`onPinch`).
+  - `CameraRig`: fuera del apuntado, un dedo mira alrededor.
+  - HUD: botón redondo 🔥 que se llena con la fuerza, flechas ◀ ▶ (`#target-prev`, `#target-next`), ayuda plegada con filas táctiles y `touch-action`.
+  - `body.touch` y `body.in-game`, con el aviso `.rotate-hint` en vertical.
+  - Tutorial, «Cómo se juega» y rótulos con textos táctiles.
+- **Petición del usuario (26-09-2026):** «apuntar con la pantalla táctil y un botón de disparo redondo que si lo mantienes carga el disparo». Es exactamente lo implementado.
+- **E2E `tests/e2e/touch.spec.ts`** (863 × 360, `hasTouch`, `isMobile`, gestos por CDP):
+  - arrastrar gira y sube la elevación;
+  - ▶ cambia el objetivo y tocar la tarjeta elige munición;
+  - separar dos dedos acerca;
+  - el botón es redondo y está abajo a la derecha; mantenerlo carga y al soltar el disparo queda listo;
+  - en vertical sale el aviso, y desaparece en horizontal.
+- **Puertas en local (2026-09-26):** `npm run verify` y las E2E `touch`, `controls` y `solo` en verde. El control con ratón no cambia.
+- **Falta en un móvil real:** probar la sensación del dedo, Safari (sin pantalla completa fuera de una app instalada) y el rendimiento (M4).
+- **Consolidación:** `FEAT-CONTROL-001` 1.3.0, `FEAT-CAMARA-001` 1.2.0, `FEAT-INTERFAZ-001` 1.3.0 y `PROD-JUGAR-001`.

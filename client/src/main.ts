@@ -1,3 +1,4 @@
+import { enterFullscreen, isMobileDevice } from './device';
 import './ui/style.css';
 import { DIFFICULTIES, ROOM_CODE_RE, type Difficulty } from '../../shared/protocol';
 import { Connection } from './net/connection';
@@ -160,8 +161,13 @@ function boot() {
   if (code && hasToken) return enterRoom(code, savedName());
   const home = showHome(ui, {
     code,
-    onJoin: (name) => enterRoom(code!, name),
+    // En móvil, pantalla completa al entrar (hace falta el gesto del usuario).
+    onJoin: (name) => {
+      enterFullscreen();
+      enterRoom(code!, name);
+    },
     onCreate: async (name) => {
+      enterFullscreen();
       try {
         enterRoom(await createRoom(), name);
       } catch (e) {
@@ -171,16 +177,27 @@ function boot() {
     onSolo: (name) =>
       showSoloSetup(ui, {
         onStart: (bots, difficulty) => {
+          enterFullscreen();
           history.replaceState(null, '', '#solo');
           void startSolo({ name, bots, difficulty });
         },
         onSandbox: () => {
+          enterFullscreen();
           history.replaceState(null, '', '#sandbox');
           void startSandbox();
         },
         onBack: () => boot(),
       }),
   });
+}
+
+// Móvil: clase para los estilos táctiles y aviso de «gira el móvil» en vertical.
+if (isMobileDevice()) {
+  document.body.classList.add('touch');
+  const hint = document.createElement('div');
+  hint.className = 'rotate-hint';
+  hint.innerHTML = '<div class="rotate-icon">📱</div><div>Gira el móvil para jugar en horizontal</div>';
+  document.body.append(hint);
 }
 
 window.addEventListener('hashchange', () => location.reload());

@@ -59,7 +59,7 @@ M5 depende de M2: el manifiesto fija la orientación horizontal y la pantalla co
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---|---|---|---|---|
 | M1 | WRK-TASK-005 · Anfitrión en segundo plano | completed | — | `6e59421`, 25-09-2026. D-065, protocolo v5 |
-| M2 | WRK-TASK-006 · Control táctil | draft | WRK-TASK-005 | — |
+| M2 | WRK-TASK-006 · Control táctil | completed | WRK-TASK-005 | Dedo para apuntar, botón redondo 🔥, flechas, pellizco, aviso de girar |
 | M3 | WRK-TASK-007 · HUD compacto | draft | WRK-TASK-006 | — |
 | M4 | WRK-TASK-008 · Perfil de rendimiento móvil | draft | WRK-TASK-005 | — |
 | M5 | WRK-TASK-009 · PWA (opcional) | draft | WRK-TASK-006 | — |

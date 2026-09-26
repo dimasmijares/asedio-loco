@@ -1,3 +1,4 @@
+import { isMobileDevice } from '../device';
 import { PROTOCOL_VERSION, type ClientMsg, type RelayData, type Role, type RoomState, type ServerMsg } from '../../../shared/protocol';
 
 export type ConnStatus = 'connecting' | 'open' | 'closed' | 'replaced' | 'error';
@@ -170,9 +171,3 @@ export class Connection {
   }
 }
 
-// Móvil o tableta: pantalla táctil sin ratón. ?mobile=1 o ?mobile=0 lo fuerzan (pruebas).
-export function isMobileDevice() {
-  const q = new URLSearchParams(location.search).get('mobile');
-  if (q === '1' || q === '0') return q === '1';
-  return matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
-}

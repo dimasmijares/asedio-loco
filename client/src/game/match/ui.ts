@@ -39,6 +39,14 @@ export const AIM_HELP: HelpRow[] = [
   [['Rueda'], 'acercar la cámara'],
 ];
 
+export const TOUCH_HELP: HelpRow[] = [
+  [['arrastrar'], 'apuntar'],
+  [['🔥'], 'mantener: fuerza · soltar: ¡fuego!'],
+  [['◀', '▶'], 'castillo objetivo'],
+  [['tarjeta'], 'munición'],
+  [['pellizcar'], 'acercar la cámara'],
+];
+
 const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot === slot)?.name ?? '¿?';
 
 export class MatchUI {
@@ -66,11 +74,12 @@ export class MatchUI {
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: cuanto más tiempo, más fuerza' : 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
+    this.hud.onTarget = (d) => this.cycleTarget(d);
     input.onSelectSlot = (i) => this.selectAmmo(i);
     this.hud.bindCharge(input);
-    this.hud.setHelp(AIM_HELP);
+    this.hud.setHelp(this.hud.touchUi ? TOUCH_HELP : AIM_HELP);
     const me = this.me();
     if (me) input.setAim(me.aim);
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
@@ -217,6 +226,7 @@ export class MatchUI {
     if (me && me.alive && s.phase === 'aim') this.hud.setAmmo(me.ammo, me.selected, (i) => this.selectAmmo(i));
     else this.hud.setAmmo([], 0, () => {});
     this.hud.showConfirm(!!me?.alive && s.phase === 'aim', !!me?.locked);
+    this.hud.showTargetButtons(this.canAim());
     this.hud.setStats(`${g.fps} fps`);
   }
 
@@ -264,7 +274,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
+      const sub = windNow && !this.last.wind ? '¡Empieza a soplar el viento!' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
       sfx.fanfare();

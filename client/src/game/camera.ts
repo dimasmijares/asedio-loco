@@ -38,23 +38,37 @@ export class CameraRig {
     let dragging = false;
     let lx = 0;
     let ly = 0;
+    // En táctil, un dedo mira alrededor (si no se está apuntando); con dos se pellizca.
+    const fingers = new Set<number>();
     dom.addEventListener('contextmenu', (e) => e.preventDefault());
     dom.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') {
+        fingers.add(e.pointerId);
+        dragging = fingers.size === 1 && this.lookEnabled;
+        lx = e.clientX;
+        ly = e.clientY;
+        return;
+      }
       if (e.button !== 2 || !this.lookEnabled) return;
       dragging = true;
       lx = e.clientX;
       ly = e.clientY;
     });
     window.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
+      if (!dragging || !this.lookEnabled || (e.pointerType === 'touch' && fingers.size !== 1)) return;
       this.userYaw -= (e.clientX - lx) * 0.006;
       this.userPitch = THREE.MathUtils.clamp(this.userPitch + (e.clientY - ly) * 0.004, -0.5, 0.9);
       lx = e.clientX;
       ly = e.clientY;
     });
-    window.addEventListener('pointerup', (e) => {
-      if (e.button === 2) dragging = false;
-    });
+    const up = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') {
+        fingers.delete(e.pointerId);
+        if (fingers.size === 0) dragging = false;
+      } else if (e.button === 2) dragging = false;
+    };
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   }
 
   zoom(delta: number) {

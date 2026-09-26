@@ -12,11 +12,15 @@ export const CHARGE_TIME = 1.5;
 const NO_LOCK = new URLSearchParams(location.search).has('nolock');
 // Una pulsación más corta que esto no dispara (evita un tiro al 5 % por un toque sin querer).
 const MIN_CHARGE = 0.12;
+// Con el dedo se recorre menos distancia que con el ratón (pantallas pequeñas): más ganancia.
+const TOUCH_GAIN = 1.6;
 
 // Control de la catapulta:
 //  - Clic derecho mantenido + ratón: horizontal = rumbo, vertical = elevación (Mayús: precisión).
 //  - Espacio o clic izquierdo mantenidos: la fuerza sube de 0 a 100 % en CHARGE_TIME y se queda.
 //    Al soltar, dispara.
+//  - Táctil: un dedo arrastrado sobre la escena apunta (como el clic derecho); dos dedos
+//    acercan o alejan la cámara; la fuerza se carga manteniendo el botón de disparo.
 //  - A/D y W/S: rumbo y elevación con el teclado. Q/E: castillo objetivo. 1/2/3 (o el teclado
 //    numérico): munición.
 export class AimInput {
@@ -33,13 +37,18 @@ export class AimInput {
   onTooShort: () => void = () => {};
   onCycleTarget: (dir: number) => void = () => {};
   onSelectSlot: (i: number) => void = () => {};
+  onPinch: (factor: number) => void = () => {}; // >1 al separar los dedos (acercar)
   private lx = 0;
   private ly = 0;
   private skipMove = false; // el primer movimiento tras bloquear el puntero trae un salto falso
   private keys = new Set<string>();
+  // Dedos sobre la escena: uno apunta (como el clic derecho), dos pellizcan (zoom).
+  private touches = new Map<number, { x: number; y: number }>();
+  private pinch = 0;
 
   constructor(readonly dom: HTMLElement) {
     dom.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') return this.touchDown(e);
       if (!this.enabled) return;
       // Clic izquierdo mantenido sobre la escena: carga la fuerza, igual que Espacio. Los
       // botones y tarjetas del HUD no llegan aquí (cortan el evento).
@@ -64,6 +73,7 @@ export class AimInput {
       }
     });
     window.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return this.touchMove(e);
       if (!this.aiming) return;
       // Con el puntero bloqueado el cursor no se mueve y el desplazamiento llega en movementX/Y.
       // Si llega a 0 pero el cursor sí se ha movido (eventos sintéticos), se usa el cursor.
@@ -89,7 +99,14 @@ export class AimInput {
       this.aiming = false;
       if (document.pointerLockElement === dom) document.exitPointerLock?.();
     };
+    const touchEnd = (e: PointerEvent) => {
+      if (!this.touches.delete(e.pointerId)) return;
+      this.pinch = 0;
+      if (this.touches.size === 0) this.aiming = false;
+    };
+    window.addEventListener('pointercancel', (e) => e.pointerType === 'touch' && touchEnd(e));
     window.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'touch') return touchEnd(e);
       if (e.button === 2) endAim();
       if (e.button === 0) this.releaseCharge('mouse');
     });
@@ -118,9 +135,38 @@ export class AimInput {
     });
     window.addEventListener('blur', () => {
       this.keys.clear();
+      this.touches.clear();
       this.cancelCharge();
       endAim();
     });
+  }
+
+  private touchDown(e: PointerEvent) {
+    this.dom.setPointerCapture?.(e.pointerId);
+    this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    // Un dedo apunta; con el segundo se deja de apuntar y se pellizca.
+    this.aiming = this.touches.size === 1 && this.enabled;
+    this.pinch = 0;
+  }
+
+  private touchMove(e: PointerEvent) {
+    const t = this.touches.get(e.pointerId);
+    if (!t) return;
+    const dx = e.clientX - t.x;
+    const dy = e.clientY - t.y;
+    t.x = e.clientX;
+    t.y = e.clientY;
+    if (this.touches.size >= 2) {
+      const [a, b] = [...this.touches.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (this.pinch > 0 && d > 0) this.onPinch(d / this.pinch);
+      this.pinch = d;
+      return;
+    }
+    if (!this.aiming || !this.enabled) return;
+    const k = settings.sensitivity * TOUCH_GAIN;
+    this.aim = clampAim({ ...this.aim, yaw: this.aim.yaw - dx * 0.0035 * k, pitch: this.aim.pitch - dy * 0.0028 * k });
+    this.onChange(this.aim);
   }
 
   // También lo usa el botón de disparo (mantener pulsado con el ratón o el dedo).

@@ -33,7 +33,7 @@ export class SandboxMode implements Mode {
     input.setAim({ yaw: Math.atan2(to[0] - lp[0], to[2] - lp[2]), pitch: 0.7, power: 0.72 });
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: cuanto más tiempo, más fuerza' : 'Espacio o el clic izquierdo: cuanto más tiempo, más fuerza', 1300);
     this.hud.bindCharge(input);
     this.hud.showConfirm(true);
     game.rig.lookEnabled = false;
@@ -43,7 +43,12 @@ export class SandboxMode implements Mode {
     this.hud.setWind(null);
     this.renderAmmo();
     this.hud.alwaysStats = true;
-    this.hud.setHelp([
+    this.hud.setHelp(this.hud.touchUi ? [
+      [['arrastrar'], 'apuntar'],
+      [['🔥'], 'mantener: fuerza · soltar: ¡fuego!'],
+      [['tarjeta'], 'munición'],
+      [['pellizcar'], 'acercar la cámara'],
+    ] : [
       [['Clic dcho.', 'ratón'], 'apuntar'],
       [['Espacio', 'clic izdo.'], 'mantener: fuerza · soltar: ¡fuego!'],
       [['A', 'D', 'W', 'S'], 'afinar el tiro'],

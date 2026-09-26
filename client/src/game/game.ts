@@ -89,6 +89,9 @@ export class Game {
       },
       { passive: false },
     );
+    document.body.classList.add('in-game');
+    // Pellizcar: separar los dedos acerca (como la rueda hacia delante).
+    this.input.onPinch = (f) => this.rig.zoom(1 / f - 1);
     window.addEventListener('resize', () => this.stage.resize());
     setQualityTarget((q) => this.stage.setQuality(q));
     this.rig.orbit(new THREE.Vector3(0, 2, 0), 70, 38, 0.06);
@@ -241,6 +244,7 @@ export class Game {
 
   dispose() {
     this.stopped = true;
+    document.body.classList.remove('in-game');
     setQualityTarget(null);
     cancelAnimationFrame(this.raf);
     this.mode?.dispose?.();

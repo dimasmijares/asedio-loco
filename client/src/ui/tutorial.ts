@@ -1,3 +1,4 @@
+import { isMobileDevice } from '../device';
 import { h } from './dom';
 
 const KEY = 'asedio.tutorial';
@@ -20,9 +21,17 @@ const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio o el clic izquierdo: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo. Si se acaba el tiempo, sale con lo que tengas.' },
 ];
 
+// En táctil se apunta arrastrando el dedo y se dispara con el botón redondo.
+const TOUCH_STEPS: typeof STEPS = [
+  { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por la pantalla: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
+  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta. Las flechas ◀ ▶ apuntan a otro castillo.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo 🔥: cuanto más tiempo, más fuerza, y la parábola crece. Al soltar, el disparo queda listo.' },
+];
+
 // Tutorial de 3 pasos en la primera partida: cada paso avanza al hacer lo que pide.
 export class Tutorial {
   private i = 0;
+  private steps = isMobileDevice() ? TOUCH_STEPS : STEPS;
   private el: HTMLElement;
   private t = 0;
   done = false;
@@ -34,11 +43,11 @@ export class Tutorial {
   }
 
   private render() {
-    const s = STEPS[this.i];
+    const s = this.steps[this.i];
     const skip = h('button', { class: 'coach-skip' }, 'Saltar');
     skip.onclick = () => this.finish();
     skip.onpointerdown = (e) => e.stopPropagation();
-    this.el.replaceChildren(h('b', null, s.title), h('div', null, s.text), h('div', { class: 'coach-dots' }, ...STEPS.map((_, k) => h('span', { class: k === this.i ? 'on' : '' }))), skip);
+    this.el.replaceChildren(h('b', null, s.title), h('div', null, s.text), h('div', { class: 'coach-dots' }, ...this.steps.map((_, k) => h('span', { class: k === this.i ? 'on' : '' }))), skip);
     this.el.classList.remove('pop');
     void this.el.offsetWidth;
     this.el.classList.add('pop');
@@ -48,13 +57,13 @@ export class Tutorial {
   // Avisa de que el jugador ha hecho algo.
   event(e: Step) {
     if (this.done) return;
-    if (STEPS[this.i].id !== e) return;
+    if (this.steps[this.i].id !== e) return;
     this.next();
   }
 
   private next() {
     this.i++;
-    if (this.i >= STEPS.length) this.finish();
+    if (this.i >= this.steps.length) this.finish();
     else this.render();
   }
 
@@ -64,7 +73,7 @@ export class Tutorial {
     this.el.style.display = aiming ? '' : 'none';
     if (!aiming) return;
     this.t += dt;
-    if (STEPS[this.i].id === 'adjust' && this.t > 7) this.next();
+    if (this.steps[this.i].id === 'adjust' && this.t > 7) this.next();
   }
 
   finish() {

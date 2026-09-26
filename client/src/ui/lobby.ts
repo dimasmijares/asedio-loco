@@ -1,5 +1,6 @@
 import { DIFFICULTIES, MAX_PLAYERS, type Difficulty, type RoomState } from '../../../shared/protocol';
 import { PLAYER_STYLES } from '../../../shared/players';
+import { isMobileDevice } from '../device';
 import type { Connection } from '../net/connection';
 import { h, titleEl, toast } from './dom';
 import { openSettings } from './settings';
@@ -70,8 +71,10 @@ export function showHowTo() {
       { class: 'panel' },
       h('h2', null, 'Cómo se juega'),
       h('p', null, '👑 Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
-      h('p', null, '🎯 Todos apuntáis a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar y subir o bajar el tiro. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola crece) y suelta para disparar: ya no se puede cambiar. Cuando todos están listos, cuenta atrás: 3, 2, 1, ¡fuego! Q/E eligen otro castillo.'),
-      h('p', null, '🐄 Cada ronda te tocan 3 municiones distintas al azar: elige una con 1, 2 o 3 (o con un clic). Las defensivas (andamio y burbuja) protegen tu castillo.'),
+      isMobileDevice()
+        ? h('p', null, '🎯 Todos apuntáis a la vez durante 20 s. Arrastra el dedo por la pantalla para girar y subir o bajar el tiro. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola crece) y suelta para disparar: ya no se puede cambiar. Cuando todos están listos, cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ eligen otro castillo; pellizca para acercar la cámara.')
+        : h('p', null, '🎯 Todos apuntáis a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar y subir o bajar el tiro. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola crece) y suelta para disparar: ya no se puede cambiar. Cuando todos están listos, cuenta atrás: 3, 2, 1, ¡fuego! Q/E eligen otro castillo.'),
+      h('p', null, isMobileDevice() ? '🐄 Cada ronda te tocan 3 municiones distintas al azar: toca la tarjeta de la que quieras. Las defensivas (andamio y burbuja) protegen tu castillo.' : '🐄 Cada ronda te tocan 3 municiones distintas al azar: elige una con 1, 2 o 3 (o con un clic). Las defensivas (andamio y burbuja) protegen tu castillo.'),
       h('p', null, '🌋 Cada 3 rondas sube la lava y, desde la ronda 6, sopla el viento. ¡Mira la flecha!'),
       close,
     ),

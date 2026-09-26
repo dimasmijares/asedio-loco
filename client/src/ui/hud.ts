@@ -2,6 +2,7 @@ import { AMMO, RARITY_COLOR, RARITY_LABEL, type AmmoId } from '../../../shared/a
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
 import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
+import { isMobileDevice } from '../device';
 import type { AimInput } from '../game/aim';
 import { sfx } from '../game/audio';
 import { h } from './dom';
@@ -45,6 +46,17 @@ export class Hud {
   private stats = h('div', { class: 'hud-stats', id: 'hud-stats' });
   // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
   confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
+  // En táctil no hay Q/E: dos flechas a los lados de la munición cambian de castillo objetivo.
+  readonly touchUi = isMobileDevice();
+  onTarget: (dir: number) => void = () => {};
+  private targetBtns = [-1, 1].map((dir) => {
+    const b = h('button', { class: 'target-btn', id: dir < 0 ? 'target-prev' : 'target-next', 'aria-label': dir < 0 ? 'Castillo anterior' : 'Castillo siguiente', hidden: true }, dir < 0 ? '◀' : '▶');
+    b.onpointerdown = (e) => {
+      e.stopPropagation();
+      this.onTarget(dir);
+    };
+    return b;
+  });
   private bannerTimer = 0;
   // Cuenta atrás antes de disparar (3-2-1 y «¡FUEGO!»), en el centro de la pantalla.
   private countdown = h('div', { class: 'hud-countdown', id: 'hud-countdown', 'aria-live': 'assertive' });
@@ -54,7 +66,8 @@ export class Hud {
 
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
-    const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, this.ammo, this.confirmBtn);
+    const row = h('div', { class: 'hud-row' }, this.targetBtns[0], this.ammo, this.targetBtns[1]);
+    const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, row, this.confirmBtn);
     const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
     const toggle = () => {
       mute.textContent = sfx.toggleMute() ? '🔇' : '🔊';
@@ -66,7 +79,11 @@ export class Hud {
     } catch {
       /* sin almacenamiento */
     }
-    const helpBtn = h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles (H)' }, '⌨️ Controles ', h('kbd', null, 'H'));
+    // En táctil la ayuda empieza plegada: la pantalla es pequeña y el tutorial ya lo explica.
+    if (this.touchUi) this.helpOpen = false;
+    const helpBtn = this.touchUi
+      ? h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles' }, '❔ Controles')
+      : h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles (H)' }, '⌨️ Controles ', h('kbd', null, 'H'));
     helpBtn.onclick = () => this.toggleHelp();
     helpBtn.onpointerdown = (e) => e.stopPropagation();
     this.help.append(helpBtn, this.helpList);
@@ -239,7 +256,7 @@ export class Hud {
     const b = this.confirmBtn;
     b.classList.toggle('charging', p !== null);
     b.style.setProperty('--p', `${Math.round((p ?? 0) * 100)}%`);
-    if (p !== null) b.textContent = `Fuerza ${Math.round(p * 100)} %`;
+    if (p !== null) b.textContent = this.touchUi ? `${Math.round(p * 100)} %` : `Fuerza ${Math.round(p * 100)} %`;
   }
 
   showConfirm(show: boolean, locked = false) {
@@ -247,7 +264,15 @@ export class Hud {
     b.style.display = show ? '' : 'none';
     b.disabled = locked;
     if (b.classList.contains('charging')) return;
-    b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio o clic izquierdo';
+    // En táctil es un botón redondo abajo a la derecha, al alcance del pulgar.
+    if (this.touchUi) b.textContent = locked ? '✔' : '🔥';
+    else b.textContent = locked ? '✔ Disparo listo · esperando a los demás' : 'Mantén Espacio o clic izquierdo';
+    b.setAttribute('aria-label', locked ? 'Disparo listo' : 'Mantén pulsado para cargar y suelta para disparar');
+  }
+
+  // Flechas de castillo objetivo: solo en táctil y mientras se puede apuntar.
+  showTargetButtons(show: boolean) {
+    for (const b of this.targetBtns) b.hidden = !(show && this.touchUi);
   }
 
   dispose() {

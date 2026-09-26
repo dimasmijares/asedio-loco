@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -79,10 +79,15 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 
 ### Known Limitations
 
-- Pensado para ratón y teclado: en táctil la interfaz no sirve para apuntar.
+- **Táctil** (WRK-TASK-006, clase `body.touch`):
+  - el botón de disparo es redondo (96 px), abajo a la derecha, y se llena como un reloj con la fuerza;
+  - flechas ◀ ▶ de castillo objetivo;
+  - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
+  - tutorial, «Cómo se juega» y rótulos con textos táctiles;
+  - pantalla completa al entrar (Android) y aviso de «Gira el móvil» en vertical durante la partida.
 - Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
-- El HUD no se ha diseñado para vertical ni para móviles (plan de móviles, M2-M5).
+- En un móvil en horizontal (360 px de alto) el marcador ocupa media altura: lo compacta M3 (WRK-TASK-007). En vertical no se juega.
 
 ## Acceptance Criteria
 

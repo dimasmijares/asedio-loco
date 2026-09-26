@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -77,7 +77,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 
 ### Known Limitations
 
-- Pensado para ratón: en táctil no hay zoom ni giro de la órbita.
+- Táctil (WRK-TASK-006): pellizcar hace lo mismo que la rueda (`onPinch` → `rig.zoom(1/f − 1)`). Fuera del apuntado, un dedo mira alrededor como el clic derecho.
 - El director no sabe dónde va a caer un disparo; lo encuadra a medida que vuela.
 - Quedan en `CameraRig` el modo `follow` y el campo `slowmo`, sin uso desde D-060.
 
