@@ -4,7 +4,7 @@ type: adr
 layer: governance
 status: accepted
 confidence: high
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -27,8 +27,8 @@ La especificación original pedía una cámara que siguiera al proyectil más in
 
 ## Decision
 
-- Durante el impacto, el director encuadra a la vez todo lo que vuela y los puntos de impacto de los últimos 2 s.
-- El radio va de 9 a 24 m: se abre deprisa y se cierra despacio. Se mira desde el lado donde estaba la cámara al empezar la ronda.
+- Durante el impacto, el director encuadra a la vez todo lo que vuela y los puntos de impacto de los últimos 2,2 s.
+- El radio va de 9 a 24 m: se abre deprisa y se cierra despacio. Se mira desde el lado donde estaba la cámara al empezar el impacto (la dirección se fija en la primera actualización del director en la fase de impacto y se mantiene hasta la ronda siguiente).
 - Lo que sale volando fuera de la isla no aleja la cámara.
 - No hay cámara lenta en directo. La cámara lenta y el primer plano del rey quedan para la repetición (ADR-007).
 

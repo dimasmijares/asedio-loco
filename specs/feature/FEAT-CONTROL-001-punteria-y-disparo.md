@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -90,7 +90,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 - [x] Una pulsación corta de Espacio no dispara.
 - [x] Mantener Espacio sube la fuerza y la parábola no encoge.
 - [x] Al soltar, el jugador queda `locked` con esa fuerza (> 30 %) y otra carga no la cambia.
-- [x] Con todos listos, la ronda arranca antes de agotar los 20 s.
+- [ ] Con todos listos, la ronda arranca antes de agotar los 20 s (sin prueba propia; ver DOM-JUEGO-001).
 - [ ] La fuerza llega al 100 % en 1,5 s ± un fotograma (sin prueba que mida el tiempo).
 - [ ] Mayúsculas reduce a la cuarta parte el giro por píxel (sin prueba).
 
@@ -111,6 +111,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 | Implemented in | `shared/ballistics.ts` | `clampAim`, `PITCH_MIN/MAX`, `POWER_MIN/MAX` |
 | Implemented in | `client/src/game/match/host.ts` | `setInput` ignora entradas tras `locked` |
 | Tested by | `tests/e2e/controls.spec.ts` | Clic derecho, Espacio, disparo definitivo |
+| Tested by | (falta) | Adelanto con todos listos: `controls.spec.ts` solo espera `phase !== 'aim'`, que también se cumple si se agota el reloj. Falta una prueba que mida que la ronda sale antes de los 20 s |
 | Decided in | D-059, D-062, D-032 | Control nuevo, salvaguardas del puntero, puntería entre jugadores |
 | External ref | `PLAN.md` etapa 2 | Petición del usuario |
 

@@ -4,7 +4,7 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -61,7 +61,7 @@ Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta u
 | Resolución interna (tope del `devicePixelRatio`) | 2 | 1,25 | 0,85 |
 | Sombras | 2048 | 1024 | no |
 | Antialias | sí | sí | no |
-| Tope de partículas | 900 | 550 | 260 |
+| Tope de partículas (humo + trozos al 60 %; `count` suma los dos) | 900 + 540 | 550 + 330 | 260 + 156 |
 | Tope de fragmentos | 260 | 170 | 90 |
 
 **Calidad adaptativa** (`game.ts`, D-041): si los fps están por debajo de 38 de forma sostenida (unos 5 s), baja un nivel y lo guarda. No actúa con `?quality=` en la URL, en navegadores automatizados ni con la pestaña oculta. Resolución y sombras cambian al momento; los topes, en la partida siguiente (D-046).

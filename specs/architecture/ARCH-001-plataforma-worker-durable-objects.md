@@ -4,7 +4,7 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -46,7 +46,7 @@ El juego necesita un sitio público y gratuito donde servir la página y coordin
   - Cualquier otra `/api/*` → 404. `run_worker_first` solo para `/api/*` y `/ws/*`.
 - **Una Durable Object `Room` por sala** (`idFromName(code)`, clase SQLite, migración `v1`). Usa WebSocket con hibernación (`acceptWebSocket`) y guarda el estado del lobby en `storage` (clave `s`).
 - **Ciclo de vida de la sala:** una sala vacía se borra con una alarma a los 60 s. En el lobby, el anfitrión que se cae tiene 8 s de gracia para recargar antes de perder el papel.
-- **Despliegue continuo** (`.github/workflows/deploy.yml`): cada push a `main` ejecuta `npm ci`, `typecheck`, `npm test`, `build` y `npx wrangler deploy`. Después, las E2E contra producción en 7 trabajos paralelos: `basicas`, `fisica`, `solitario`, `cuatro-jugadores`, `migracion`, `revancha` y `red-mala`. Cada uno sube sus capturas como `capturas-e2e-<grupo>`.
+- **Despliegue continuo** (`.github/workflows/deploy.yml`): cada push a `main` ejecuta `npm ci`, `npm run kdd:check`, `typecheck`, `npm test`, `build` y `npx wrangler deploy`. Después, las E2E contra producción en 7 trabajos paralelos: `basicas`, `fisica`, `solitario`, `cuatro-jugadores`, `migracion`, `revancha` y `red-mala`. Cada uno sube sus capturas como `capturas-e2e-<grupo>`.
 - Secretos: `CLOUDFLARE_API_TOKEN` (solo Workers Scripts:Edit) como secret y `CLOUDFLARE_ACCOUNT_ID` como variable.
 
 ### Rationale
@@ -65,7 +65,7 @@ El juego necesita un sitio público y gratuito donde servir la página y coordin
 
 ## Acceptance Criteria
 
-- [x] `GET /api/health` responde `{ ok: true, v }` con la versión del protocolo.
+- [ ] `GET /api/health` responde `{ ok: true, v }` con la versión del protocolo.
 - [x] `POST /api/rooms` devuelve un código de 4 letras y la sala se puede unir por enlace.
 - [x] Un push a `main` con CI en verde despliega y ejecuta los 7 grupos de E2E contra producción.
 - [ ] Una conexión WebSocket desde un origen ajeno recibe 403 (sin prueba automática).
@@ -85,7 +85,7 @@ El juego necesita un sitio público y gratuito donde servir la página y coordin
 | Implemented in | `wrangler.jsonc` | Estáticos, binding `ROOMS`, migración `v1` |
 | Implemented in | `.github/workflows/deploy.yml` | Despliegue continuo y matriz de E2E |
 | Tested by | `tests/e2e/lobby.spec.ts` | Crear sala, unirse por enlace, lista de conectados |
-| Tested by | `playwright.config.ts` | En local espera a `/api/health` de `wrangler dev` |
+| Implemented in | `playwright.config.ts` | En local espera a `/api/health` de `wrangler dev`. No es una prueba: ninguna comprueba la respuesta `{ ok, v }` |
 | Decided in | D-003, D-004, D-005, D-006, D-050 | Plataforma, estáticos, sin plugins, deploy directo, E2E en paralelo |
 
 ## Open Questions

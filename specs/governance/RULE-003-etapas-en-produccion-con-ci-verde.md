@@ -4,7 +4,7 @@ type: rule
 layer: governance
 status: active
 confidence: high
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -41,7 +41,7 @@ El usuario juega en la URL pública con amigos: producción tiene que estar siem
 
 | Mechanism | Where | Blocking |
 |-----------|-------|----------|
-| typecheck, `npm test` y build antes de `wrangler deploy` | `.github/workflows/deploy.yml`, trabajo `deploy` | yes |
+| `npm run kdd:check`, typecheck, `npm test` y build antes de `wrangler deploy` | `.github/workflows/deploy.yml`, trabajo `deploy` | yes |
 | E2E contra producción en 7 grupos | mismo workflow, trabajos `e2e (<grupo>)` | no para el despliegue ya hecho; sí para la etapa siguiente |
 | `npm run ci:estado -- --wait` | local, al cerrar la tarea | yes, por proceso |
 | Revisión de capturas | artefactos `capturas-e2e-<grupo>` y `review.mjs` | no |

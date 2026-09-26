@@ -4,7 +4,7 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -49,7 +49,7 @@ El juego es derribar castillos: la física tiene que ser creíble, estable en re
 - **Estabilidad:** suelo de la isla con cuboides y cilindros, no un casco convexo (D-011). No se duermen cuerpos a mano (D-012). Las consultas espaciales primero recogen y luego modifican (D-018).
 - **Escenas de física como prueba** (`sim/scenes.ts`, D-048). Una sola definición, ejecutada en Vitest y en el navegador (`/#physics=<escena>`):
   - `ccd`: pedrusco a 140 m/s contra un muro de hierro de 8 cm. No lo atraviesa.
-  - `tower`: se quita la base de una torre de 5 bloques y lo de arriba cae.
+  - `tower`: una base de piedra con 5 bloques encima (6 en total); se quita la base y lo de arriba cae.
   - `glass`: el mismo impacto rompe el cristal y no la piedra.
   - `fragments`: un bloque de madera roto genera fragmentos que al rato se retiran.
 

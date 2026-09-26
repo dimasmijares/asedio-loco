@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -51,8 +51,8 @@ La **lava** es un mar que rodea la isla y sube por niveles al empezar ciertas ro
    | 7 | 22+ | 5,2 | Otra hilera (tope) |
 
 3. **Comerse bloques:** al subir, cada bloque cuya base queda más de 3 cm por debajo de la nueva altura pierde sus uniones, deja de chocar con la superficie de lava y se hunde a 0,6 m/s. Se funde cuando su cara de arriba queda a ras. Lo de encima baja con él sin golpes.
-4. **Sobre la isla**, la superficie de lava es un suelo físico: un bloque que cae encima se queda flotando y **no se funde**. Solo se come la hilera cuando sube el nivel.
-5. **Fuera de la isla** (el mar), lo que toca la lava se frena y se funde tras el tiempo de su material (madera 1,2 s, piedra 2,6 s, cristal 0,8 s, hierro 4 s). Los proyectiles, a los 0,6 s.
+4. **Sobre la isla**, la superficie de lava es un suelo físico: un bloque que cae encima se queda flotando y **no se funde**. Solo se come la hilera cuando sube el nivel. Esta excepción es solo para bloques.
+5. **Fuera de la isla** (el mar), lo que toca la lava se frena y se funde tras el tiempo de su material (madera 1,2 s, piedra 2,6 s, cristal 0,8 s, hierro 4 s). Los proyectiles se frenan y se funden a los 0,6 s en cualquier lava, también sobre la isla.
 6. Un rey que toca la lava queda eliminado (DOM-JUEGO-001, regla 10).
 7. **Viento:** nulo hasta la ronda 5. Desde la ronda 6 (la 3 en modo rápido) tiene dirección al azar y velocidad al azar entre 2 y `3,5 + min(4, (ronda − 6) · 0,5)` m/s. Es decir, hasta 3,5 m/s en la ronda 6 y hasta 7,5 m/s desde la 14.
 8. Cada munición nota el viento según su `windFactor` (de 0,2 el piano o el agujero negro a 0,5 la gallina). Las defensivas no vuelan.

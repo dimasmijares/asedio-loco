@@ -4,7 +4,7 @@ type: adr
 layer: governance
 status: accepted
 confidence: high
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -38,7 +38,7 @@ Los castillos originales tenían 106 bloques, dentro de la referencia de 80-120 
 
 **Positive:**
 
-- Castillos más vistosos; en proporción, cada disparo destroza menos (de 7,9 a 8,8 bloques por disparo).
+- Castillos más vistosos. Cada disparo destroza 8,8 bloques frente a 7,9: más en absoluto pero menos en proporción (6,3 % frente a 7,5 % del castillo).
 
 **Negative:**
 
