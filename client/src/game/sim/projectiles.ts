@@ -19,6 +19,10 @@ const tv = (v: { x: number; y: number; z: number }): Vec3 => [v.x, v.y, v.z];
 
 // Ajustes de equilibrio (WRK-TASK-021, medidos con tests/balance/destrozo).
 const LOG_SPIN = 12; // rad/s que mantiene el tronco al rodar
+const LOG_SPEED = 8; // m/s en horizontal que no pierde mientras rueda (apisonadora, WRK-TASK-029)
+// Cocos (WRK-TASK-029): se abren ya cayendo, cerca del castillo, en 6.
+const COCO_SPLIT_VY = -5; // m/s: se abren cuando caen a esta velocidad
+const COCO_SPREAD = 1.6; // abre el abanico: metralla por toda la fachada
 // Gallina bombardera (WRK-TASK-028): botes cortos y bajos hacia el castillo más cercano y, en
 // cada uno, un racimo de huevos que explotan al tocar algo.
 const CHICKEN_BOUNCES = 3;
@@ -44,21 +48,23 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
       return { maxLife: 6 };
 
     case 'log': {
-      let rolling = false;
+      let dir: Vec3 | null = null;
       return {
         maxLife: 7.5,
-        onContact() {
-          rolling = true;
+        onContact(r) {
+          if (dir) return;
+          // Rueda recto en la dirección en que venía: barre la fila baja del castillo.
+          const v = r.body.linvel();
+          dir = v3.norm([v.x, 0, v.z]);
         },
         onStep(r) {
-          if (!rolling) return;
-          // Sigue rodando: mantiene el giro alrededor de su eje largo.
-          const w = r.body.angvel();
-          const sp = Math.hypot(w.x, w.y, w.z);
-          if (sp < LOG_SPIN && sp > 0.01) {
-            const k = LOG_SPIN / sp;
-            r.body.setAngvel({ x: w.x * k, y: w.y * k, z: w.z * k }, true);
-          }
+          if (!dir) return;
+          const v = r.body.linvel();
+          const along = v.x * dir[0] + v.z * dir[2];
+          if (along < LOG_SPEED) r.body.setLinvel({ x: dir[0] * LOG_SPEED, y: Math.min(v.y, 2), z: dir[2] * LOG_SPEED }, true);
+          // Y sigue girando alrededor de su eje largo, que va atravesado a la marcha.
+          const axis: Vec3 = [dir[2], 0, -dir[0]];
+          r.body.setAngvel({ x: axis[0] * LOG_SPIN, y: 0, z: axis[2] * LOG_SPIN }, true);
         },
       };
     }
@@ -68,7 +74,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
       return {
         maxLife: 6,
         onStep(r) {
-          if (split || r.body.linvel().y > 0) return;
+          if (split || r.body.linvel().y > COCO_SPLIT_VY) return;
           split = true;
           const p = tv(r.body.translation());
           const v = tv(r.body.linvel());
@@ -76,15 +82,17 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.events.push({ e: 'fx', kind: 'split', p });
           const side = v3.norm([v[2], 0, -v[0]]);
           const fwd = v3.norm([v[0], 0, v[2]]);
-          // Abanico cerrado: los 4 caen repartidos sobre el mismo castillo, no por media isla.
+          // Abanico cerrado: los 6 caen repartidos sobre el mismo castillo, no por media isla.
           const offs: [number, number][] = [
-            [1.3, 0.5],
-            [-1.3, 0.5],
-            [0.55, -0.8],
-            [-0.55, -0.8],
+            [1.6, 0.6],
+            [-1.6, 0.6],
+            [0.8, -0.9],
+            [-0.8, -0.9],
+            [0, 1.1],
+            [0, -1.6],
           ];
           for (const [s, f] of offs) {
-            const dv = v3.add(v3.scale(side, s), v3.scale(fwd, f));
+            const dv = v3.scale(v3.add(v3.scale(side, s), v3.scale(fwd, f)), COCO_SPREAD);
             sim.spawnProjectile(AMMO.coconuts, r.slot, v3.add(p, v3.scale(dv, 0.15)), v3.add(v, dv), { scale: 0.72, behavior: { maxLife: 5 } });
           }
         },

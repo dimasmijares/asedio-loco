@@ -1,11 +1,11 @@
 rock       rotos  10.7  movidos   1.7  reyes   2/6  disp  0.8  alt  2.6  base  2.5  piedra  6.2
-log        rotos   6.7  movidos   3.3  reyes   0/6  disp  1.1  alt  4.2  base  0.7  piedra  3.0 ! (10-13)
-coconuts   rotos   8.0  movidos   2.0  reyes   0/6  disp  1.4  alt  3.3  base  1.2  piedra  2.5 ! (10-13)
-cow        rotos  16.0  movidos   1.5  reyes   3/6  disp  1.5  alt  3.1  base  3.0  piedra  8.0
-melon      rotos  14.0  movidos   0.5  reyes   3/6  disp  1.1  alt  3.0  base  2.7  piedra  8.5
-chicken    rotos  12.7  movidos   3.3  reyes   1/6  disp  1.9  alt  3.4  base  0.8  piedra  5.7
+log        rotos   9.7  movidos   5.5  reyes   0/6  disp  2.7  alt  4.3  base  0.8  piedra  3.5 ! (10-13)
+coconuts   rotos  12.7  movidos   3.2  reyes   0/6  disp  2.0  alt  3.3  base  1.7  piedra  4.7
+cow        rotos  16.3  movidos   2.5  reyes   3/6  disp  1.5  alt  3.1  base  3.2  piedra  8.0
+melon      rotos  14.0  movidos   0.7  reyes   2/6  disp  1.1  alt  2.9  base  2.7  piedra  8.5
+chicken    rotos  13.8  movidos   4.3  reyes   1/6  disp  2.2  alt  3.6  base  1.5  piedra  5.3
 piano      rotos  10.5  movidos   2.2  reyes   0/6  disp  1.4  alt  2.5  base  2.7  piedra  5.5 ! (15-20)
-blackhole  rotos  13.3  movidos  16.0  reyes   0/6  disp  2.3  alt  3.7  base  3.2  piedra  4.3 ! (20-26)
+blackhole  rotos  14.3  movidos  15.8  reyes   0/6  disp  2.3  alt  3.6  base  3.3  piedra  5.3 ! (20-26)
 magnet     rotos  12.5  movidos  10.5  reyes   0/6  disp  1.5  alt  2.4  base  4.2  piedra  7.0 ! (18-24)
 snowball   rotos   9.5  movidos   6.3  reyes   0/6  disp  3.7  alt  4.5  base  0.5  piedra  3.3 ! (18-24)
-media      rotos  11.4  movidos   4.7  reyes  9/60
+media      rotos  12.4  movidos   5.3  reyes  8/60

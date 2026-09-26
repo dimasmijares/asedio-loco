@@ -46,8 +46,8 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
 | Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s |
-| Tronco rodante | común | 14 | Al tocar algo sigue rodando | r 0,36 m, largo 1,9 m, densidad 3, giro mínimo 12 rad/s, vida 7,5 s |
-| Racimo de cocos | común | 14 | Se divide en 4 en el punto más alto | abanico cerrado, cocos al 72 % de tamaño, densidad 7 |
+| Tronco rodante | común | 14 | Apisonadora: al tocar algo rueda en línea recta en la dirección en que venía y arrasa lo que pilla | r 0,36 m, largo 1,9 m, densidad 3; no baja de 8 m/s ni de 12 rad/s mientras rueda; vida 7,5 s |
+| Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 10 |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 120 (rompe piedra cerca del centro) |
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
 | Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 30 % del daño y del empuje; mecha de 1,5 s |

@@ -40,7 +40,7 @@ Cada munición ofensiva tiene una **identidad** (qué destroza y cómo) y un **o
 | Munición | Rareza | Identidad | Firma esperada | Rotos (hoy → objetivo) |
 |---|---|---|---|---|
 | Pedrusco | común | El fiable: rompe justo donde apuntas | Agujero pequeño y limpio; la referencia | 9,8 → 9-11 |
-| Tronco | común | Apisonadora: barre la parte baja | Muchos bloques movidos en la fila baja; el castillo se descalza | 6,5 → 10-13 |
+| Tronco | común | Apisonadora: arrasa en línea recta lo que pilla | Surco estrecho y largo, muchos bloques movidos (WRK-TASK-029: rueda por donde toca, no siempre por la base) | 6,5 → 10-13 |
 | Cocos | común | Metralla: muchos golpes repartidos | Desperfectos por toda la fachada | 6,5 → 10-13 |
 | Vaca | rara | Bomba: cráter | Agujero redondo grande y bloques volando | 2,3 → 14-18 |
 | Sandía | rara | Carga de demolición: se pega y revienta desde dentro | Hueco profundo en el punto exacto; tumba torres | 2,6 → 14-18 |

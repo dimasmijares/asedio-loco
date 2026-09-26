@@ -28,8 +28,8 @@ Primero se mide la firma de cada munición, para comprobar que cada cambio da la
 | 1 | WRK-TASK-026 · Firma de cada munición en la prueba de destrozo | completed | — | Dispersión, altura, piedra rota y objetivos por munición |
 | 2 | WRK-TASK-027 · Explosiones que rompen piedra: vaca y sandía | completed | 026 | Vaca cráter y sandía carga de demolición |
 | 3 | WRK-TASK-028 · Gallina bombardera | completed | 027 | Botes que se quedan en el castillo y huevos que explotan |
-| 4 | WRK-TASK-029 · Comunes: tronco apisonadora y cocos metralla | active | 026 | Tronco que barre la base y 6 cocos que rompen |
-| 5 | WRK-TASK-030 · Piano perforador | draft | 026 | Atraviesa pisos y remata con una onda en el suelo |
+| 4 | WRK-TASK-029 · Comunes: tronco apisonadora y cocos metralla | completed | 026 | Tronco que barre la base y 6 cocos que rompen |
+| 5 | WRK-TASK-030 · Piano perforador | active | 026 | Atraviesa pisos y remata con una onda en el suelo |
 | 6 | WRK-TASK-031 · Épicas: agujero negro, imán con retroceso y alud | draft | 027 | Tres épicas en 18-26 bloques con firmas distintas |
 | 7 | WRK-TASK-032 · Sensación propia de cada munición | draft | 027-031 | Temblor según destrozo, efectos, sonidos y textos |
 | 8 | WRK-TASK-033 · Bots y equilibrio final | draft | 027-032 | Bots que usan cada munición a su manera; partida medida |
