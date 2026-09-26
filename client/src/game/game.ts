@@ -47,7 +47,6 @@ export class Game {
   preview: TrajectoryPreview;
   sim: Sim | null = null;
   mode: Mode | null = null;
-  timeScale = 1;
   simPaused = false;
   fps = 0;
   frameMs = 0;
@@ -195,7 +194,7 @@ export class Game {
     const t0 = performance.now();
     const rawDt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
-    const dt = rawDt * this.timeScale;
+    const dt = rawDt;
     this.frames++;
     this.fpsT += rawDt;
     if (this.fpsT >= 0.5) {

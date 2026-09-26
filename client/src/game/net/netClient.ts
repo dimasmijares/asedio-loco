@@ -7,7 +7,7 @@ import type { PlayerInput } from '../match/host';
 import type { MatchSource } from '../match/ui';
 import type { SimEvent } from '../sim/sim';
 import { Interpolator } from './interp';
-import { aimToArr, arrToAim, unpackBlocks, unpackPoses, type FullMsg, type GameMsg, type TickMsg } from './messages';
+import { aimToArr, arrToAim, isStale, unpackBlocks, unpackPoses, type FullMsg, type GameMsg, type TickMsg } from './messages';
 
 // Cliente que no es anfitrión: no simula nada (salvo los fragmentos decorativos),
 // solo reproduce lo que manda el anfitrión, interpolando poses con un poco de retraso.
@@ -63,7 +63,7 @@ export class NetClient implements MatchSource {
 
   private setState(s: MatchState) {
     // Un estado más viejo que el que ya tenemos (misma partida) no puede deshacer nada.
-    if (s.seed === this.state.seed && s.v < this.state.v) return;
+    if (isStale(this.state, s)) return;
     this.state = s;
     this.deadline = performance.now() / 1000 + s.remaining;
     this.applyLiveAims();
@@ -95,6 +95,8 @@ export class NetClient implements MatchSource {
 
   // Estado completo: se ajusta la vista para que coincida exactamente con el anfitrión.
   private applyFull(m: FullMsg) {
+    // Un estado completo viejo tampoco: ni su estado ni sus bloques, reyes o proyectiles.
+    if (isStale(this.state, m.s)) return;
     const view = this.game.view;
     // El estado completo manda sobre lo que se vea: si había una repetición, se corta.
     view.endReplay();

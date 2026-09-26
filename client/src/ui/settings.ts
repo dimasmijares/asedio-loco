@@ -5,7 +5,7 @@ import { h } from './dom';
 // Ajustes guardados en el navegador: calidad gráfica, sonido, sensibilidad y texto grande.
 export interface Settings {
   quality: Quality;
-  sensitivity: number; // multiplicador del arrastre del tirachinas
+  sensitivity: number; // multiplica el movimiento del ratón o del dedo al apuntar
   bigText: boolean;
   showFps: boolean;
 }
@@ -100,7 +100,7 @@ export function openSettings() {
       h('label', { class: 'check' }, sound, ' Sonido (tecla M)'),
       h('label', { class: 'check' }, big, ' Texto grande'),
       h('label', { class: 'check' }, fps, ' Mostrar fps'),
-      h('label', { htmlFor: 'set-sens' }, 'Sensibilidad del tirachinas ', sensVal),
+      h('label', { htmlFor: 'set-sens' }, 'Sensibilidad al apuntar ', sensVal),
       sens,
       close,
     ),

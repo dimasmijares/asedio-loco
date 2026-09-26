@@ -3,9 +3,9 @@ id: WRK-TASK-019
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -27,9 +27,9 @@ En `server/index.ts` (línea 264), al volver al lobby un espectador pasa a jugad
 
 ## Acceptance Criteria
 
-- [ ] Al pasar de espectador a jugador se conservan `mobile` y `name`.
-- [ ] Un móvil promovido no es elegido anfitrión si hay un ordenador.
-- [ ] `npm run verify` y `multiplayer -g "anfitrión"` en verde.
+- [x] Al pasar de espectador a jugador se conservan `mobile` y `name`.
+- [x] Un móvil promovido no es elegido anfitrión si hay un ordenador.
+- [x] `npm run verify` y `multiplayer -g "anfitrión"` en verde.
 
 ## Test Plan
 
@@ -39,4 +39,6 @@ En `server/index.ts` (línea 264), al volver al lobby un espectador pasa a jugad
 
 ## Evidence
 
-Pendiente.
+- `server/index.ts`: al pasar de espectador a jugador, el adjunto conserva el resto de campos (`{ ...wa, pid, role, name }`), así que `mobile` sigue ahí para elegir anfitrión.
+- **Sin prueba automática propia:** el Durable Object no se carga en Vitest, y una E2E necesitaría un móvil que entre como espectador, el final de la partida y la revancha. La revancha y la migración siguen en verde.
+- Puertas en local (2026-09-26): tipos, 37 unitarios y lote E2E `multiplayer` (6), `controls` (2), `solo`, `touch` (2) y `hud-compact` (4): 15 en verde contra un servidor recién compilado.

@@ -3,9 +3,9 @@ id: WRK-TASK-017
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -33,9 +33,9 @@ Fuera: cualquier cambio de comportamiento.
 
 ## Acceptance Criteria
 
-- [ ] Ninguna cadena visible ni comentario menciona el tirachinas.
-- [ ] No queda código de cámara lenta en directo sin uso, y la repetición sigue a cámara lenta.
-- [ ] `npm run verify` y las E2E `controls` y `solo` en verde.
+- [x] Ninguna cadena visible ni comentario menciona el tirachinas.
+- [x] No queda código de cámara lenta en directo sin uso, y la repetición sigue a cámara lenta.
+- [x] `npm run verify` y las E2E `controls` y `solo` en verde.
 
 ## Test Plan
 
@@ -46,6 +46,14 @@ Fuera: cualquier cambio de comportamiento.
 
 ## Evidence
 
-Pendiente.
-
-Nota: las teclas de las tarjetas 11 y 12 del campo de pruebas ya se arreglaron en WRK-TASK-024.
+- **Código muerto quitado:**
+  - modo de cámara `follow`, `slowmo` y los campos de seguimiento de `CameraRig`;
+  - `Game.timeScale`, `HostEnv.timeScale` y su reinicio en `solo.ts`, y también en los arneses de `tests/balance` y `countdown.test.ts`;
+  - `PREVIEW_TIME`.
+- **Textos corregidos:**
+  - «Sensibilidad al apuntar» en lugar de «del tirachinas»;
+  - el comentario de `ammo` (`HAND` = 3);
+  - el comentario de `autoplay.ts` (bot normal).
+- Las teclas de las tarjetas 11 y 12 del campo de pruebas ya se arreglaron en WRK-TASK-024.
+- La repetición sigue a cámara lenta: va por `view.stepReplay`, no por `timeScale`.
+- Puertas en local (2026-09-26): tipos, 37 unitarios y lote E2E `multiplayer` (6), `controls` (2), `solo`, `touch` (2) y `hud-compact` (4): 15 en verde contra un servidor recién compilado.

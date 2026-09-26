@@ -38,6 +38,7 @@ export class OnlineMode implements Mode {
       },
       send: (input: PlayerInput) => (this.netHost ? this.netHost.localInput(input) : this.netClient?.send(input)),
       remaining: () => (this.netHost ? this.netHost.state.remaining : (this.netClient?.remaining() ?? 0)),
+      connected: (id: string) => conn.room?.players.find((p) => p.id === id)?.connected ?? false,
     };
     if (conn.isHost) this.startHost(room);
     else this.startClient(room);

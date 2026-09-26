@@ -3,9 +3,9 @@ id: WRK-TASK-015
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -41,9 +41,9 @@ Fuera: código del juego.
 
 ## Acceptance Criteria
 
-- [ ] El README no dice que haya cámara lenta en directo y menciona la repetición al acabar la ronda.
-- [ ] `CLAUDE.md` describe la fase 4 sin «foco en el rey que cae» en directo.
-- [ ] Ninguna otra frase del README contradice D-060 o D-061 (búsqueda de «cámara lenta» y «lenta»).
+- [x] El README no dice que haya cámara lenta en directo y menciona la repetición al acabar la ronda.
+- [x] `CLAUDE.md` describe la fase 4 sin «foco en el rey que cae» en directo.
+- [x] Ninguna otra frase del README contradice D-060 o D-061 (búsqueda de «cámara lenta» y «lenta»).
 
 ## Test Plan
 
@@ -55,4 +55,6 @@ Fuera: código del juego.
 
 ## Evidence
 
-Pendiente.
+- `README.md`: la eliminación se ve al momento con confeti, un rótulo y la calavera, y al acabar la ronda hay repetición a cámara lenta. Ya no dice que haya cámara lenta en directo.
+- `CLAUDE.md` ya no hablaba de la fase 4: se reescribió al adoptar KDD.
+- Búsqueda de «lenta» en README y «Cómo se juega»: no queda ninguna contradicción con D-060 ni con D-061.

@@ -11,7 +11,6 @@ import type { Sim, SimEvent } from '../sim/sim';
 // equilibrio, un entorno sin navegador.
 export interface HostEnv {
   sim: Sim | null;
-  timeScale: number;
   startSim(slots: number[]): Sim;
   setLavaVisual(y: number): void;
   simPaused?: boolean; // la física se para durante la repetición

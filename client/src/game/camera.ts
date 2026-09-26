@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-type Mode = 'orbit' | 'aim' | 'follow' | 'watch';
+type Mode = 'orbit' | 'aim' | 'watch';
 
 // Cámara con transiciones suaves entre modos y sacudida por explosiones.
 export class CameraRig {
@@ -22,13 +22,7 @@ export class CameraRig {
   // Apuntado
   aimFrom = new THREE.Vector3();
   aimYaw = 0;
-  // Seguimiento
-  followGetter: (() => THREE.Vector3 | null) | null = null;
-  followVel = new THREE.Vector3();
-  private followDir = new THREE.Vector3(0, 0, 1);
-  private lastFollow = new THREE.Vector3();
   shake = 0;
-  slowmo = 1;
   // Mirar alrededor con el clic derecho. Se desactiva mientras se apunta, porque entonces el
   // clic derecho mueve la catapulta.
   lookEnabled = true;
@@ -95,15 +89,6 @@ export class CameraRig {
     this.sharpness = 4;
   }
 
-  follow(getter: () => THREE.Vector3 | null, dir?: THREE.Vector3) {
-    if (this.mode !== 'follow' && dir) this.followDir.copy(dir).setY(0).normalize();
-    this.mode = 'follow';
-    this.followGetter = getter;
-    this.sharpness = 6;
-    const p = getter();
-    if (p) this.lastFollow.copy(p);
-  }
-
   watch(target: THREE.Vector3, from: THREE.Vector3) {
     this.mode = 'watch';
     this.wantTarget.copy(target);
@@ -140,20 +125,6 @@ export class CameraRig {
           .addScaledVector(right, 3)
           .add(new THREE.Vector3(0, 8 * this.userZoom + this.userPitch * 6, 0));
         this.wantTarget.copy(this.aimFrom).addScaledVector(d, 22).add(new THREE.Vector3(0, 3.5, 0));
-        break;
-      }
-      case 'follow': {
-        const p = this.followGetter?.();
-        if (p) {
-          this.followVel.lerp(p.clone().sub(this.lastFollow).divideScalar(Math.max(dt, 1e-3)), Math.min(1, dt * 4));
-          this.lastFollow.copy(p);
-        }
-        // Detrás y por encima del proyectil, mirando un poco por delante de él.
-        const v = this.followVel.clone();
-        v.y = 0;
-        if (v.lengthSq() > 0.5) this.followDir.lerp(v.normalize(), Math.min(1, dt * 3)).normalize();
-        this.wantTarget.copy(this.lastFollow).addScaledVector(this.followVel, 0.25);
-        this.wantPos.copy(this.lastFollow).addScaledVector(this.followDir, -12).add(new THREE.Vector3(0, 5.5, 0));
         break;
       }
       case 'watch':

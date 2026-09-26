@@ -182,10 +182,11 @@ export class Hud {
           h(
             'div',
             { class: 'hp-body' },
-            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.connected === false ? ' 📡' : '', p.you ? ' (tú)' : ''), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
+            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.you ? ' (tú)' : ''), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
             h('div', { class: 'hp-bar' }, h('div', { style: `width:${pct}%;background:${st.color}` })),
           ),
-          h('div', { class: 'hp-state' }, p.alive ? (p.locked ? '✔' : '') : '💀'),
+          // 📡: desconectado (su catapulta dispara con la última puntería al acabar el tiempo).
+          h('div', { class: 'hp-state', title: p.connected === false ? 'Desconectado' : '' }, !p.alive ? '💀' : p.connected === false ? '📡' : p.locked ? '✔' : ''),
         );
       }),
     );

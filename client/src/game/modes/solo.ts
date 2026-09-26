@@ -57,7 +57,6 @@ export class SoloMode implements Mode {
 
   rematch() {
     this.ui.dispose();
-    this.game.timeScale = 1;
     this.opts.seed = undefined;
     this.start();
   }

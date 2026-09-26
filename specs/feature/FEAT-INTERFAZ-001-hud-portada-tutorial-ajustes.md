@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.4.0
+version: 1.5.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -58,7 +58,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 4. **HUD de partida:**
    - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
-   - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
+   - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 📡 si está desconectado (en red) y 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
    - Abajo, potencia y elevación, 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
    - Rótulos: «RONDA N», «¡LA LAVA SUBE!», «¡REY ELIMINADO!» / «¡TU REY HA CAÍDO!», «REPETICIÓN».

@@ -6,7 +6,6 @@ export const POWER_MAX = 33;
 export const PITCH_MIN = 12 * DEG;
 export const PITCH_MAX = 75 * DEG;
 export const PITCH_DEFAULT = 40 * DEG;
-export const PREVIEW_TIME = 0.42; // segundos de trayectoria visibles al apuntar
 
 export interface Aim {
   yaw: number; // rumbo en el mundo (0 = +z)

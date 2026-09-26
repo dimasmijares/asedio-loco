@@ -19,7 +19,6 @@ export async function simulateGame(seed: number, difficulty: Difficulty, slots =
   await loadRapier();
   const env: HostEnv = {
     sim: null,
-    timeScale: 1,
     startSim(s) {
       this.sim?.free();
       this.sim = new Sim(s);

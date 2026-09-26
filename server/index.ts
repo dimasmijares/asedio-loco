@@ -261,7 +261,8 @@ export class Room extends DurableObject<Env> {
           const slot = [0, 1, 2, 3].find((i) => !used.has(i))!;
           const player = { id: hex(4), name: wa.name || `Jugador ${slot + 1}`, slot, token: hex(16) };
           s.players.push(player);
-          w.serializeAttachment({ pid: player.id, role: 'player', name: player.name } satisfies Attach);
+          // Se conserva el resto del adjunto: sobre todo `mobile`, que decide quién puede ser anfitrión.
+          w.serializeAttachment({ ...wa, pid: player.id, role: 'player', name: player.name } satisfies Attach);
           this.send(w, { t: 'welcome', you: { id: player.id, token: player.token, role: 'player' }, room: this.view() });
         }
         this.save();

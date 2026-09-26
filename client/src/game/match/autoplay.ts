@@ -3,7 +3,7 @@ import { hashString, rng, type Vec3 } from '../../../../shared/math';
 import type { WorldView } from '../view';
 import type { MatchSource } from './ui';
 
-// "Puntería automática" para las pruebas: el jugador humano decide como un bot difícil,
+// "Puntería automática" para las pruebas: el jugador humano decide como un bot normal,
 // pero manda sus entradas por el mismo camino que un humano (red incluida).
 export class AutoPlayer {
   private round = -1;

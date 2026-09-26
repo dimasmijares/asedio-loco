@@ -3,9 +3,9 @@ id: WRK-TASK-018
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -29,9 +29,9 @@ Fuera: el formato de los mensajes. Si cambia, se aplica RULE-002.
 
 ## Acceptance Criteria
 
-- [ ] Un `full` con la misma semilla y menor `v` no toca bloques, poses, reyes ni proyectiles.
-- [ ] Un `full` de otra partida (otra semilla, por ejemplo tras una revancha) se sigue aplicando.
-- [ ] La reconexión y la migración siguen en verde (`multiplayer -g "anfitrión"`).
+- [x] Un `full` con la misma semilla y menor `v` no toca bloques, poses, reyes ni proyectiles.
+- [x] Un `full` de otra partida (otra semilla, por ejemplo tras una revancha) se sigue aplicando.
+- [x] La reconexión y la migración siguen en verde (`multiplayer -g "anfitrión"`).
 
 ## Test Plan
 
@@ -42,4 +42,6 @@ Fuera: el formato de los mensajes. Si cambia, se aplica RULE-002.
 
 ## Evidence
 
-Pendiente.
+- `isStale` (`client/src/game/net/messages.ts`) decide para `st` y `full`. Un `full` de la misma semilla con `v` menor no aplica nada: ni estado, ni bloques, ni reyes, ni proyectiles. Uno de otra semilla (revancha) sí se aplica.
+- `tests/unit/messages.test.ts` (2 pruebas): viejo, igual, nuevo y otra partida.
+- Puertas en local (2026-09-26): tipos, 37 unitarios y lote E2E `multiplayer` (6), `controls` (2), `solo`, `touch` (2) y `hud-compact` (4): 15 en verde contra un servidor recién compilado. Reconexión y migración incluidas.

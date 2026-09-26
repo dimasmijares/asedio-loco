@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -66,7 +66,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - Si se estaba resolviendo un impacto, se da por terminado. Si se apuntaba, los bots vuelven a decidir y quedan al menos 3 s.
    - En el lobby, el anfitrión tiene 8 s de gracia para recargar sin perder el papel.
 7. **Cesión en segundo plano** (D-065): a los 2 s con la pestaña oculta, el anfitrión manda `yield` y pasa a cliente sin desconectarse. Al volver pide un `full`. Si no hay otro humano conectado, la partida espera. No se cede en `over`.
-8. **Revancha:** solo el anfitrión ve «¡Revancha!». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco.
+8. **Revancha:** solo el anfitrión ve «¡Revancha!». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
 9. **Sala vacía:** se borra a los 60 s sin conexiones.
 
 ### Outputs
@@ -114,7 +114,3 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 | Tested by | `tests/unit/protocol.test.ts` | `sanitizeName`, `parseClientMsg`, `randomRoomCode` |
 | Decided in | D-031, D-033, D-065 | Migración, espectadores y reconexión, cesión en segundo plano |
 
-## Open Questions
-
-- Al pasar un espectador a jugador en la revancha, `server/index.ts` rehace su adjunto sin el campo `mobile`: un móvil promovido cuenta como ordenador al elegir anfitrión. ¿Es un fallo? — dimas
-- En el HUD de partida no aparece el 📡 de jugador desconectado: `MatchUI` no pasa `connected` a `setPlayers`. — dimas

@@ -4,7 +4,7 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -63,7 +63,7 @@ Hasta 4 jugadores y varios espectadores tienen que ver la misma partida, aunque 
 | `hi` | cliente → anfitrión | "Acabo de llegar": pide un `full` |
 
 - Los clientes solo aceptan `st`, `tk` y `full` del `hostId` actual.
-- **Estado con versión (D-064):** `MatchState.v` sube en cada cambio. Un cliente descarta un `MatchState` con la misma `seed` y menor `v`.
+- **Estado con versión (D-064):** `MatchState.v` sube en cada cambio. Un cliente descarta un `st` o un `full` con la misma `seed` y menor `v` (`isStale`); de un `full` viejo no aplica nada, tampoco bloques, reyes ni proyectiles (WRK-TASK-018).
 - **Interpolación:** los clientes dibujan 120 ms por detrás del reloj estimado del anfitrión (`INTERP_DELAY`). Los eventos van en la misma línea temporal que las poses (D-029).
 
 **Elección y migración de anfitrión** (`server/index.ts`):
@@ -126,4 +126,3 @@ Hasta 4 jugadores y varios espectadores tienen que ver la misma partida, aunque 
 
 ## Open Questions
 
-- D-064 dice que se descarta un `st` o `full` viejo, pero `applyFull` aplica igualmente los bloques y poses de un `full` viejo; solo se ignora su `MatchState`. ¿Es lo que se quiere? — dimas

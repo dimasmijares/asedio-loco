@@ -15,7 +15,7 @@ Sin cuentas ni instalaciones: crea una sala, copia el enlace y pásaselo a tus a
 ## Cómo se juega
 
 - **Rondas simultáneas.** Todos apuntáis a la vez durante 20 s y disparáis soltando Espacio o el clic izquierdo. En cuanto todos estáis listos (o se acaba el tiempo), cuenta atrás: 3, 2, 1, ¡fuego!, mientras la cámara se aleja para verlo todo. Luego salen todos los disparos, escalonados para que se vean, y la física resuelve el destrozo.
-- **Eliminación.** Un rey cae si sale despedido fuera de su castillo y toca el suelo, si lo aplastan o si toca la lava. Se ve al momento: cámara lenta, confeti y la calavera en el marcador.
+- **Eliminación.** Un rey cae si sale despedido fuera de su castillo y toca el suelo, si lo aplastan o si toca la lava. Se ve al momento con confeti, un rótulo y la calavera en el marcador, y al acabar la ronda hay una repetición a cámara lenta de su caída.
 - **Munición loca.** Cada ronda te tocan 3 municiones distintas al azar y eliges una; las que no usas se pierden. Son 12 tipos:
   - **Comunes:** pedrusco, tronco rodante, racimo de cocos (se divide en 4).
   - **Raras:** vaca explosiva, sandía pegajosa, gallina saltarina, piano (cae en vertical donde apuntes).

@@ -25,6 +25,12 @@ export interface TickMsg {
   e?: SimEvent[];
   a?: number[]; // punterías [slot, yaw, pitch, power, sel, tgt] (bots y anfitrión)
 }
+// Un estado de la misma partida (misma semilla) con versión menor que el que ya se tiene es
+// viejo: no debe deshacer nada, ni el `MatchState` ni los bloques de un `full` (D-064).
+export function isStale(current: { seed: number; v: number }, incoming: { seed: number; v: number }) {
+  return incoming.seed === current.seed && incoming.v < current.v;
+}
+
 export interface FullMsg {
   k: 'full';
   t: number;

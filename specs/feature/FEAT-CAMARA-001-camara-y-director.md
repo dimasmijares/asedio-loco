@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -63,7 +63,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
    - Mira desde el lado donde estaba la cámara al empezar la cuenta atrás (detrás de tu castillo), fijo toda la ronda.
    - Distancia `radio / tan(27,5°) · 0,8 + 4`; altura al menos 9 m. Suavizado de la cámara 1,6.
    - Tras el último punto sigue 1,2 s más antes de soltar la cámara.
-4. **Sin cámara lenta en directo** (D-060): `timeScale` se queda en 1. La cámara lenta es de la repetición (FEAT-REPLAY-001).
+4. **Sin cámara lenta en directo** (D-060): el juego ya no tiene `timeScale` ni modo de cámara de seguimiento (se quitaron en WRK-TASK-017). La cámara lenta es de la repetición (FEAT-REPLAY-001).
 5. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
 6. La cámara nunca baja de y = 0,8 m.
 
@@ -87,7 +87,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 - [ ] Durante el impacto, el radio del encuadre queda entre 9 y 24 m pasado el plano general (sin prueba).
 - [x] Al disparar, la cámara ya está en el plano general, sin saltos (revisión con `tests/tools/countdown-shots.mjs`, 2026-09-26).
 - [ ] Un proyectil que sale de la isla no aleja la cámara.
-- [ ] Sin cámara lenta durante la fase de impacto: `Game.timeScale` vale 1 en toda la partida (hoy solo se ve en el código).
+- [x] Sin cámara lenta durante la fase de impacto: no existe `timeScale` en `Game` ni en `HostEnv` (WRK-TASK-017; lo garantiza el compilador).
 - [ ] La rueda no deja el zoom fuera de 0,45-1,8.
 
 ## Evidence

@@ -28,7 +28,7 @@ export interface PlayerState {
   bot: boolean;
   difficulty?: Difficulty;
   alive: boolean;
-  ammo: AmmoId[]; // en la mano (máx. 2)
+  ammo: AmmoId[]; // en la mano (HAND = 3 distintas por ronda)
   selected: number;
   locked: boolean;
   aim: Aim;
