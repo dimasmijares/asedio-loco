@@ -42,5 +42,5 @@ El HUD sabe pintar 📡 junto a un jugador desconectado, pero `MatchUI` no le pa
 
 - `MatchSource.connected`: en red sale de `conn.room.players[].connected`; en solitario no se usa.
 - `MatchUI` lo pasa al marcador, y la celda de estado enseña 📡 (con `title` «Desconectado») en lugar de ✔. Se ve también en el HUD compacto, que oculta los nombres.
-- **E2E de 4 jugadores:** el jugador que se reconecta sale antes a `about:blank`, y el anfitrión ve 📡 en su hueco (log: «reconexión: el anfitrión ve 📡 en el hueco 2»). Después vuelve y recupera su castillo.
+- **E2E de 4 jugadores:** el jugador que se reconecta sale antes a `about:blank`, y el anfitrión lo ve desconectado en su hueco: la celda lleva el aviso «Desconectado» y enseña 📡, o 💀 si su rey ya había caído. Es lo que pasó en la primera ejecución en CI y hacía fallar la prueba; ya está corregida. Después vuelve y recupera su castillo.
 - Puertas en local (2026-09-26): tipos, 37 unitarios y lote E2E `multiplayer` (6), `controls` (2), `solo`, `touch` (2) y `hud-compact` (4): 15 en verde contra un servidor recién compilado.

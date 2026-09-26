@@ -169,11 +169,13 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     if (spectator && !reconnected && h.round >= 2 && h.phase === 'aim') {
       const g = guests[1];
       const before = (await summary(g))!;
-      // Mientras está fuera, los demás lo ven desconectado (📡) en el marcador.
+      // Mientras está fuera, los demás lo ven desconectado en el marcador: 📡 si su rey sigue
+      // vivo (si ya cayó, la celda enseña 💀) y, en cualquier caso, el aviso «Desconectado».
       const url = g.url();
       await g.goto('about:blank');
-      await host.waitForFunction((slot) => document.querySelector(`#hud-players .hp[data-slot="${slot}"] .hp-state`)?.textContent === '📡', before.you, { timeout: 20_000 });
-      console.log(`reconexión: el anfitrión ve 📡 en el hueco ${before.you}`);
+      await host.waitForFunction((slot) => document.querySelector(`#hud-players .hp[data-slot="${slot}"] .hp-state`)?.getAttribute('title') === 'Desconectado', before.you, { timeout: 20_000 });
+      const cell = await host.locator(`#hud-players .hp[data-slot="${before.you}"] .hp-state`).textContent();
+      console.log(`reconexión: el anfitrión ve al hueco ${before.you} desconectado (${cell})`);
       await g.goto(url);
       const [after] = await waitAll([g], (s) => s.fulls > 0);
       expect(after.you).toBe(before.you);
