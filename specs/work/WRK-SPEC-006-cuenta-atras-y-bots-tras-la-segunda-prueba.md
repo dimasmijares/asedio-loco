@@ -40,7 +40,9 @@ Tras probar la versión actual (26-09-2026), el usuario pide:
 - Fase nueva `countdown` de 3 s (1 s con `?fast=1`) entre el apuntado y el impacto.
 - La cuenta atrás empieza en cuanto todos los vivos han fijado su ataque o se agotan los 20 s. Si se agotan, los que no han disparado quedan fijados con su puntería actual.
 - Durante la cuenta atrás, la cámara se aleja de forma continua hasta un plano general que encuadra todos los castillos en juego y sigue así al empezar el impacto.
-- Efecto en pantalla: número grande 3-2-1 con sonido en cada segundo, y «¡Fuego!» al llegar a 0.
+- Efecto en pantalla: 3, 2, 1, ¡FUEGO!, cuatro tiempos de 1 s con sonido. Los disparos salen con ¡FUEGO!.
+- Munición: se elige bien tanto con clic en la tarjeta como con 1/2/3 del teclado normal o del numérico.
+- Disparo: se carga y se suelta con Espacio o manteniendo el clic izquierdo sobre la escena.
 - Bots:
   - fijan su ataque en 1-3 s: fácil 2-3 s, normal 1,5-2,5 s y difícil 1-2 s;
   - eligen objetivo con un sorteo ponderado: más peso al más débil y al más cercano según la dificultad, y empates al azar;
@@ -57,6 +59,7 @@ Tras probar la versión actual (26-09-2026), el usuario pide:
 - **Objetivo de los bots:** reparto y venganza.
 - **Rapidez de los bots:** de 1 a 3 s según la dificultad.
 - **Al agotarse los 20 s:** también hay cuenta atrás de 3 s, con los que no han disparado fijados con su puntería actual.
+- **Segundo mensaje (26-09-2026):** la cuenta atrás es «3 2 1 Fuego» aunque sean 4 s. La munición debe poder elegirse bien con el ratón y con el teclado numérico. El disparo, con Espacio o manteniendo el clic izquierdo.
 
 ## Knowledge Context
 
@@ -76,4 +79,6 @@ Tras probar la versión actual (26-09-2026), el usuario pide:
 - [ ] Al disparar, la cámara ya está en el plano general, sin saltos.
 - [ ] Con 1 humano y 3 bots, los 3 bots coinciden en el mismo objetivo en menos del 25 % de las rondas (medido con semillas).
 - [ ] Los bots fijan su ataque en 1-3 s.
+- [ ] Un clic en una tarjeta de munición la selecciona siempre, y también las teclas 1/2/3 y Numpad 1/2/3.
+- [ ] Mantener el clic izquierdo sobre la escena carga la fuerza y al soltar dispara, igual que Espacio.
 - [ ] Equilibrio medido antes y después (RULE-001) y `PROTOCOL_VERSION` subida (RULE-002).

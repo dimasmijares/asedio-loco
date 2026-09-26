@@ -4,7 +4,7 @@ import { aimedAt, decideBots, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
 import { lerp, type Vec3 } from '../../../../shared/math';
-import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, eliminate, impactMaxDuration, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
+import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, impactMaxDuration, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
 
 // Lo que el anfitrión necesita del juego. Lo implementa Game y, en las pruebas de
@@ -57,7 +57,9 @@ export class MatchHost {
   private roundElims: number[] = [];
   private realT = 0;
   private blocksT = 0;
-  private lockGrace = -1;
+  // Segundos de apuntado que quedaban al empezar la última cuenta atrás (pruebas: con todos
+  // listos debe ser > 0).
+  aimLeft = 0;
 
   constructor(readonly game: HostEnv, public state: MatchState, fresh = true) {
     if (fresh) game.startSim(state.players.map((p) => p.slot));
@@ -119,12 +121,11 @@ export class MatchHost {
       case 'aim':
         s.remaining -= rawDt;
         this.updateBots(rawDt);
-        if (alivePlayers(s).every((p) => p.locked)) {
-          // Todos listos: medio segundo de margen y a disparar.
-          if (this.lockGrace < 0) this.lockGrace = 0.6;
-          this.lockGrace -= rawDt;
-        }
-        if (s.remaining <= 0 || (this.lockGrace >= 0 && this.lockGrace <= 0)) this.beginImpact();
+        if (s.remaining <= 0 || alivePlayers(s).every((p) => p.locked)) this.beginCountdown();
+        break;
+      case 'countdown':
+        s.remaining -= rawDt;
+        if (s.remaining <= 0) this.beginImpact();
         break;
       case 'impact':
         this.updateImpact();
@@ -153,7 +154,6 @@ export class MatchHost {
     } else if (s.phase === 'replay') {
       this.beginResults();
     } else if (s.phase === 'aim') {
-      this.lockGrace = -1;
       this.planBots();
     }
     this.emit();
@@ -164,7 +164,6 @@ export class MatchHost {
     const prevLevel = s.lavaLevel;
     startRound(s);
     if (s.round === 1) s.remaining += this.firstAimBonus;
-    this.lockGrace = -1;
     this.sim.setLava(s.lavaY);
     this.game.setLavaVisual(s.lavaY);
     this.sim.wind = s.wind;
@@ -207,6 +206,21 @@ export class MatchHost {
         this.emit();
       }
     }
+  }
+
+  // Todos listos o tiempo agotado: los que no han disparado quedan fijados con su puntería
+  // actual (un bot que aún giraba, con la que había decidido) y empieza la cuenta atrás.
+  private beginCountdown() {
+    const s = this.state;
+    this.aimLeft = Math.max(0, s.remaining);
+    for (const p of alivePlayers(s)) {
+      const plan = this.bots.get(p.slot);
+      if (!p.locked && plan) p.aim = plan.d.aim;
+      p.locked = true;
+    }
+    s.phase = 'countdown';
+    s.remaining = countdownDuration(s);
+    this.emit();
   }
 
   private beginImpact() {

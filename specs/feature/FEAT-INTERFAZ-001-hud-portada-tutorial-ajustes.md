@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -56,7 +56,8 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).
    - Se puede saltar. Al terminar se guarda y no vuelve. En solitario da 10 s más de apuntado en la ronda 1.
 4. **HUD de partida:**
-   - Arriba, la fase y el tiempo: urgente por debajo de 4 s y con tic sonoro en los 3 últimos.
+   - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
+   - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
    - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
    - Abajo, potencia y elevación, 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo.
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
@@ -103,7 +104,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 
 | Relation | Target | Description |
 |----------|--------|-------------|
-| Implemented in | `client/src/ui/hud.ts` | HUD, panel de controles, carga, rótulos |
+| Implemented in | `client/src/ui/hud.ts` | HUD, panel de controles, carga, rótulos, cuenta atrás |
 | Implemented in | `client/src/ui/lobby.ts` | Portada, «Cómo se juega», «Jugar solo», lobby |
 | Implemented in | `client/src/ui/tutorial.ts` | Tutorial de 3 pasos |
 | Implemented in | `client/src/ui/settings.ts` | Ajustes y texto grande |

@@ -4,7 +4,7 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -40,7 +40,7 @@ Hasta 4 jugadores y varios espectadores tienen que ver la misma partida, aunque 
 
 **Anfitrión autoritativo.** Un jugador (el anfitrión) ejecuta `Sim` y `MatchHost` (ARCH-002). Los demás reproducen lo que manda.
 
-**Protocolo con el servidor** (`shared/protocol.ts`, JSON sobre WebSocket en `/ws/ABCD`). `PROTOCOL_VERSION = 5`.
+**Protocolo con el servidor** (`shared/protocol.ts`, JSON sobre WebSocket en `/ws/ABCD`). `PROTOCOL_VERSION = 6` (v6: fase `countdown`, WRK-TASK-022).
 
 - Cliente → servidor: `hello {v, name, token?, mobile?}`, `name`, `config {bots, difficulty, fast}`, `start`, `lobby` (revancha), `yield`, `relay {to, d}`, `ping`.
 - Servidor → cliente: `welcome {you:{id, token, role}, room}`, `room {room}`, `relay {from, d}`, `pong`, `error {code, msg}`.

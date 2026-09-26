@@ -343,6 +343,15 @@ export class Sfx {
     });
   }
 
+  // «¡Fuego!» al final de la cuenta atrás: golpe grave y un acorde que sube.
+  fuego() {
+    const o = this.out(undefined, 0.5);
+    if (!o) return;
+    const t = this.ctx!.currentTime;
+    this.tone(o, t, 0.35, 'triangle', 110, 55, 0.5);
+    [392, 523, 784].forEach((f) => this.tone(o, t + 0.04, 0.45, 'sawtooth', f, f * 1.06, 0.1, 0.02));
+  }
+
   tick(urgent = false) {
     const o = this.out(undefined, 0.3);
     if (!o) return;

@@ -4,7 +4,7 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.1.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -81,6 +81,7 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 
 - `node tests/tools/review.mjs <base> <carpeta>`: portada, apuntado, carga, impacto y resultados, con GPU.
 - `node tests/tools/impact-shots.mjs <base> <carpeta> [ronda]`: la cámara panorámica.
+- `node tests/tools/countdown-shots.mjs <base> <carpeta> [ronda]`: la cuenta atrás (3, 2, 1, ¡FUEGO!) y cómo se aleja la cámara hasta el plano general.
 - `node tests/tools/replay-shots.mjs <base> <carpeta>`: la repetición.
 - `node tests/tools/highlights.mjs <base> <carpeta>`: capturas destacadas de una partida contra bots.
 - `node tests/tools/shot.mjs <url> <png> [espera_ms] [js]`: una captura rápida.

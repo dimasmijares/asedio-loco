@@ -8,7 +8,7 @@ import { hashString, rng, type Vec3 } from './math';
 import { BOT_NAMES } from './players';
 import type { Difficulty, RoomState } from './protocol';
 
-export type Phase = 'intro' | 'aim' | 'impact' | 'replay' | 'results' | 'over';
+export type Phase = 'intro' | 'aim' | 'countdown' | 'impact' | 'replay' | 'results' | 'over';
 
 export interface PlayerStats {
   dealt: number; // bloques rivales destruidos
@@ -52,7 +52,7 @@ export interface MatchState {
   v: number;
   round: number;
   phase: Phase;
-  remaining: number; // segundos que quedan de la fase (aim/results/intro)
+  remaining: number; // segundos que quedan de la fase (aim/countdown/replay/results/intro)
   players: PlayerState[];
   lavaLevel: number;
   lavaY: number;
@@ -123,9 +123,15 @@ export function isDuel(s: MatchState) {
 }
 
 // 20 s para apuntar en todas las rondas (el usuario lo prefiere al acortarlas en el duelo).
-// Si todos confirman antes, la ronda arranca en cuanto están listos.
+// Si todos confirman antes, empieza en ese momento la cuenta atrás.
 export function aimDuration(s: MatchState) {
   return s.fast ? 3 : 20;
+}
+
+// Cuenta atrás antes de disparar: la cámara se aleja hasta el plano general y al llegar a 0
+// salen las catapultas. Empieza con todos listos o al agotarse el apuntado.
+export function countdownDuration(s: MatchState) {
+  return s.fast ? 1 : 3;
 }
 
 // Repetición a cámara lenta de cada rey caído en la ronda (como mucho dos seguidas).

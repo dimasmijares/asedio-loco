@@ -2,7 +2,7 @@
 // mensajes de control (hello, config, start…). Todo lo relativo a la partida
 // viaja dentro de `relay` y el servidor lo retransmite sin interpretarlo.
 
-export const PROTOCOL_VERSION = 5;
+export const PROTOCOL_VERSION = 6;
 export const MAX_PLAYERS = 4;
 export const MAX_NAME_LEN = 16;
 export const MAX_MSG_BYTES = 64 * 1024;

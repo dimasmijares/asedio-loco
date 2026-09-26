@@ -57,8 +57,15 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   await page.keyboard.up('Space');
   expect((await me()).power, 'el disparo es definitivo').toBeCloseTo(fired.power, 5);
 
-  // Con todos listos, la ronda arranca sin agotar el tiempo (el reloj del anfitrión va con los
-  // fotogramas, así que en CI, a pocos fps, se le da margen de sobra).
+  // Con todos listos, empieza la cuenta atrás sin agotar el tiempo de apuntado (el reloj del
+  // anfitrión va con los fotogramas, así que en CI, a pocos fps, se le da margen de sobra).
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase !== 'aim', null, { timeout: 90_000 });
+  const leave = await page.evaluate(() => {
+    const host = (window as any).__asedio.mode.host;
+    return { phase: host.state.phase as string, aimLeft: host.aimLeft as number };
+  });
+  expect(leave.phase, 'tras el apuntado viene la cuenta atrás').toBe('countdown');
+  expect(leave.aimLeft, 'la cuenta atrás empieza antes de agotar el apuntado').toBeGreaterThan(0);
+  await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'impact', null, { timeout: 30_000 });
   expect(errors).toEqual([]);
 });

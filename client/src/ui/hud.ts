@@ -44,6 +44,10 @@ export class Hud {
   // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
   confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
   private bannerTimer = 0;
+  // Cuenta atrás antes de disparar (3-2-1 y «¡FUEGO!»), en el centro de la pantalla.
+  private countdown = h('div', { class: 'hud-countdown', id: 'hud-countdown', 'aria-live': 'assertive' });
+  private countdownText = '';
+  private countdownTimer = 0;
 
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
@@ -74,7 +78,7 @@ export class Hud {
     gear.onclick = () => openSettings();
     gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.stats);
-    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.banner);
+    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.banner, this.countdown);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
   }
@@ -181,6 +185,20 @@ export class Hud {
   setStats(text: string) {
     const show = this.alwaysStats || settings.showFps;
     this.stats.textContent = show ? text : '';
+  }
+
+  // Número de la cuenta atrás; cada cambio vuelve a lanzar la animación. Con `ms`, se oculta solo.
+  setCountdown(text: string | null, ms = 0) {
+    if ((text ?? '') === this.countdownText) return;
+    this.countdownText = text ?? '';
+    clearTimeout(this.countdownTimer);
+    if (!text) {
+      this.countdown.classList.remove('show');
+      return;
+    }
+    this.countdown.replaceChildren(h('span', { class: text.length > 1 ? 'cd-go' : 'cd-num' }, text));
+    this.countdown.classList.add('show');
+    if (ms) this.countdownTimer = window.setTimeout(() => this.setCountdown(null), ms);
   }
 
   showBanner(text: string, sub = '', ms = 1800, cls = '') {

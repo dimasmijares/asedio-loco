@@ -4,7 +4,7 @@ type: rule
 layer: governance
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.0.1
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -19,7 +19,7 @@ tags:
 
 ## Rule
 
-Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **5**) en el mismo despliegue.
+Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **6**) en el mismo despliegue.
 
 Cuenta como dato compartido:
 
@@ -37,7 +37,7 @@ Todo `shared/`, `server/` y `client/src/game/net/`, más cualquier dato que viaj
 
 El servidor rechaza un `hello` con otra versión y responde «Versión antigua: recarga la página». Es la única defensa contra una pestaña abierta antes de un despliegue. Sin subir la versión, esa pestaña entraría en una sala nueva y vería castillos mal montados o fases desconocidas, sin ningún error.
 
-Ya se ha subido por la mano de 3 municiones (etapa 1), la fase `replay` (v3), el castillo de 140 bloques (v4) y `mobile` y `yield` (v5).
+Ya se ha subido por la mano de 3 municiones (etapa 1), la fase `replay` (v3), el castillo de 140 bloques (v4), `mobile` y `yield` (v5) y la fase `countdown` (v6, WRK-TASK-022).
 
 ## Enforcement
 

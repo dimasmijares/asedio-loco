@@ -3,9 +3,9 @@ id: WRK-TASK-022
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: medium
-version: 0.1.0
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -17,7 +17,7 @@ dependencies:
 tags: [camara, fases, hud]
 ---
 
-# WRK-TASK-022 — Cuenta atrás de 3 s con la cámara alejándose
+# WRK-TASK-022 — Cuenta atrás 3, 2, 1, ¡FUEGO! con la cámara alejándose
 
 ## Objective
 
@@ -41,11 +41,11 @@ Entre el apuntado y el impacto, una fase `countdown` de 3 s en la que la cámara
 
 ## Acceptance Criteria
 
-- [ ] Todos listos → 3 s de cuenta atrás → impacto. Lo mismo al agotarse los 20 s, con los rezagados fijados.
-- [ ] Número 3-2-1 en pantalla con sonido, y «¡Fuego!» al disparar.
-- [ ] Al disparar, la cámara ya está en el plano general; capturas de antes y después.
-- [ ] `PROTOCOL_VERSION` pasa a 6.
-- [ ] E2E `solo`, `multiplayer` y `controls` en verde.
+- [x] Todos listos → 3 s de cuenta atrás → impacto. Lo mismo al agotarse los 20 s, con los rezagados fijados.
+- [x] 3, 2, 1 y ¡FUEGO! en pantalla, cuatro tiempos de 1 s con sonido; los disparos salen con ¡FUEGO! (segundo mensaje del usuario).
+- [x] Al disparar, la cámara ya está en el plano general; capturas de antes y después.
+- [x] `PROTOCOL_VERSION` pasa a 6.
+- [x] E2E `solo`, `multiplayer` y `controls` en verde.
 
 ## Test Plan
 
@@ -56,4 +56,13 @@ Entre el apuntado y el impacto, una fase `countdown` de 3 s en la que la cámara
 
 ## Evidence
 
-Pendiente.
+- **Código:**
+  - `shared/match.ts`: fase `countdown` y `countdownDuration` (3 s, o 1 s con `?fast=1`).
+  - `MatchHost.beginCountdown`: sustituye a `lockGrace`, deja fijados a los rezagados y expone `aimLeft`.
+  - `Director.startCountdown` y `countdown`: plano general continuo, que al empezar el impacto sigue 2,5 s con los castillos.
+  - `Hud.setCountdown`, `sfx.fuego` y el paso a `PROTOCOL_VERSION` 6.
+- **Pruebas unitarias:** `tests/unit/countdown.test.ts` usa el anfitrión real en Node. Comprueba `intro → aim → countdown → impact` con `aimLeft > 0` y 3 s de cuenta. Si un humano no dispara, la cuenta empieza al agotarse los 20 s y queda fijado.
+- **E2E:** `controls.spec.ts` ahora exige `countdown` con `aimLeft > 0`.
+- **Puertas en local (2026-09-26):** `npm run verify` y E2E `controls`, `solo` y `multiplayer` (6 pruebas: 4 jugadores, migración, segundo plano, móvil, revancha y red mala), 8 en verde.
+- **Capturas** con `tests/tools/countdown-shots.mjs`: el 3 detrás del castillo propio, el 2 ya alejándose y ¡FUEGO! con los 4 castillos en el encuadre. Al impacto, el encuadre se cierra poco a poco, sin saltos.
+- **Consolidación:** `DOM-JUEGO-001` 1.1.0, `FEAT-CAMARA-001` 1.1.0, `FEAT-INTERFAZ-001` 1.1.0, `ARCH-003` y `RULE-002` (v6).

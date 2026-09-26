@@ -190,8 +190,8 @@ export class MatchUI {
       }
       if (g.view.replaying.done && this.replayT > 0.3) this.nextReplay(s);
     }
-    // Durante los disparos, plano panorámico (director).
-    const directing = s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
+    // Cuenta atrás: la cámara se aleja hasta el plano general. Durante los disparos, panorámica.
+    const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
       if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
       else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
@@ -202,10 +202,13 @@ export class MatchUI {
 
     // HUD.
     const rem = this.src.remaining();
-    // Cuenta atrás sonora en los últimos segundos del apuntado.
-    const sec = Math.ceil(rem);
-    if (s.phase === 'aim' && sec <= 3 && sec >= 1 && sec !== this.lastTick) sfx.tick(sec === 1);
-    this.lastTick = s.phase === 'aim' ? sec : -1;
+    // Cuenta atrás antes de disparar: número grande y un pitido por segundo.
+    if (s.phase === 'countdown') {
+      const n = Math.max(1, Math.ceil(rem));
+      this.hud.setCountdown(String(n));
+      if (n !== this.lastTick) sfx.tick(n === 1);
+      this.lastTick = n;
+    } else this.lastTick = -1;
     this.hud.setTimer(s.phase === 'aim' ? rem : null, s.phase === 'aim' && rem < 4);
     this.hud.setWind(s.wind, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
     this.hud.setPlayers(
@@ -248,6 +251,16 @@ export class MatchUI {
       this.game.view.endReplay();
       this.hud.root.classList.remove('replaying');
     }
+    if (s.phase === 'countdown' && prev !== 'countdown') {
+      const castles = s.players.filter((p) => p.alive).map((p) => new THREE.Vector3(...castleOrigin(p.slot)));
+      this.director.startCountdown(castles, this.src.remaining());
+    }
+    // 3, 2, 1 y ¡FUEGO!: el cuarto tiempo dura lo mismo que los otros y coincide con los disparos.
+    if (s.phase === 'impact' && prev === 'countdown') {
+      this.hud.setCountdown('¡FUEGO!', 1000);
+      sfx.fuego();
+    }
+    else if (s.phase !== 'countdown') this.hud.setCountdown(null);
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
@@ -264,6 +277,7 @@ export class MatchUI {
     if (s.phase === 'impact') this.hud.setPhase(`Ronda ${s.round}`, '¡Fuego!');
     else if (s.phase === 'replay') this.hud.setPhase(`Ronda ${s.round}`, 'Repetición');
     else if (s.phase === 'aim') this.hud.setPhase(`Ronda ${s.round}`, 'Fase de apuntado');
+    else if (s.phase === 'countdown') this.hud.setPhase(`Ronda ${s.round}`, '¡Preparados!');
     else if (s.phase === 'intro') this.hud.setPhase('¡Preparados!', 'La partida va a empezar');
     else if (s.phase === 'results') {
       this.hud.setPhase(`Ronda ${s.round}`, 'Resultados');

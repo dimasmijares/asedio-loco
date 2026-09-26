@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -54,17 +54,18 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 1. **Apuntado** (`rig.aim`), jugador vivo en fase `aim`:
    - 12 m detrás de la catapulta (×zoom), 3 m a la derecha y 8 m arriba (×zoom).
    - Mira a un punto 22 m por delante y 3,5 m arriba, para que quepa la parábola que crece al cargar.
-2. **Impacto y resultados:** manda el director mientras tenga algo que encuadrar.
+2. **Cuenta atrás** (`Director.startCountdown` y `countdown`): en los 3 s de la fase `countdown` la cámara va de la vista de apuntado a un plano general que encuadra todos los castillos en juego (radio: el que ocupan + 6 m, hasta 34 m), visto desde detrás de tu castillo. El movimiento es continuo y suave (`smoothstep`): sale despacio y frena al llegar. En pantalla, 3-2-1 y «¡FUEGO!» (FEAT-INTERFAZ-001).
+3. **Impacto y resultados:** manda el director mientras tenga algo que encuadrar. Parte del plano general de la cuenta atrás y, durante los primeros 2,5 s del impacto, sigue encuadrando los castillos en juego (radio de hasta 34 m) para que se vean los disparos de todos. Después se cierra despacio sobre la acción.
    - Encuadra a la vez todo lo que vuela y los puntos de impacto de los últimos 2,2 s. No persigue a ningún proyectil.
    - Ignora lo que está bajo y = −2 o a más de 6 m fuera del borde de la isla (`islandSdf`).
-   - Radio del encuadre: el que ocupa la acción + 4 m, entre 9 y 24 m.
+   - Radio del encuadre: el que ocupa la acción + 4 m, entre 9 y 24 m (hasta 34 m mientras dura el plano general).
    - Se abre deprisa (hasta `dt·3` por fotograma) y se cierra despacio (0,6 veces el suavizado del centro). El centro se suaviza con `1 − e^(−1,4·dt)`.
-   - Mira desde el lado donde estaba la cámara al empezar el impacto (detrás de tu castillo), fijo toda la ronda.
+   - Mira desde el lado donde estaba la cámara al empezar la cuenta atrás (detrás de tu castillo), fijo toda la ronda.
    - Distancia `radio / tan(27,5°) · 0,8 + 4`; altura al menos 9 m. Suavizado de la cámara 1,6.
    - Tras el último punto sigue 1,2 s más antes de soltar la cámara.
-3. **Sin cámara lenta en directo** (D-060): `timeScale` se queda en 1. La cámara lenta es de la repetición (FEAT-REPLAY-001).
-4. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
-5. La cámara nunca baja de y = 0,8 m.
+4. **Sin cámara lenta en directo** (D-060): `timeScale` se queda en 1. La cámara lenta es de la repetición (FEAT-REPLAY-001).
+5. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
+6. La cámara nunca baja de y = 0,8 m.
 
 ### Outputs
 
@@ -83,7 +84,8 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 ## Acceptance Criteria
 
 - [ ] En `aim`, la cámara queda detrás de la catapulta propia y gira con el rumbo.
-- [ ] Durante el impacto, el radio del encuadre queda siempre entre 9 y 24 m.
+- [ ] Durante el impacto, el radio del encuadre queda entre 9 y 24 m pasado el plano general (sin prueba).
+- [x] Al disparar, la cámara ya está en el plano general, sin saltos (revisión con `tests/tools/countdown-shots.mjs`, 2026-09-26).
 - [ ] Un proyectil que sale de la isla no aleja la cámara.
 - [ ] Sin cámara lenta durante la fase de impacto: `Game.timeScale` vale 1 en toda la partida (hoy solo se ve en el código).
 - [ ] La rueda no deja el zoom fuera de 0,45-1,8.
@@ -100,7 +102,8 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `client/src/game/camera.ts` | `CameraRig`: modos `orbit`, `aim`, `watch`, zoom y sacudida |
-| Implemented in | `client/src/game/director.ts` | Panorámica del impacto |
+| Implemented in | `client/src/game/director.ts` | Plano general de la cuenta atrás y panorámica del impacto |
+| Tested by | `tests/tools/countdown-shots.mjs` | Capturas de la cuenta atrás y del principio del impacto |
 | Implemented in | `client/src/game/match/ui.ts` | Elección de plano por fase |
 | Implemented in | `client/src/game/game.ts` | Rueda → `rig.zoom` |
 | Tested by | `tests/tools/impact-shots.mjs` | Capturas de la panorámica (revisión manual) |

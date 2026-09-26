@@ -19,14 +19,16 @@ tags: [jugabilidad, camara, bots]
 
 ## Approach
 
-Son dos tareas y sus File Scope no se solapan salvo `host.ts`, así que van en serie. Primero los bots: es la más pequeña y deja medido el equilibrio. Después la cuenta atrás, que cambia el protocolo y la cámara. Cada una se despliega por separado y se avisa al usuario al terminar las dos.
+Son cuatro tareas en serie, porque comparten `host.ts`, `ui.ts` o `aim.ts`. 024 y 025 llegaron en un segundo mensaje del usuario. Primero los bots: es la más pequeña y deja medido el equilibrio. Después la cuenta atrás, que cambia el protocolo y la cámara. Cada una se despliega por separado y se avisa al usuario al terminar las dos.
 
 ## Estado
 
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
 | 1 | WRK-TASK-023 · Bots: objetivo repartido, venganza y 1-3 s | completed | — | Reparto ponderado con venganza; bots en 1-3 s |
-| 2 | WRK-TASK-022 · Cuenta atrás de 3 s con la cámara alejándose | draft | 023 | — |
+| 2 | WRK-TASK-022 · Cuenta atrás 3, 2, 1, ¡FUEGO! con la cámara alejándose | completed | 023 | Fase `countdown`, plano general y protocolo v6 |
+| 3 | WRK-TASK-024 · Munición con clic y teclado numérico | draft | — | — |
+| 4 | WRK-TASK-025 · Disparo manteniendo el clic izquierdo | draft | 024 | — |
 
 ## Risk Assessment
 

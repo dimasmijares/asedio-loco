@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.1.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -34,9 +34,9 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 
 1. Hay como mucho 4 jugadores (`MAX_PLAYERS`). Los humanos ocupan sus huecos y los bots de relleno, los huecos libres más bajos. Hacen falta al menos 2 (humanos conectados más bots) para empezar.
 2. La partida empieza con una fase `intro` de 3 s (1 s en modo rápido) y luego la ronda 1.
-3. Cada ronda recorre las fases `aim` → `impact` → (`replay`) → `results`. Al acabar `results` se comprueba si hay ganador; si lo hay, la fase pasa a `over`.
+3. Cada ronda recorre las fases `aim` → `countdown` → `impact` → (`replay`) → `results`. Al acabar `results` se comprueba si hay ganador; si lo hay, la fase pasa a `over`.
 4. **Apuntado:** 20 s en todas las rondas, también en el duelo (3 s con `?fast=1`). En solitario, si toca el tutorial, la ronda 1 tiene 10 s más.
-5. **Adelanto:** si todos los jugadores vivos han confirmado su disparo, la ronda sale 0,6 s después, sin esperar al reloj.
+5. **Cuenta atrás:** en cuanto todos los jugadores vivos han confirmado su disparo, o al agotarse el apuntado, empieza la fase `countdown` de 3 s (1 s en modo rápido). Los que no habían disparado quedan fijados con su puntería actual; un bot que aún giraba, con la que había decidido. Al llegar a 0 empieza el impacto. Sustituye al margen de 0,6 s de antes (WRK-TASK-022).
 6. Si se acaba el tiempo, cada jugador vivo dispara con la puntería y la munición que tenga en ese momento. Un jugador desconectado también dispara así (no pasa a ser un bot).
 7. **Impacto:** los disparos salen por orden de hueco, separados 0,45 s. La fase termina cuando todos han salido, han pasado más de 2,2 s, no queda ningún proyectil y todo está quieto; como mucho, 9 s (7 s en modo rápido) más 0,45 s por disparo.
 8. **Repetición:** si en la ronda cayó algún rey, antes de los resultados hay una fase `replay` de 5 s por rey (1,5 s en modo rápido), con un máximo de 2 reyes. La física se pausa mientras dura.
@@ -75,7 +75,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 - [x] Una partida de 4 jugadores en red llega a un ganador y todos los clientes ven el mismo ganador y el mismo número de rondas.
 - [x] Una partida en solitario contra bots llega a un ganador.
 - [x] Todos los clientes ven el mismo número de repeticiones.
-- [ ] El adelanto por «todos listos» (0,6 s) tiene prueba propia.
+- [x] Con todos listos, la cuenta atrás empieza antes de agotar el apuntado y dura 3 s; con alguien sin disparar, empieza al agotarse y le deja fijado (`tests/unit/countdown.test.ts`, `tests/e2e/controls.spec.ts`).
 
 ## Evidence
 
@@ -90,7 +90,8 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `shared/match.ts` | Duraciones, `startRound`, `eliminate`, `checkWinner`, `MAX_ROUNDS` |
-| Implemented in | `client/src/game/match/host.ts` | Fases, adelanto (`lockGrace`), escalonado (`STAGGER`), repetición |
+| Implemented in | `client/src/game/match/host.ts` | Fases, cuenta atrás (`beginCountdown`, `aimLeft`), escalonado (`STAGGER`), repetición |
+| Tested by | `tests/unit/countdown.test.ts` | Paso `aim` → `countdown` → `impact` con el anfitrión real en Node |
 | Implemented in | `client/src/game/sim/sim.ts` | `checkKings`, `KING_CRUSH_FORCE` |
 | Tested by | `tests/unit/match.test.ts` | Rondas y victoria |
 | Tested by | `tests/e2e/multiplayer.spec.ts` | «4 jugadores hasta el final…» |

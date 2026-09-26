@@ -931,6 +931,65 @@ html.big-text .ammo-name {
   box-shadow: 0 2px 0 var(--ink);
 }
 
+/* ---------- Cuenta atrás antes de disparar ---------- */
+
+.hud-countdown {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.hud-countdown.show {
+  opacity: 1;
+}
+
+.hud-countdown span {
+  font-family: var(--display);
+  color: #ffd23f;
+  -webkit-text-stroke: 4px var(--ink);
+  text-shadow: 0 8px 0 var(--ink), 0 0 60px rgba(255, 180, 60, 0.55);
+  animation: cd-pop 1s ease-out both;
+}
+
+.hud-countdown .cd-num {
+  font-size: clamp(110px, 22vw, 220px);
+}
+
+.hud-countdown .cd-go {
+  font-size: clamp(80px, 15vw, 180px);
+  color: #ff7a3d;
+}
+
+@keyframes cd-pop {
+  0% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+  18% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.92);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-countdown span {
+    animation: none;
+  }
+}
+
 /* ---------- Repetición ---------- */
 
 .hud.replaying::before,
