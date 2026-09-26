@@ -57,6 +57,10 @@ export class MatchUI {
   private last = { round: 0, phase: '', alive: new Map<number, boolean>(), lava: 0, wind: false };
   private overPanel: HTMLElement | null = null;
   private resultsBox: HTMLElement;
+  // Daño de la ronda sobre cada castillo (WRK-TASK-036): etiquetas proyectadas a la pantalla.
+  private dmgLayer = h('div', { class: 'dmg-labels', id: 'dmg-labels' });
+  private dmgLabels: { el: HTMLElement; p: THREE.Vector3 }[] = [];
+  private dmgUntil = 0;
   private aimSent = 0;
   private lastTick = -1;
   tutorial: Tutorial | null = null;
@@ -72,7 +76,7 @@ export class MatchUI {
     this.hud = new Hud(parent);
     this.director = new Director(game.view, game.rig);
     this.resultsBox = h('div', { class: 'results-box', id: 'results-box' });
-    this.hud.root.append(this.resultsBox);
+    this.hud.root.append(this.resultsBox, this.dmgLayer);
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
@@ -151,6 +155,7 @@ export class MatchUI {
   }
 
   update(dt: number) {
+    this.placeDamage();
     const g = this.game;
     const s = this.src.state;
     const me = this.me();
@@ -283,6 +288,7 @@ export class MatchUI {
       this.director.reset();
       this.game.view.recorder.rebase(this.game.view.time);
       this.resultsBox.replaceChildren();
+      this.clearDamage();
       const me = this.me();
       if (me) this.game.input.setAim(me.aim);
     }
@@ -317,6 +323,53 @@ export class MatchUI {
         ),
       );
     this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows);
+    this.showDamage(s);
+  }
+
+  // Sobre cada castillo que seguía en juego, los bloques que ha perdido en la ronda.
+  private showDamage(s: MatchState) {
+    const r = s.results;
+    if (!r) return;
+    this.clearDamage();
+    for (const p of s.players) {
+      const lost = r.lost[p.slot] ?? 0;
+      if (!p.alive && lost === 0) continue;
+      const st = PLAYER_STYLES[p.slot];
+      const el = h('div', { class: `dmg-label${lost ? '' : ' none'}`, 'data-slot': String(p.slot), style: `--c:${st.color}` }, lost ? `−${lost}` : 'Sin daños');
+      const o = castleOrigin(p.slot);
+      this.dmgLabels.push({ el, p: new THREE.Vector3(o[0], o[1] + 6.5, o[2]) });
+      this.dmgLayer.append(el);
+    }
+    this.dmgUntil = performance.now() + 2800;
+    this.placeDamage();
+  }
+
+  private placeDamage() {
+    if (!this.dmgLabels.length) return;
+    if (performance.now() > this.dmgUntil) return this.clearDamage();
+    const cam = this.game.stage.camera;
+    const w = innerWidth;
+    const hgt = innerHeight;
+    const v = new THREE.Vector3();
+    const rb = this.resultsBox.getBoundingClientRect();
+    for (const { el, p } of this.dmgLabels) {
+      v.copy(p).project(cam);
+      // Detrás de la cámara la proyección sale invertida: se da la vuelta para anclarla al borde
+      // del lado correcto. Si el castillo queda fuera de pantalla, la etiqueta se queda en el borde.
+      if (v.z > 1) v.multiplyScalar(-1);
+      const mx = Math.min(w / 2 - 8, el.offsetWidth / 2 + 8);
+      const my = Math.min(hgt / 2 - 8, el.offsetHeight / 2 + 26); // + lo que sube y baja la animación
+      const x = Math.min(w - mx, Math.max(mx, ((v.x + 1) / 2) * w));
+      let y = Math.min(hgt - my, Math.max(my, ((1 - v.y) / 2) * hgt));
+      // Si cae sobre la lista de resultados, baja justo por debajo de ella.
+      if (x > rb.left - mx && x < rb.right + mx && y > rb.top - my && y < rb.bottom + my) y = Math.min(hgt - my, rb.bottom + my);
+      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    }
+  }
+
+  private clearDamage() {
+    this.dmgLabels = [];
+    this.dmgLayer.replaceChildren();
   }
 
   private showOver(s: MatchState) {

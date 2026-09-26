@@ -62,7 +62,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Abajo, potencia y elevación, una línea con lo que hace la munición elegida (`#hud-ammo-desc`, WRK-TASK-032: en móvil el `title` de la tarjeta no se ve; se oculta en horizontal con menos de 500 px de alto), 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
    - Rótulos: «RONDA N», «LA LAVA SUBE», «REY ELIMINADO» / «TU REY HA CAÍDO», «REPETICIÓN».
-   - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Un castillo sin daños pone «sin daños» (D-055).
+   - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
    - **Registro de los textos** (27-09-2026, a petición del usuario): claro, preciso y neutro. Sin coloquialismos ni chistes en rótulos, resultados, estadísticas, avisos y descripciones; los nombres propios (municiones, bots) y la cuenta atrás «3, 2, 1, ¡FUEGO!» se mantienen. Las descripciones de munición caben en dos líneas del HUD en vertical (la prueba `hud-compact` usa la más larga).
 5. **Ajustes** (en portada y HUD):
    - Calidad baja / media / alta, que se aplica al momento (D-046).

@@ -3,9 +3,9 @@ id: WRK-PLAN-008
 type: spec
 layer: work-plan
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-27
 updated: 2026-09-27
 owner: dimas
@@ -27,7 +27,7 @@ Tres tareas independientes y en serie, de menor a mayor alcance visual. Cada una
 |---:|---|---|---|---|
 | 1 | WRK-TASK-034 · El castillo propio no tapa la vista al apuntar | completed | — | Desvanecido por tramado de los bloques cercanos a la cámara |
 | 2 | WRK-TASK-035 · Plano general que encuadra todos los castillos en cualquier pantalla | completed | — | `Director.frame` con los dos ejes del campo de visión |
-| 3 | WRK-TASK-036 · Daño de la ronda sobre cada castillo | active | — | Número flotante con los bloques perdidos |
+| 3 | WRK-TASK-036 · Daño de la ronda sobre cada castillo | completed | — | Número flotante con los bloques perdidos |
 
 ## Risk Assessment
 
@@ -39,4 +39,4 @@ Tres tareas independientes y en serie, de menor a mayor alcance visual. Cada una
 
 ## Evidence
 
-Pendiente.
+Las 3 tareas están completadas y subidas a `main`, cada una comprobada en escritorio (1280×720) y en móvil vertical (390×844) con capturas y pruebas E2E. `encuadre.spec.ts` entra en el grupo `basicas` de CI. Queda que el usuario lo pruebe.

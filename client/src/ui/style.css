@@ -1077,6 +1077,62 @@ kbd {
   display: none;
 }
 
+/* Daño de la ronda sobre cada castillo (WRK-TASK-036). */
+.dmg-labels {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dmg-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--display);
+  font-size: 34px;
+  color: var(--c);
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 var(--ink);
+  white-space: nowrap;
+  animation: dmg-pop 2.8s ease-out forwards;
+}
+
+.dmg-label.none {
+  font-size: 18px;
+  color: #ffffff;
+  -webkit-text-stroke: 4px var(--ink);
+}
+
+@keyframes dmg-pop {
+  0% {
+    opacity: 0;
+    margin-top: 14px;
+  }
+  12% {
+    opacity: 1;
+    margin-top: 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    margin-top: -18px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 600px) {
+  .dmg-label {
+    font-size: 26px;
+    -webkit-text-stroke: 4px var(--ink);
+  }
+  .dmg-label.none {
+    font-size: 14px;
+  }
+}
+
 .res-phrase {
   font-family: var(--display);
   font-size: 26px;
@@ -1377,7 +1433,8 @@ html.big-text .ammo-name {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud-countdown span {
+  .hud-countdown span,
+  .dmg-label {
     animation: none;
   }
 }

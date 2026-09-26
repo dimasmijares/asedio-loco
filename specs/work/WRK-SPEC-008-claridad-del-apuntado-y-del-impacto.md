@@ -3,9 +3,9 @@ id: WRK-SPEC-008
 type: spec
 layer: work-spec
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-27
 updated: 2026-09-27
 owner: dimas
@@ -48,3 +48,13 @@ El usuario pide (27-09-2026) la siguiente iteración completa, priorizando la ca
 
 - Cada tarea se comprueba en escritorio (1280×720) y en móvil vertical (390×844), con capturas y pruebas.
 - RULE-004: el paso de física y el dibujado siguen dentro del presupuesto.
+
+## Evidence
+
+Hecho en WRK-PLAN-008, el 27-09-2026:
+
+- **Apuntado:** los bloques más cercanos a la cámara que la catapulta se desvanecen por tramado; la franja central queda despejada en los dos formatos (WRK-TASK-034).
+- **Plano general:** encuadra los 4 castillos también en vertical (WRK-TASK-035).
+- **Resultados:** cada castillo muestra encima el daño de la ronda (WRK-TASK-036).
+- **Pruebas:** `encuadre.spec.ts` cubre las dos últimas en escritorio y en móvil vertical.
+- **Rendimiento:** sin cambios; paso de física de 5,3 ms.
