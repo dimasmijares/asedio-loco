@@ -54,7 +54,7 @@ Que un grupo de hasta 4 amigos pueda jugar una partida de unos 5 minutos en el n
 10. **Revancha:** en red, solo el anfitrión ve «¡Revancha!»; los demás, «Esperando a que el anfitrión pida la revancha…». Todos vuelven al lobby con la misma sala y los mismos jugadores. En solitario empieza otra partida. «Salir» recarga la página.
 11. **Espectador que entra tarde:** recibe el estado completo al llegar, ve la partida en directo y no puede disparar. No ve la repetición de reyes que cayeron antes de su llegada.
 12. **Recargar a mitad de partida:** se vuelve al mismo hueco con el token y se pide el estado completo.
-13. **Móvil:** en vertical o en horizontal se apunta arrastrando el dedo y se dispara manteniendo el botón redondo (WRK-TASK-006). Al entrar se pide pantalla completa (Android), sin forzar la orientación. Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión. Si el anfitrión pasa a segundo plano 2 s, cede la partida a otro jugador. El plan está en `docs/MOVILES.md` (M2-M5 pendientes).
+13. **Móvil:** se juega por defecto en vertical (también en horizontal). Se apunta arrastrando el dedo y se dispara manteniendo el botón redondo (WRK-TASK-006). Al entrar se pide pantalla completa (Android), sin forzar la orientación. Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión. Si el anfitrión pasa a segundo plano 2 s, cede la partida a otro jugador. El plan está en `docs/MOVILES.md` (M2-M5 pendientes).
 
 ### Acceptance Criteria
 

@@ -25,7 +25,7 @@ tags:
 
 ## Objective
 
-Que el juego se pueda «Añadir a pantalla de inicio» y se abra en horizontal y a pantalla completa, sin tienda de aplicaciones. Es la única forma de tener pantalla completa real en un iPhone.
+Que el juego se pueda «Añadir a pantalla de inicio» y se abra a pantalla completa (en vertical por defecto, sin bloquear el giro), sin tienda de aplicaciones. Es la única forma de tener pantalla completa real en un iPhone.
 
 ## File Scope
 
@@ -44,13 +44,13 @@ Fuera: service worker para jugar sin conexión (el juego necesita la red para la
 | ARCH-001 | Los estáticos los sirve el mismo Worker; comprobar que el manifiesto se sirve con su tipo |
 | PROD-JUGAR-001 | Abrir la PWA lleva a la portada; un enlace de sala `#ABCD` sigue funcionando |
 
-- Manifiesto con `display: fullscreen`, `orientation: landscape` y `start_url: /`.
+- Manifiesto con `display: fullscreen`, `orientation: any` (el vertical es el modo por defecto, pero no se bloquea) y `start_url: /`.
 - El icono se genera por código, como el resto de gráficos del juego (sin assets externos).
 - Depende de M2 porque fija la orientación y la pantalla completa que M2 introduce. Es opcional: se decide tras probar M2-M4 (WRK-SPEC-004, Open Questions).
 
 ## Acceptance Criteria
 
-- [ ] Chrome en Android ofrece instalar la aplicación y se abre en horizontal a pantalla completa.
+- [ ] Chrome en Android ofrece instalar la aplicación y se abre a pantalla completa y se puede girar.
 - [ ] En iOS Safari, «Añadir a pantalla de inicio» la abre sin barras del navegador.
 - [ ] Un enlace de sala abierto desde la PWA entra en la sala.
 - [ ] Lighthouse no marca errores en el manifiesto.

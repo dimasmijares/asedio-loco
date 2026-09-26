@@ -1,9 +1,11 @@
 import { expect, test, type CDPSession, type Page } from '@playwright/test';
 import { watchErrors } from './helpers';
 
-// Móvil Android en horizontal: pantalla táctil, sin ratón. Los gestos se mandan como eventos
-// táctiles de verdad (CDP), que Chromium convierte en pointer events de tipo `touch`.
-test.use({ viewport: { width: 863, height: 360 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+// Móvil Android en vertical (la forma de jugar por defecto): pantalla táctil, sin ratón. Los gestos
+// se mandan como eventos táctiles de verdad (CDP), que Chromium convierte en pointer events `touch`.
+const W = 390;
+const H = 844;
+test.use({ viewport: { width: W, height: H }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
 
 type Pt = { x: number; y: number };
 const touch = (cdp: CDPSession, type: 'touchStart' | 'touchMove' | 'touchEnd', pts: Pt[]) =>
@@ -32,7 +34,7 @@ test('táctil: apuntar arrastrando, flechas, tarjetas, pellizco y botón redondo
 
   // Arrastrar un dedo por la escena: a la derecha gira, hacia arriba sube la elevación.
   const s0 = await state(page);
-  await drag(cdp, { x: 380, y: 200 }, { x: 460, y: 150 });
+  await drag(cdp, { x: 150, y: 420 }, { x: 230, y: 370 });
   const s1 = await state(page);
   expect(s1.yaw, 'gira').toBeLessThan(s0.yaw - 0.2);
   expect(s1.pitch, 'sube').toBeGreaterThan(s0.pitch + 0.1);
@@ -46,15 +48,15 @@ test('táctil: apuntar arrastrando, flechas, tarjetas, pellizco y botón redondo
 
   // Pellizcar: separar los dedos acerca la cámara.
   const z0 = (await state(page)).zoom;
-  await touch(cdp, 'touchStart', [{ x: 400, y: 200 }, { x: 460, y: 200 }]);
-  for (let i = 1; i <= 8; i++) await touch(cdp, 'touchMove', [{ x: 400 - i * 12, y: 200 }, { x: 460 + i * 12, y: 200 }]);
+  await touch(cdp, 'touchStart', [{ x: 165, y: 420 }, { x: 225, y: 420 }]);
+  for (let i = 1; i <= 8; i++) await touch(cdp, 'touchMove', [{ x: 165 - i * 12, y: 420 }, { x: 225 + i * 12, y: 420 }]);
   await touch(cdp, 'touchEnd', []);
   expect((await state(page)).zoom, 'acerca').toBeLessThan(z0 - 0.1);
 
   // Botón redondo abajo a la derecha: mantenerlo carga y al soltar el disparo queda listo.
   const btn = (await page.locator('#confirm').boundingBox())!;
-  expect(btn.x + btn.width, 'a la derecha').toBeGreaterThan(863 - 140);
-  expect(btn.y + btn.height, 'abajo').toBeGreaterThan(360 - 140);
+  expect(btn.x + btn.width, 'a la derecha').toBeGreaterThan(W - 140);
+  expect(btn.y + btn.height, 'en la mitad de abajo').toBeGreaterThan(H / 2);
   expect(Math.abs(btn.width - btn.height), 'redondo').toBeLessThan(4);
   const c = { x: btn.x + btn.width / 2, y: btn.y + btn.height / 2 };
   await touch(cdp, 'touchStart', [c]);

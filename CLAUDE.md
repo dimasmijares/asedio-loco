@@ -24,6 +24,8 @@ El juego está en producción: https://asedio-loco.dimasmijares.workers.dev. Cad
 - **Terminado:** fases 0-6 (`WRK-PLAN-001`), cambios tras la primera prueba (`WRK-PLAN-002`) y adopción de KDD (`WRK-PLAN-003`).
 - **Entrega activa:** juego en móviles (`WRK-PLAN-004`): M1 hecha, M2-M5 pendientes.
 - **Pendientes sueltos:** `WRK-PLAN-005`.
+- **Siguiente:** munición con identidad destructiva (`WRK-PLAN-007`, en borrador a la espera de decisiones del usuario).
+- **Móvil:** se juega en vertical por defecto; se diseña y se prueba primero en vertical.
 
 ## Comandos
 
