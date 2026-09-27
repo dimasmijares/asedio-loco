@@ -19,6 +19,10 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
     null,
     { timeout: 120_000 },
   );
+  // En la cuenta atrás se han mostrado los arcos de quién ataca a quién (WRK-TASK-045).
+  const arcs = await page.evaluate(() => (window as any).__asedio.mode.ui.arcsShown);
+  expect(arcs.round).toBeGreaterThanOrEqual(1);
+  expect(arcs.pairs.split(',').length, `arcos: ${arcs.pairs}`).toBeGreaterThanOrEqual(2);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: info.outputPath('impacto.png') });
   await expect(page.locator('#game-over')).toBeVisible({ timeout: 800_000 });

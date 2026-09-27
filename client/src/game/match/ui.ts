@@ -11,6 +11,7 @@ import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
 import { replayCamera } from '../replay';
+import { AttackArcs } from '../render/arcs';
 import type { Game } from '../game';
 import { causeText } from '../modes/sandbox';
 import type { SimEvent } from '../sim/sim';
@@ -61,6 +62,9 @@ export class MatchUI {
   private dmgLayer = h('div', { class: 'dmg-labels', id: 'dmg-labels' });
   private dmgLabels: { el: HTMLElement; p: THREE.Vector3 }[] = [];
   private dmgUntil = 0;
+  // Quién ataca a quién durante la cuenta atrás (WRK-TASK-045).
+  arcs: AttackArcs;
+  arcsShown = { round: 0, pairs: '' }; // últimos arcos mostrados, «atacante>objetivo» (para las pruebas)
   private aimSent = 0;
   private lastTick = -1;
   tutorial: Tutorial | null = null;
@@ -77,6 +81,7 @@ export class MatchUI {
     this.director = new Director(game.view, game.rig);
     this.resultsBox = h('div', { class: 'results-box', id: 'results-box' });
     this.hud.root.append(this.resultsBox, this.dmgLayer);
+    this.arcs = new AttackArcs(game.stage.scene);
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
@@ -156,6 +161,7 @@ export class MatchUI {
 
   update(dt: number) {
     this.placeDamage();
+    this.arcs.update(dt);
     const g = this.game;
     const s = this.src.state;
     g.fullRate = s.phase === 'countdown' || s.phase === 'impact' || s.phase === 'replay';
@@ -272,7 +278,8 @@ export class MatchUI {
     if (s.phase === 'countdown' && prev !== 'countdown') {
       const castles = s.players.filter((p) => p.alive).map((p) => new THREE.Vector3(...castleOrigin(p.slot)));
       this.director.startCountdown(castles, this.src.remaining());
-    }
+      this.showArcs(s);
+    } else if (s.phase !== 'countdown' && prev === 'countdown') this.arcs.hide();
     // 3, 2, 1 y ¡FUEGO!: el cuarto tiempo dura lo mismo que los otros y coincide con los disparos.
     if (s.phase === 'impact' && prev === 'countdown') {
       this.hud.setCountdown('¡FUEGO!', 1000);
@@ -305,6 +312,20 @@ export class MatchUI {
       this.hud.setPhase('Fin de la partida', '');
       if (prev !== 'over') this.showOver(s);
     }
+  }
+
+  // Un arco por jugador vivo, de su catapulta al castillo al que apunta (si sigue en pie).
+  private showArcs(s: MatchState) {
+    const alive = new Set(s.players.filter((p) => p.alive).map((p) => p.slot));
+    const attackers = s.players.filter((p) => p.alive && p.target !== p.slot && alive.has(p.target));
+    this.arcsShown = { round: s.round, pairs: attackers.map((p) => `${p.slot}>${p.target}`).join(',') };
+    this.arcs.show(
+      attackers
+        .map((p) => {
+          const o = castleOrigin(p.target);
+          return { from: launchPoint(p.slot), to: [o[0], o[1] + 5.5, o[2]], color: PLAYER_STYLES[p.slot].color };
+        }),
+    );
   }
 
   private showResults(s: MatchState) {
@@ -431,6 +452,7 @@ export class MatchUI {
 
   dispose() {
     this.hud.dispose();
+    this.arcs.dispose();
     this.overPanel?.remove();
   }
 }

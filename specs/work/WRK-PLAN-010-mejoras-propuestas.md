@@ -29,7 +29,7 @@ Para empezar en una sesión nueva: `npm run kdd:pendientes`, elegir la primera t
 |---:|---|---|---|---|
 | 1 | WRK-TASK-044 · Equilibrio del pedrusco contra el rey | completed | — | 2026-09-27 |
 | 2 | WRK-TASK-046 · Nombres en el marcador compacto del móvil | completed | — | 2026-09-27 |
-| 3 | WRK-TASK-045 · Indicador de quién ataca a quién | draft | — | — |
+| 3 | WRK-TASK-045 · Indicador de quién ataca a quién | completed | — | 2026-09-27 |
 | 4 | WRK-TASK-049 · Polvo y humo persistentes tras un derrumbe | draft | — | — |
 | 5 | WRK-TASK-048 · Tutorial adaptado al vertical | draft | — | — |
 | 6 | WRK-TASK-041 · Protección del rey en las primeras rondas | draft | 044 | — |

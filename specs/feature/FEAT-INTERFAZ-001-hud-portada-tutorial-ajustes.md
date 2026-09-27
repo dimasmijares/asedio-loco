@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.6.0
+version: 1.7.0
 created: 2026-09-26
 updated: 2026-09-27
 owner: dimas
@@ -61,6 +61,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 📡 si está desconectado (en red) y 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
    - Abajo, potencia y elevación, una línea con lo que hace la munición elegida (`#hud-ammo-desc`, WRK-TASK-032: en móvil el `title` de la tarjeta no se ve; se oculta en horizontal con menos de 500 px de alto), 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
+   - **Quién ataca a quién** (WRK-TASK-045): durante la cuenta atrás, un arco de guiones del color de cada jugador vivo va de su catapulta al castillo al que apunta (`AttackArcs`, `render/arcs.ts`). Los guiones avanzan hacia el objetivo y el arco acaba en una punta. Se curva hacia la derecha de la marcha, así que dos jugadores que se atacan entre sí no se tapan. Aparece en 0,35 s y se desvanece en 0,3 s al empezar el impacto. Sale del `MatchState` (`target`), así que un invitado ve los mismos arcos que el anfitrión sin mensajes nuevos. Dos InstancedMesh: dos llamadas de dibujo.
    - Al empezar la cuenta atrás se retira el rótulo que hubiera en pantalla (WRK-TASK-038). Los bloques `@media` de pantallas pequeñas van al final de `style.css` para prevalecer sobre las reglas base.
    - Rótulos: «RONDA N», «LA LAVA SUBE», «REY ELIMINADO» / «TU REY HA CAÍDO», «REPETICIÓN».
    - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
@@ -113,6 +114,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 |------|-----------|------|-------------------|
 | Testing | `tests/e2e/smoke.spec.ts`, `tests/e2e/solo.spec.ts`, `tests/e2e/multiplayer.spec.ts` | 2026-09-26 | low → medium |
 | Expert review | Capturas de `tests/tools/review.mjs` | 2026-09-25 | — |
+| Testing | `tests/e2e/solo.spec.ts` y `multiplayer.spec.ts` (revancha): arcos en la cuenta atrás, iguales en el anfitrión y el invitado, WRK-TASK-045 | 2026-09-27 | — |
 | Testing | `tests/e2e/hud-compact.spec.ts` (nombres cortos visibles, sin recortar ni solapes en 6 tamaños) y `tests/unit/players.test.ts`, WRK-TASK-046 | 2026-09-27 | — |
 
 ## Traceability
@@ -124,7 +126,8 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/tutorial.ts` | Tutorial de 3 pasos |
 | Implemented in | `client/src/ui/settings.ts` | Ajustes y texto grande |
 | Implemented in | `client/src/ui/backdrop.ts` | Fondo animado |
-| Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados y pantalla final |
+| Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados, arcos de la cuenta atrás (`showArcs`) y pantalla final |
+| Implemented in | `client/src/game/render/arcs.ts` | `AttackArcs`: quién ataca a quién |
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying` |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |

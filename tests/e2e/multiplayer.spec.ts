@@ -18,6 +18,7 @@ type Summary = {
   migrations: number;
   demotions: number;
   replays: number;
+  arcs: { round: number; pairs: string };
   fulls: number;
 };
 
@@ -304,6 +305,11 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   await join(g1, hash, 'Jugador2', SLOW);
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
   await host.click('#start');
+  // Arcos de quién ataca a quién (WRK-TASK-045): el invitado ve los mismos que el anfitrión.
+  const r1 = await waitAll([host, g1], (s) => s.round === 1 && (s.phase === 'impact' || s.phase === 'results'));
+  expect(r1[0].arcs.round).toBe(1);
+  expect(r1[0].arcs.pairs.split(',')).toHaveLength(4);
+  expect(r1[1].arcs, 'arcos del invitado').toEqual(r1[0].arcs);
   await waitAll([host, g1], (s) => s.phase === 'over', 720_000);
   await expect(g1.locator('#rematch')).toHaveCount(0);
   await host.click('#rematch');
