@@ -361,9 +361,14 @@ export class MatchUI {
       const my = Math.min(hgt / 2 - 8, el.offsetHeight / 2 + 26); // + lo que sube y baja la animación
       const x = Math.min(w - mx, Math.max(mx, ((v.x + 1) / 2) * w));
       let y = Math.min(hgt - my, Math.max(my, ((1 - v.y) / 2) * hgt));
-      // Si cae sobre la lista de resultados, baja justo por debajo de ella.
-      if (x > rb.left - mx && x < rb.right + mx && y > rb.top - my && y < rb.bottom + my) y = Math.min(hgt - my, rb.bottom + my);
-      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      let xx = x;
+      // Si cae sobre la lista de resultados, baja justo por debajo de ella y, si ahí no cabe (poca
+      // altura, móvil en horizontal), se pone al lado de la lista, en el lado que le toca.
+      if (x > rb.left - mx && x < rb.right + mx && y > rb.top - my && y < rb.bottom + my) {
+        if (rb.bottom + my * 2 <= hgt) y = rb.bottom + my;
+        else xx = x < (rb.left + rb.right) / 2 ? Math.max(mx, rb.left - mx) : Math.min(w - mx, rb.right + mx);
+      }
+      el.style.transform = `translate(${xx}px, ${y}px) translate(-50%, -50%)`;
     }
   }
 

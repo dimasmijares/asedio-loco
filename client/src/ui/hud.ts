@@ -232,6 +232,10 @@ export class Hud {
     }
     this.countdown.replaceChildren(h('span', { class: text.length > 1 ? 'cd-go' : 'cd-num' }, text));
     this.countdown.classList.add('show');
+    // La cuenta atrás manda: retira el rótulo que hubiera («RONDA N», «LA LAVA SUBE»), que si no
+    // se superpone con los números (WRK-TASK-038).
+    clearTimeout(this.bannerTimer);
+    this.banner.classList.remove('show');
     if (ms) this.countdownTimer = window.setTimeout(() => this.setCountdown(null), ms);
   }
 

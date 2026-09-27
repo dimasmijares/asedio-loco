@@ -26,8 +26,8 @@ Primero los castillos, porque cambian el coste de la física y el equilibrio del
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
 | 1 | WRK-TASK-037 · Castillos de 176 bloques con forro interior | completed | — | Forro, munición reajustada, protocolo v7 |
-| 2 | WRK-TASK-038 · Modo horizontal en móvil | active | — | HUD y cámara revisados en horizontal |
-| 3 | WRK-TASK-039 · Mejora gráfica | draft | — | Una mejora visible en PC y móvil |
+| 2 | WRK-TASK-038 · Modo horizontal en móvil | completed | — | HUD y cámara revisados en horizontal |
+| 3 | WRK-TASK-039 · Mejora gráfica | active | — | Una mejora visible en PC y móvil |
 
 Después: WRK-TASK-013, WRK-TASK-008 y WRK-TASK-016.
 
