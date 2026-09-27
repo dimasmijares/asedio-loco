@@ -728,10 +728,15 @@ kbd {
   color: #ff6b6b;
 }
 
+.banner-text.guard {
+  color: #ffd23f;
+}
+
 .banner-sub {
   font-size: 22px;
   font-weight: bold;
   margin-top: 6px;
+  white-space: pre-line;
 }
 
 @media (max-width: 700px) {

@@ -82,6 +82,7 @@ export interface KingInfo {
   alive: boolean;
   cause?: KingCause;
   by?: number;
+  saved?: boolean; // el escudo real ya lo ha salvado en esta ronda (para avisar una sola vez)
 }
 
 export interface Stats {
@@ -128,6 +129,10 @@ export class Sim {
   lavaY = -3.6;
   wind: Vec3 = [0, 0, 0];
   breaking = true;
+  // Escudo real (WRK-TASK-041): mientras está activo, ningún rey cae; el anfitrión lo activa en las
+  // rondas 1 y 2 y, al acabar cada una, devuelve a su pedestal a los que se han salido.
+  kingGuard = false;
+  private kingHome = new Map<number, Vec3>();
   stats: Stats = { destroyed: [0, 0, 0, 0], lost: [0, 0, 0, 0], self: [0, 0, 0, 0] };
   private nextProj = 2000;
   private fracSeed = 1;
@@ -544,10 +549,51 @@ export class Sim {
   killKing(slot: number, cause: KingCause, by = -1) {
     const k = this.kings.get(slot);
     if (!k || !k.alive) return;
+    if (this.kingGuard) return this.guardKing(k);
     k.alive = false;
     k.cause = cause;
     k.by = by;
     this.events.push({ e: 'king', slot, cause, by });
+  }
+
+  // El escudo real salva al rey: no acumula daño y, la primera vez en la ronda, se avisa.
+  private guardKing(k: KingInfo) {
+    const r = this.recs.get(kingId(k.slot));
+    if (r) r.damage = 0;
+    if (k.saved) return;
+    k.saved = true;
+    this.events.push({ e: 'fx', kind: 'kingGuard', p: r ? this.pos(r) : this.home(k.slot), slot: k.slot });
+  }
+
+  private home(slot: number): Vec3 {
+    let p = this.kingHome.get(slot);
+    if (!p) this.kingHome.set(slot, (p = buildCastle(slot).kingPos));
+    return p;
+  }
+
+  // Devuelve el rey a su pedestal (un poco por encima, para que caiga sobre lo que quede).
+  private homeKing(r: Rec) {
+    const h = this.home(r.slot);
+    r.body.setTranslation({ x: h[0], y: h[1] + 0.4, z: h[2] }, true);
+    r.body.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);
+    r.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+    r.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+    r.damage = 0;
+    this.events.push({ e: 'fx', kind: 'kingHome', p: [h[0], h[1], h[2]], slot: r.slot });
+  }
+
+  // Al acabar una ronda con escudo: los reyes que están fuera de su castillo vuelven al pedestal y
+  // todos empiezan la siguiente sin daño.
+  restoreKings() {
+    for (const k of this.kings.values()) {
+      k.saved = false;
+      if (!k.alive) continue;
+      const r = this.recs.get(kingId(k.slot));
+      if (!r) continue;
+      const p = this.pos(r);
+      r.damage = 0;
+      if (p[1] < 0.95 ? !insideCastle(k.slot, p, 0.2) : !insideCastle(k.slot, p, 1.5)) this.homeKing(r);
+    }
   }
 
   private checkKings() {
@@ -763,7 +809,11 @@ export class Sim {
     for (const r of [...this.recs.values()]) {
       const p = r.body.translation();
       if (p.y < -14 || Math.abs(p.x) > 90 || Math.abs(p.z) > 90) {
-        if (r.kind === 'king') {
+        if (r.kind === 'king' && this.kingGuard && this.kings.get(r.slot)?.alive) {
+          // Con el escudo real, el rey que cae al vacío vuelve en el acto a su pedestal.
+          this.guardKing(this.kings.get(r.slot)!);
+          this.homeKing(r);
+        } else if (r.kind === 'king') {
           this.killKing(r.slot, 'fell', r.lastHitBy);
           this.recs.delete(r.id);
           this.byHandle.delete(r.col.handle);

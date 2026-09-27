@@ -4,9 +4,9 @@ type: rule
 layer: governance
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.0.2
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies: []
 tags:
@@ -19,7 +19,7 @@ tags:
 
 ## Rule
 
-Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **6**) en el mismo despliegue.
+Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **8**; 7 desde ADR-013 y 8 desde ADR-014) en el mismo despliegue.
 
 Cuenta como dato compartido:
 

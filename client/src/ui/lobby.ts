@@ -71,6 +71,7 @@ export function showHowTo() {
       { class: 'panel' },
       h('h2', null, 'Cómo se juega'),
       h('p', null, '👑 Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
+      h('p', null, '🛡️ Escudo real: en las rondas 1 y 2 ningún rey puede caer. Si al final de la ronda un rey está fuera de su castillo, vuelve a su pedestal.'),
       isMobileDevice()
         ? h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Arrastra el dedo por la pantalla para girar la catapulta y ajustar la elevación. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola se alarga) y suéltalo para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ cambian de castillo objetivo y el gesto de pellizcar acerca la cámara.')
         : h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar la catapulta y ajustar la elevación. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola se alarga) y suelta para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Q/E cambian de castillo objetivo.'),

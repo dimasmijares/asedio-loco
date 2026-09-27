@@ -4,7 +4,7 @@ import { aimedAt, decideBots, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
 import { lerp, type Vec3 } from '../../../../shared/math';
-import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, impactMaxDuration, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
+import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, impactMaxDuration, kingGuarded, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
 
 // Lo que el anfitrión necesita del juego. Lo implementa Game y, en las pruebas de
@@ -66,6 +66,7 @@ export class MatchHost {
     sim.setLava(state.lavaY);
     game.setLavaVisual(state.lavaY);
     sim.wind = state.wind;
+    sim.kingGuard = kingGuarded(state);
   }
 
   get sim() {
@@ -162,6 +163,9 @@ export class MatchHost {
     const s = this.state;
     const prevLevel = s.lavaLevel;
     startRound(s);
+    // Escudo real: si la ronda que acaba lo tenía, se recoloca a los reyes que se han salido.
+    if (this.sim.kingGuard) this.sim.restoreKings();
+    this.sim.kingGuard = kingGuarded(s);
     if (s.round === 1) s.remaining += this.firstAimBonus;
     this.sim.setLava(s.lavaY);
     this.game.setLavaVisual(s.lavaY);
@@ -298,6 +302,7 @@ export class MatchHost {
     s.replay = null;
     s.remaining = resultsDuration(s);
     this.game.simPaused = false;
+    if (this.sim.kingGuard) this.sim.restoreKings();
     this.emit();
   }
 

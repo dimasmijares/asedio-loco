@@ -5,9 +5,9 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: DOM-JUEGO-004
@@ -46,6 +46,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
     - la base de su cápsula queda a menos de 6 cm sobre la lava (`lava`);
     - está por debajo de 0,95 m y fuera de su zona de castillo (5,6 m + 0,2 m de margen desde el centro) (`outside`);
     - lo aplastan: fuerza de contacto de más de 600, daño acumulado ≥ 1 o una explosión cercana (`crushed`). Los umbrales están en DOM-JUEGO-004.
+10b. **Escudo real** (ADR-014, WRK-TASK-041): en las rondas 1 y 2 (`KING_GUARD_ROUNDS`), en todas sus fases, ningún rey cae por ninguna de esas causas, y el daño acumulado se pone a 0. Al empezar los resultados de esas rondas, y otra vez al empezar la ronda siguiente, el rey que está fuera de su castillo (por debajo de 0,95 m y fuera de su zona, o a más de 1,5 m de ella) vuelve a su pedestal. El que cae al vacío vuelve en el acto. Desde la ronda 3 rigen las causas de arriba.
 11. La eliminación se apunta a quien golpeó al rey por última vez (`lastHitBy`), que suma una baja si no es el propio jugador.
 12. **Victoria:** gana el último rey en pie. Si caen todos los que quedaban en la misma ronda, gana el que tenga más bloques en pie y, si empatan, el que cayó el último. Al terminar la ronda 24 (`MAX_ROUNDS`) gana el vivo con más bloques en pie.
 13. **Cierre rápido:** si durante el apuntado solo queda un rey (por ejemplo, la lava se ha llevado a otro al empezar la ronda), el reloj baja a 0,5 s.
@@ -64,6 +65,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 - Borde: un humano desconectado sigue vivo y nunca confirma (`client/src/game/match/host.ts` solo marca `locked` a los bots y a quien manda su disparo), así que con un desconectado en la partida la ronda nunca se adelanta y agota los 20 s.
 - Borde: un rey sale despedido y cae de pie en el patio de su propio castillo: sigue vivo (está dentro de su zona). Si cae en el césped, fuera de la zona, queda eliminado (`outside`).
 - Borde: los dos últimos reyes caen en la misma ronda: gana quien conserva más bloques, aunque su rey cayera primero.
+- Borde: en la ronda 2, un impacto directo saca al rey al césped: sigue vivo y, al empezar los resultados, vuelve a su pedestal.
 - Contraejemplo: un castillo sin bloques con el rey en pie sigue en la partida; no hay barra de vida.
 
 ## Acceptance Criteria
@@ -83,6 +85,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 |------|-----------|------|-------------------|
 | Testing | `tests/unit/match.test.ts` (rondas, eliminación y victoria) | 2026-09-26 | low → medium |
 | Testing | `tests/e2e/multiplayer.spec.ts`, `tests/e2e/solo.spec.ts` | 2026-09-26 | — |
+| Production data | WRK-TASK-041, 12 partidas por dificultad, sin y con escudo: primera eliminación en la ronda 1 en 13 de 36 → en la ronda 3 o más tarde en las 36; rondas por partida: fácil 9,4 → 10,0, normal 7,6 → 9,4, difícil 5,4 → 6,9 | 2026-09-28 | — |
 | Production data | `tests/balance/ultimo-facil.txt` (12,5 rondas, 271 s), `ultimo-normal.txt` (9,1, 165 s), `ultimo-dificil.txt` (7,3, 139 s; tras WRK-TASK-021) | 2026-09-26 | — |
 
 ## Traceability
@@ -92,7 +95,9 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 | Implemented in | `shared/match.ts` | Duraciones, `startRound`, `eliminate`, `checkWinner`, `MAX_ROUNDS` |
 | Implemented in | `client/src/game/match/host.ts` | Fases, cuenta atrás (`beginCountdown`, `aimLeft`), escalonado (`STAGGER`), repetición |
 | Tested by | `tests/unit/countdown.test.ts` | Paso `aim` → `countdown` → `impact` con el anfitrión real en Node |
-| Implemented in | `client/src/game/sim/sim.ts` | `checkKings`, `KING_CRUSH_FORCE` |
+| Implemented in | `client/src/game/sim/sim.ts` | `checkKings`, `KING_CRUSH_FORCE`, escudo real (`kingGuard`, `restoreKings`) |
+| Tested by | `tests/unit/guard.test.ts` | Escudo real: el rey no cae y vuelve al pedestal |
+| Decided in | ADR-014 | Escudo real en las rondas 1 y 2 |
 | Tested by | `tests/unit/match.test.ts` | Rondas y victoria |
 | Tested by | `tests/e2e/multiplayer.spec.ts` | «4 jugadores hasta el final…» |
 | Decided in | D-024, D-058, D-061 | Empates, 20 s y 3 municiones, repetición |

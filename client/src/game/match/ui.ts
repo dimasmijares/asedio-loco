@@ -3,7 +3,7 @@ import { AMMO } from '../../../../shared/ammo';
 import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
-import { replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
+import { KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
@@ -156,6 +156,8 @@ export class MatchUI {
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
       if (e.e === 'fx' && e.kind === 'lavaRise') this.hud.showBanner('LA LAVA SUBE', 'Destruye los bloques que alcanza', 2200, 'bad');
+      if (e.e === 'fx' && e.kind === 'kingGuard' && e.slot !== undefined)
+        this.hud.showBanner('ESCUDO REAL', `🛡️ ${e.slot === this.src.you ? 'Tu rey se salva' : `El rey de ${nameOf(this.src.state, e.slot)} se salva`}: nadie cae hasta la ronda ${KING_GUARD_ROUNDS + 1}`, 2200, 'guard');
     }
   }
 
@@ -164,6 +166,7 @@ export class MatchUI {
     this.arcs.update(dt);
     const g = this.game;
     const s = this.src.state;
+    g.view.setKingGuard(kingGuarded(s));
     g.fullRate = s.phase === 'countdown' || s.phase === 'impact' || s.phase === 'replay';
     const me = this.me();
     const input = g.input;
@@ -289,9 +292,13 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
+      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
+      // Escudo real (WRK-TASK-041): se anuncia al empezar, en la última ronda con él y al acabarse.
+      if (s.round === 1) sub += `\n🛡️ Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`;
+      else if (s.round === KING_GUARD_ROUNDS) sub += '\n🛡️ Última ronda con escudo real';
+      else if (s.round === KING_GUARD_ROUNDS + 1) sub += '\nSe acaba el escudo real: los reyes ya pueden caer';
       this.last.wind = windNow;
-      this.hud.showBanner(`RONDA ${s.round}`, sub, 1700);
+      this.hud.showBanner(`RONDA ${s.round}`, sub, s.round <= KING_GUARD_ROUNDS + 1 ? 2600 : 1700);
       sfx.fanfare();
       this.director.reset();
       this.game.view.recorder.rebase(this.game.view.time);

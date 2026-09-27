@@ -9,6 +9,8 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   await page.waitForFunction(() => (window as any).__asedio?.mode?.host, null, { timeout: 30_000 });
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'aim', null, { timeout: 30_000 });
   await canvasNotBlack(page);
+  // Escudo real en la ronda 1 (WRK-TASK-041): los 4 reyes lo llevan a la vista.
+  expect(await page.evaluate(() => (window as any).__asedio.game.view.guardedKings)).toBe(4);
   await page.screenshot({ path: info.outputPath('apuntado.png') });
   // La fase de impacto (o cualquier momento posterior si ha ido muy deprisa).
   await page.waitForFunction(
@@ -32,6 +34,7 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   });
   console.log('fin', JSON.stringify(st));
   expect(st.winner).not.toBeNull();
+  expect(st.rounds, 'con el escudo real nadie cae antes de la ronda 3').toBeGreaterThanOrEqual(3);
   expect(st.alive).toBeLessThanOrEqual(1);
   await expect(page.locator('#game-over')).toHaveAttribute('data-rounds', String(st.rounds));
   await page.screenshot({ path: info.outputPath('final.png') });

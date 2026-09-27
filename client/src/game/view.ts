@@ -35,6 +35,8 @@ export class WorldView {
   catapults = new Map<number, Catapult>();
   kings = new Map<number, THREE.Object3D>();
   kingAlive = new Map<number, boolean>();
+  // Escudo real (WRK-TASK-041): halo sobre la cabeza y columna de luz dorada sobre cada rey.
+  private guard: { on: boolean; objs: Map<number, THREE.Object3D>; beam: THREE.MeshBasicMaterial | null } = { on: false, objs: new Map(), beam: null };
   projs = new Map<number, ProjView>();
   shields = new Map<number, THREE.Mesh>();
   markers: { obj: THREE.Object3D; until: number }[] = [];
@@ -260,6 +262,15 @@ export class WorldView {
       case 'build':
         if (slot !== undefined) this.fx.dust(castleOrigin(slot), 14, '#f4a261', 0.6);
         break;
+      case 'kingGuard':
+        // El escudo real acaba de salvar a este rey.
+        this.fx.sparks(p, '#ffd23f', 24);
+        this.fx.ring([p[0], p[1] + 0.3, p[2]], 1.2, '#ffe8a3');
+        break;
+      case 'kingHome':
+        this.fx.dust(p, 8, '#fff4d6', 0.45);
+        this.fx.sparks([p[0], p[1] + 0.5, p[2]], '#ffd23f', 16);
+        break;
       case 'pop':
         this.fx.sparks(p, '#72ddf7', 20);
         break;
@@ -269,6 +280,53 @@ export class WorldView {
           if (k) k.visible = false;
         }
         break;
+    }
+  }
+
+  // Enciende o apaga el escudo real. Se puede llamar en cada fotograma: solo actúa si cambia.
+  setKingGuard(on: boolean) {
+    if (on === this.guard.on) return;
+    this.guard.on = on;
+    if (on && !this.guard.objs.size) {
+      const halo = new THREE.MeshBasicMaterial({ color: '#ffd23f', toneMapped: false });
+      this.guard.beam = new THREE.MeshBasicMaterial({ color: '#fff4c4', transparent: true, opacity: 0.35, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+      const ringGeo = new THREE.TorusGeometry(0.3, 0.045, 8, 28);
+      const beamGeo = new THREE.CylinderGeometry(0.45, 0.8, 8, 18, 1, true);
+      for (const slot of this.kings.keys()) {
+        const g = new THREE.Group();
+        const ring = new THREE.Mesh(ringGeo, halo);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.95;
+        ring.name = 'halo';
+        const beam = new THREE.Mesh(beamGeo, this.guard.beam);
+        beam.position.y = 4.1;
+        beam.renderOrder = 3;
+        g.add(ring, beam);
+        g.name = 'king-guard';
+        this.root.add(g);
+        this.guard.objs.set(slot, g);
+      }
+    }
+    for (const g of this.guard.objs.values()) g.visible = on;
+  }
+
+  // Número de reyes con el escudo a la vista (para las pruebas).
+  get guardedKings() {
+    let n = 0;
+    for (const g of this.guard.objs.values()) if (g.visible) n++;
+    return n;
+  }
+
+  private updateGuard(t: number) {
+    if (!this.guard.on) return;
+    if (this.guard.beam) this.guard.beam.opacity = 0.32 + Math.sin(t * 2.4) * 0.08;
+    for (const [slot, g] of this.guard.objs) {
+      const k = this.kings.get(slot);
+      g.visible = !!k && k.visible && (this.kingAlive.get(slot) ?? false);
+      if (!k || !g.visible) continue;
+      // Sigue al rey sin girar con él (el rey rueda al caer; el halo, no).
+      g.position.copy(k.position);
+      g.children[0].rotation.z = t * 1.5;
     }
   }
 
@@ -315,6 +373,7 @@ export class WorldView {
       return true;
     });
     for (const s of this.shields.values()) (s.material as THREE.MeshToonMaterial).opacity = 0.18 + Math.sin(t * 3) * 0.05;
+    this.updateGuard(t);
     this.shake = Math.max(0, this.shake - dt * 1.8);
   }
 

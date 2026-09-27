@@ -166,6 +166,13 @@ export function ammoRng(seed: number, round: number, slot: number) {
   return rng((seed ^ hashString(`ammo:${round}:${slot}`)) >>> 0);
 }
 
+// Escudo real (WRK-TASK-041, ADR-014): en las rondas 1 y 2 ningún rey puede caer. Si al final de
+// una de esas rondas un rey está fuera de su castillo, vuelve a su pedestal. Se deduce de la ronda.
+export const KING_GUARD_ROUNDS = 2;
+export function kingGuarded(s: Pick<MatchState, 'round' | 'phase'>) {
+  return s.round >= 1 && s.round <= KING_GUARD_ROUNDS && s.phase !== 'over' && s.phase !== 'intro';
+}
+
 // Empieza una ronda: lava, viento y 3 municiones distintas nuevas (las de la ronda anterior se pierden).
 export function startRound(s: MatchState): MatchState {
   s.round++;
