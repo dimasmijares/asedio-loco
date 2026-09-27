@@ -5,9 +5,9 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 3.0.0
+version: 3.1.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-27
 owner: dimas
 dependencies:
   - id: DOM-JUEGO-001
@@ -45,7 +45,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
-| Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s |
+| Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s; aplasta al rey con la mitad de fuerza (WRK-TASK-044) |
 | Tronco rodante | común | 14 | Apisonadora: al tocar algo rueda en línea recta en la dirección en que venía y derriba lo que encuentra | r 0,36 m, largo 1,9 m, densidad 3; no baja de 9 m/s ni de 12 rad/s mientras rueda; vida 7,5 s |
 | Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 9 |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 108 (rompe piedra cerca del centro) |
@@ -85,6 +85,8 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 
 - **Con castillos de 176 bloques (WRK-TASK-037, ADR-013)**, tras el reajuste, bloques rotos por disparo (12 disparos): pedrusco 9,4; tronco 10,6; cocos 12,2; vaca 16,5; sandía 17,8; gallina 15,1; piano 17,2; agujero negro 21,6; imán 19,9; bola de nieve 20,2. Media: 16,0, igual que con 140 bloques, así que el castillo resiste un 26 % más en proporción. Reyes: 14 de 120, con 5 de 12 del pedrusco (impactos directos) y 4 de 12 del agujero negro.
 
+- **El pedrusco ya no es el que más reyes mata (WRK-TASK-044).** Al darle de lleno al rey, la fuerza de contacto del pedrusco cuenta la mitad (`kingCrush` en el comportamiento de la munición; 1 en las demás). Con 12 disparos: 9,4 bloques rotos en los dos casos y reyes 5/12 → 2/12. Equilibrio en difícil (12 partidas): 5,5 → 5,0 rondas, dentro del ruido; la primera eliminación sigue en la ronda 1 en 9 de 12 partidas.
+
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
 
 ## Acceptance Criteria
@@ -103,6 +105,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Testing | `tests/unit/match.test.ts` (reparto con semilla) | 2026-09-26 | low → medium |
 | Testing | `tests/balance/destrozo.test.ts` → `destrozo.txt` | 2026-09-26 | — |
 | Production data | `tests/balance/ultimo-*.txt` | 2026-09-26 | — |
+| Testing | WRK-TASK-044: destrozo y equilibrio en difícil antes y después | 2026-09-27 | — |
 
 ## Traceability
 

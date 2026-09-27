@@ -653,6 +653,7 @@ export class Sim {
   private onForce(r: Rec, f: number, other: Rec | null) {
     if (other && other.lastHitBy >= 0 && other.lastHitBy !== r.slot) r.lastHitBy = other.lastHitBy;
     if (!this.breaking) return;
+    if (r.kind === 'king' && other?.kind === 'proj') f *= other.behavior?.kingCrush ?? 1;
     // Una carga en reposo no es un golpe: solo cuenta si chocaban con cierta velocidad relativa,
     // salvo aplastamientos enormes (3 veces el umbral).
     const rel = this.relSpeed(r, other);

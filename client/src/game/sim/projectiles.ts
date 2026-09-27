@@ -9,6 +9,7 @@ import type { Rec, Sim } from './sim';
 export interface ProjectileBehavior {
   maxLife?: number;
   plowKeep?: number; // parte de la velocidad que conserva al atravesar lo que rompe (0,6 por defecto)
+  kingCrush?: number; // factor de la fuerza con que aplasta al rey al darle de lleno (1 por defecto)
   onLaunch?(owner: number): void; // munición sin cuerpo (defensiva, piano)
   onSpawn?(r: Rec): void;
   onStep?(r: Rec, dt: number): void;
@@ -55,11 +56,14 @@ const MELON_PIERCE = 2;
 const PIANO_KEEP = 0.85;
 const CHORD_RADIUS = 2.8;
 const CHORD_FORCE = 60;
+// Pedrusco (WRK-TASK-044): es común y mataba al rey en 5 de 12 impactos directos, más que ninguna
+// rara o épica. Aplasta al rey con menos fuerza; los bloques los sigue rompiendo igual.
+const ROCK_KING = 0.5;
 
 export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior {
   switch (id) {
     case 'rock':
-      return { maxLife: 6 };
+      return { maxLife: 6, kingCrush: ROCK_KING };
 
     case 'log': {
       let dir: Vec3 | null = null;

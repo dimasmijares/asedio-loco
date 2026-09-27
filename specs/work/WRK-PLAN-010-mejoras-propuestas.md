@@ -3,7 +3,7 @@ id: WRK-PLAN-010
 type: spec
 layer: work-plan
 scope: ephemeral
-status: draft
+status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-27
@@ -27,7 +27,7 @@ Para empezar en una sesión nueva: `npm run kdd:pendientes`, elegir la primera t
 
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
-| 1 | WRK-TASK-044 · Equilibrio del pedrusco contra el rey | draft | — | — |
+| 1 | WRK-TASK-044 · Equilibrio del pedrusco contra el rey | completed | — | 2026-09-27 |
 | 2 | WRK-TASK-046 · Nombres en el marcador compacto del móvil | draft | — | — |
 | 3 | WRK-TASK-045 · Indicador de quién ataca a quién | draft | — | — |
 | 4 | WRK-TASK-049 · Polvo y humo persistentes tras un derrumbe | draft | — | — |

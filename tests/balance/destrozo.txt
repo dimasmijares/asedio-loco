@@ -1,11 +1,11 @@
-rock       rotos  10.7  movidos   1.7  reyes   2/6  disp  0.8  alt  2.6  base  2.5  piedra  6.2  (crushed 2)
-log        rotos  12.0  movidos   6.0  reyes   0/6  disp  3.4  alt  4.2  base  1.2  piedra  4.8
-coconuts   rotos  11.2  movidos   3.2  reyes   0/6  disp  1.7  alt  3.3  base  1.3  piedra  4.0
-cow        rotos  15.5  movidos   1.7  reyes   1/6  disp  1.4  alt  3.0  base  3.2  piedra  8.2  (crushed 1)
-melon      rotos  13.2  movidos   0.7  reyes   0/6  disp  0.9  alt  3.0  base  2.7  piedra  8.0 ! (14-18)
-chicken    rotos  11.8  movidos   2.8  reyes   1/6  disp  1.7  alt  3.4  base  1.5  piedra  4.3 ! (12-16)  (crushed 1)
-piano      rotos  12.5  movidos   2.7  reyes   0/6  disp  1.2  alt  2.3  base  3.7  piedra  7.5 ! (15-20)
-blackhole  rotos  19.0  movidos  10.2  reyes   3/6  disp  2.5  alt  3.7  base  3.2  piedra  7.3 ! (20-26)  (outside 3)
-magnet     rotos  24.8  movidos   7.2  reyes   0/6  disp  2.4  alt  2.6  base  5.5  piedra 14.0 ! (18-24)
-snowball   rotos  15.3  movidos   6.5  reyes   0/6  disp  3.3  alt  4.3  base  1.5  piedra  7.3 ! (18-24)
-media      rotos  14.6  movidos   4.3  reyes  7/60
+rock       rotos  10.7  movidos   2.7  reyes   0/6  disp  0.9  alt  2.5  base  2.7  piedra  6.3
+log        rotos  10.0  movidos   5.2  reyes   0/6  disp  3.6  alt  4.3  base  0.7  piedra  3.3
+coconuts   rotos  11.3  movidos   4.2  reyes   0/6  disp  1.9  alt  3.3  base  1.3  piedra  4.7
+cow        rotos  15.8  movidos   2.0  reyes   1/6  disp  1.5  alt  3.2  base  3.0  piedra  8.0  (crushed 1)
+melon      rotos  15.2  movidos   1.0  reyes   0/6  disp  1.3  alt  3.1  base  2.8  piedra  8.3
+chicken    rotos  14.7  movidos   2.5  reyes   1/6  disp  2.0  alt  3.4  base  1.5  piedra  5.8  (crushed 1)
+piano      rotos  16.7  movidos   3.0  reyes   0/6  disp  1.4  alt  2.2  base  4.8  piedra 12.0
+blackhole  rotos  21.3  movidos  12.7  reyes   0/6  disp  2.5  alt  3.8  base  0.8  piedra  8.2
+magnet     rotos  25.5  movidos   3.8  reyes   1/6  disp  2.0  alt  2.4  base  4.8  piedra 17.5 ! (18-24)  (outside 1)
+snowball   rotos  16.7  movidos   6.2  reyes   0/6  disp  3.2  alt  4.2  base  1.8  piedra  8.0 ! (18-24)
+media      rotos  15.8  movidos   4.3  reyes  3/60
