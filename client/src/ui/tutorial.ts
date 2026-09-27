@@ -15,6 +15,13 @@ export function tutorialPending() {
 
 type Step = 'aim' | 'adjust' | 'fire';
 
+// Qué control resalta cada paso (WRK-TASK-048): en el primero, una mano que arrastra sobre la escena.
+const FOCUS: Record<Step, string[]> = {
+  aim: [],
+  adjust: ['#hud-ammo', '#target-prev', '#target-next'],
+  fire: ['#confirm'],
+};
+
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
   { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta). Q/E apuntan a otro castillo.' },
@@ -33,13 +40,29 @@ export class Tutorial {
   private i = 0;
   private steps = isMobileDevice() ? TOUCH_STEPS : STEPS;
   private el: HTMLElement;
+  // Mano (táctil) o ratón que se desliza sobre la escena en el paso de apuntar.
+  private swipe = h('div', { class: 'coach-swipe', 'aria-hidden': 'true' }, isMobileDevice() ? '👆' : '🖱️');
   private t = 0;
   done = false;
 
   constructor(parent: HTMLElement) {
     this.el = h('div', { class: 'coach', id: 'tutorial', role: 'status' });
-    parent.append(this.el);
+    parent.append(this.el, this.swipe);
     this.render();
+  }
+
+  // Paso en curso (para las pruebas).
+  get step() {
+    return this.done ? null : this.steps[this.i].id;
+  }
+
+  private focus(on: boolean) {
+    const id = on && !this.done ? this.steps[this.i].id : null;
+    const want = id ? FOCUS[id].map((sel) => document.querySelector(sel)).filter((el): el is Element => !!el) : [];
+    for (const el of document.querySelectorAll('.tut-focus')) if (!want.includes(el)) el.classList.remove('tut-focus');
+    for (const el of want) if (!el.classList.contains('tut-focus')) el.classList.add('tut-focus');
+    const swipe = id === 'aim' ? '' : 'none';
+    if (this.swipe.style.display !== swipe) this.swipe.style.display = swipe;
   }
 
   private render() {
@@ -51,7 +74,9 @@ export class Tutorial {
     this.el.classList.remove('pop');
     void this.el.offsetWidth;
     this.el.classList.add('pop');
+    this.el.dataset.step = s.id;
     this.t = 0;
+    this.focus(true);
   }
 
   // Avisa de que el jugador ha hecho algo.
@@ -71,6 +96,8 @@ export class Tutorial {
   update(dt: number, aiming: boolean) {
     if (this.done) return;
     this.el.style.display = aiming ? '' : 'none';
+    // Los controles se muestran y ocultan con la fase: el resaltado se repone en cada fotograma.
+    this.focus(aiming);
     if (!aiming) return;
     this.t += dt;
     if (this.steps[this.i].id === 'adjust' && this.t > 7) this.next();
@@ -78,7 +105,9 @@ export class Tutorial {
 
   finish() {
     this.done = true;
+    this.focus(false);
     this.el.remove();
+    this.swipe.remove();
     try {
       localStorage.setItem(KEY, 'done');
     } catch {

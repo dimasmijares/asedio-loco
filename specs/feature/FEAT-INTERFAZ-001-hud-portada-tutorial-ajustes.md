@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.7.0
+version: 1.8.0
 created: 2026-09-26
 updated: 2026-09-27
 owner: dimas
@@ -55,6 +55,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).
    - Se puede saltar. Al terminar se guarda y no vuelve. En solitario da 10 s más de apuntado en la ronda 1.
+   - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano 👆 (🖱️ en PC) se desliza sobre la escena. En el 2, un anillo blanco con pulso amarillo resalta las tarjetas y las flechas ◀ ▶. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
 4. **HUD de partida:**
    - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
@@ -106,7 +107,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 - [x] Al final aparece `#game-over` con el ganador y el número de rondas.
 - [ ] El panel de controles se pliega con H y sigue plegado tras recargar (sin prueba).
 - [ ] Con texto grande, el marcador y la ayuda crecen (sin prueba).
-- [ ] El tutorial avanza con cada acción y no vuelve tras terminarlo (sin prueba automática; se fuerza con `?tutorial=1`).
+- [ ] El tutorial no vuelve tras terminarlo (sin prueba automática; se fuerza con `?tutorial=1`). Que avanza con cada paso, resalta el control que toca y no tapa ningún control lo comprueba `tests/e2e/tutorial.spec.ts` (WRK-TASK-048).
 
 ## Evidence
 
@@ -123,7 +124,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 |----------|--------|-------------|
 | Implemented in | `client/src/ui/hud.ts` | HUD, panel de controles, carga, rótulos, cuenta atrás |
 | Implemented in | `client/src/ui/lobby.ts` | Portada, «Cómo se juega», «Jugar solo», lobby |
-| Implemented in | `client/src/ui/tutorial.ts` | Tutorial de 3 pasos |
+| Implemented in | `client/src/ui/tutorial.ts` | Tutorial de 3 pasos y resaltado de controles (`FOCUS`) |
 | Implemented in | `client/src/ui/settings.ts` | Ajustes y texto grande |
 | Implemented in | `client/src/ui/backdrop.ts` | Fondo animado |
 | Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados, arcos de la cuenta atrás (`showArcs`) y pantalla final |
@@ -131,6 +132,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying` |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
+| Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |
 
