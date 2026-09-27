@@ -32,4 +32,24 @@ describe('repetición', () => {
     expect(Math.max(...seen)).toBeGreaterThanOrEqual(44);
     expect(Math.max(...seen)).toBeLessThanOrEqual(45);
   });
+
+  // Mejor disparo (WRK-TASK-047): el tramo se copia y sigue valiendo aunque el búfer cambie.
+  it('un tramo guardado reproduce lo mismo que el búfer y tiene tope de poses', () => {
+    const r = new ReplayRecorder();
+    for (let i = 0; i <= 90; i++) for (const id of [3, 4]) r.pose(i / 30, id, [i, id, 0], [0, 0, 0, 1]);
+    r.event(1.2, { e: 'boom', p: [1, 2, 3], r: 3, kind: 'cow' });
+    const clip = r.clip(1, 2);
+    expect(clip.posesBetween(1, 2)).toEqual(r.posesBetween(1, 2).map((x) => ({ ...x, t: expect.closeTo(x.t, 5) })));
+    expect(clip.eventsBetween(1, 2)).toHaveLength(1);
+    expect(clip.bytes).toBe(clip.count * 9 * 4 + 64);
+    expect(r.clip(0, 3, 10).count).toBe(10);
+    // El búfer se reinicia (rebase) y el tramo sigue ahí.
+    r.rebase(1000);
+    expect(r.posesBetween(1, 2)).toEqual([]);
+    const seen: number[] = [];
+    const player = new ReplayPlayer(clip, clip.t0, clip.t1, 1);
+    player.step(2, { time: 0, applyPose: (id, p) => id === 3 && seen.push(p[0]), applyEvent: () => {} });
+    expect(Math.min(...seen)).toBe(30);
+    expect(Math.max(...seen)).toBe(60);
+  });
 });

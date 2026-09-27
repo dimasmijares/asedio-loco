@@ -33,7 +33,7 @@ Para empezar en una sesión nueva: `npm run kdd:pendientes`, elegir la primera t
 | 4 | WRK-TASK-049 · Polvo y humo persistentes tras un derrumbe | completed | — | 2026-09-27 |
 | 5 | WRK-TASK-048 · Tutorial adaptado al vertical | completed | — | 2026-09-27 |
 | 6 | WRK-TASK-041 · Protección del rey en las primeras rondas | completed | 044 | 2026-09-28 |
-| 7 | WRK-TASK-047 · Repetición del mejor disparo al final | draft | — | — |
+| 7 | WRK-TASK-047 · Repetición del mejor disparo al final | completed | — | 2026-09-28 |
 | 8 | WRK-TASK-051 · Animación del rey | draft | — | — |
 | 9 | WRK-TASK-052 · Física más barata para el anfitrión móvil | draft | — | — |
 | 10 | WRK-TASK-050 · Iluminación del atardecer y sombras de contacto | draft | 052 | — |

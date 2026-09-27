@@ -10,13 +10,57 @@ const MAX_POSES = 120_000; // entradas del búfer circular (t, id, p, q): ~4 MB
 const KEEP_EVENTS = 15; // segundos de eventos que se guardan
 const POSE_STEP = 1 / 30; // cada cuerpo se graba como mucho a 30 Hz
 
+// De dónde lee una reproducción: el búfer en directo o un tramo guardado aparte.
+export interface ReplaySource {
+  posesBetween(t0: number, t1: number): { t: number; id: number; p: Vec3; q: Quat }[];
+  eventsBetween(t0: number, t1: number): { t: number; e: SimEvent }[];
+}
+
+// Como mucho se guardan 60 000 poses en un tramo (~2,2 MB): el del mejor disparo (WRK-TASK-047).
+export const CLIP_MAX_POSES = 60_000;
+
+// Un tramo copiado del búfer para verlo más tarde, aunque el búfer ya se haya sobrescrito.
+// Poses empaquetadas (t relativo a t0, id, p, q) y los eventos de la ventana.
+export class ReplayClip implements ReplaySource {
+  constructor(
+    readonly poses: Float32Array,
+    readonly events: { t: number; e: SimEvent }[],
+    readonly t0: number,
+    readonly t1: number,
+  ) {}
+
+  get count() {
+    return this.poses.length / 9;
+  }
+
+  // Memoria aproximada del tramo: las poses más unos 64 bytes por evento.
+  get bytes() {
+    return this.poses.byteLength + this.events.length * 64;
+  }
+
+  posesBetween(t0: number, t1: number) {
+    const out: { t: number; id: number; p: Vec3; q: Quat }[] = [];
+    const b = this.poses;
+    for (let o = 0; o < b.length; o += 9) {
+      const t = b[o] + this.t0;
+      if (t < t0 || t > t1) continue;
+      out.push({ t, id: b[o + 1], p: [b[o + 2], b[o + 3], b[o + 4]], q: [b[o + 5], b[o + 6], b[o + 7], b[o + 8]] });
+    }
+    return out;
+  }
+
+  eventsBetween(t0: number, t1: number) {
+    return this.events.filter((x) => x.t >= t0 && x.t <= t1);
+  }
+}
+
 export interface ReplayTarget {
   time: number;
   applyPose(id: number, p: Vec3, q: Quat): void;
   applyEvent(e: SimEvent): void;
 }
 
-export class ReplayRecorder {
+export class ReplayRecorder implements ReplaySource {
   private buf = new Float32Array(MAX_POSES * 9);
   private head = 0; // siguiente entrada a escribir
   private size = 0;
@@ -73,6 +117,22 @@ export class ReplayRecorder {
     return this.events.filter((x) => x.t >= t0 && x.t <= t1);
   }
 
+  // Copia el tramo [t0, t1] (como mucho `max` poses, las primeras) para verlo más tarde.
+  clip(t0: number, t1: number, max = CLIP_MAX_POSES) {
+    const poses = this.posesBetween(t0, t1);
+    const n = Math.min(max, poses.length);
+    const buf = new Float32Array(n * 9);
+    for (let i = 0; i < n; i++) {
+      const x = poses[i];
+      const o = i * 9;
+      buf[o] = x.t - t0;
+      buf[o + 1] = x.id;
+      buf.set(x.p, o + 2);
+      buf.set(x.q, o + 5);
+    }
+    return new ReplayClip(buf, this.eventsBetween(t0, t1), t0, t1);
+  }
+
   // Las entradas del búfer guardan tiempos relativos a `base` para no perder precisión.
   rebase(t: number) {
     if (t - this.base < 600) return;
@@ -94,7 +154,7 @@ export class ReplayPlayer {
   done = false;
 
   constructor(
-    rec: ReplayRecorder,
+    rec: ReplaySource,
     readonly t0: number,
     readonly t1: number,
     readonly speed = 0.5,
@@ -127,6 +187,14 @@ export class ReplayPlayer {
     while (this.ei < this.events.length && this.events[this.ei].t <= this.t) target.applyEvent(this.events[this.ei++].e);
     if (this.t >= this.t1) this.done = true;
   }
+}
+
+// Cámara del mejor disparo (WRK-TASK-047): más lejos que la del rey, para que quepa el destrozo.
+export function shotCamera(at: THREE.Vector3, t: number, out: { from: THREE.Vector3; at: THREE.Vector3 }) {
+  const a = 0.9 + t * 0.25;
+  out.at.copy(at).add(new THREE.Vector3(0, 1.5, 0));
+  out.from.copy(at).add(new THREE.Vector3(Math.cos(a) * 16, 11, Math.sin(a) * 16));
+  return out;
 }
 
 // Cámara de la repetición: cerca del rey, girando despacio a su alrededor y desde lo bastante

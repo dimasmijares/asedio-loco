@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: FEAT-CAMARA-001
@@ -62,6 +62,11 @@ Grabar en cada cliente lo que llega a su vista y, cuando cae un rey, reproducir 
    - Si no hay nada grabado de ese rey, se salta.
 4. **Vuelta al directo:** lo que llega durante la repetición se aparta. Al terminar se deshace lo repuesto y se aplica lo apartado. Un estado completo (`full`) corta la repetición en el acto.
 5. **Migración:** si el nuevo anfitrión hereda la partida en `replay`, pasa directamente a resultados.
+6. **Mejor disparo al final** (WRK-TASK-047), en cada cliente y sin mensajes nuevos:
+   - Al empezar cada impacto, `WorldView.snapshot` guarda los bloques y los reyes tal como están.
+   - Al acabar el impacto, si el jugador que más bloques ha roto en la ronda supera el mejor de la partida, se guarda su tramo: desde 0,2 s antes de su disparo hasta 7 s después (4 s en modo rápido), copiado del búfer a un `ReplayClip` (poses empaquetadas en un `Float32Array` y eventos; como mucho 60 000 poses, unos 2,2 MB). También se guardan la foto y el nivel de la lava. Es la misma cifra que la estadística «Mejor disparo».
+   - En la fase `over`, antes de la pantalla final: se vacían los resultados, las cifras de daño y el humo; se pone la foto y la lava de entonces, y se reproduce el tramo a cámara lenta (hasta 9 s; 3 s en modo rápido). La cámara gira a 16 m del punto donde acabó su proyectil (`shotCamera`), con el rótulo «MEJOR DISPARO · nombre · bloques en la ronda N» y las bandas de cine.
+   - Se salta con el botón, con cualquier tecla o tocando la pantalla. Al terminar o saltarla vuelve la foto del final y aparece la pantalla final.
 
 ### Outputs
 
@@ -91,14 +96,15 @@ Grabar en cada cliente lo que llega a su vista y, cuando cae un rey, reproducir 
 |------|-----------|------|-------------------|
 | Testing | `tests/unit/replay.test.ts`, `tests/e2e/multiplayer.spec.ts` | 2026-09-26 | low → medium |
 | Expert review | Capturas de `tests/tools/replay-shots.mjs` | 2026-09-25 | — |
+| Testing | WRK-TASK-047: `replay.test.ts` (tramo guardado), `solo.spec.ts` (repetición final y salto), capturas en 1280×720 y 390×844; tramos medidos de 0,9-1,3 MB | 2026-09-28 | — |
 
 ## Traceability
 
 | Relation | Target | Description |
 |----------|--------|-------------|
-| Implemented in | `client/src/game/replay.ts` | `ReplayRecorder`, `ReplayPlayer`, `replayCamera` |
-| Implemented in | `client/src/game/view.ts` | `startReplay`, `stepReplay`, `endReplay` |
-| Implemented in | `client/src/game/match/ui.ts` | Cola de reyes, ventana 2,6 s / 0,8 s, cámara |
+| Implemented in | `client/src/game/replay.ts` | `ReplayRecorder`, `ReplayPlayer`, `ReplayClip`, `replayCamera`, `shotCamera` |
+| Implemented in | `client/src/game/view.ts` | `startReplay`, `stepReplay`, `endReplay`, `snapshot`, `restoreSnapshot`, `startClip` |
+| Implemented in | `client/src/game/match/ui.ts` | Cola de reyes, ventana 2,6 s / 0,8 s, cámara; mejor disparo (`keepBest`, `startFinal`, `endFinal`) |
 | Implemented in | `client/src/game/match/host.ts` | Fase `replay`, pausa de la física |
 | Implemented in | `shared/match.ts` | `REPLAY_MAX`, `replayDuration` |
 | Implemented in | `client/src/game/net/netClient.ts` | `applyFull` corta la repetición |

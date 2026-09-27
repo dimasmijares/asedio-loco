@@ -1182,6 +1182,18 @@ html.big-text .ammo-name {
 
 /* ---------- Repetición ---------- */
 
+/* Saltar la repetición del mejor disparo (WRK-TASK-047): en la franja negra de abajo. */
+.skip-replay {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: calc(4.5vh - 17px);
+  z-index: 30;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .hud.replaying::before,
 .hud.replaying::after {
   content: '';

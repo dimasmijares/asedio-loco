@@ -11,7 +11,7 @@ import { toon } from './render/materials';
 import { Catapult, makeKing, makeProjectile } from './render/models';
 import type { Stage } from './render/stage';
 import { DEBRIS_CAP, NoDebris, type DebrisLike, type MakeDebris } from './debrisLike';
-import { ReplayPlayer, ReplayRecorder } from './replay';
+import { ReplayPlayer, ReplayRecorder, type ReplayClip } from './replay';
 import { SHIELD_RADIUS } from './shield';
 import type { SimEvent } from './sim/sim';
 
@@ -27,6 +27,11 @@ export interface ProjView {
 
 // Todo lo que se ve del mundo. Se alimenta igual desde la simulación local (anfitrión)
 // que desde la red (resto de clientes).
+export interface ViewSnapshot {
+  blocks: { id: number; mat: MaterialId; size: Vec3; p: Vec3; q: Quat }[];
+  kings: { slot: number; p: Vec3; q: Quat; alive: boolean; visible: boolean; crown: boolean }[];
+}
+
 export class WorldView {
   root = new THREE.Group();
   blocks: BlockMeshes;
@@ -450,6 +455,46 @@ export class WorldView {
     const pending = this.pendingLive;
     this.pendingLive = [];
     for (const e of pending) this.apply(e);
+  }
+
+  // ---------- foto del escenario (mejor disparo, WRK-TASK-047) ----------
+
+  // Bloques y reyes tal como están ahora, para volver a ponerlos más tarde.
+  snapshot(): ViewSnapshot {
+    const blocks: ViewSnapshot['blocks'] = [];
+    for (const [id, it] of this.blocks.items) blocks.push({ id, mat: it.mat, size: it.size, p: it.p, q: it.q });
+    const kings: ViewSnapshot['kings'] = [];
+    for (const [slot, k] of this.kings) {
+      kings.push({ slot, p: [k.position.x, k.position.y, k.position.z], q: [k.quaternion.x, k.quaternion.y, k.quaternion.z, k.quaternion.w], alive: this.kingAlive.get(slot) ?? false, visible: k.visible, crown: k.getObjectByName('crown')?.visible ?? true });
+    }
+    return { blocks, kings };
+  }
+
+  restoreSnapshot(s: ViewSnapshot) {
+    for (const pr of [...this.projs.values()]) this.applyDirect({ e: 'projEnd', id: pr.id });
+    this.blocks.clear();
+    this.debris.clear();
+    for (const b of s.blocks) this.addBlock(b.id, b.mat, b.size, b.p, b.q);
+    for (const k of s.kings) {
+      const obj = this.kings.get(k.slot);
+      if (!obj) continue;
+      obj.position.set(...k.p);
+      obj.quaternion.set(...k.q);
+      obj.visible = k.visible;
+      const crown = obj.getObjectByName('crown');
+      if (crown) crown.visible = k.crown;
+      this.kingAlive.set(k.slot, k.alive);
+    }
+  }
+
+  // Reproduce un tramo guardado sobre la foto que ya se ha puesto (restoreSnapshot). Al terminar,
+  // `endReplay` vuelve al directo y quien la pidió pone la foto del final.
+  startClip(clip: ReplayClip, speed: number) {
+    this.endReplay();
+    const player = new ReplayPlayer(clip, clip.t0, clip.t1, speed);
+    for (const [id, f] of player.initialPoses()) this.poseDirect(id, f.p, f.q);
+    this.replayUndo = [];
+    this.replaying = player;
   }
 
   blockCount(slot?: number) {

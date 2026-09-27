@@ -27,7 +27,20 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   expect(arcs.pairs.split(',').length, `arcos: ${arcs.pairs}`).toBeGreaterThanOrEqual(2);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: info.outputPath('impacto.png') });
-  await expect(page.locator('#game-over')).toBeVisible({ timeout: 800_000 });
+  // Antes de la pantalla final, el mejor disparo (WRK-TASK-047): se ve con su rótulo y se salta.
+  await expect(page.locator('#skip-replay')).toBeVisible({ timeout: 800_000 });
+  await expect(page.locator('#hud-banner')).toContainText('MEJOR DISPARO');
+  const clip = await page.evaluate(() => {
+    const b = (window as any).__asedio.mode.ui.best;
+    return { dealt: b.dealt, kb: Math.round(b.clip.bytes / 1024) };
+  });
+  console.log('mejor disparo', JSON.stringify(clip));
+  expect(clip.dealt).toBeGreaterThan(0);
+  expect(clip.kb, 'tramo acotado').toBeLessThanOrEqual(2200);
+  await page.waitForTimeout(800);
+  await page.keyboard.press('x');
+  await expect(page.locator('#game-over')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('#skip-replay')).toHaveCount(0);
   const st = await page.evaluate(() => {
     const s = (window as any).__asedio.mode.host.state;
     return { winner: s.winner, rounds: s.round, alive: s.players.filter((p: any) => p.alive).length };

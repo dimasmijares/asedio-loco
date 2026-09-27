@@ -4,15 +4,17 @@ import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
 import { KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
+import type { Vec3 } from '../../../../shared/math';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
-import { replayCamera } from '../replay';
+import { replayCamera, shotCamera, type ReplayClip } from '../replay';
 import { AttackArcs } from '../render/arcs';
 import type { Game } from '../game';
+import type { ViewSnapshot } from '../view';
 import { causeText } from '../modes/sandbox';
 import type { SimEvent } from '../sim/sim';
 import type { PlayerInput } from './host';
@@ -75,6 +77,13 @@ export class MatchUI {
   private replaySlot = -1;
   private replayT = 0;
   private replayCam = { from: new THREE.Vector3(), at: new THREE.Vector3() };
+  // Mejor disparo de la partida (WRK-TASK-047): foto del escenario al empezar su impacto y tramo
+  // grabado, para repetirlo antes de la pantalla final. Cada cliente usa lo que él mismo vio.
+  private impactSnap: ViewSnapshot | null = null;
+  private impactT0 = 0;
+  best: { slot: number; dealt: number; round: number; lavaY: number; snap: ViewSnapshot; clip: ReplayClip; focus: THREE.Vector3 } | null = null;
+  private final: { end: ViewSnapshot; skip: HTMLElement; off: () => void } | null = null;
+  bestShown = 0; // repeticiones del mejor disparo empezadas (para las pruebas)
 
   constructor(readonly game: Game, readonly src: MatchSource, readonly parent: HTMLElement, readonly opts: MatchUIOptions = {}) {
     this.hud = new Hud(parent);
@@ -208,13 +217,16 @@ export class MatchUI {
     if (g.view.replaying) {
       this.replayT += dt;
       g.view.stepReplay(dt);
-      const k = g.view.kingPos(this.replaySlot);
+      const k = this.final ? this.best?.focus : g.view.kingPos(this.replaySlot);
       if (k) {
-        replayCamera(k, this.replayT, this.replayCam);
+        (this.final ? shotCamera : replayCamera)(k, this.replayT, this.replayCam);
         g.rig.watch(this.replayCam.at, this.replayCam.from);
         g.rig.sharpness = this.replayT < 0.05 ? 50 : 5;
       }
-      if (g.view.replaying.done && this.replayT > 0.3) this.nextReplay(s);
+      if (g.view.replaying.done && this.replayT > 0.3) {
+        if (this.final) this.endFinal();
+        else this.nextReplay(s);
+      }
     }
     // Cuenta atrás: la cámara se aleja hasta el plano general. Durante los disparos, panorámica.
     const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
@@ -287,7 +299,10 @@ export class MatchUI {
     if (s.phase === 'impact' && prev === 'countdown') {
       this.hud.setCountdown('¡FUEGO!', 1000);
       sfx.fuego();
+      this.impactSnap = this.game.view.snapshot();
+      this.impactT0 = this.game.view.time;
     }
+    if (prev === 'impact' && s.phase !== 'impact') this.keepBest(s);
     else if (s.phase !== 'countdown') this.hud.setCountdown(null);
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
@@ -317,7 +332,9 @@ export class MatchUI {
       this.showResults(s);
     } else if (s.phase === 'over') {
       this.hud.setPhase('Fin de la partida', '');
-      if (prev !== 'over') this.showOver(s);
+      if (prev !== 'over') {
+        if (!this.startFinal(s)) this.showOver(s);
+      }
     }
   }
 
@@ -333,6 +350,83 @@ export class MatchUI {
           return { from: launchPoint(p.slot), to: [o[0], o[1] + 5.5, o[2]], color: PLAYER_STYLES[p.slot].color };
         }),
     );
+  }
+
+  // Al acabar un impacto: si alguien ha superado el mejor disparo de la partida, se guarda su tramo.
+  private keepBest(s: MatchState) {
+    const r = s.results;
+    const snap = this.impactSnap;
+    this.impactSnap = null;
+    if (!r || !snap) return;
+    let slot = -1;
+    let dealt = this.best?.dealt ?? 0;
+    for (const p of s.players) if ((r.dealt[p.slot] ?? 0) > dealt) (slot = p.slot), (dealt = r.dealt[p.slot]);
+    if (slot < 0) return;
+    const view = this.game.view;
+    const evs = view.recorder.eventsBetween(this.impactT0 - 0.5, view.time);
+    const fire = evs.find((x) => x.e.e === 'fx' && x.e.kind === 'fire' && x.e.slot === slot)?.t ?? this.impactT0;
+    // Dónde acabó su proyectil (o, si no se sabe, el castillo que más perdió en la ronda).
+    const mine = new Set(evs.flatMap((x) => (x.e.e === 'proj' && x.e.owner === slot ? [x.e.id] : [])));
+    const end = evs.find((x) => x.e.e === 'projEnd' && mine.has(x.e.id) && x.e.p)?.e as { p?: Vec3 } | undefined;
+    const hurt = s.players.reduce((a, b) => ((r.lost[b.slot] ?? 0) > (r.lost[a.slot] ?? 0) ? b : a), s.players[0]);
+    const focus = new THREE.Vector3(...(end?.p ?? castleOrigin(hurt.slot)));
+    focus.y = Math.max(1, Math.min(focus.y, 4));
+    const t0 = fire - 0.2;
+    const t1 = Math.min(view.time, fire + (s.fast ? 4 : 7));
+    this.best = { slot, dealt, round: s.round, lavaY: s.lavaY, snap, clip: view.recorder.clip(t0, t1), focus };
+  }
+
+  // Fin de la partida: antes de la pantalla final, el mejor disparo a cámara lenta.
+  private startFinal(s: MatchState) {
+    const b = this.best;
+    if (!b || !b.clip.count) return false;
+    const view = this.game.view;
+    const end = view.snapshot();
+    // Sin los resultados, las cifras ni el humo de la última ronda, y con la lava de entonces.
+    this.resultsBox.replaceChildren();
+    this.clearDamage();
+    view.fx.clearSmoke();
+    view.restoreSnapshot(b.snap);
+    this.game.setLavaVisual(b.lavaY);
+    const span = b.clip.t1 - b.clip.t0;
+    view.startClip(b.clip, Math.max(s.fast ? 1 : 0.6, span / (s.fast ? 3 : 9)));
+    this.replayT = 0;
+    this.bestShown++;
+    this.hud.root.classList.add('replaying');
+    this.hud.showBanner('MEJOR DISPARO', `${nameOf(s, b.slot)} · ${b.dealt} bloques en la ronda ${b.round}`, 2600);
+    const skip = h('button', { class: 'skip-replay', id: 'skip-replay' }, this.hud.touchUi ? 'Toca para saltar' : 'Saltar (cualquier tecla)');
+    const go = () => this.endFinal();
+    skip.onclick = go;
+    // Cualquier tecla o toque la salta; se escucha un instante después para no coger el último clic.
+    const t = setTimeout(() => {
+      addEventListener('keydown', go);
+      addEventListener('pointerdown', go);
+    }, 300);
+    this.parent.append(skip);
+    this.final = {
+      end,
+      skip,
+      off: () => {
+        clearTimeout(t);
+        removeEventListener('keydown', go);
+        removeEventListener('pointerdown', go);
+      },
+    };
+    return true;
+  }
+
+  private endFinal() {
+    const f = this.final;
+    if (!f) return;
+    this.final = null;
+    f.off();
+    f.skip.remove();
+    const view = this.game.view;
+    view.endReplay();
+    view.restoreSnapshot(f.end);
+    this.game.setLavaVisual(this.src.state.lavaY);
+    this.hud.root.classList.remove('replaying');
+    this.showOver(this.src.state);
   }
 
   private showResults(s: MatchState) {
@@ -458,6 +552,11 @@ export class MatchUI {
   }
 
   dispose() {
+    if (this.final) {
+      this.final.off();
+      this.final.skip.remove();
+      this.final = null;
+    }
     this.hud.dispose();
     this.arcs.dispose();
     this.overPanel?.remove();
