@@ -23,6 +23,7 @@ for (const [w, h] of [
   [740, 360],
   [915, 412],
   [360, 780],
+  [390, 844],
   [412, 915],
 ]) {
   test.describe(`${w}×${h}`, () => {
@@ -35,6 +36,9 @@ for (const [w, h] of [
       // La descripción más larga de la munición, para comprobar el peor caso.
       const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
       await page.evaluate((t) => (document.querySelector('#hud-ammo-desc')!.textContent = t), longest);
+      const shorts = await page.locator('.hp-short').evaluateAll((els) =>
+        els.map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
+      );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
       const r = await rects(page);
       expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(8);
@@ -49,9 +53,16 @@ for (const [w, h] of [
           const cross = a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
           expect(cross, `${keys[i]} se cruza con ${keys[j]}`).toBe(false);
         }
-      // Marcador compacto: sin nombres, con porcentaje.
+      // Marcador compacto: nombre corto en vez del completo, con porcentaje (WRK-TASK-046).
       expect(await page.locator('.hp-name').first().isVisible()).toBe(false);
       await expect(page.locator('.hp-pct').first()).toBeVisible();
+      expect(shorts.length).toBe(4);
+      for (const s of shorts) {
+        expect(s.w, `nombre corto «${s.text}» visible`).toBeGreaterThan(4);
+        expect(s.cut, `nombre corto «${s.text}» sin recortar`).toBe(false);
+      }
+      expect(new Set(shorts.map((s) => s.text)).size, 'nombres cortos distintos').toBe(4);
+      expect(shorts.some((s) => s.text === 'Tú')).toBe(true);
     });
   });
 }
@@ -62,4 +73,5 @@ test('con más de 500 px de alto el marcador sigue enseñando los nombres', asyn
   await page.goto('/?bots=3&seed=5#solo');
   await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
   await expect(page.locator('.hp-name').first()).toBeVisible();
+  expect(await page.locator('.hp-short').first().isVisible()).toBe(false);
 });

@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.5.0
+version: 1.6.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-27
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -89,7 +89,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical el HUD se recoloca (marcador compacto, viento bajo los botones, fila de tarjetas abajo y botón de disparo encima a la derecha) y la cámara abre el campo de visión para no bajar de 40° de ancho.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
-  - el marcador se queda en estandarte, porcentaje, barra y ✔/💀, sin nombres (tu fila, con borde blanco);
+  - el marcador se queda en estandarte, nombre corto, porcentaje, barra y ✔/💀 (tu fila, con borde blanco). El nombre corto (`shortName`, WRK-TASK-046) es «Tú» en tu fila, la última palabra en los bots («Lady Pixel» → «Pixel») y la primera en los humanos; el nombre completo queda en el `title` de la fila. El cuerpo de la fila va en dos líneas (nombre arriba; barra y porcentaje debajo) y mide 52 px, en vertical y en horizontal (antes 40-44 px sin nombre);
   - la fase, el reloj, el viento, la potencia y las tarjetas se encogen;
   - la ayuda empieza plegada;
   - el botón de disparo baja a la esquina inferior derecha: redondo de 84 px en táctil, más pequeño con ratón;
@@ -113,6 +113,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 |------|-----------|------|-------------------|
 | Testing | `tests/e2e/smoke.spec.ts`, `tests/e2e/solo.spec.ts`, `tests/e2e/multiplayer.spec.ts` | 2026-09-26 | low → medium |
 | Expert review | Capturas de `tests/tools/review.mjs` | 2026-09-25 | — |
+| Testing | `tests/e2e/hud-compact.spec.ts` (nombres cortos visibles, sin recortar ni solapes en 6 tamaños) y `tests/unit/players.test.ts`, WRK-TASK-046 | 2026-09-27 | — |
 
 ## Traceability
 
@@ -125,7 +126,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/backdrop.ts` | Fondo animado |
 | Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados y pantalla final |
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying` |
-| Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas) |
+| Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |

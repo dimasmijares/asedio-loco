@@ -1,7 +1,7 @@
 import { AMMO, RARITY_COLOR, RARITY_LABEL, type AmmoId } from '../../../shared/ammo';
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
 import { DEG, type Vec3 } from '../../../shared/math';
-import { PLAYER_STYLES } from '../../../shared/players';
+import { PLAYER_STYLES, shortName } from '../../../shared/players';
 import { isMobileDevice } from '../device';
 import type { AimInput } from '../game/aim';
 import { sfx } from '../game/audio';
@@ -181,12 +181,12 @@ export class Hud {
         const pct = Math.min(100, Math.round((p.blocks / Math.max(1, p.maxBlocks)) * 100));
         return h(
           'div',
-          { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}`, 'data-slot': String(p.slot) },
+          { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}`, 'data-slot': String(p.slot), title: p.name },
           h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, st.glyph),
           h(
             'div',
             { class: 'hp-body' },
-            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.you ? ' (tú)' : ''), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
+            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.you ? ' (tú)' : ''), h('div', { class: 'hp-short' }, shortName(p)), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
             h('div', { class: 'hp-bar' }, h('div', { style: `width:${pct}%;background:${st.color}` })),
           ),
           // 📡: desconectado (su catapulta dispara con la última puntería al acabar el tiempo).

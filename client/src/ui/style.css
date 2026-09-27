@@ -424,6 +424,10 @@ button.big {
   text-overflow: ellipsis;
 }
 
+.hp-short {
+  display: none;
+}
+
 .hp-bar {
   height: 7px;
   background: rgba(255, 255, 255, 0.2);
@@ -1202,21 +1206,44 @@ html.big-text .ammo-name {
     font-size: 11px;
     padding-top: 1px;
   }
+  /* Dos líneas: nombre corto arriba; barra y porcentaje debajo (WRK-TASK-046). */
   .hp-body {
     flex: none;
-    width: 44px;
+    width: 52px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 3px;
+    line-height: 11px;
+  }
+  .hp-top {
+    display: contents;
   }
   .hp-name {
     display: none;
   }
+  .hp-short {
+    display: block;
+    grid-column: 1 / -1;
+    min-width: 0;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .hp-pct {
+    grid-row: 2;
+    grid-column: 2;
     margin-left: 0;
-    font-size: 11px;
+    font-size: 9px;
     opacity: 1;
   }
   .hp-bar {
+    grid-row: 2;
+    grid-column: 1;
     height: 4px;
-    margin-top: 1px;
+    margin-top: 0;
   }
   .hp-state {
     font-size: 13px;
@@ -1400,21 +1427,44 @@ html.big-text .ammo-name {
     font-size: 11px;
     padding-top: 1px;
   }
+  /* Dos líneas: nombre corto arriba; barra y porcentaje debajo (WRK-TASK-046). */
   .hp-body {
     flex: none;
-    width: 40px;
+    width: 52px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 3px;
+    line-height: 11px;
+  }
+  .hp-top {
+    display: contents;
   }
   .hp-name {
     display: none;
   }
+  .hp-short {
+    display: block;
+    grid-column: 1 / -1;
+    min-width: 0;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .hp-pct {
+    grid-row: 2;
+    grid-column: 2;
     margin-left: 0;
-    font-size: 11px;
+    font-size: 9px;
     opacity: 1;
   }
   .hp-bar {
+    grid-row: 2;
+    grid-column: 1;
     height: 4px;
-    margin-top: 1px;
+    margin-top: 0;
   }
   .hp-state {
     font-size: 13px;
