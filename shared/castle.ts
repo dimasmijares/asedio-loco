@@ -39,7 +39,7 @@ interface LocalBlock {
   rotY?: number;
 }
 
-// Plano local de un castillo (140 bloques). El eje +z es la fachada, que mira al centro de la isla.
+// Plano local de un castillo (176 bloques). El eje +z es la fachada, que mira al centro de la isla.
 function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
   const blocks: LocalBlock[] = [];
   const joints: [number, number][] = [];
@@ -69,6 +69,7 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
 
   // Murallas entre torres: 4 hileras de 5 bloques. Arriba, madera unida como una pasarela.
   const WALL_ROWS = 4;
+  const LINING_ROWS = 3;
   const walls: { axis: 'x' | 'z'; fixed: number; side: 'front' | 'back' | 'left' | 'right' }[] = [
     { axis: 'x', fixed: T, side: 'front' },
     { axis: 'x', fixed: -T, side: 'back' },
@@ -91,6 +92,20 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
         prev = i;
       }
     }
+  }
+
+  // Forro interior (WRK-TASK-037): detrás de cada muralla, 3 hileras de 3 bloques de piedra. El
+  // castillo resiste más sin cambiar su silueta, y un disparo que atraviesa la muralla no llega
+  // directo al torreón. Solo los 3 bloques centrales, para no chocar en las esquinas.
+  for (const w of walls) {
+    const inner = w.fixed - Math.sign(w.fixed) * S;
+    for (let r = 0; r < LINING_ROWS; r++)
+      for (let k = 1; k <= 3; k++) {
+        const along = (-2 + k) * S;
+        const p: Vec3 = w.axis === 'x' ? [along, (0.5 + r) * S, inner] : [inner, (0.5 + r) * S, along];
+        const size: Vec3 = w.axis === 'x' ? [0.98 * S, S, 0.98 * S] : [0.98 * S, S, 0.98 * S];
+        add({ mat: 'stone', size, p, part: 'wall' });
+      }
   }
 
   // Contrafuertes en el centro de las murallas laterales, por fuera: 4 bloques y una almena.

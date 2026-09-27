@@ -40,7 +40,7 @@ La física es la seña de identidad del juego y sus efectos no son intuitivos:
 
 - Reforzar municiones subió la media de 6,2 a 8 bloques por disparo (D-052).
 - Reyes más frágiles bajaron la partida difícil a 2,6 minutos y hubo que deshacerlo (D-053).
-- Los castillos de 140 bloques subieron el paso de física de 3,3 a unos 5 ms (D-063).
+- Los castillos de 140 bloques subieron el paso de física de 3,3 a unos 5 ms (D-063), y los de 176, a 8,7 ms con SwiftShader (ADR-013).
 
 Sin medir, estas consecuencias se descubren jugando, tarde.
 

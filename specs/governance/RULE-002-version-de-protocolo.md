@@ -37,7 +37,7 @@ Todo `shared/`, `server/` y `client/src/game/net/`, más cualquier dato que viaj
 
 El servidor rechaza un `hello` con otra versión y responde «Versión antigua: recarga la página». Es la única defensa contra una pestaña abierta antes de un despliegue. Sin subir la versión, esa pestaña entraría en una sala nueva y vería castillos mal montados o fases desconocidas, sin ningún error.
 
-Ya se ha subido por la mano de 3 municiones (etapa 1), la fase `replay` (v3), el castillo de 140 bloques (v4), `mobile` y `yield` (v5) y la fase `countdown` (v6, WRK-TASK-022).
+Ya se ha subido por la mano de 3 municiones (etapa 1), la fase `replay` (v3), el castillo de 140 bloques (v4), el de 176 bloques (v7), `mobile` y `yield` (v5) y la fase `countdown` (v6, WRK-TASK-022).
 
 ## Enforcement
 

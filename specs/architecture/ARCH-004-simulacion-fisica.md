@@ -33,7 +33,7 @@ El juego es derribar castillos: la física tiene que ser creíble, estable en re
 
 ### Context
 
-- 4 castillos de 140 bloques (560 cuerpos) con uniones, reyes, proyectiles raros (vacas, pianos, imán, agujero negro) y lava.
+- 4 castillos de 176 bloques (704 cuerpos, ADR-013) con uniones, reyes, proyectiles raros (vacas, pianos, imán, agujero negro) y lava.
 - Un castillo en reposo no puede derrumbarse solo ni vibrar sin dormirse.
 - La física solo corre en el anfitrión (ARCH-002, ARCH-003); los fragmentos sí corren en todos.
 

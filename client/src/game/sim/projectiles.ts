@@ -20,7 +20,7 @@ const tv = (v: { x: number; y: number; z: number }): Vec3 => [v.x, v.y, v.z];
 
 // Ajustes de equilibrio (WRK-TASK-021, medidos con tests/balance/destrozo).
 const LOG_SPIN = 12; // rad/s que mantiene el tronco al rodar
-const LOG_SPEED = 8; // m/s en horizontal que no pierde mientras rueda (apisonadora, WRK-TASK-029)
+const LOG_SPEED = 9; // m/s en horizontal que no pierde mientras rueda (apisonadora, WRK-TASK-029)
 // Cocos (WRK-TASK-029): se abren ya cayendo, cerca del castillo, en 6.
 const COCO_SPLIT_VY = -5; // m/s: se abren cuando caen a esta velocidad
 const COCO_SPREAD = 1.6; // abre el abanico: metralla por toda la fachada
@@ -31,14 +31,15 @@ const CHICKEN_HOP: [number, number] = [2.5, 4.5]; // m/s en horizontal y hacia a
 const EGGS = [6, 5, 5]; // huevos por bote
 export const EGG_SCALE = 0.45; // un proyectil de gallina a esta escala es un huevo
 const EGG_RADIUS = 2.2;
-const EGG_FORCE = 72;
+const EGG_FORCE = 64;
 const EGG_KING = 0.25; // los huevos apenas le hacen daño al rey: es munición de destrozo
 const EGG_FUSE = 1.5; // s: si no toca nada antes, explota igual
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
-const MAGNET_STRENGTH = 30;
+const MAGNET_STRENGTH = 34;
 // Épicas (WRK-TASK-031).
 const SPIT_RADIUS = 5; // el agujero negro, al cerrarse, escupe lo que no se ha tragado
 const SPIT_FORCE = 90;
+const SPIT_KING = 0.05; // el rey pesa poco: con más, el escupitajo lo saca del castillo en casi todos los impactos directos
 const MAGNET_RECOIL = 22; // m/s: el imán, al acabar, lanza el hierro que ha arrancado contra el castillo
 const SNOW_MAX = 1.5; // m de radio que alcanza la bola de nieve
 const SNOW_GROW = 0.9;
@@ -46,14 +47,14 @@ const SNOW_GROW = 0.9;
 const SCAFFOLD_BLOCKS = 15; // m/s de crecimiento mientras rueda
 // Vaca: cráter que rompe piedra cerca del centro. Sandía: carga pegada que revienta desde dentro.
 const COW_RADIUS = 4.8;
-const COW_FORCE = 120;
+const COW_FORCE = 108;
 const MELON_RADIUS = 4.0;
-const MELON_FORCE = 130;
+const MELON_FORCE = 108;
 const MELON_PIERCE = 2;
 // Piano (WRK-TASK-030): atraviesa pisos y, al tocar el suelo o pararse, remata con un acorde.
-const PIANO_KEEP = 0.9;
+const PIANO_KEEP = 0.85;
 const CHORD_RADIUS = 2.8;
-const CHORD_FORCE = 85;
+const CHORD_FORCE = 60;
 
 export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior {
   switch (id) {
@@ -272,7 +273,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.removeRec(r, 'proj');
           sim.addField({ kind: 'blackhole', p, until: sim.time + 2.2, radius: 5.5, strength: 50, owner: r.slot });
           sim.events.push({ e: 'fx', kind: 'blackhole', p, slot: r.slot });
-          sim.later(2.2, () => sim.explode(p, SPIT_RADIUS, SPIT_FORCE, r.slot, 'implode'));
+          sim.later(2.2, () => sim.explode(p, SPIT_RADIUS, SPIT_FORCE, r.slot, 'implode', { king: SPIT_KING }));
         },
       };
     }
@@ -299,7 +300,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
             }
             if (!best) return;
             const aimAt: Vec3 = [best[0], best[1] + 2, best[2]];
-            for (const b of sim.recsInBall(p, 4.5)) {
+            for (const b of sim.recsInBall(p, 5)) {
               if (b.kind !== 'block' || b.mat?.id !== 'iron') continue;
               const d = v3.norm(v3.sub(aimAt, sim.pos(b)));
               b.body.setLinvel({ x: d[0] * MAGNET_RECOIL, y: d[1] * MAGNET_RECOIL, z: d[2] * MAGNET_RECOIL }, true);

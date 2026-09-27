@@ -41,19 +41,19 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 6. Al disparar se gasta la munición elegida. Si nadie elige, sale la primera de la mano.
 7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013), o lo que diga su `plowKeep` (el piano, el 90 %).
 8. Todas las que vuelan notan el arrastre del aire y el viento (DOM-JUEGO-002). Tienen CCD.
-9. `explode` acepta `pierce` (los bloques cercanos no hacen de escudo) y `king` (factor de daño y empuje sobre el rey). Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027).
+9. `explode` acepta `pierce` (los bloques cercanos no hacen de escudo) y `king` (factor de daño y empuje sobre el rey). Una explosión que no le da al rey de lleno (a más de 1,2 m) le quita como mucho un 60 %: hacen falta dos explosiones, un impacto directo o que le caiga el castillo encima (WRK-TASK-027). Los campos de fuerza (agujero negro e imán) no mueven al rey (WRK-TASK-037).
 
 | Munición | Rareza | Peso | Efecto | Parámetros clave |
 |---|---|---|---|---|
 | Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s |
-| Tronco rodante | común | 14 | Apisonadora: al tocar algo rueda en línea recta en la dirección en que venía y arrasa lo que pilla | r 0,36 m, largo 1,9 m, densidad 3; no baja de 8 m/s ni de 12 rad/s mientras rueda; vida 7,5 s |
-| Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 10 |
-| Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 120 (rompe piedra cerca del centro) |
-| Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 130; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
-| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 72, al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
-| Piano | rara | 6 | Martillo: se marca dónde caería, cae en vertical desde 22 m a los 1,1 s, atraviesa pisos y al tocar el suelo o pararse suelta un acorde final | densidad 6, viento 0,2; conserva el 90 % de la velocidad al romper (`plowKeep`); acorde de 2,8 m y fuerza 85 |
-| Agujero negro | épica | 3 | Borrador: atrae y se traga lo cercano y, al cerrarse, escupe lo que no se ha tragado | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,6 m del núcleo desaparece; al final, onda de 5 m y fuerza 80 |
-| Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 30 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 4,5 m sale a 22 m/s |
+| Tronco rodante | común | 14 | Apisonadora: al tocar algo rueda en línea recta en la dirección en que venía y derriba lo que encuentra | r 0,36 m, largo 1,9 m, densidad 3; no baja de 9 m/s ni de 12 rad/s mientras rueda; vida 7,5 s |
+| Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 9 |
+| Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 108 (rompe piedra cerca del centro) |
+| Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 108; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
+| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 64, al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
+| Piano | rara | 6 | Martillo: se marca dónde caería, cae en vertical desde 22 m a los 1,1 s, atraviesa pisos y al tocar el suelo o pararse suelta un acorde final | densidad 6, viento 0,2; conserva el 85 % de la velocidad al romper (`plowKeep`); acorde de 2,8 m y fuerza 60 |
+| Agujero negro | épica | 3 | Borrador: atrae y se traga lo cercano y, al cerrarse, escupe lo que no se ha tragado | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,3 m del núcleo desaparece; al final, onda de 5 m y fuerza 90, al rey solo el 5 % |
+| Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 34 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 5 m sale a 22 m/s |
 | Bola de nieve | épica | 3 | Alud: crece mientras rueda en línea recta en la dirección en que llegó | radio de 0,45 a 1,5 m (+0,9 m/s), no baja de 9 m/s rodando |
 | Andamio | defensiva | 7 | Reconstruye hasta 15 bloques propios (10 hasta WRK-TASK-033) | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
@@ -82,6 +82,8 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
   | **Media** | | | **8,4 → 16,1** | | | | | 19/120 |
 
   Firmas: el pedrusco, el daño más concentrado (0,8 m); el piano, el más bajo (2,3 m) y el que más base rompe; la bola de nieve y el tronco, los más alargados; el imán, el que más piedra y hierro rompe.
+
+- **Con castillos de 176 bloques (WRK-TASK-037, ADR-013)**, tras el reajuste, bloques rotos por disparo (12 disparos): pedrusco 9,4; tronco 10,6; cocos 12,2; vaca 16,5; sandía 17,8; gallina 15,1; piano 17,2; agujero negro 21,6; imán 19,9; bola de nieve 20,2. Media: 16,0, igual que con 140 bloques, así que el castillo resiste un 26 % más en proporción. Reyes: 14 de 120, con 5 de 12 del pedrusco (impactos directos) y 4 de 12 del agujero negro.
 
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.
 

@@ -54,7 +54,7 @@ Tres capas:
 | Rey del hueco `slot` | `1000 + slot` | `KING_ID_BASE`, `kingId()` |
 | Proyectil | `2000`, `2001`… | `Sim.nextProj` |
 
-Con 140 bloques por castillo (DOM-JUEGO-004) cabe de sobra en 200. Los fragmentos no tienen id: son locales.
+Con 176 bloques por castillo (DOM-JUEGO-004, ADR-013) cabe en 200; más de 199 obligaría a cambiar `BLOCK_ID_STRIDE`. Los fragmentos no tienen id: son locales.
 
 **Modos** (`client/src/game/modes/`, elegidos por la ruta en `client/src/main.ts`):
 

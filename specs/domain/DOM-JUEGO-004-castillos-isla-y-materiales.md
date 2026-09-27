@@ -35,7 +35,7 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 2. **Huecos:** los castillos están a ±22 m del centro en cada eje. Hueco 0 = (−x, −z), 1 = (+x, −z), 2 = (+x, +z), 3 = (−x, +z). La fachada (+z local) mira al centro.
 3. **Zona del castillo:** un cuadrado de 5,6 m de semilado (con los contrafuertes). Se usa para saber si el rey está «fuera» (DOM-JUEGO-001).
 4. **Catapulta:** en un bastión estático delante de la fachada, en (0; 1,5; 7,4) local; el disparo sale 1,9 m por encima. No se cae con la muralla (D-008).
-5. **Castillo:** 140 bloques a escala 1,2 (bloque base de 1,2 m):
+5. **Castillo:** 176 bloques a escala 1,2 (bloque base de 1,2 m), con un forro interior de piedra detrás de cada muralla (3 hileras de los 3 bloques centrales, ADR-013):
    - 4 torres de 5 bloques (3 de piedra y 2 de madera) con 4 almenas de piedra cada una;
    - 4 murallas de 4 hileras de 5 bloques: 3 de piedra y una pasarela de madera arriba, con una ventana de cristal en la 3.ª hilera, un portón de hierro en la base de la fachada y dos refuerzos de hierro en la muralla trasera;
    - 2 contrafuertes laterales de 4 bloques (2 de piedra y 2 de madera) y una almena;
@@ -61,7 +61,7 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 ### Constraints
 
 - 4 castillos suman 560 bloques. El paso de física en la escena más cargada cuesta unos 5 ms (RULE-004, ARCH-005).
-- La especificación original sugería 80-120 bloques por castillo; se amplió a 140 por decisión del usuario (D-063).
+- La especificación original sugería 80-120 bloques por castillo; se amplió a 140 por decisión del usuario (D-063) y a 176 con el forro interior (ADR-013).
 
 ### Examples
 
@@ -76,7 +76,7 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 - [x] Una torre sin base se derrumba.
 - [x] El cristal se rompe antes que la piedra con el mismo impacto.
 - [x] Un bloque fracturado genera fragmentos que luego se retiran.
-- [ ] Una prueba comprueba que el castillo tiene 140 bloques con el reparto de materiales de la regla 5.
+- [ ] Una prueba comprueba que el castillo tiene 176 bloques con el reparto de materiales de la regla 5.
 
 ## Evidence
 
@@ -90,7 +90,7 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `shared/map.ts` | Isla, huecos, zona del castillo, catapulta |
-| Implemented in | `shared/castle.ts` | Plano de 140 bloques, uniones, rey, ids |
+| Implemented in | `shared/castle.ts` | Plano de 176 bloques, uniones, rey, ids |
 | Implemented in | `shared/materials.ts` | Propiedades de los materiales, `CHIP_RATIO` |
 | Implemented in | `client/src/game/sim/sim.ts` | Rotura, explosiones, `JOINT_STRAIN`, `KING_CRUSH_FORCE` |
 | Implemented in | `shared/fracture.ts`, `client/src/game/sim/debris.ts` | Troceo y fragmentos |

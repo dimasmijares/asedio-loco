@@ -10,7 +10,7 @@ import { behaviorFor, type ProjectileBehavior } from './projectiles';
 
 export const DT = 1 / 60;
 const LAVA_FLOOR_HALF = 2;
-const BLACKHOLE_CORE = 1.6; // m: lo que llega al núcleo del agujero negro desaparece (WRK-TASK-031)
+const BLACKHOLE_CORE = 1.3; // m: lo que llega al núcleo del agujero negro desaparece (WRK-TASK-031)
 const LAVA_SINK_SPEED = 0.6; // m/s a los que se hunde lo que se come la lava
 // Grupos de colisión de Rapier: 16 bits de pertenencia << 16 | 16 bits de filtro.
 // El suelo de lava pertenece al grupo 2; los bloques que se está comiendo lo excluyen.
@@ -507,6 +507,9 @@ export class Sim {
         const d = v3.sub(f.p, c0);
         const dist = Math.max(0.4, v3.len(d));
         const dir = v3.norm(d);
+        // Los campos no mueven al rey: destrozan lo que tiene alrededor y, si se queda sin apoyo,
+        // cae; pero no lo sacan a rastras del castillo (WRK-TASK-037).
+        if (r.kind === 'king') continue;
         const m = r.body.mass();
         if (f.kind === 'blackhole') {
           // Atracción con remolino: cae hacia el centro girando.

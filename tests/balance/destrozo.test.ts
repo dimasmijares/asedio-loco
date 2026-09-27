@@ -62,6 +62,7 @@ test('destrozo por munición', async () => {
     let base = 0;
     let hard = 0;
     let spreadShots = 0;
+    const causes: Record<string, number> = {};
     for (let s = 0; s < SHOTS; s++) {
       const r = rng(1000 + s * 7919);
       const sim = new Sim([0, 1]);
@@ -105,7 +106,10 @@ test('destrozo por munición', async () => {
         height += gone.reduce((t, p) => t + p[1] - baseY, 0) / gone.length;
         spreadShots++;
       }
-      if (!sim.kings.get(1)?.alive || !sim.recs.has(kingId(1))) kings++;
+      if (!sim.kings.get(1)?.alive || !sim.recs.has(kingId(1))) {
+        kings++;
+        causes[sim.kings.get(1)?.cause ?? 'desaparecido'] = (causes[sim.kings.get(1)?.cause ?? 'desaparecido'] ?? 0) + 1;
+      }
       sim.free();
     }
     tot.broken += broken;
@@ -116,7 +120,7 @@ test('destrozo por munición', async () => {
     const mark = t && (b < t[0] || b > t[1]) ? ` ! (${t[0]}-${t[1]})` : '';
     const n = Math.max(1, spreadShots);
     lines.push(
-      `${ammo.padEnd(10)} rotos ${f(b)}  movidos ${f(moved / SHOTS)}  reyes ${`${kings}/${SHOTS}`.padStart(5)}  disp ${f(spread / n, 4)}  alt ${f(height / n, 4)}  base ${f(base / SHOTS, 4)}  piedra ${f(hard / SHOTS, 4)}${mark}`,
+      `${ammo.padEnd(10)} rotos ${f(b)}  movidos ${f(moved / SHOTS)}  reyes ${`${kings}/${SHOTS}`.padStart(5)}  disp ${f(spread / n, 4)}  alt ${f(height / n, 4)}  base ${f(base / SHOTS, 4)}  piedra ${f(hard / SHOTS, 4)}${mark}${kings ? `  (${Object.entries(causes).map(([c, n]) => `${c} ${n}`).join(', ')})` : ''}`,
     );
   }
   const n = LIST.length * SHOTS;
