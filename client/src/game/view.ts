@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { AMMO, type AmmoId } from '../../../shared/ammo';
-import { buildCastle, kingId, slotOfBlock, KING_ID_BASE } from '../../../shared/castle';
+import { buildCastle, kingId, slotOfBlock, KING_HALF_HEIGHT, KING_ID_BASE, KING_RADIUS } from '../../../shared/castle';
 import { CATAPULT_LOCAL, castleOrigin, toWorld } from '../../../shared/map';
 import type { MaterialId } from '../../../shared/materials';
 import type { Quat, Vec3 } from '../../../shared/math';
@@ -8,7 +8,7 @@ import { PLAYER_STYLES } from '../../../shared/players';
 import { BlockMeshes } from './render/blocks';
 import { Fx } from './render/fx';
 import { toon } from './render/materials';
-import { Catapult, makeKing, makeProjectile } from './render/models';
+import { Catapult, KING_NECK, makeKing, makeProjectile } from './render/models';
 import type { Stage } from './render/stage';
 import { DEBRIS_CAP, NoDebris, type DebrisLike, type MakeDebris } from './debrisLike';
 import { ReplayPlayer, ReplayRecorder, type ReplayClip } from './replay';
@@ -27,6 +27,8 @@ export interface ProjView {
 
 // Todo lo que se ve del mundo. Se alimenta igual desde la simulación local (anfitrión)
 // que desde la red (resto de clientes).
+const SCARE_TIME = 1.3; // s que dura el susto del rey
+
 export interface ViewSnapshot {
   blocks: { id: number; mat: MaterialId; size: Vec3; p: Vec3; q: Quat }[];
   kings: { slot: number; p: Vec3; q: Quat; alive: boolean; visible: boolean; crown: boolean }[];
@@ -40,6 +42,8 @@ export class WorldView {
   catapults = new Map<number, Catapult>();
   kings = new Map<number, THREE.Object3D>();
   kingAlive = new Map<number, boolean>();
+  // Animación del rey (WRK-TASK-051): susto (s que quedan) y desmayo (0 de pie, 1 en el suelo).
+  private kingAnim = new Map<number, { scare: number; faint: number }>();
   // Escudo real (WRK-TASK-041): halo sobre la cabeza y columna de luz dorada sobre cada rey.
   private guard: { on: boolean; objs: Map<number, THREE.Object3D>; beam: THREE.MeshBasicMaterial | null } = { on: false, objs: new Map(), beam: null };
   projs = new Map<number, ProjView>();
@@ -91,6 +95,7 @@ export class WorldView {
     this.fx?.clearSmoke();
     for (const k of this.kings.values()) this.root.remove(k);
     this.kings.clear();
+    this.kingAnim.clear();
     for (const slot of this.slots) {
       const c = buildCastle(slot);
       for (const b of c.blocks) {
@@ -163,6 +168,9 @@ export class WorldView {
 
   private applyDirect(e: SimEvent) {
     for (const fn of this.listeners) fn(e);
+    if (e.e === 'hit' && e.f > 300) this.startle(e.p, 4);
+    else if (e.e === 'boom') this.startle(e.p, e.r + 3);
+    else if (e.e === 'rm' && e.why === 'frac') this.startle(e.p, 3);
     switch (e.e) {
       case 'rm':
         this.removeBlock(e.id);
@@ -322,6 +330,58 @@ export class WorldView {
     return n;
   }
 
+  // Asusta a los reyes vivos que están a menos de `r` metros de p.
+  private startle(p: Vec3, r: number) {
+    for (const [slot, k] of this.kings) {
+      if (!this.kingAlive.get(slot)) continue;
+      const dx = k.position.x - p[0];
+      const dy = k.position.y - p[1];
+      const dz = k.position.z - p[2];
+      if (dx * dx + dy * dy + dz * dz > r * r) continue;
+      const a = this.kingAnim.get(slot) ?? { scare: 0, faint: 0 };
+      if (a.scare < 0.3) a.scare = SCARE_TIME;
+      this.kingAnim.set(slot, a);
+    }
+  }
+
+  // Brazos arriba y cabeza que tiembla al asustarse; de espaldas al suelo al caer. Solo mueve las
+  // piezas del modelo, nunca el rey entero (su posición es la de la física).
+  private animateKings(dt: number, t: number) {
+    for (const [slot, k] of this.kings) {
+      if (!k.visible) continue;
+      const a = this.kingAnim.get(slot) ?? { scare: 0, faint: 0 };
+      this.kingAnim.set(slot, a);
+      const alive = this.kingAlive.get(slot) ?? false;
+      // Un proyectil que pasa cerca también asusta.
+      if (alive && a.scare < 0.3) for (const pr of this.projs.values()) if (pr.p.distanceToSquared(k.position) < 3.5 * 3.5) a.scare = SCARE_TIME;
+      a.scare = Math.max(0, a.scare - dt);
+      a.faint += ((alive ? 0 : 1) - a.faint) * Math.min(1, dt * 5);
+      const u = k.userData as { rig?: THREE.Object3D; head?: THREE.Object3D; armL?: THREE.Object3D; armR?: THREE.Object3D };
+      if (!u.rig) {
+        u.rig = k.getObjectByName('rig');
+        u.head = k.getObjectByName('head');
+        u.armL = k.getObjectByName('armL');
+        u.armR = k.getObjectByName('armR');
+      }
+      if (!u.rig || !u.head || !u.armL || !u.armR) continue;
+      // Susto: sube rápido y baja despacio.
+      const s = a.scare > 0 ? Math.min(1, (SCARE_TIME - a.scare) * 10) * Math.min(1, a.scare / 0.45) : 0;
+      // El desmayo solo tumba al rey en la medida en que la cápsula sigue de pie: si la física ya
+      // lo ha tumbado, no se tumba dos veces.
+      const up = 1 - 2 * (k.quaternion.x * k.quaternion.x + k.quaternion.z * k.quaternion.z);
+      const f = a.faint * Math.max(0, up);
+      const arm = 0.35 + s * 2.2 + a.faint * 0.9;
+      u.armL.rotation.z = -arm;
+      u.armR.rotation.z = arm;
+      u.armL.rotation.x = u.armR.rotation.x = -s * 0.3 + Math.sin(t * 2 + slot) * 0.05 * (1 - s);
+      u.head.rotation.y = Math.sin(t * 32) * 0.28 * s;
+      u.head.rotation.z = f * 0.5;
+      u.head.position.y = KING_NECK + Math.sin(t * 2.2 + slot) * 0.012;
+      u.rig.position.y = -(KING_HALF_HEIGHT + KING_RADIUS) + Math.abs(Math.sin(t * 16)) * 0.07 * s;
+      u.rig.rotation.x = -f * 1.35;
+    }
+  }
+
   private updateGuard(t: number) {
     if (!this.guard.on) return;
     if (this.guard.beam) this.guard.beam.opacity = 0.32 + Math.sin(t * 2.4) * 0.08;
@@ -379,6 +439,7 @@ export class WorldView {
     });
     for (const s of this.shields.values()) (s.material as THREE.MeshToonMaterial).opacity = 0.18 + Math.sin(t * 3) * 0.05;
     this.updateGuard(t);
+    this.animateKings(dt, t);
     this.shake = Math.max(0, this.shake - dt * 1.8);
   }
 

@@ -143,28 +143,35 @@ export class Catapult {
 }
 
 // Rey: cuerpo con túnica del color del jugador, cabeza, barba y corona dorada.
+// El rey va articulado (WRK-TASK-051): `rig` (pivote en los pies) lleva el cuerpo, la cabeza
+// (con la corona) y los dos brazos, que `WorldView` anima por código. La cápsula física no cambia.
+export const KING_NECK = 0.72; // altura del cuello desde los pies
+export const KING_SHOULDER = 0.6;
+
 export function makeKing(slot: number) {
   const st = PLAYER_STYLES[slot];
   const g = new THREE.Group();
   const h = KING_HALF_HEIGHT + KING_RADIUS; // mitad de la altura total
   const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 0.65, 10), toon(st.color));
-  robe.position.y = -h + 0.33;
+  robe.position.y = 0.33;
   g.add(robe);
   const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.07, 10), toon('#ffd23f'));
-  belt.position.y = -h + 0.45;
+  belt.position.y = 0.45;
   g.add(belt);
+  // Cabeza, barba y ojos, alrededor del cuello.
+  const hg = new THREE.Group();
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), toon('#ffcf9e'));
-  head.position.y = -h + 0.82;
-  g.add(head);
+  head.position.y = 0.82 - KING_NECK;
+  hg.add(head);
   const beard = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.25, 8), toon('#f5f5f5'));
   beard.rotation.x = Math.PI;
-  beard.position.set(0, -h + 0.7, 0.13);
-  g.add(beard);
+  beard.position.set(0, 0.7 - KING_NECK, 0.13);
+  hg.add(beard);
   for (const x of [-0.08, 0.08]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 5), toon('#1d1626'));
-    eye.position.set(x, -h + 0.86, 0.2);
+    eye.position.set(x, 0.86 - KING_NECK, 0.2);
     eye.userData.noOutline = true;
-    g.add(eye);
+    hg.add(eye);
   }
   const crown = new THREE.Group();
   const gold = toon('#ffc300', { emissive: '#553300' });
@@ -179,13 +186,36 @@ export function makeKing(slot: number) {
   const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.045), toon('#e63946'));
   gem.position.set(0, 0.02, 0.2);
   crown.add(gem);
-  // Cuerpo y corona fusionados por separado (la corona se oculta cuando el rey cae).
+  // Cuerpo, cabeza y corona fusionados por separado (la corona se oculta cuando el rey cae).
   const king = new THREE.Group();
-  king.add(mergeStatic(g, true, true, 0.022));
+  const rig = new THREE.Group();
+  rig.name = 'rig';
+  rig.position.y = -h;
+  king.add(rig);
+  rig.add(mergeStatic(g, true, true, 0.022));
+  const headMerged = mergeStatic(hg, true, true, 0.022);
+  headMerged.position.y = KING_NECK;
+  headMerged.name = 'head';
+  rig.add(headMerged);
   const crownMerged = mergeStatic(crown, true, true, 0.022);
-  crownMerged.position.y = -h + 1.05;
+  crownMerged.position.y = 1.05 - KING_NECK;
   crownMerged.name = 'crown';
-  king.add(crownMerged);
+  headMerged.add(crownMerged);
+  // Brazos: manga y mano de un solo material y sin contorno (una llamada de dibujo cada uno).
+  const sleeve = toon(st.color);
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Group();
+    const a = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, 0.32, 8), sleeve);
+    a.position.y = -0.16;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 6), sleeve);
+    hand.position.y = -0.33;
+    arm.add(a, hand);
+    const merged = mergeStatic(arm, false, true);
+    merged.position.set(side * 0.23, KING_SHOULDER, 0);
+    merged.rotation.z = side * 0.35;
+    merged.name = side < 0 ? 'armL' : 'armR';
+    rig.add(merged);
+  }
   shadows(king);
   return king;
 }

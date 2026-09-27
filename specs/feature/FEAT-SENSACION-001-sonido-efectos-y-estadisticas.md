@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-27
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: ARCH-002
@@ -59,6 +59,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
    - **Polvo y humo tras un derrumbe** (WRK-TASK-049): cuando se rompen 3 bloques en menos de 3 s dentro de una celda de 5 m, nace allí un foco (`Fx.rubble`, `Fx.collapse`). Si ya hay otro a menos de 6 m, se aviva ese. Durante 10 s el foco suelta bocanadas grandes (1,4-2,2 m, que crecen hasta 2,6 veces) y translúcidas (opacidad 0,7), en tonos pardos y grises. Salen cada 0,35 / 0,5 / 0,75 s y cada vez más despacio, suben a 0,8-1,3 m/s y duran 5-7 s. Así la columna se ve durante los resultados y el principio de la ronda siguiente, y se disipa en unos 15 s. Reserva propia (`Fx.smoke`, un InstancedMesh): topes de 180 / 110 / 50 bocanadas y 9 / 6 / 3 focos. `clearSmoke` la vacía al reconstruir los castillos.
 3. **Fragmentos** (D-009): trozos decorativos en un mundo físico local, no sincronizados. Máximo 260 / 170 / 90 y desaparecen a los 3-5 s.
 4. **Rey caído:** confeti con su color, polvo, sacudida de cámara (+0,5), corona oculta, calavera en el marcador y rótulo.
+   - **Rey animado** (WRK-TASK-051), solo en el modelo: el rey va articulado (`rig` con pivote en los pies, cabeza con la corona y dos brazos de un solo material y sin contorno). **Susto** durante 1,3 s: brazos arriba, cabeza que tiembla y saltitos. Lo provocan un golpe de fuerza > 300 a menos de 4 m, una explosión a menos de su radio + 3 m, un bloque roto a menos de 3 m o un proyectil que pasa a menos de 3,5 m. **Desmayo** al caer: se tumba de espaldas, con la cabeza ladeada y los brazos abiertos, en la medida en que la cápsula sigue de pie. Sale de `kingAlive`, así que en las repeticiones vuelve a ponerse de pie y a caer. En reposo, respiración suave y balanceo de brazos. Cuesta 2 llamadas de dibujo por rey (los brazos).
 5. **Grietas** (WRK-TASK-039): un bloque dañado se oscurece y muestra grietas procedurales que se ensanchan con el daño, en el sombreador de los bloques y sin coste de CPU.
 5. **Lava viva** (D-056), en shaders y sin coste de CPU: placas de costra con grietas incandescentes, latido en lo líquido, lava casi blanca junto al acantilado hasta que inunda la isla, y chispas que suben del mar (520 / 320 / 140). Viñeta cálida en los bordes. El nivel sube suavemente hasta el objetivo.
 6. **Estadísticas finales** (D-035), en `#game-over`:
@@ -102,6 +103,8 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `client/src/game/audio.ts` | `Sfx`: síntesis, espacialización, silencio |
+| Implemented in | `client/src/game/render/models.ts` | `makeKing` articulado (`KING_NECK`, `KING_SHOULDER`) |
+| Implemented in | `client/src/game/view.ts` | `startle` y `animateKings`: susto y desmayo del rey |
 | Implemented in | `client/src/game/render/fx.ts` | Partículas, confeti y humo de derrumbe (`SMOKE_CAP`) |
 | Implemented in | `client/src/game/sim/debris.ts` | Fragmentos locales |
 | Implemented in | `client/src/game/render/stage.ts` | Shader de la lava, chispas, viñeta |
