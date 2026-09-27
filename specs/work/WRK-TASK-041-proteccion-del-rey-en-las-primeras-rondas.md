@@ -42,9 +42,11 @@ Evitar que un jugador quede eliminado en la primera ronda. Hoy, en difícil, la 
 
 ADR-010 impide rebajar la resistencia de los reyes de forma general; esta es una protección temporal y debe quedar en una ADR nueva.
 
+**Decisión del usuario (2026-09-27):** a) escudo real en las rondas 1-2.
+
 ## Acceptance Criteria
 
-- [ ] Decisión del usuario anotada.
+- [x] Decisión del usuario anotada.
 - [ ] Equilibrio (12 partidas por dificultad): la primera eliminación no llega antes de la primera ronda sin protección.
 - [ ] La protección se ve en PC y en móvil vertical (capturas) y se explica en «Cómo se juega».
 - [ ] ADR nueva y DOM-JUEGO-001 actualizados.

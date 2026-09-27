@@ -32,6 +32,8 @@ Dar más volumen a los castillos: mejor luz de atardecer, sombras de contacto (o
 
 **Decisión del usuario al empezar** (con capturas de las alternativas): intensidad del cambio y si se aplica también en calidad baja. Opciones técnicas: oclusión aproximada por altura en el sombreador (barata), sombras más suaves, o postproceso SSAO (caro, solo en calidad alta).
 
+**Decisión del usuario (2026-09-27):** oclusión aproximada por altura y luz de atardecer algo más cálida, sutil y en todas las calidades (sin SSAO); las capturas antes y después siguen pendientes de su aprobación.
+
 ## Acceptance Criteria
 
 - [ ] Capturas antes y después en PC y en móvil vertical, aprobadas por el usuario.

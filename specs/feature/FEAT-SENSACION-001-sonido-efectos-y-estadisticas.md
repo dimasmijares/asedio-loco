@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-27
 owner: dimas
 dependencies:
   - id: ARCH-002
@@ -56,6 +56,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
    - M o el botón silencian; la preferencia se guarda (`asedio.mute`).
 2. **Partículas** (`Fx`): humo, polvo, anillos, explosiones con colores por munición, esquirlas por material, fuego, chispas y confeti.
    - Tope de humo 900 / 550 / 260 según la calidad (los trozos, el 60 %), y la cantidad por efecto se escala ×1 / ×0,7 / ×0,4.
+   - **Polvo y humo tras un derrumbe** (WRK-TASK-049): cuando se rompen 3 bloques en menos de 3 s dentro de una celda de 5 m, nace allí un foco (`Fx.rubble`, `Fx.collapse`). Si ya hay otro a menos de 6 m, se aviva ese. Durante 10 s el foco suelta bocanadas grandes (1,4-2,2 m, que crecen hasta 2,6 veces) y translúcidas (opacidad 0,7), en tonos pardos y grises. Salen cada 0,35 / 0,5 / 0,75 s y cada vez más despacio, suben a 0,8-1,3 m/s y duran 5-7 s. Así la columna se ve durante los resultados y el principio de la ronda siguiente, y se disipa en unos 15 s. Reserva propia (`Fx.smoke`, un InstancedMesh): topes de 180 / 110 / 50 bocanadas y 9 / 6 / 3 focos. `clearSmoke` la vacía al reconstruir los castillos.
 3. **Fragmentos** (D-009): trozos decorativos en un mundo físico local, no sincronizados. Máximo 260 / 170 / 90 y desaparecen a los 3-5 s.
 4. **Rey caído:** confeti con su color, polvo, sacudida de cámara (+0,5), corona oculta, calavera en el marcador y rótulo.
 5. **Grietas** (WRK-TASK-039): un bloque dañado se oscurece y muestra grietas procedurales que se ensanchan con el daño, en el sombreador de los bloques y sin coste de CPU.
@@ -101,7 +102,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `client/src/game/audio.ts` | `Sfx`: síntesis, espacialización, silencio |
-| Implemented in | `client/src/game/render/fx.ts` | Partículas y confeti |
+| Implemented in | `client/src/game/render/fx.ts` | Partículas, confeti y humo de derrumbe (`SMOKE_CAP`) |
 | Implemented in | `client/src/game/sim/debris.ts` | Fragmentos locales |
 | Implemented in | `client/src/game/render/stage.ts` | Shader de la lava, chispas, viñeta |
 | Implemented in | `client/src/game/view.ts` | Efectos por evento (`king`, `boom`…) |

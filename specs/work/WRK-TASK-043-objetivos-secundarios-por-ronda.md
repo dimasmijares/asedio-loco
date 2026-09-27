@@ -40,9 +40,11 @@ Dar variedad a las decisiones de puntería con objetivos secundarios (romper el 
 
 El objetivo de la ronda se anuncia en el rótulo «RONDA N» y se marca en el castillo rival.
 
+**Decisión del usuario (2026-09-27):** a) munición mejor en la ronda siguiente.
+
 ## Acceptance Criteria
 
-- [ ] Decisión del usuario anotada.
+- [x] Decisión del usuario anotada.
 - [ ] Un objetivo por ronda, visible en PC y en móvil vertical.
 - [ ] Los bots persiguen el objetivo con cierta probabilidad.
 - [ ] Equilibrio medido antes y después.

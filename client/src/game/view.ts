@@ -81,6 +81,7 @@ export class WorldView {
     for (const [s, c] of this.catapults) c.root.visible = this.slots.includes(s);
     this.blocks.clear();
     this.debris.clear();
+    this.fx?.clearSmoke();
     for (const k of this.kings.values()) this.root.remove(k);
     this.kings.clear();
     for (const slot of this.slots) {
@@ -163,6 +164,7 @@ export class WorldView {
           this.shake = Math.min(1.3, this.shake + 0.035);
           this.debris.burst(e.mat, e.size, e.p, e.q, e.v, e.seed);
           this.fx.shatter(e.p, e.mat);
+          this.fx.rubble(e.p);
         } else if (e.why === 'melt') this.fx.fire(e.p, 6);
         break;
       case 'spawn':

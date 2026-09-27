@@ -27,10 +27,11 @@ class Pool {
   // `cap` es el tope vigente (según la calidad); la malla se crea con la capacidad máxima para
   // poder subirlo en plena partida sin recrearla (WRK-TASK-013).
   cap: number;
-  constructor(geo: THREE.BufferGeometry, readonly capacity: number, parent: THREE.Object3D, emissive = false) {
+  constructor(geo: THREE.BufferGeometry, readonly capacity: number, parent: THREE.Object3D, opacity = 1) {
     this.cap = capacity;
     const cap = capacity;
-    const mat = new THREE.MeshToonMaterial({ color: '#ffffff', gradientMap: toonGradient(), emissive: emissive ? '#000000' : '#000000' });
+    const see = opacity < 1;
+    const mat = new THREE.MeshToonMaterial({ color: '#ffffff', gradientMap: toonGradient(), transparent: see, opacity, depthWrite: !see });
     this.mesh = new THREE.InstancedMesh(geo, mat, cap);
     this.mesh.count = 0;
     this.mesh.frustumCulled = false;
@@ -82,14 +83,41 @@ const randDir = () => new THREE.Vector3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).norm
 // Tope de partículas por calidad (D-046).
 export const FX_CAP = { low: 260, medium: 550, high: 900 } as const;
 
+// Polvo y humo que quedan tras un derrumbe (WRK-TASK-049): pocas bocanadas grandes y translúcidas
+// que salen de unos focos durante SMOKE_LIFE segundos y suben despacio. Un foco nace donde se
+// rompen SMOKE_BLOCKS bloques en una celda de SMOKE_CELL m en menos de SMOKE_WINDOW s.
+export const SMOKE_CAP = { low: 50, medium: 110, high: 180 } as const; // bocanadas
+const SMOKE_FOCI = { low: 3, medium: 6, high: 9 } as const;
+const SMOKE_EVERY = { low: 0.75, medium: 0.5, high: 0.35 } as const; // s entre bocanadas de un foco
+const SMOKE_CELL = 5;
+const SMOKE_BLOCKS = 3;
+const SMOKE_WINDOW = 3;
+const SMOKE_LIFE = 10; // s que suelta humo un foco; la última bocanada tarda ~5 s más en irse
+const SMOKE_COLORS = ['#a89f90', '#8f877c', '#6e6873', '#5d5866'];
+
+interface Focus {
+  p: THREE.Vector3;
+  r: number;
+  t: number;
+  next: number;
+}
+
 export class Fx {
   puffs: Pool;
   bits: Pool;
+  smoke: Pool;
   scale: number;
+  foci: Focus[] = [];
+  private quality: 'low' | 'medium' | 'high' = 'medium';
+  private cells = new Map<string, { n: number; at: number; p: THREE.Vector3 }>();
+  private time = 0;
 
   constructor(parent: THREE.Object3D, quality: 'low' | 'medium' | 'high') {
     this.puffs = new Pool(new THREE.IcosahedronGeometry(1, 0), FX_CAP.high, parent);
     this.bits = new Pool(new THREE.BoxGeometry(1, 1, 1), Math.floor(FX_CAP.high * 0.6), parent);
+    this.smoke = new Pool(new THREE.IcosahedronGeometry(1, 1), SMOKE_CAP.high, parent, 0.7);
+    this.smoke.mesh.renderOrder = 2;
+    this.smoke.mesh.name = 'smoke';
     this.scale = 1;
     this.setQuality(quality);
   }
@@ -100,6 +128,71 @@ export class Fx {
     this.scale = quality === 'high' ? 1 : quality === 'medium' ? 0.7 : 0.4;
     this.puffs.setCap(cap);
     this.bits.setCap(Math.floor(cap * 0.6));
+    this.quality = quality;
+    this.smoke.setCap(SMOKE_CAP[quality]);
+    if (this.foci.length > SMOKE_FOCI[quality]) this.foci.splice(0, this.foci.length - SMOKE_FOCI[quality]);
+  }
+
+  // Un bloque roto en p. Si en su celda se rompen varios seguidos, es un derrumbe: nace un foco de
+  // humo (o se aviva el que ya hay cerca).
+  rubble(p: Vec3) {
+    const key = `${Math.floor(p[0] / SMOKE_CELL)},${Math.floor(p[2] / SMOKE_CELL)}`;
+    let c = this.cells.get(key);
+    if (!c || this.time - c.at > SMOKE_WINDOW) {
+      c = { n: 0, at: this.time, p: new THREE.Vector3() };
+      this.cells.set(key, c);
+    }
+    c.n++;
+    c.p.add(new THREE.Vector3(p[0], Math.max(0.3, p[1]), p[2]));
+    if (c.n !== SMOKE_BLOCKS) return;
+    this.collapse(c.p.clone().divideScalar(c.n));
+  }
+
+  collapse(p: THREE.Vector3) {
+    const near = this.foci.find((f) => Math.hypot(f.p.x - p.x, f.p.z - p.z) < SMOKE_CELL * 1.2);
+    if (near) {
+      near.t = Math.min(near.t, 1);
+      near.r = Math.min(3, near.r + 0.4);
+      return;
+    }
+    if (this.foci.length >= SMOKE_FOCI[this.quality]) this.foci.shift();
+    this.foci.push({ p, r: 2.2, t: 0, next: 0 });
+  }
+
+  private stepSmoke(dt: number) {
+    const every = SMOKE_EVERY[this.quality];
+    for (const f of this.foci) {
+      f.t += dt;
+      while (f.next <= f.t && f.t < SMOKE_LIFE) {
+        // Al principio sale más denso; luego se va apagando.
+        f.next += every * (1 + f.t / SMOKE_LIFE);
+        const a = rnd(0, Math.PI * 2);
+        const d = rnd(0, f.r);
+        this.smoke.add({
+          p: new THREE.Vector3(f.p.x + Math.cos(a) * d, f.p.y + rnd(-0.2, 0.6), f.p.z + Math.sin(a) * d),
+          v: new THREE.Vector3(rnd(-0.3, 0.3), rnd(0.8, 1.3), rnd(-0.3, 0.3)),
+          life: 0,
+          max: rnd(5, 7),
+          size: rnd(1.4, 2.2) * (1.2 - (0.4 * f.t) / SMOKE_LIFE),
+          grow: 1.6,
+          gravity: -0.03,
+          drag: 0.25,
+          color: new THREE.Color(SMOKE_COLORS[Math.floor(rnd(0, SMOKE_COLORS.length))]),
+          spin: new THREE.Vector3(rnd(-0.3, 0.3), rnd(-0.3, 0.3), rnd(-0.3, 0.3)),
+          rot: new THREE.Euler(rnd(0, 3), rnd(0, 3), rnd(0, 3)),
+        });
+      }
+    }
+    this.foci = this.foci.filter((f) => f.t < SMOKE_LIFE);
+    if (this.cells.size > 64) for (const [k, c] of this.cells) if (this.time - c.at > SMOKE_WINDOW) this.cells.delete(k);
+  }
+
+  // Quita el humo al instante (al reconstruir los castillos).
+  clearSmoke() {
+    this.foci = [];
+    this.cells.clear();
+    this.smoke.items = [];
+    this.smoke.update(0);
   }
 
   private n(k: number) {
@@ -235,11 +328,14 @@ export class Fx {
   }
 
   update(dt: number) {
+    this.time += dt;
+    this.stepSmoke(dt);
     this.puffs.update(dt);
     this.bits.update(dt);
+    this.smoke.update(dt);
   }
 
   get count() {
-    return this.puffs.items.length + this.bits.items.length;
+    return this.puffs.items.length + this.bits.items.length + this.smoke.items.length;
   }
 }

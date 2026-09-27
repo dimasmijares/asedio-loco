@@ -40,9 +40,11 @@ Que el jugador eliminado siga participando: elegir qué castillo sigue la cámar
 
 La opción b o c cambia el equilibrio (RULE-001) y el protocolo (RULE-002).
 
+**Decisión del usuario (2026-09-27):** a) solo cámara.
+
 ## Acceptance Criteria
 
-- [ ] Decisión del usuario anotada.
+- [x] Decisión del usuario anotada.
 - [ ] Un jugador eliminado puede elegir qué castillo ve, en PC y en móvil vertical.
 - [ ] Los espectadores que entran con la partida empezada tienen los mismos controles.
 

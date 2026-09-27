@@ -4,9 +4,9 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.1.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-27
 owner: dimas
 dependencies:
   - id: RULE-004
@@ -76,6 +76,7 @@ Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por p
 | Antialias | sí | sí | no |
 | Tope de partículas (humo + trozos al 60 %; `count` suma los dos) | 900 + 540 | 550 + 330 | 260 + 156 |
 | Tope de fragmentos | 260 | 170 | 90 |
+| Humo de derrumbe: bocanadas y focos (`SMOKE_CAP`, WRK-TASK-049; también en `count`) | 180, 9 | 110, 6 | 50, 3 |
 
 **Cambio de calidad en caliente** (`Game.applyQuality`, WRK-TASK-013): cambia la resolución y las sombras (`Stage.setQuality`) y los topes de fragmentos (`DEBRIS_CAP`: 90, 170 y 260) y de partículas (`FX_CAP`: 260, 550 y 900). Las mallas se crean con la capacidad de la calidad alta; al bajar, se retiran los más antiguos que sobran.
 
@@ -114,6 +115,7 @@ Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por p
 |------|-----------|------|-------------------|
 | Testing | `node tests/tools/bench.mjs` con RTX 3080 (tabla de arriba) | 2026-09-25 | low → medium |
 | Testing | `tests/e2e/perf.spec.ts` en CI | 2026-09-26 | — |
+| Testing | WRK-TASK-049: banco `low gpu cpu=4 movil` antes y después del humo (2 pasadas): 12 fps en los dos casos, dibujo 8,7 → 9,15 ms por fotograma y las mismas llamadas de dibujo (238) | 2026-09-27 | — |
 
 ## Traceability
 
