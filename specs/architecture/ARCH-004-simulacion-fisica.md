@@ -4,9 +4,9 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.0.1
+version: 1.1.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: RULE-004
@@ -39,7 +39,7 @@ El juego es derribar castillos: la física tiene que ser creíble, estable en re
 
 ### Decision
 
-- **Motor:** Rapier 3D 0.20 (`@dimforge/rapier3d-compat`, WASM), cargado una vez con `loadRapier()`. Gravedad −9,81 y 6 iteraciones del resolvedor.
+- **Motor:** Rapier 3D 0.20 (`@dimforge/rapier3d-compat`, WASM), cargado una vez con `loadRapier()`. Gravedad −9,81, 4 subpasos del resolvedor (`SOLVER_ITERATIONS`) y 1 cm de distancia de predicción de contactos (`CONTACT_PREDICTION`; Rapier trae 2 cm). Antes eran 6 subpasos y 2 cm: WRK-TASK-052 los bajó para que un móvil pueda ser anfitrión. La predicción es lo que más pesa: con 2 cm, cada bloque de una pila mantiene abiertos los contactos con sus vecinos aunque no se toquen. Con todos los bloques despiertos, los castillos se quedan quietos y se vuelven a dormir (`tests/unit/castle-rest.test.ts`).
 - **Paso fijo de 1/60 s** (`DT` en `sim.ts`). El bucle de `game.ts` acumula tiempo y da **como mucho 4 pasos por fotograma**. Si llega al tope, descarta el resto: en un equipo lento la física va más despacio en vez de entrar en espiral (D-042). La cámara lenta escala el `dt` de entrada.
 - **Rotura por golpes, no por cargas** (D-010). Cada material tiene un `breakForce` (madera 420, piedra 850, cristal 150, hierro 4200; D-017). Por encima de `breakForce` el bloque se rompe. Por encima de `breakForce × CHIP_RATIO` acumula daño. La fuerza de un bloque en reposo que sostiene a otros no cuenta.
 - **Uniones fijas rompibles** entre bloques vecinos, sin contacto entre las dos piezas (D-014).

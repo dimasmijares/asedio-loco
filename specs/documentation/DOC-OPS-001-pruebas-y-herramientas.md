@@ -4,9 +4,9 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.1.1
+version: 1.1.2
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: ARCH-001
@@ -52,7 +52,7 @@ El agente que trabaja en el repo y el propio dimas. Se supone Node 22, npm y el 
 
 **2. Equilibrio y destrozo (Node, sin navegador)**
 
-- `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts balance`: partidas de 4 bots. `DIFF` es `facil`, `normal` o `dificil` (6 partidas por defecto). El resumen queda en `tests/balance/ultimo-<dif>.txt`.
+- `GAMES=8 DIFF=normal npx vitest run --config tests/balance/vitest.config.ts balance`: partidas de 4 bots. `DIFF` es `facil`, `normal` o `dificil` (6 partidas por defecto). El resumen queda en `tests/balance/ultimo-<dif>.txt`. Ojo: el filtro `balance` coincide con la carpeta y ejecuta también `destrozo.test.ts` (con 6 disparos, que sobrescriben `destrozo.txt`). Para medir solo el equilibrio se filtra por `balance.test` (WRK-TASK-052).
 - `npx vitest run --config tests/balance/vitest.config.ts destrozo`: dispara cada munición contra un castillo entero (`SHOTS`, 6 por defecto). Deja en `tests/balance/destrozo.txt` los bloques rotos y desplazados por disparo.
 - Para cualquier cambio de física o de munición: medir antes y después y comparar.
 

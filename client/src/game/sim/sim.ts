@@ -10,6 +10,12 @@ import { behaviorFor, type ProjectileBehavior } from './projectiles';
 import { SHIELD_RADIUS } from '../shield';
 
 export const DT = 1 / 60;
+// Coste del paso de física (WRK-TASK-052, medido con el banco y el destrozo): 4 subpasos del
+// solucionador (antes 6) y 1 cm de distancia de predicción de contactos (Rapier: 2 cm). La
+// predicción es lo que más cuesta: con 2 cm, cada bloque de una pila mantiene abiertos los
+// contactos con sus vecinos aunque no se toquen.
+export const SOLVER_ITERATIONS = 4;
+export const CONTACT_PREDICTION = 0.01;
 const LAVA_FLOOR_HALF = 2;
 const BLACKHOLE_CORE = 1.3; // m: lo que llega al núcleo del agujero negro desaparece (WRK-TASK-031)
 const LAVA_SINK_SPEED = 0.6; // m/s a los que se hunde lo que se come la lava
@@ -149,7 +155,8 @@ export class Sim {
   constructor(readonly slots: number[]) {
     const R = RAPIER;
     this.world = new R.World({ x: 0, y: -9.81, z: 0 });
-    this.world.integrationParameters.numSolverIterations = 6;
+    this.world.integrationParameters.numSolverIterations = SOLVER_ITERATIONS;
+    this.world.integrationParameters.normalizedPredictionDistance = CONTACT_PREDICTION;
     this.eq = new R.EventQueue(true);
     this.buildIsland();
     for (const slot of slots) {

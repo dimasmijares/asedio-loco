@@ -5,9 +5,9 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 3.1.0
+version: 3.2.0
 created: 2026-09-26
-updated: 2026-09-27
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: DOM-JUEGO-001
@@ -50,10 +50,10 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 9 |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 108 (rompe piedra cerca del centro) |
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 108; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
-| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 64, al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
+| Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 58 (64 hasta WRK-TASK-052), al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
 | Piano | rara | 6 | Martillo: se marca dónde caería, cae en vertical desde 22 m a los 1,1 s, atraviesa pisos y al tocar el suelo o pararse suelta un acorde final | densidad 6, viento 0,2; conserva el 85 % de la velocidad al romper (`plowKeep`); acorde de 2,8 m y fuerza 60 |
 | Agujero negro | épica | 3 | Borrador: atrae y se traga lo cercano y, al cerrarse, escupe lo que no se ha tragado | campo de 5,5 m y 2,2 s, fuerza 50; lo que llega a 1,3 m del núcleo desaparece; al final, onda de 5 m y fuerza 90, al rey solo el 5 % |
-| Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 34 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 5 m sale a 22 m/s |
+| Imán | épica | 3 | Desmontador: arranca el hierro y, al acabar, lo lanza contra el castillo rival más cercano | campo de 10 m y 2,3 s, fuerza 34 (3 % sobre lo que no es hierro); rompe las uniones del hierro; retroceso: el hierro a menos de 5 m sale a 18 m/s (22 hasta WRK-TASK-052) |
 | Bola de nieve | épica | 3 | Alud: crece mientras rueda en línea recta en la dirección en que llegó | radio de 0,45 a 1,5 m (+0,9 m/s), no baja de 9 m/s rodando |
 | Andamio | defensiva | 7 | Reconstruye hasta 15 bloques propios (10 hasta WRK-TASK-033) | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
@@ -85,6 +85,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 
 - **Con castillos de 176 bloques (WRK-TASK-037, ADR-013)**, tras el reajuste, bloques rotos por disparo (12 disparos): pedrusco 9,4; tronco 10,6; cocos 12,2; vaca 16,5; sandía 17,8; gallina 15,1; piano 17,2; agujero negro 21,6; imán 19,9; bola de nieve 20,2. Media: 16,0, igual que con 140 bloques, así que el castillo resiste un 26 % más en proporción. Reyes: 14 de 120, con 5 de 12 del pedrusco (impactos directos) y 4 de 12 del agujero negro.
 
+- **Con la física más barata (WRK-TASK-052)**, bloques rotos por disparo con 12 disparos. Antes, 2 pasadas con la física anterior; después, con 4 subpasos, 1 cm de predicción, huevos de 58 y retroceso del imán de 18: pedrusco 9,4 → 10,2; tronco 10,6 → 9,8; cocos 12,2 → 11,2; vaca 16,3-16,6 → 17,1; sandía 17,3-17,8 → 17,3; gallina 15,7-16,8 → 16,7; piano 17,4-18,0 → 17,5; agujero negro 21,3 → 19,3; imán 19,9 → 22,7; bola de nieve 20,2 → 19,2. Media 16,1-16,2 → 16,1; reyes 9-12 → 12 de 120. Con los mismos parámetros del motor, las municiones sin azar (pedrusco, tronco, cocos, imán, nieve) repiten la cifra exacta. Cambiar cualquier parámetro del motor mueve la de alguna, sin tendencia: con 6 subpasos y 1 cm, la nieve bajaba a 12,8. Sin retocar la munición, el imán subía a 24,3 y la gallina a 18,3, y se salían de su franja; de ahí los dos ajustes.
 - **El pedrusco ya no es el que más reyes mata (WRK-TASK-044).** Al darle de lleno al rey, la fuerza de contacto del pedrusco cuenta la mitad (`kingCrush` en el comportamiento de la munición; 1 en las demás). Con 12 disparos: 9,4 bloques rotos en los dos casos y reyes 5/12 → 2/12. Equilibrio en difícil (12 partidas): 5,5 → 5,0 rondas, dentro del ruido; la primera eliminación sigue en la ronda 1 en 9 de 12 partidas.
 
 - Borde: una mano con pedrusco, vaca y burbuja; el jugador no elige y se acaba el tiempo: dispara el pedrusco.

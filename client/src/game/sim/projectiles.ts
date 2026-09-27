@@ -32,7 +32,7 @@ const CHICKEN_HOP: [number, number] = [2.5, 4.5]; // m/s en horizontal y hacia a
 const EGGS = [6, 5, 5]; // huevos por bote
 export const EGG_SCALE = 0.45; // un proyectil de gallina a esta escala es un huevo
 const EGG_RADIUS = 2.2;
-const EGG_FORCE = 64;
+const EGG_FORCE = 58;
 const EGG_KING = 0.25; // los huevos apenas le hacen daño al rey: es munición de destrozo
 const EGG_FUSE = 1.5; // s: si no toca nada antes, explota igual
 const MAGNET_TIME = 2.3; // s que dura el campo del imán
@@ -41,7 +41,7 @@ const MAGNET_STRENGTH = 34;
 const SPIT_RADIUS = 5; // el agujero negro, al cerrarse, escupe lo que no se ha tragado
 const SPIT_FORCE = 90;
 const SPIT_KING = 0.05; // el rey pesa poco: con más, el escupitajo lo saca del castillo en casi todos los impactos directos
-const MAGNET_RECOIL = 22; // m/s: el imán, al acabar, lanza el hierro que ha arrancado contra el castillo
+const MAGNET_RECOIL = 18; // m/s: el imán, al acabar, lanza el hierro que ha arrancado contra el castillo
 const SNOW_MAX = 1.5; // m de radio que alcanza la bola de nieve
 const SNOW_GROW = 0.9;
 // Andamio: con el destrozo de WRK-PLAN-007 (15 bloques por disparo de media) reconstruye 15.

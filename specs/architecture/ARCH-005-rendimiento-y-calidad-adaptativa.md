@@ -4,9 +4,9 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-27
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: RULE-004
@@ -54,8 +54,10 @@ Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta u
 |---|---|---|---|---|---|---|---|---|---|
 | PC, media, 1280×720 | 285 | 85 | 3,3 ms | 5,3 ms | 394 | 684 | 170 | 880 | 1 |
 | Móvil emulado: baja, 390×844, CPU frenada 4× (`cpu=4 movil`) | 16 | 5 | 56 ms | 14,5 ms | 238 | 684 | 90 | 416 | 0,85 |
+| PC, media, tras WRK-TASK-052 (28-09-2026) | 324 | 119 | 2,9 ms | 3,4 ms | 410 | 630 | 170 | 900 | 1 |
+| Móvil emulado, tras WRK-TASK-052 (5 pasadas) | 21-26 | 8 | 32 ms | 8,9-10,7 ms | 242 | 600-631 | 90 | 434 | 0,85 |
 
-Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por paso, pero por poco: en un móvil de gama media que haga de anfitrión, la escena más cargada (12 proyectiles a la vez) va a cámara lenta. En una partida normal hay como mucho 4 disparos por ronda, y el anfitrión pasa a un ordenador si lo hay (ARCH-003).
+Tras WRK-TASK-052 (4 subpasos del resolvedor y 1 cm de predicción de contactos, ARCH-004), el paso de física con la CPU 4× más lenta baja de 14,5 a unos 10 ms y deja holgura. Con SwiftShader (`perf.spec.ts`) baja de 7,9-9,2 a 4,6 ms. Antes, con la CPU 4× más lenta, la física cabía en el presupuesto de 16 ms por paso, pero por poco: en un móvil de gama media que haga de anfitrión, la escena más cargada (12 proyectiles a la vez) va a cámara lenta. En una partida normal hay como mucho 4 disparos por ronda, y el anfitrión pasa a un ordenador si lo hay (ARCH-003).
 
 **Peso inicial** (WRK-TASK-016): la portada no descarga Rapier (1,1 MB comprimido); se carga al empezar una partida o el campo de pruebas.
 
@@ -115,6 +117,7 @@ Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por p
 |------|-----------|------|-------------------|
 | Testing | `node tests/tools/bench.mjs` con RTX 3080 (tabla de arriba) | 2026-09-25 | low → medium |
 | Testing | `tests/e2e/perf.spec.ts` en CI | 2026-09-26 | — |
+| Testing | WRK-TASK-052: banco `low gpu cpu=4 movil`, 3 pasadas antes (paso de física 13,9-16,1 ms) y 5 después (8,9-10,7 ms); en Node, `world.step` es el 90 % del paso | 2026-09-28 | — |
 | Testing | WRK-TASK-049: banco `low gpu cpu=4 movil` antes y después del humo (2 pasadas): 12 fps en los dos casos, dibujo 8,7 → 9,15 ms por fotograma y las mismas llamadas de dibujo (238) | 2026-09-27 | — |
 
 ## Traceability
