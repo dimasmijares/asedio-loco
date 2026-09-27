@@ -58,6 +58,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
    - Tope de humo 900 / 550 / 260 según la calidad (los trozos, el 60 %), y la cantidad por efecto se escala ×1 / ×0,7 / ×0,4.
 3. **Fragmentos** (D-009): trozos decorativos en un mundo físico local, no sincronizados. Máximo 260 / 170 / 90 y desaparecen a los 3-5 s.
 4. **Rey caído:** confeti con su color, polvo, sacudida de cámara (+0,5), corona oculta, calavera en el marcador y rótulo.
+5. **Grietas** (WRK-TASK-039): un bloque dañado se oscurece y muestra grietas procedurales que se ensanchan con el daño, en el sombreador de los bloques y sin coste de CPU.
 5. **Lava viva** (D-056), en shaders y sin coste de CPU: placas de costra con grietas incandescentes, latido en lo líquido, lava casi blanca junto al acantilado hasta que inunda la isla, y chispas que suben del mar (520 / 320 / 140). Viñeta cálida en los bordes. El nivel sube suavemente hasta el objetivo.
 6. **Estadísticas finales** (D-035), en `#game-over`:
    - 💥 Mayor destrozo (bloques rivales rotos).

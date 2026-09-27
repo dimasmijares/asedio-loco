@@ -37,14 +37,69 @@ const FADE_WORLD = /* glsl */ `
   #endif
 `;
 
-// Añade el desvanecido cercano a un material estándar de three (el de los bloques).
+// Grietas de los bloques dañados (WRK-TASK-039): un patrón de Voronoi en las coordenadas locales
+// de cada cara, que se ensancha con el daño. El daño se lee del color de la instancia, que
+// `Blocks.setDamage` oscurece (k = 1 - 0,55 · daño). Sin texturas ni geometría nueva.
+const CRACK_VERT = /* glsl */ `
+  vCrackP = position;
+  vCrackN = normal;
+  #ifdef USE_INSTANCING
+    vCrackSeed = float(gl_InstanceID);
+  #else
+    vCrackSeed = 0.0;
+  #endif
+`;
+const CRACK_FRAG = /* glsl */ `
+  varying vec3 vCrackP;
+  varying vec3 vCrackN;
+  varying float vCrackSeed;
+  vec2 crackHash(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+    return fract(sin(p) * 43758.5453);
+  }
+  // Distancia al borde entre celdas de Voronoi: 0 sobre la grieta.
+  float crackEdge(vec2 uv) {
+    vec2 i = floor(uv);
+    vec2 f = fract(uv);
+    float d1 = 8.0;
+    float d2 = 8.0;
+    for (int y = -1; y <= 1; y++)
+      for (int x = -1; x <= 1; x++) {
+        vec2 g = vec2(float(x), float(y));
+        float d = length(g + crackHash(i + g) - f);
+        if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d;
+      }
+    return d2 - d1;
+  }
+`;
+const CRACK_APPLY = /* glsl */ `
+  #if defined(USE_INSTANCING_COLOR) || defined(USE_COLOR)
+  {
+    float dmg = clamp((1.0 - vColor.r) / 0.55, 0.0, 1.0);
+    if (dmg > 0.1) {
+      vec3 an = abs(vCrackN);
+      vec2 uv = an.x > 0.5 ? vCrackP.yz : an.y > 0.5 ? vCrackP.xz : vCrackP.xy;
+      float e = crackEdge(uv * 2.6 + vCrackSeed * 1.37);
+      float w = 0.035 + 0.15 * dmg;
+      float c = 1.0 - smoothstep(w * 0.5, w, e);
+      diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.07, 0.05, 0.06), c * min(1.0, dmg * 1.4));
+    }
+  }
+  #endif
+`;
+
+// Material de los bloques: desvanecido cercano (WRK-TASK-034) y grietas según el daño (WRK-TASK-039).
 export function withNearFade<T extends THREE.Material>(m: T): T {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uFadeNear = NEAR_FADE;
-    sh.vertexShader = sh.vertexShader.replace('void main() {', 'varying vec3 vFadeW;\nvoid main() {').replace('#include <project_vertex>', `#include <project_vertex>\n${FADE_WORLD}`);
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', `${FADE_FRAG}\nvoid main() {\n  nearFade();`);
+    sh.vertexShader = sh.vertexShader
+      .replace('void main() {', 'varying vec3 vFadeW;\nvarying vec3 vCrackP;\nvarying vec3 vCrackN;\nvarying float vCrackSeed;\nvoid main() {')
+      .replace('#include <project_vertex>', `#include <project_vertex>\n${FADE_WORLD}\n${CRACK_VERT}`);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('void main() {', `${FADE_FRAG}\n${CRACK_FRAG}\nvoid main() {\n  nearFade();`)
+      .replace('#include <color_fragment>', `#include <color_fragment>\n${CRACK_APPLY}`);
   };
-  m.customProgramCacheKey = () => 'nearFade';
+  m.customProgramCacheKey = () => 'nearFade+cracks';
   return m;
 }
 
