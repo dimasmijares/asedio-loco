@@ -3,6 +3,7 @@ import type { Quat, Vec3 } from '../../../shared/math';
 import { TrajectoryPreview, AimInput } from './aim';
 import { AMMO, AMMO_IDS } from '../../../shared/ammo';
 import { sfx } from './audio';
+import { isMobileDevice } from '../device';
 import { NEAR_FADE } from './render/materials';
 import { makeProjectile } from './render/models';
 import { setQualityTarget, settings } from '../ui/settings';
@@ -28,7 +29,8 @@ export function savedQuality(): Quality {
     /* sin almacenamiento */
   }
   const url = new URLSearchParams(location.search).get('quality') as Quality | null;
-  return url ?? 'medium';
+  // Perfil móvil (WRK-TASK-008): sin calidad elegida, un móvil arranca en baja.
+  return url ?? (isMobileDevice() ? 'low' : 'medium');
 }
 
 export function saveQuality(q: Quality) {
@@ -65,6 +67,11 @@ export class Game {
   // clientes en un mismo equipo sin GPU, para que el dibujo no le robe CPU a la física.
   private renderEvery = 1 / Math.max(0.1, Number(new URLSearchParams(location.search).get('render')) || Infinity);
   private renderT = Infinity;
+  // Perfil móvil (WRK-TASK-008): fuera de los momentos de acción se dibuja como mucho a 30 fps
+  // para ahorrar batería y calor. El modo marca `fullRate` en la cuenta atrás, el impacto y la
+  // repetición. La física no cambia de ritmo.
+  private mobile = isMobileDevice();
+  fullRate = false;
 
   static async create(canvas: HTMLCanvasElement, slots: number[], quality = savedQuality()) {
     await loadRapier();
@@ -246,7 +253,8 @@ export class Game {
     if (NEAR_FADE.value < 0.5 && fade === 0) NEAR_FADE.value = 0;
     this.stage.update(rawDt);
     this.renderT += rawDt;
-    if (this.renderT >= this.renderEvery) {
+    const every = this.mobile && !this.fullRate ? Math.max(this.renderEvery, 1 / 31) : this.renderEvery;
+    if (this.renderT >= every) {
       this.renderT = 0;
       this.stage.render();
     }

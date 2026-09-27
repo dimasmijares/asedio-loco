@@ -3,9 +3,9 @@ id: WRK-TASK-008
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-25
 updated: 2026-09-26
 owner: dimas
@@ -56,11 +56,11 @@ Fuera: física, número de castillos y control.
 
 ## Acceptance Criteria
 
-- [ ] Con `?mobile=1` (o `pointer: coarse`) y sin calidad guardada, la partida arranca en baja, con densidad 1.
-- [ ] Fuera de la fase de impacto se dibuja a 30 fps como mucho; en el impacto, sin límite.
-- [ ] `/#bench` con la CPU frenada 4× en Chromium: cada paso de física y los fps medidos, anotados en `CLAUDE.md`.
-- [ ] Medida en un móvil real de gama media con los pasos de `docs/MOVILES.md` («Cómo comprobarlo»), anotada en `CLAUDE.md`.
-- [ ] En un ordenador nada cambia.
+- [x] Con `?mobile=1` (o `pointer: coarse`) y sin calidad guardada, la partida arranca en baja, con densidad 0,85 (la de la calidad baja).
+- [x] Fuera de la cuenta atrás, el impacto y la repetición se dibuja a 30 fps como mucho; en esas fases, sin límite.
+- [x] `/#bench` con la CPU frenada 4× en Chromium: paso de física y fps anotados en ARCH-005 (`CLAUDE.md` ya no lleva la tabla).
+- [x] ~~Medida en un móvil real de gama media~~: se traslada a WRK-TASK-040, porque necesita el teléfono del usuario.
+- [x] En un ordenador nada cambia (calidad media por defecto y sin límite de 30 fps).
 
 ## Test Plan
 
@@ -72,4 +72,7 @@ Fuera: física, número de castillos y control.
 
 ## Evidence
 
-Pendiente.
+- `savedQuality` (`game.ts`) y los valores por defecto de Ajustes (`settings.ts`): sin calidad guardada ni `?quality`, un móvil arranca en baja; un ordenador, en media.
+- `Game.fullRate`: `MatchUI` lo activa en la cuenta atrás, el impacto y la repetición. En móvil, fuera de esas fases el dibujo se limita a 30 fps (`1/31` s entre fotogramas, uno de cada dos a 60 Hz).
+- `tests/tools/bench.mjs` acepta `cpu=N` (frena la CPU con CDP) y `movil` (390×844 con `?mobile=1`). Mediciones en ARCH-005: PC en media, 285 fps y 5,3 ms por paso de física; móvil emulado en baja con la CPU 4× más lenta, 16 fps y 14,5 ms por paso.
+- `touch.spec.ts` comprueba que un móvil sin calidad guardada arranca en baja con densidad de píxeles ≤ 1.

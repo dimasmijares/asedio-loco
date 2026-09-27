@@ -48,6 +48,17 @@ El juego tiene que ir fluido en un portátil normal, también en el peor momento
 
 Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta unos 5 ms.
 
+**Mediciones con castillos de 176 bloques** (27-09-2026, `tests/tools/bench.mjs`, misma máquina):
+
+| Perfil | fps medios | peor 5 % | CPU/fotograma | física/paso | llamadas | despiertos | fragmentos | partículas | densidad |
+|---|---|---|---|---|---|---|---|---|---|
+| PC, media, 1280×720 | 285 | 85 | 3,3 ms | 5,3 ms | 394 | 684 | 170 | 880 | 1 |
+| Móvil emulado: baja, 390×844, CPU frenada 4× (`cpu=4 movil`) | 16 | 5 | 56 ms | 14,5 ms | 238 | 684 | 90 | 416 | 0,85 |
+
+Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por paso, pero por poco: en un móvil de gama media que haga de anfitrión, la escena más cargada (12 proyectiles a la vez) va a cámara lenta. En una partida normal hay como mucho 4 disparos por ronda, y el anfitrión pasa a un ordenador si lo hay (ARCH-003).
+
+**Perfil móvil** (WRK-TASK-008): sin calidad guardada ni `?quality`, un móvil arranca en baja (densidad de píxeles 0,85). Fuera de la cuenta atrás, el impacto y la repetición se dibuja como mucho a 30 fps (`Game.fullRate`); la física no cambia de ritmo.
+
 **Presupuestos:**
 
 - Un paso de física (1/60 s) cuesta menos de 16 ms de media en la escena de referencia, incluso sin GPU (`tests/e2e/perf.spec.ts`, en CI).

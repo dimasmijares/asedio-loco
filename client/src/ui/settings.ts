@@ -1,4 +1,5 @@
 import { sfx } from '../game/audio';
+import { isMobileDevice } from '../device';
 import type { Quality } from '../game/render/stage';
 import { h } from './dom';
 
@@ -15,7 +16,7 @@ const KEY = 'asedio.settings';
 const QUALITY_KEY = 'asedio.quality';
 
 function load(): Settings {
-  const def: Settings = { quality: 'medium', sensitivity: 1, bigText: false, showFps: false, shake: !matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const def: Settings = { quality: isMobileDevice() ? 'low' : 'medium', sensitivity: 1, bigText: false, showFps: false, shake: !matchMedia('(prefers-reduced-motion: reduce)').matches };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<Settings>;
     const q = localStorage.getItem(QUALITY_KEY) as Quality | null;

@@ -158,6 +158,7 @@ export class MatchUI {
     this.placeDamage();
     const g = this.game;
     const s = this.src.state;
+    g.fullRate = s.phase === 'countdown' || s.phase === 'impact' || s.phase === 'replay';
     const me = this.me();
     const input = g.input;
     if (this.pendingAim && performance.now() - this.aimSent > 100) this.flushAim();

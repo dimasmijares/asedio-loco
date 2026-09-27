@@ -31,6 +31,10 @@ test('táctil: apuntar arrastrando, flechas, tarjetas, pellizco y botón redondo
   await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
   const cdp = await page.context().newCDPSession(page);
   expect(await page.evaluate(() => document.body.classList.contains('touch')), 'se detecta el móvil').toBe(true);
+  // Perfil móvil (WRK-TASK-008): sin calidad guardada arranca en baja, con densidad de píxeles ≤ 1.
+  const prof = await page.evaluate(() => ({ q: (window as any).__asedio.game.stage.quality, pr: (window as any).__asedio.game.stage.renderer.getPixelRatio() }));
+  expect(prof.q).toBe('low');
+  expect(prof.pr).toBeLessThanOrEqual(1);
 
   // Arrastrar un dedo por la escena: a la derecha gira, hacia arriba sube la elevación.
   const s0 = await state(page);
