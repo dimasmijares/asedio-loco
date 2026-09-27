@@ -7,21 +7,16 @@ test('los topes de fragmentos y partículas siguen a la calidad en caliente', as
   await page.goto('/?quality=high#sandbox');
   await page.waitForFunction(() => (window as any).__asedio?.mode?.fire, null, { timeout: 60_000 });
   await page.waitForTimeout(1000);
-  // Unas cuantas vacas contra el castillo diana para llenar fragmentos y partículas.
-  for (let i = 0; i < 4; i++) {
-    await page.evaluate((i) => {
-      const m = (window as any).__asedio.mode;
-      m.selectAmmo(3);
-      m.fire(m.aimAt(i % 2 ? 'wall' : 'tower', 0.7));
-    }, i);
-    await page.waitForTimeout(900);
-  }
-  await page.waitForTimeout(1200);
+  // Se llenan fragmentos y partículas directamente (sin depender de la física ni de los tiempos
+  // de CI): 60 bloques de piedra troceados y 20 explosiones.
   const before = await page.evaluate(() => {
     const v = (window as any).__asedio.game.view;
+    for (let i = 0; i < 60; i++) v.debris.burst('stone', [1.2, 1.2, 1.2], [i % 10, 4 + Math.floor(i / 10), 0], [0, 0, 0, 1], [0, 0, 0], 1000 + i);
+    for (let i = 0; i < 20; i++) v.fx.boom([i, 3, 0], 3, 'boom');
     return { debris: v.debris.count, fx: v.fx.count };
   });
   expect(before.debris, 'hay fragmentos antes de bajar la calidad').toBeGreaterThan(90);
+  expect(before.fx, 'hay partículas antes de bajar la calidad').toBeGreaterThan(260);
   const low = await page.evaluate(() => {
     const g = (window as any).__asedio.game;
     g.applyQuality('low');
