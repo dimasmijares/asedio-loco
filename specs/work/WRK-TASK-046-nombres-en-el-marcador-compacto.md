@@ -50,3 +50,4 @@ Opciones: iniciales o nombre abreviado (6-8 caracteres) junto al porcentaje, o e
 - En el modo compacto (altura ≤ 500 px y vertical ≤ 600 px de ancho) el cuerpo de la fila pasa a dos líneas: nombre corto de 10 px arriba; barra y porcentaje de 9 px debajo. Mide 52 px (antes 40-44 px): con el nombre y el porcentaje en la misma línea no cabía en 360 px de ancho sin tocar el panel de la ronda.
 - `hud-compact.spec.ts`: se añade 390×844; en los 6 tamaños comprueba que hay 4 nombres cortos distintos, visibles, sin recortar y sin solapes. En escritorio el nombre corto no se ve.
 - `npm run verify` en verde (39 unitarios) y `npm run e2e -- hud-compact`: 7 de 7.
+- Hallazgo en CI: medir con `locator.evaluateAll` fallaba a veces porque `setPlayers` rehace las filas entre la consulta y la evaluación y el localizador se quedaba con filas ya sueltas (ancho 0). La prueba mide ahora en un solo `page.evaluate`; 21 de 21 con `--repeat-each 3`.

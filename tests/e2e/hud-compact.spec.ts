@@ -36,8 +36,9 @@ for (const [w, h] of [
       // La descripción más larga de la munición, para comprobar el peor caso.
       const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
       await page.evaluate((t) => (document.querySelector('#hud-ammo-desc')!.textContent = t), longest);
-      const shorts = await page.locator('.hp-short').evaluateAll((els) =>
-        els.map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
+      // En una sola evaluación: el marcador se rehace a menudo y un localizador puede quedarse con filas ya sueltas.
+      const shorts = await page.evaluate(() =>
+        [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
       );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
       const r = await rects(page);
