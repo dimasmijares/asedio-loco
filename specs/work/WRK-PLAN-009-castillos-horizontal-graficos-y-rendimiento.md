@@ -3,9 +3,9 @@ id: WRK-PLAN-009
 type: spec
 layer: work-plan
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-27
 updated: 2026-09-27
 owner: dimas
@@ -29,7 +29,7 @@ Primero los castillos, porque cambian el coste de la física y el equilibrio del
 | 2 | WRK-TASK-038 · Modo horizontal en móvil | completed | — | HUD y cámara revisados en horizontal |
 | 3 | WRK-TASK-039 · Mejora gráfica: grietas en los bloques dañados | completed | — | Una mejora visible en PC y móvil |
 
-Después: WRK-TASK-013, WRK-TASK-008 y WRK-TASK-016.
+Después, completadas en sus planes: WRK-TASK-013 y WRK-TASK-016 (WRK-PLAN-005) y WRK-TASK-008 (WRK-PLAN-004). La medida en un Android real queda en WRK-TASK-040.
 
 ## Risk Assessment
 
@@ -40,4 +40,4 @@ Después: WRK-TASK-013, WRK-TASK-008 y WRK-TASK-016.
 
 ## Evidence
 
-Pendiente.
+Las 3 tareas del plan y las 3 de rendimiento están completadas y subidas a `main`, cada una con sus pruebas en escritorio y móvil. Pruebas nuevas en CI: `calidad.spec.ts` y la de la portada sin Rapier en `smoke.spec.ts`. Queda WRK-TASK-014 (gráfica integrada), sin hardware para medirla.

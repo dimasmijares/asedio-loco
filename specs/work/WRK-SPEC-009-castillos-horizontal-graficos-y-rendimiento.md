@@ -3,9 +3,9 @@ id: WRK-SPEC-009
 type: spec
 layer: work-spec
 scope: ephemeral
-status: active
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-27
 updated: 2026-09-27
 owner: dimas
@@ -51,3 +51,16 @@ El usuario pide (27-09-2026):
 - PC y móvil vertical a la par; el horizontal se comprueba en 3 tamaños de móvil.
 - RULE-001 y RULE-004: destrozo, equilibrio y banco antes y después.
 - RULE-002: `PROTOCOL_VERSION` sube si cambia la disposición de los bloques.
+
+## Evidence
+
+Hecho el 27-09-2026:
+
+- **Castillos (WRK-TASK-037, ADR-013):** 176 bloques; cada disparo destroza lo mismo que antes, y las partidas en normal pasan de 6,8 a 7,9 rondas.
+- **Horizontal (WRK-TASK-038):** resultados compactos, cuenta atrás sin rótulos encima, descripción de munición visible, y corregido el orden de los `@media`.
+- **Gráficos (WRK-TASK-039):** grietas procedurales en los bloques dañados.
+- **Rendimiento:**
+  - topes de fragmentos y partículas en caliente (WRK-TASK-013);
+  - perfil móvil, con calidad baja y 30 fps fuera de la acción (WRK-TASK-008);
+  - portada sin Rapier (WRK-TASK-016).
+- **Pendientes:** la medida en un Android real (WRK-TASK-040) y en una gráfica integrada (WRK-TASK-014).

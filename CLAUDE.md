@@ -22,9 +22,10 @@ Las instrucciones de trabajo están en @AGENTS.md: `specs/` es la fuente de verd
 El juego está en producción: https://asedio-loco.dimasmijares.workers.dev. Cada push a `main` despliega y ejecuta las E2E contra producción.
 
 - **Terminado:** fases 0-6 (`WRK-PLAN-001`), cambios tras la primera prueba (`WRK-PLAN-002`) y adopción de KDD (`WRK-PLAN-003`).
-- **Entrega activa:** juego en móviles (`WRK-PLAN-004`): M1 hecha, M2-M5 pendientes.
+- **Juego en móviles** (`WRK-PLAN-004`): M1-M4 hechas; quedan la medida en un Android real (M4b) y la PWA (M5, opcional).
 - **Pendientes sueltos:** `WRK-PLAN-005`.
-- **Munición con identidad destructiva** (`WRK-PLAN-007`) y **claridad del apuntado y del impacto** (`WRK-PLAN-008`): terminados, pendientes de que el usuario los pruebe.
+- **Munición con identidad destructiva** (`WRK-PLAN-007`), **claridad del apuntado y del impacto** (`WRK-PLAN-008`) y **castillos de 176 bloques, horizontal, grietas y rendimiento** (`WRK-PLAN-009`): terminados, pendientes de que el usuario los pruebe.
+- **Medidas pendientes con hardware del usuario:** Android real (`WRK-TASK-040`) y gráfica integrada (`WRK-TASK-014`).
 - **Toda mejora va a la par en PC y en móvil vertical**, con pruebas en los dos formatos.
 - **Móvil:** se juega en vertical por defecto; se diseña y se prueba primero en vertical.
 
