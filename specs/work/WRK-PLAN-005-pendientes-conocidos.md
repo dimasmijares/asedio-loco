@@ -65,7 +65,7 @@ Orden recomendado, de más barato o más útil a menos:
 | 4 | WRK-TASK-014 · Medir en gráfica integrada | draft | — | — |
 | 5 | WRK-TASK-012 · Estadísticas con migración | draft | — | — |
 | 6 | WRK-TASK-011 · Repetición por lava | draft | — | — |
-| 7 | WRK-TASK-016 · Rapier fuera de la portada | draft | — | — |
+| 7 | WRK-TASK-016 · Rapier fuera de la portada | completed | — | La portada no pide Rapier (1,1 MB comprimido); prueba en `smoke.spec.ts` |
 | 8 | WRK-TASK-019 · Espectador promovido conserva `mobile` | completed | — | Hecho el 26-09-2026 |
 | 9 | WRK-TASK-018 · `full` viejo sin efecto | completed | — | Hecho el 26-09-2026 |
 | 10 | WRK-TASK-020 · Desconectados en el marcador | completed | — | Hecho el 26-09-2026 |

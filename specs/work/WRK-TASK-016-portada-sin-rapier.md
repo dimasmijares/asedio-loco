@@ -3,9 +3,9 @@ id: WRK-TASK-016
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -46,9 +46,9 @@ Fuera: la carga de Rapier al empezar una partida.
 
 ## Acceptance Criteria
 
-- [ ] Abrir la portada con `?backdrop=1` no pide el `.wasm` de Rapier.
-- [ ] El fondo sigue girando con la isla y los 4 castillos.
-- [ ] Empezar una partida carga Rapier y funciona como antes.
+- [x] Abrir la portada con `?backdrop=1` no pide el `.wasm` de Rapier.
+- [x] El fondo sigue girando con la isla y los 4 castillos.
+- [x] Empezar una partida carga Rapier y funciona como antes.
 
 ## Test Plan
 
@@ -60,4 +60,15 @@ Fuera: la carga de Rapier al empezar una partida.
 
 ## Evidence
 
-Pendiente.
+- No bastaba con quitar `loadRapier()` del fondo: `rapier3d-compat` lleva el `.wasm` incrustado en su módulo JS, y el fondo lo arrastraba por tres importaciones estáticas:
+  - `view.ts` → `sim/debris.ts`;
+  - `view.ts` → `sim/sim.ts` (por `SHIELD_RADIUS`);
+  - `backdrop.ts` → `game.ts` (por `savedQuality`).
+- **Cambios:**
+  - `debrisLike.ts` (interfaz `DebrisLike`, `NoDebris` y `DEBRIS_CAP`, sin Rapier): `WorldView` recibe una fábrica de fragmentos; `Game` le pasa `Debris` y el fondo usa `NoDebris`.
+  - `shield.ts` (`SHIELD_RADIUS`).
+  - `quality.ts` (`savedQuality`).
+- **Resultado:** el fragmento `view-*.js` ya no hace referencia a `rapier-*.js` (2,85 MB, 1,09 MB comprimido); solo lo hace `game-*.js`.
+- **Pruebas:**
+  - `smoke.spec.ts`: con `?backdrop=1`, la portada carga la vista del fondo y no pide nada de Rapier;
+  - `solo.spec.ts`: una partida completa sigue funcionando (Rapier se carga al empezar).

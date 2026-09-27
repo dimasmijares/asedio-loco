@@ -57,6 +57,8 @@ Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta u
 
 Con la CPU 4× más lenta la física sigue dentro del presupuesto de 16 ms por paso, pero por poco: en un móvil de gama media que haga de anfitrión, la escena más cargada (12 proyectiles a la vez) va a cámara lenta. En una partida normal hay como mucho 4 disparos por ronda, y el anfitrión pasa a un ordenador si lo hay (ARCH-003).
 
+**Peso inicial** (WRK-TASK-016): la portada no descarga Rapier (1,1 MB comprimido); se carga al empezar una partida o el campo de pruebas.
+
 **Perfil móvil** (WRK-TASK-008): sin calidad guardada ni `?quality`, un móvil arranca en baja (densidad de píxeles 0,85). Fuera de la cuenta atrás, el impacto y la repetición se dibuja como mucho a 30 fps (`Game.fullRate`); la física no cambia de ritmo.
 
 **Presupuestos:**

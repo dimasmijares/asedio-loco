@@ -50,7 +50,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 ### Behavior
 
 1. **Portada:** título, nombre, «Crear sala» (o «Entrar en la sala ABCD»), «Jugar solo contra bots» (rivales 1-3, dificultad, campo de pruebas), «Cómo se juega» y «Ajustes».
-   - Fondo animado: la isla con los 4 castillos y la cámara girando, sin física (D-043). No se crea en navegadores automatizados. Se desmonta al empezar la partida y vuelve con la revancha.
+   - Fondo animado: la isla con los 4 castillos y la cámara girando, sin física (D-043) y sin descargar Rapier: la vista recibe los fragmentos desde fuera (`DebrisLike`) y el fondo usa `NoDebris` (WRK-TASK-016). No se crea en navegadores automatizados salvo con `?backdrop=1`. Se desmonta al empezar la partida y vuelve con la revancha.
 2. **Cómo se juega:** una ventana con 4 párrafos (rey, apuntado de 20 s, 3 municiones, lava y viento).
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).

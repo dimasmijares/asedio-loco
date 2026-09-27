@@ -10,9 +10,10 @@ import { Fx } from './render/fx';
 import { toon } from './render/materials';
 import { Catapult, makeKing, makeProjectile } from './render/models';
 import type { Stage } from './render/stage';
-import { DEBRIS_CAP, Debris } from './sim/debris';
+import { DEBRIS_CAP, NoDebris, type DebrisLike, type MakeDebris } from './debrisLike';
 import { ReplayPlayer, ReplayRecorder } from './replay';
-import { SHIELD_RADIUS, type SimEvent } from './sim/sim';
+import { SHIELD_RADIUS } from './shield';
+import type { SimEvent } from './sim/sim';
 
 export interface ProjView {
   id: number;
@@ -29,7 +30,7 @@ export interface ProjView {
 export class WorldView {
   root = new THREE.Group();
   blocks: BlockMeshes;
-  debris: Debris;
+  debris: DebrisLike;
   fx: Fx;
   catapults = new Map<number, Catapult>();
   kings = new Map<number, THREE.Object3D>();
@@ -57,11 +58,11 @@ export class WorldView {
     this.fx.setQuality(q);
   }
 
-  constructor(readonly stage: Stage, readonly slots: number[]) {
+  constructor(readonly stage: Stage, readonly slots: number[], makeDebris: MakeDebris = () => new NoDebris()) {
     stage.scene.add(this.root);
     const shadows = stage.quality !== 'low';
     this.blocks = new BlockMeshes(this.root, 640, 0.035, shadows);
-    this.debris = new Debris(this.root, DEBRIS_CAP[stage.quality], shadows);
+    this.debris = makeDebris(this.root, DEBRIS_CAP[stage.quality], shadows);
     this.fx = new Fx(this.root, stage.quality);
     for (const slot of [0, 1, 2, 3]) {
       const c = new Catapult(slot);

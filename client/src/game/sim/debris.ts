@@ -23,10 +23,11 @@ const _s = new THREE.Vector3();
 // Fragmentos decorativos: un mundo físico aparte que cada cliente simula por su cuenta
 // (no se sincronizan por red). Los bloques de verdad aparecen aquí como cuerpos
 // cinemáticos para que los trozos reboten en ellos sin empujarlos.
-// Tope de fragmentos por calidad (D-009, D-046).
-export const DEBRIS_CAP = { low: 90, medium: 170, high: 260 } as const;
+import { DEBRIS_CAP, type DebrisLike } from '../debrisLike';
 
-export class Debris {
+export { DEBRIS_CAP };
+
+export class Debris implements DebrisLike {
   world: World;
   pieces: Piece[] = [];
   proxies = new Map<number, RigidBody>();

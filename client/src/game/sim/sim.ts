@@ -7,6 +7,7 @@ import { CHIP_RATIO, MATERIALS, type Material, type MaterialId } from '../../../
 import { type Quat, type Vec3, v3 } from '../../../../shared/math';
 import { RAPIER, type Collider, type ImpulseJoint, type RigidBody, type World } from './rapier';
 import { behaviorFor, type ProjectileBehavior } from './projectiles';
+import { SHIELD_RADIUS } from '../shield';
 
 export const DT = 1 / 60;
 const LAVA_FLOOR_HALF = 2;
@@ -18,7 +19,7 @@ const FLOOR_GROUPS = (0x0002 << 16) | 0xffff;
 const DOOMED_GROUPS = (0x0001 << 16) | 0xfffd;
 const KING_CRUSH_FORCE = 600;
 const JOINT_STRAIN = 0.07; // m de separación entre anclajes que rompe una unión
-export const SHIELD_RADIUS = 7.2;
+export { SHIELD_RADIUS };
 
 export type RemoveWhy = 'frac' | 'melt' | 'void' | 'eat';
 export type KingCause = 'crushed' | 'fell' | 'lava' | 'outside';

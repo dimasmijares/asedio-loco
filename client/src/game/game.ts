@@ -4,6 +4,8 @@ import { TrajectoryPreview, AimInput } from './aim';
 import { AMMO, AMMO_IDS } from '../../../shared/ammo';
 import { sfx } from './audio';
 import { isMobileDevice } from '../device';
+import { savedQuality } from './quality';
+import { Debris } from './sim/debris';
 import { NEAR_FADE } from './render/materials';
 import { makeProjectile } from './render/models';
 import { setQualityTarget, settings } from '../ui/settings';
@@ -21,17 +23,7 @@ export interface Mode {
 
 const QUALITY_KEY = 'asedio.quality';
 
-export function savedQuality(): Quality {
-  try {
-    const q = localStorage.getItem(QUALITY_KEY) as Quality | null;
-    if (q === 'low' || q === 'medium' || q === 'high') return q;
-  } catch {
-    /* sin almacenamiento */
-  }
-  const url = new URLSearchParams(location.search).get('quality') as Quality | null;
-  // Perfil móvil (WRK-TASK-008): sin calidad elegida, un móvil arranca en baja.
-  return url ?? (isMobileDevice() ? 'low' : 'medium');
-}
+export { savedQuality };
 
 export function saveQuality(q: Quality) {
   try {
@@ -80,7 +72,7 @@ export class Game {
 
   private constructor(readonly canvas: HTMLCanvasElement, public slots: number[], quality: Quality) {
     this.stage = new Stage(canvas, quality);
-    this.view = new WorldView(this.stage, slots);
+    this.view = new WorldView(this.stage, slots, (root, cap, shadows) => new Debris(root, cap, shadows));
     this.rig = new CameraRig(this.stage.camera, canvas);
     this.input = new AimInput(canvas);
     this.preview = new TrajectoryPreview(this.stage.scene);

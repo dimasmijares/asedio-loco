@@ -37,3 +37,16 @@ test('humo: portada y campo de pruebas sin errores', async ({ page }, info) => {
   await page.screenshot({ path: info.outputPath('cuatro-castillos.png') });
   expect(errors).toEqual([]);
 });
+
+// La portada dibuja su fondo animado sin descargar Rapier, que solo hace falta para jugar
+// (WRK-TASK-016): son 1,1 MB comprimidos menos al abrir el enlace, importante con datos móviles.
+test('la portada no descarga Rapier para el fondo', async ({ page }) => {
+  test.setTimeout(60_000);
+  const requests: string[] = [];
+  page.on('request', (r) => requests.push(r.url()));
+  await page.goto('/?backdrop=1');
+  await page.waitForSelector('#backdrop-canvas', { timeout: 30_000 });
+  await page.waitForTimeout(3000);
+  expect(requests.filter((u) => /rapier/i.test(u)), 'peticiones de Rapier en la portada').toEqual([]);
+  expect(requests.some((u) => /\/assets\/view-/.test(u)), 'la vista del fondo se ha cargado').toBe(true);
+});

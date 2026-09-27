@@ -18,9 +18,8 @@ export function showBackdrop(parent: HTMLElement): Promise<Backdrop | null> {
     const THREE = await import('three');
     const { Stage } = await import('../game/render/stage');
     const { WorldView } = await import('../game/view');
-    const { savedQuality } = await import('../game/game');
-    const { loadRapier } = await import('../game/sim/rapier');
-    await loadRapier();
+    // Sin Rapier (WRK-TASK-016): la vista va sin fragmentos y la calidad sale de `quality.ts`.
+    const { savedQuality } = await import('../game/quality');
     if (!current) return null; // se canceló mientras cargaba
     const stage = new Stage(canvas, savedQuality() === 'high' ? 'medium' : savedQuality());
     const view = new WorldView(stage, [0, 1, 2, 3]);
