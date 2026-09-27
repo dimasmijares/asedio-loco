@@ -24,7 +24,12 @@ const _s = new THREE.Vector3();
 class Pool {
   mesh: THREE.InstancedMesh;
   items: P[] = [];
-  constructor(geo: THREE.BufferGeometry, readonly cap: number, parent: THREE.Object3D, emissive = false) {
+  // `cap` es el tope vigente (según la calidad); la malla se crea con la capacidad máxima para
+  // poder subirlo en plena partida sin recrearla (WRK-TASK-013).
+  cap: number;
+  constructor(geo: THREE.BufferGeometry, readonly capacity: number, parent: THREE.Object3D, emissive = false) {
+    this.cap = capacity;
+    const cap = capacity;
     const mat = new THREE.MeshToonMaterial({ color: '#ffffff', gradientMap: toonGradient(), emissive: emissive ? '#000000' : '#000000' });
     this.mesh = new THREE.InstancedMesh(geo, mat, cap);
     this.mesh.count = 0;
@@ -36,6 +41,11 @@ class Pool {
   add(p: P) {
     if (this.items.length >= this.cap) this.items.shift();
     this.items.push(p);
+  }
+  // Nuevo tope: si baja, se retiran las partículas más antiguas que sobran.
+  setCap(n: number) {
+    this.cap = Math.min(n, this.capacity);
+    if (this.items.length > this.cap) this.items.splice(0, this.items.length - this.cap);
   }
   update(dt: number) {
     let n = 0;
@@ -69,16 +79,27 @@ class Pool {
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 const randDir = () => new THREE.Vector3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize();
 
+// Tope de partículas por calidad (D-046).
+export const FX_CAP = { low: 260, medium: 550, high: 900 } as const;
+
 export class Fx {
   puffs: Pool;
   bits: Pool;
   scale: number;
 
   constructor(parent: THREE.Object3D, quality: 'low' | 'medium' | 'high') {
-    const cap = quality === 'high' ? 900 : quality === 'medium' ? 550 : 260;
+    this.puffs = new Pool(new THREE.IcosahedronGeometry(1, 0), FX_CAP.high, parent);
+    this.bits = new Pool(new THREE.BoxGeometry(1, 1, 1), Math.floor(FX_CAP.high * 0.6), parent);
+    this.scale = 1;
+    this.setQuality(quality);
+  }
+
+  // Topes y densidad de partículas según la calidad; se puede cambiar en plena partida.
+  setQuality(quality: 'low' | 'medium' | 'high') {
+    const cap = FX_CAP[quality];
     this.scale = quality === 'high' ? 1 : quality === 'medium' ? 0.7 : 0.4;
-    this.puffs = new Pool(new THREE.IcosahedronGeometry(1, 0), cap, parent);
-    this.bits = new Pool(new THREE.BoxGeometry(1, 1, 1), Math.floor(cap * 0.6), parent);
+    this.puffs.setCap(cap);
+    this.bits.setCap(Math.floor(cap * 0.6));
   }
 
   private n(k: number) {

@@ -10,7 +10,7 @@ import { Fx } from './render/fx';
 import { toon } from './render/materials';
 import { Catapult, makeKing, makeProjectile } from './render/models';
 import type { Stage } from './render/stage';
-import { Debris } from './sim/debris';
+import { DEBRIS_CAP, Debris } from './sim/debris';
 import { ReplayPlayer, ReplayRecorder } from './replay';
 import { SHIELD_RADIUS, type SimEvent } from './sim/sim';
 
@@ -50,11 +50,18 @@ export class WorldView {
   private pendingLive: SimEvent[] = [];
   private replayUndo: (() => void)[] = [];
 
+  // Cambia en plena partida los topes de fragmentos y partículas (WRK-TASK-013); la resolución y
+  // las sombras las cambia `Stage.setQuality`.
+  setQuality(q: 'low' | 'medium' | 'high') {
+    this.debris.setMax(DEBRIS_CAP[q]);
+    this.fx.setQuality(q);
+  }
+
   constructor(readonly stage: Stage, readonly slots: number[]) {
     stage.scene.add(this.root);
     const shadows = stage.quality !== 'low';
     this.blocks = new BlockMeshes(this.root, 640, 0.035, shadows);
-    this.debris = new Debris(this.root, stage.quality === 'high' ? 260 : stage.quality === 'medium' ? 170 : 90, shadows);
+    this.debris = new Debris(this.root, DEBRIS_CAP[stage.quality], shadows);
     this.fx = new Fx(this.root, stage.quality);
     for (const slot of [0, 1, 2, 3]) {
       const c = new Catapult(slot);

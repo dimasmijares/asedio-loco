@@ -66,7 +66,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
    - **Registro de los textos** (27-09-2026, a petición del usuario): claro, preciso y neutro. Sin coloquialismos ni chistes en rótulos, resultados, estadísticas, avisos y descripciones; los nombres propios (municiones, bots) y la cuenta atrás «3, 2, 1, ¡FUEGO!» se mantienen. Las descripciones de munición caben en dos líneas del HUD en vertical (la prueba `hud-compact` usa la más larga).
 5. **Ajustes** (en portada y HUD):
-   - Calidad baja / media / alta, que se aplica al momento (D-046).
+   - Calidad baja / media / alta, que se aplica al momento, también a los topes de fragmentos y partículas (D-046, WRK-TASK-013).
    - Sonido, texto grande, temblor de cámara (activado salvo con `prefers-reduced-motion`, WRK-TASK-032) y mostrar fps (ocultos por defecto, D-055).
    - Sensibilidad del ratón de ×0,4 a ×1,8 (pasos de 0,1).
 6. **Accesibilidad** (D-045): colores Okabe-Ito más un emblema por jugador (☀ ☾ ★ ϟ), con tinta oscura sobre amarillo y rosa. Hay texto grande y silencio.
@@ -87,7 +87,6 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
   - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical el HUD se recoloca (marcador compacto, viento bajo los botones, fila de tarjetas abajo y botón de disparo encima a la derecha) y la cámara abre el campo de visión para no bajar de 40° de ancho.
-- Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
   - el marcador se queda en estandarte, porcentaje, barra y ✔/💀, sin nombres (tu fila, con borde blanco);

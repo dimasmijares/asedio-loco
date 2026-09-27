@@ -23,6 +23,9 @@ const _s = new THREE.Vector3();
 // Fragmentos decorativos: un mundo físico aparte que cada cliente simula por su cuenta
 // (no se sincronizan por red). Los bloques de verdad aparecen aquí como cuerpos
 // cinemáticos para que los trozos reboten en ellos sin empujarlos.
+// Tope de fragmentos por calidad (D-009, D-046).
+export const DEBRIS_CAP = { low: 90, medium: 170, high: 260 } as const;
+
 export class Debris {
   world: World;
   pieces: Piece[] = [];
@@ -31,13 +34,17 @@ export class Debris {
   time = 0;
   lavaY = -3.6;
 
-  constructor(parent: THREE.Object3D, readonly maxPieces = 220, shadows = true) {
+  // `maxPieces` es el tope vigente; las mallas se crean con `capacity` para poder subirlo en
+  // plena partida (WRK-TASK-013).
+  maxPieces: number;
+  constructor(parent: THREE.Object3D, maxPieces = 220, shadows = true, readonly capacity = Math.max(maxPieces, DEBRIS_CAP.high)) {
+    this.maxPieces = Math.min(maxPieces, capacity);
     this.world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
     this.world.integrationParameters.numSolverIterations = 2;
     addIslandColliders(this.world);
     const geo = new THREE.BoxGeometry(1, 1, 1);
     for (const mat of MATERIAL_IDS) {
-      const m = new THREE.InstancedMesh(geo, blockMaterial(mat), maxPieces);
+      const m = new THREE.InstancedMesh(geo, blockMaterial(mat), capacity);
       m.count = 0;
       m.castShadow = shadows && mat !== 'glass';
       m.frustumCulled = false;
@@ -145,5 +152,11 @@ export class Debris {
 
   get count() {
     return this.pieces.length;
+  }
+
+  // Nuevo tope: si baja, se retiran los fragmentos más antiguos que sobran.
+  setMax(n: number) {
+    this.maxPieces = Math.min(n, this.capacity);
+    while (this.pieces.length > this.maxPieces) this.kill(0);
   }
 }

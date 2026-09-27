@@ -3,9 +3,9 @@ id: WRK-TASK-013
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 1.0.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -47,9 +47,9 @@ Fuera: `stage.ts`, que ya cambia resolución y sombras al momento.
 
 ## Acceptance Criteria
 
-- [ ] En `/#sandbox`, al pasar de alta a baja, el contador de trozos no supera 90 y el de partículas no supera el tope de baja.
-- [ ] Al subir de baja a alta, los topes suben sin recargar.
-- [ ] Se quita la limitación correspondiente de `CLAUDE.md` y D-046 queda superada en `DECISIONES.md` o su especificación.
+- [x] En `/#sandbox`, al pasar de alta a baja, el contador de trozos no supera 90 y el de partículas no supera el tope de baja.
+- [x] Al subir de baja a alta, los topes suben sin recargar.
+- [x] Se quita la limitación de ARCH-005, FEAT-INTERFAZ-001 y FEAT-SENSACION-001 (`CLAUDE.md` ya no la tenía); `DECISIONES.md` es histórico y no se actualiza.
 
 ## Test Plan
 
@@ -61,4 +61,6 @@ Fuera: `stage.ts`, que ya cambia resolución y sombras al momento.
 
 ## Evidence
 
-Pendiente.
+- `Game.applyQuality` sustituye a `Stage.setQuality` en Ajustes y en la calidad adaptativa, y llama también a `WorldView.setQuality`, que a su vez llama a `Debris.setMax` y `Fx.setQuality`.
+- Las mallas instanciadas se crean con la capacidad de la calidad alta (260 fragmentos por material, 900 partículas y 540 astillas). El tope vigente es un límite aparte: al bajar, se retiran de golpe los más antiguos que sobran, algo que no cuesta nada en CPU.
+- `tests/e2e/calidad.spec.ts` (grupo `basicas` de CI): en `/?quality=high#sandbox`, tras 4 vacas hay más de 90 fragmentos. Al pasar a baja, el tope es 90 y el recuento no lo supera (partículas: tope 260). Al volver a alta, los topes vuelven a 260 y 900 sin recargar.

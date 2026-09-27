@@ -93,7 +93,7 @@ export class Game {
     // Pellizcar: separar los dedos acerca (como la rueda hacia delante).
     this.input.onPinch = (f) => this.rig.zoom(1 / f - 1);
     window.addEventListener('resize', () => this.stage.resize());
-    setQualityTarget((q) => this.stage.setQuality(q));
+    setQualityTarget((q) => this.applyQuality(q));
     this.rig.orbit(new THREE.Vector3(0, 2, 0), 70, 38, 0.06);
     this.rig.snap();
     this.loop = this.loop.bind(this);
@@ -106,6 +106,12 @@ export class Game {
   private slowSamples = 0;
   autoQuality = !new URLSearchParams(location.search).has('quality') && !navigator.webdriver;
   onQualityChange: (q: Quality) => void = () => {};
+  // Calidad nueva en plena partida: resolución y sombras (escenario) y topes de fragmentos y
+  // partículas (vista).
+  applyQuality(q: Quality) {
+    this.stage.setQuality(q);
+    this.view.setQuality(q);
+  }
   private adaptQuality() {
     if (!this.autoQuality || document.visibilityState !== 'visible') return;
     this.slowSamples = this.fps < 38 ? this.slowSamples + 1 : Math.max(0, this.slowSamples - 2);
@@ -117,7 +123,7 @@ export class Game {
       this.autoQuality = false;
       return;
     }
-    this.stage.setQuality(next);
+    this.applyQuality(next);
     settings.quality = next;
     saveQuality(next);
     this.onQualityChange(next);

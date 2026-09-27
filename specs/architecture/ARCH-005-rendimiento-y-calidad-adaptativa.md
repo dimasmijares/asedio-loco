@@ -64,6 +64,8 @@ Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta u
 | Tope de partículas (humo + trozos al 60 %; `count` suma los dos) | 900 + 540 | 550 + 330 | 260 + 156 |
 | Tope de fragmentos | 260 | 170 | 90 |
 
+**Cambio de calidad en caliente** (`Game.applyQuality`, WRK-TASK-013): cambia la resolución y las sombras (`Stage.setQuality`) y los topes de fragmentos (`DEBRIS_CAP`: 90, 170 y 260) y de partículas (`FX_CAP`: 260, 550 y 900). Las mallas se crean con la capacidad de la calidad alta; al bajar, se retiran los más antiguos que sobran.
+
 **Calidad adaptativa** (`game.ts`, D-041): si los fps están por debajo de 38 de forma sostenida (unos 5 s), baja un nivel y lo guarda. No actúa con `?quality=` en la URL, en navegadores automatizados ni con la pestaña oculta. Resolución y sombras cambian al momento; los topes, en la partida siguiente (D-046).
 
 **Técnicas:**
@@ -85,7 +87,6 @@ Con SwiftShader la misma escena va a unos 16 fps y cada paso de física cuesta u
 - Las cifras de la tabla solo valen para una gráfica de gama alta. El objetivo en integradas es una estimación.
 - En móviles no hay datos; la calidad adaptativa es la única red de seguridad.
 - La adaptación no sube de nivel: si un pico baja la calidad, se queda así hasta que el jugador la cambie.
-- Tras cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente.
 
 ## Acceptance Criteria
 

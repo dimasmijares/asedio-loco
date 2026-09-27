@@ -78,7 +78,6 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 
 ### Known Limitations
 
-- Al cambiar la calidad en plena partida, los topes de partículas y fragmentos no cambian hasta la siguiente partida.
 - Si el anfitrión se va en plena fase de impacto, las estadísticas de esa ronda quedan incompletas.
 - En la isla, los bloques que caen sobre la lava no se funden (solo se come la hilera al subir el nivel).
 - La repetición reemite los eventos: los sonidos se oyen otra vez durante ella.

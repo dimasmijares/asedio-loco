@@ -60,7 +60,7 @@ Orden recomendado, de más barato o más útil a menos:
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---|---|---|---|---|
 | 1 | WRK-TASK-015 · README sin cámara lenta en directo | completed | — | Hecho el 26-09-2026 |
-| 2 | WRK-TASK-013 · Topes al cambiar calidad | draft | — | — |
+| 2 | WRK-TASK-013 · Topes al cambiar calidad | completed | — | Topes en caliente (`applyQuality`), prueba `calidad.spec.ts` |
 | 3 | WRK-TASK-010 · Desconectado pasa a bot | draft | — | — |
 | 4 | WRK-TASK-014 · Medir en gráfica integrada | draft | — | — |
 | 5 | WRK-TASK-012 · Estadísticas con migración | draft | — | — |
