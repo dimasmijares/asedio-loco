@@ -18,33 +18,39 @@ tags: [movil, rendimiento]
 
 ## Objective
 
-Confirmar en un teléfono Android real de gama media que la partida en solitario y en red es jugable con el perfil móvil (WRK-TASK-008), como anfitrión y como invitado.
+Confirmar en un teléfono Android real lo que hasta ahora solo se ha medido con emulación: rendimiento, control táctil, horizontal y temperatura. **Son pruebas opcionales** que solo puede hacer el usuario; ninguna tarea depende de ellas.
 
 ## File Scope
 
 - `specs/architecture/ARCH-005-rendimiento-y-calidad-adaptativa.md` (tabla de mediciones)
+- Tareas nuevas si alguna prueba descubre un problema
 
-Fuera: código del juego. Si la medida no llega, el arreglo es otra tarea.
+Fuera: código del juego.
 
 ## Implementation Notes
 
-Necesita el teléfono del usuario. Pasos:
+Pruebas (URL: `https://asedio-loco.dimasmijares.workers.dev`):
 
-1. Abrir `https://asedio-loco.dimasmijares.workers.dev/?bots=3#solo` con el móvil en vertical.
-2. Activar «Mostrar fps» en Ajustes.
-3. Anotar los fps al apuntar y durante el impacto de las primeras rondas, y el modelo del teléfono.
-4. Repetir con `#bench` para la escena de referencia.
+| N.º | Prueba | Cómo | Qué anotar |
+|---|---|---|---|
+| A1 | Rendimiento en solitario | En vertical, activar «Mostrar fps» en Ajustes y jugar unas rondas contra 3 bots | Modelo del teléfono, fps al apuntar y durante el impacto |
+| A2 | Escena de referencia | Abrir `/#bench` y esperar al final | fps medios del resultado |
+| A3 | Móvil como anfitrión | Crear una sala desde el móvil y entrar desde otro dispositivo, sin PC en la sala | Si los impactos van fluidos o a cámara lenta |
+| A4 | Control táctil | Apuntar arrastrando, disparar con 🔥 y cambiar de objetivo con ◀ ▶ | Qué resulta incómodo o impreciso |
+| A5 | Horizontal | Girar el móvil durante una partida | Qué se tapa o se lee mal |
+| A6 | Batería y temperatura | Jugar una partida completa (2-3 minutos) | Si el teléfono se calienta de forma notable |
 
 ## Acceptance Criteria
 
-- [ ] Modelo del teléfono, fps al apuntar, fps en el impacto y resultado de `#bench` anotados en ARCH-005.
-- [ ] Si el impacto baja de 20 fps, se abre una tarea con la causa (física como anfitrión, dibujo o partículas).
+- [ ] Resultados de las pruebas que haga el usuario anotados en ARCH-005 (A1-A3) o en Evidence (A4-A6).
+- [ ] Si el impacto baja de 20 fps (A1, A3), se abre una tarea con la causa; WRK-TASK-052 ya ataca el coste de la física.
+- [ ] Cada problema de control o de interfaz (A4, A5) se convierte en una tarea.
 
 ## Test Plan
 
 | Level | What it covers |
 |-------|----------------|
-| Manual | Teléfono real del usuario |
+| Manual | Teléfono Android del usuario |
 
 ## Evidence
 

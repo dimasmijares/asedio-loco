@@ -25,7 +25,8 @@ El juego está en producción: https://asedio-loco.dimasmijares.workers.dev. Cad
 - **Juego en móviles** (`WRK-PLAN-004`): M1-M4 hechas; quedan la medida en un Android real (M4b) y la PWA (M5, opcional).
 - **Pendientes sueltos:** `WRK-PLAN-005`.
 - **Munición con identidad destructiva** (`WRK-PLAN-007`), **claridad del apuntado y del impacto** (`WRK-PLAN-008`) y **castillos de 176 bloques, horizontal, grietas y rendimiento** (`WRK-PLAN-009`): terminados, pendientes de que el usuario los pruebe.
-- **Medidas pendientes con hardware del usuario:** Android real (`WRK-TASK-040`) y gráfica integrada (`WRK-TASK-014`).
+- **Siguiente entrega:** mejoras propuestas (`WRK-SPEC-010`, `WRK-PLAN-010`): 12 tareas nuevas (WRK-TASK-041 a 052) y 4 de planes anteriores (010, 011, 012, 009), aprobadas por el usuario. Para empezar: `npm run kdd:pendientes` y la primera tarea lista del orden sugerido en `WRK-PLAN-010`. Las tareas 041, 042, 043 y 050 empiezan dando opciones al usuario.
+- **Pruebas opcionales en Android** (solo las puede hacer el usuario): lista A1-A6 en `WRK-TASK-040`. Sin hardware: gráfica integrada (`WRK-TASK-014`).
 - **Toda mejora va a la par en PC y en móvil vertical**, con pruebas en los dos formatos.
 - **Móvil:** se juega en vertical por defecto; se diseña y se prueba primero en vertical.
 
