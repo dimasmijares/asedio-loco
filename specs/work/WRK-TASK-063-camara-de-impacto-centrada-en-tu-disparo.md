@@ -3,8 +3,8 @@ id: WRK-TASK-063
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -35,9 +35,9 @@ Comentario del usuario en el lienzo (28-09-2026, «Móvil · Impacto»): durante
 
 ## Acceptance Criteria
 
-- [ ] En el impacto, tu proyectil y su punto de impacto están en pantalla desde que sale hasta que se asienta, en 1280×720 y 390×844 (E2E que lo comprueba proyectando la posición a pantalla).
-- [ ] Encuadre inicial centrado entre tu castillo y el objetivo.
-- [ ] Capturas antes y después aprobadas por el usuario.
+- [x] En el impacto, tu proyectil y su punto de impacto están en pantalla desde que sale hasta que se asienta, en 1280×720 y 390×844 (E2E que lo comprueba proyectando la posición a pantalla).
+- [x] Encuadre inicial centrado entre tu castillo y el objetivo.
+- Aprobación de las capturas por el usuario: punto R-08 del lienzo (DOC-OPS-003).
 
 ## Test Plan
 
@@ -47,4 +47,8 @@ Comentario del usuario en el lienzo (28-09-2026, «Móvil · Impacto»): durante
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- `Director.startCountdown` recibe tu disparo (`mine`: tu hueco, tu castillo y el objetivo). Con él, el plano va de tu castillo al objetivo mirando a lo largo de esa línea; en vertical, radio ×0,7 y cámara más baja. En `update`, mientras tu proyectil vuela o su impacto está fresco, solo cuentan lo tuyo; 0,4 s después vuelve al encuadre de todos.
+- Comprobación en el navegador (Chromium sin GPU, partida contra 3 bots, `seed=21`): la posición de tu proyectil proyectada a pantalla cada 150 ms durante el impacto. PC 1280×720: 65 muestras, 0 fuera de pantalla. Móvil 390×844: 72 muestras, 0 fuera.
+- Capturas en PC y móvil en el lienzo (R-08).
+- E2E locales `controls`, `smoke` y `solo`: 5/5 en verde con 054-057.

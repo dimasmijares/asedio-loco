@@ -328,7 +328,10 @@ export class MatchUI {
     }
     if (s.phase === 'countdown' && prev !== 'countdown') {
       const castles = s.players.filter((p) => p.alive).map((p) => new THREE.Vector3(...castleOrigin(p.slot)));
-      this.director.startCountdown(castles, this.src.remaining());
+      // Si juegas, el plano va de tu castillo al que apuntas (WRK-TASK-063).
+      const me = this.me();
+      const mine = me?.alive && me.target !== undefined && me.target !== me.slot ? { slot: me.slot, home: new THREE.Vector3(...castleOrigin(me.slot)), target: new THREE.Vector3(...castleOrigin(me.target)) } : undefined;
+      this.director.startCountdown(castles, this.src.remaining(), mine);
       this.showArcs(s);
     } else if (s.phase !== 'countdown' && prev === 'countdown') this.arcs.hide();
     // 3, 2, 1 y ¡FUEGO!: el cuarto tiempo dura lo mismo que los otros y coincide con los disparos.

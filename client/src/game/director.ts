@@ -9,10 +9,12 @@ const MAX_WIDE = 34;
 // Dirección de cámara durante los impactos: un plano panorámico que encuadra a la vez todos
 // los proyectiles en vuelo y los sitios donde acaban de caer. No persigue a ninguno: el
 // encuadre cambia despacio y se acerca solo si la acción está concentrada (p. ej. un disparo).
+// Si juegas (WRK-TASK-063), primero manda tu disparo: el plano va de tu castillo al que apuntas
+// y solo sigue tus proyectiles y dónde caen; los demás entran cuando el tuyo se ha asentado.
 export class Director {
   private t = 0;
   // Dónde cayó cada proyectil (se mantiene un rato para ver el destrozo).
-  private impacts: { p: THREE.Vector3; until: number }[] = [];
+  private impacts: { p: THREE.Vector3; until: number; owner?: number }[] = [];
   private lastSeen = new Map<number, THREE.Vector3>();
   private dir = new THREE.Vector3(); // dirección horizontal desde la que se mira (fija en la ronda)
   private holdUntil = 0;
@@ -25,6 +27,9 @@ export class Director {
   // Cuenta atrás: la cámara va de la vista de apuntado al plano general.
   private pull: { at0: THREE.Vector3; from0: THREE.Vector3; at1: THREE.Vector3; from1: THREE.Vector3; t: number; dur: number } | null = null;
   private last = { at: new THREE.Vector3(), from: new THREE.Vector3() };
+  // Tu disparo: quién eres y hasta cuándo manda (se alarga mientras vuela o acaba de caer).
+  private mine: { slot: number; until: number } | null = null;
+  private owners = new Map<number, number>();
 
   constructor(readonly view: WorldView, readonly rig: CameraRig) {}
 
@@ -37,13 +42,17 @@ export class Director {
     this.anchors = [];
     this.anchorsUntil = 0;
     this.pull = null;
+    this.mine = null;
+    this.owners.clear();
   }
 
   // Empieza la cuenta atrás: calcula el plano general que encuadra los castillos en juego,
   // visto desde detrás del tuyo (donde está ahora la cámara), y se aleja hasta él en `dur` s.
-  startCountdown(castles: THREE.Vector3[], dur: number) {
+  // Con `mine`, el plano va solo de tu castillo al que apuntas.
+  startCountdown(castles: THREE.Vector3[], dur: number, mine?: { slot: number; home: THREE.Vector3; target: THREE.Vector3 }) {
     if (!castles.length) return;
-    this.anchors = castles.map((c) => c.clone().setY(2));
+    this.mine = mine ? { slot: mine.slot, until: Infinity } : null;
+    this.anchors = (mine ? [mine.home, mine.target] : castles).map((c) => c.clone().setY(2));
     this.anchorsUntil = this.t + dur + 2.5;
     const c = new THREE.Vector3();
     for (const p of this.anchors) c.add(p);
@@ -52,9 +61,14 @@ export class Director {
     for (const p of this.anchors) r = Math.max(r, Math.hypot(p.x - c.x, p.z - c.z));
     this.center.copy(c);
     this.radius = THREE.MathUtils.clamp(r + 6, 9, MAX_WIDE);
-    this.dir.copy(this.rig.pos).sub(c).setY(0);
+    // Tu disparo: se mira a lo largo de la línea de tu castillo al objetivo, desde detrás del
+    // tuyo. En un móvil en vertical, la línea ocupa el alto de la pantalla.
+    if (mine) this.dir.subVectors(mine.home, mine.target).setY(0);
+    else this.dir.copy(this.rig.pos).sub(c).setY(0);
     if (this.dir.lengthSq() < 1) this.dir.set(0, 0, 1);
     this.dir.normalize();
+    // A lo largo de la línea, la profundidad de la perspectiva ya acorta: basta un radio menor.
+    if (mine && this.rig.camera.aspect < 1) this.radius = Math.max(9, this.radius * 0.7);
     const end = this.frame();
     this.pull = { at0: this.rig.target.clone(), from0: this.rig.pos.clone(), at1: end.at, from1: end.from, t: 0, dur: Math.max(0.3, dur) };
   }
@@ -87,8 +101,8 @@ export class Director {
     const at = this.center.clone().setY(Math.max(1.5, this.center.y * 0.6));
     const from = at
       .clone()
-      .addScaledVector(this.dir, dist * (tall ? 0.62 : 0.82))
-      .add(new THREE.Vector3(0, Math.max(9, dist * (tall ? 0.78 : 0.55)), 0));
+      .addScaledVector(this.dir, dist * (tall ? (this.mine ? 0.8 : 0.62) : 0.82))
+      .add(new THREE.Vector3(0, Math.max(9, dist * (tall ? (this.mine ? 0.55 : 0.78) : 0.55)), 0));
     return { at, from };
   }
 
@@ -100,17 +114,27 @@ export class Director {
   update(dt: number): boolean {
     this.t += dt;
     // Proyectiles que han desaparecido: ahí ha habido un impacto.
-    for (const [id, p] of this.lastSeen) if (!this.view.projs.has(id)) this.addImpact(p), this.lastSeen.delete(id);
+    for (const [id, p] of this.lastSeen) if (!this.view.projs.has(id)) this.addImpact(p, this.owners.get(id)), this.lastSeen.delete(id), this.owners.delete(id);
+    this.impacts = this.impacts.filter((i) => i.until > this.t);
+    // Mientras tu disparo vuela o acaba de caer, solo cuenta lo tuyo.
+    const mine = this.mine;
+    if (mine) {
+      const flying = [...this.view.projs.values()].some((pr) => pr.owner === mine.slot);
+      const landed = this.impacts.some((i) => i.owner === mine.slot);
+      const started = this.lastSeen.size > 0 || this.impacts.length > 0;
+      if (flying || landed || !started) mine.until = this.t + 0.4;
+      if (this.t > mine.until) this.mine = null;
+    }
+    const only = (owner: number | undefined) => !this.mine || owner === this.mine.slot;
     const pts: THREE.Vector3[] = [];
     for (const pr of this.view.projs.values()) {
       // Lo que sale volando fuera de la isla no merece alejar la cámara.
-      if (pr.p.y > -2 && islandSdf(pr.p.x, pr.p.z) < 6) pts.push(pr.p);
+      if (only(pr.owner) && pr.p.y > -2 && islandSdf(pr.p.x, pr.p.z) < 6) pts.push(pr.p);
       const seen = this.lastSeen.get(pr.id);
       if (seen) seen.copy(pr.p);
-      else this.lastSeen.set(pr.id, pr.p.clone());
+      else this.lastSeen.set(pr.id, pr.p.clone()), this.owners.set(pr.id, pr.owner);
     }
-    this.impacts = this.impacts.filter((i) => i.until > this.t);
-    for (const i of this.impacts) pts.push(i.p);
+    for (const i of this.impacts) if (only(i.owner)) pts.push(i.p);
     const wide = this.t < this.anchorsUntil;
     if (wide) pts.push(...this.anchors);
     if (!pts.length) return this.t < this.holdUntil;
@@ -122,6 +146,7 @@ export class Director {
     let r = 0;
     for (const p of pts) r = Math.max(r, Math.hypot(p.x - c.x, p.z - c.z), p.y - c.y);
     r = THREE.MathUtils.clamp(r + 4, 9, wide ? MAX_WIDE : 24);
+    if (this.mine && this.rig.camera.aspect < 1) r = Math.max(9, r * 0.7);
     const k = 1 - Math.exp(-dt * 1.4);
     if (this.radius === 0) {
       this.center.copy(c);
@@ -144,7 +169,7 @@ export class Director {
     return true;
   }
 
-  private addImpact(p: THREE.Vector3) {
-    this.impacts.push({ p: p.clone().setY(Math.max(1, p.y)), until: this.t + 2.2 });
+  private addImpact(p: THREE.Vector3, owner?: number) {
+    this.impacts.push({ p: p.clone().setY(Math.max(1, p.y)), until: this.t + 2.2, owner });
   }
 }
