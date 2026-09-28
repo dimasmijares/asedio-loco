@@ -27,10 +27,12 @@ export class NetHost {
 
   constructor(readonly game: Game, readonly conn: Connection, state: MatchState, readonly localSlot: number | null, fresh = true) {
     this.host = new MatchHost(game, state, fresh);
+    this.host.isConnected = (id) => id === conn.you?.id || (conn.room?.players.find((p) => p.id === id)?.connected ?? false);
+    this.host.autoDifficulty = conn.room?.config.difficulty ?? 'normal';
     this.host.onState = (s) => this.send('all', { k: 'st', s });
     this.host.onAim = (slot, p) => {
       // Los humanos remotos ya mandan su puntería a todos; aquí van la de los bots y la propia.
-      if (!p.bot && slot !== this.localSlot) return;
+      if (!p.bot && !p.auto && slot !== this.localSlot) return;
       this.aims.set(slot, [slot, ...aimToArr(p.aim), p.selected, p.target]);
     };
     game.onBodyMoved = (id, p, q) => this.moved.set(id, { p, q });

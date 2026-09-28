@@ -279,7 +279,7 @@ export class MatchUI {
     this.hud.setTimer(s.phase === 'aim' ? rem : null, s.phase === 'aim' && rem < 4);
     this.hud.setWind(s.wind, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
     this.hud.setPlayers(
-      s.players.map((p) => ({ slot: p.slot, name: p.name, alive: p.alive, blocks: p.blocks, maxBlocks: BLOCKS_PER_CASTLE, locked: s.phase === 'aim' && p.locked, bot: p.bot, you: p.slot === this.src.you, connected: p.bot ? true : (this.src.connected?.(p.id) ?? true) })),
+      s.players.map((p) => ({ slot: p.slot, name: p.name, alive: p.alive, blocks: p.blocks, maxBlocks: BLOCKS_PER_CASTLE, locked: s.phase === 'aim' && p.locked, bot: p.bot || p.auto, you: p.slot === this.src.you, connected: p.bot ? true : (this.src.connected?.(p.id) ?? true) })),
     );
     if (me && me.alive && s.phase === 'aim') this.hud.setAmmo(me.ammo, me.selected, (i) => this.selectAmmo(i));
     else this.hud.setAmmo([], 0, () => {});

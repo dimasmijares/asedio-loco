@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -86,7 +86,7 @@ Decidir por cada bot, al empezar la ronda, a quién dispara, con qué munición 
 
 - Las partidas varían mucho de duración: con bots difíciles un rey puede caer en la ronda 1; con fáciles se llega a la inundación (ronda 10) y más allá.
 - Los bots no reaccionan a lo que pasa durante la ronda ni aprenden de sus fallos: deciden una vez.
-- Un humano que se desconecta no pasa a bot (FEAT-SALAS-001).
+- Un humano desconectado pasa a bot desde la ronda siguiente, con la dificultad de la sala, y deja de serlo al volver (`PlayerState.auto`, FEAT-SALAS-001, WRK-TASK-010).
 - Tras una migración de anfitrión se pierde durante una ronda quién atacó a quién: esa ronda no hay venganza.
 
 ## Acceptance Criteria

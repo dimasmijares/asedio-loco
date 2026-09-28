@@ -5,6 +5,7 @@ import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
 import { lerp, type Vec3 } from '../../../../shared/math';
 import { GOALS, REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, goalCounts, impactMaxDuration, kingGuarded, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
+import type { Difficulty } from '../../../../shared/protocol';
 import type { Sim, SimEvent } from '../sim/sim';
 
 // Lo que el anfitrión necesita del juego. Lo implementa Game y, en las pruebas de
@@ -60,6 +61,11 @@ export class MatchHost {
   // listos debe ser > 0).
   aimLeft = 0;
 
+  // Quién sigue conectado (en red) y con qué dificultad juega el bot que lleva a un desconectado
+  // (WRK-TASK-010). En solitario todos están conectados.
+  isConnected: (id: string) => boolean = () => true;
+  autoDifficulty: Difficulty = 'normal';
+
   constructor(readonly game: HostEnv, public state: MatchState, fresh = true) {
     if (fresh) game.startSim(state.players.map((p) => p.slot));
     const sim = game.sim!;
@@ -87,7 +93,8 @@ export class MatchHost {
   setInput(slot: number, input: PlayerInput) {
     const p = this.player(slot);
     const s = this.state;
-    if (!p || !p.alive || s.phase !== 'aim' || p.locked) return;
+    // Si lo lleva un bot (se desconectó), recupera el control en el siguiente apuntado.
+    if (!p || !p.alive || s.phase !== 'aim' || p.locked || p.auto) return;
     if (input.aim) p.aim = clampAim(input.aim);
     if (input.selected !== undefined && input.selected >= 0 && input.selected < p.ammo.length) p.selected = input.selected;
     if (input.target !== undefined && s.players.some((q) => q.slot === input.target && q.alive && q.slot !== slot)) p.target = input.target;
@@ -166,6 +173,12 @@ export class MatchHost {
     // Escudo real: si la ronda que acaba lo tenía, se recoloca a los reyes que se han salido.
     if (this.sim.kingGuard) this.sim.restoreKings();
     this.sim.kingGuard = kingGuarded(s);
+    // Un humano desconectado al empezar la ronda: su castillo lo lleva un bot hasta que vuelva.
+    for (const p of s.players) {
+      if (p.bot) continue;
+      p.auto = p.alive && !this.isConnected(p.id);
+      if (p.auto) p.difficulty ??= this.autoDifficulty;
+    }
     if (s.round === 1) s.remaining += this.firstAimBonus;
     this.sim.setLava(s.lavaY);
     this.game.setLavaVisual(s.lavaY);

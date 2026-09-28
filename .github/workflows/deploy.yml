@@ -58,6 +58,8 @@ jobs:
             args: multiplayer -g "revancha"
           - grupo: red-mala
             args: multiplayer -g "red mala"
+          - grupo: desconexion
+            args: multiplayer -g "desconectado"
     name: e2e (${{ matrix.grupo }})
     steps:
       - uses: actions/checkout@v7

@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -65,6 +65,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 6. **Migración de anfitrión** (D-031): si el anfitrión se desconecta en partida, el servidor elige a otro jugador conectado, primero los ordenadores y luego por hueco. Ese cliente reconstruye la física con lo que ve y sigue.
    - Si se estaba resolviendo un impacto, se da por terminado. Si se apuntaba, los bots vuelven a decidir y quedan al menos 3 s.
    - En el lobby, el anfitrión tiene 8 s de gracia para recargar sin perder el papel.
+6b. **Desconectado → bot** (WRK-TASK-010): al empezar cada ronda, el anfitrión marca `auto` en los humanos vivos que no están conectados. Su castillo lo lleva un bot con la dificultad de la sala (`decideBots`), su puntería se reenvía a todos como la de un bot y el marcador enseña 🤖 junto a 📡. Si vuelve con su token, sus entradas se ignoran hasta el siguiente apuntado, en el que recupera el control. El resto de la ronda en que se fue hace de margen para reconectar.
 7. **Cesión en segundo plano** (D-065): a los 2 s con la pestaña oculta, el anfitrión manda `yield` y pasa a cliente sin desconectarse. Al volver pide un `full`. Si no hay otro humano conectado, la partida espera. No se cede en `over`.
 8. **Revancha:** solo el anfitrión ve «Revancha». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
 9. **Sala vacía:** se borra a los 60 s sin conexiones.
@@ -78,7 +79,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 
 ### Known Limitations
 
-- Un jugador que se desconecta en plena partida no pasa a ser un bot: su catapulta dispara con la última puntería cuando se acaba el tiempo.
+- Un jugador que se desconecta en plena partida dispara con su última puntería hasta que acaba la ronda en curso. Desde la siguiente, su castillo lo lleva un bot (WRK-TASK-010, punto 6b).
 - Si el anfitrión se va en plena fase de impacto, las estadísticas de esa ronda quedan incompletas.
 - Un espectador que entra tarde no ve las repeticiones anteriores (FEAT-REPLAY-001).
 - Cualquiera con el enlace puede entrar: no hay salas privadas ni expulsión.

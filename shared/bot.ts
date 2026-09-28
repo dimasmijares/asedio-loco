@@ -170,7 +170,7 @@ export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number
 // quién apuntó cada jugador en la ronda anterior (venganza).
 export function decideBots(s: MatchState, kingPos: Record<number, Vec3>, lastTargets: ReadonlyMap<number, number>): Map<number, BotDecision> {
   const taken: Record<number, number> = {};
-  const order = s.players.filter((p) => p.alive && p.bot);
+  const order = s.players.filter((p) => p.alive && (p.bot || p.auto));
   const shuffle = rng((s.seed ^ hashString(`bots:${s.round}`)) >>> 0);
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(shuffle.next() * (i + 1));

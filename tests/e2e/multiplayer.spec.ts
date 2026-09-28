@@ -329,6 +329,56 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   expect(errors).toEqual([]);
 });
 
+// WRK-TASK-010: el castillo de un jugador que se desconecta lo lleva un bot desde la ronda
+// siguiente, y el jugador lo recupera al volver con su token.
+test('un jugador desconectado pasa a ser un bot y recupera el control al volver', async ({ browser }) => {
+  test.setTimeout(600_000);
+  const errors: string[] = [];
+  const host = await newPlayer(browser, errors, 'anfitrión');
+  const g1 = await newPlayer(browser, errors, 'j2');
+  const hash = await createRoom(host, '&bots=2');
+  await join(g1, hash, 'Jugador2', SLOW);
+  await expect(host.locator('#player-list li[data-player]')).toHaveCount(2);
+  await host.click('#start');
+  const [, g] = await waitAll([host, g1], (s) => s.round === 1 && s.phase === 'aim');
+  const slot = g.you!;
+  const player = () => host.evaluate((slot) => (window as any).__asedio.mode.state.players.find((p: any) => p.slot === slot), slot);
+  const url = g1.url();
+  await g1.goto('about:blank');
+  await host.waitForFunction((slot) => document.querySelector(`#hud-players .hp[data-slot="${slot}"] .hp-state`)?.getAttribute('title') === 'Desconectado', slot, { timeout: 20_000 });
+  // En la ronda siguiente (la 2, con el escudo real: su rey sigue vivo) lo lleva un bot: elige un
+  // rival, fija su disparo y el HUD lo marca. El apuntado es corto: se lee en la propia página.
+  const p2 = await host.evaluate(
+    (slot) =>
+      new Promise<any>((done) => {
+        const tick = () => {
+          const s = (window as any).__asedio.mode.state;
+          if (s.round >= 2 && s.phase === 'aim') return done({ round: s.round, ...s.players.find((p: any) => p.slot === slot) });
+          requestAnimationFrame(tick);
+        };
+        tick();
+      }),
+    slot,
+  );
+  expect(p2.auto, `ronda ${p2.round}: lo lleva un bot`).toBe(true);
+  await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name`)).toContainText('🤖');
+  // Fija su disparo contra un rival (en la cuenta atrás ya está fijado).
+  await expect.poll(async () => { const q = await player(); return q.locked && q.target !== slot; }, { timeout: 30_000 }).toBe(true);
+  // Vuelve con su token: desde el siguiente apuntado es otra vez suyo.
+  await g1.goto(url);
+  const [back] = await waitAll([g1], (s) => s.fulls > 0);
+  expect(back.you).toBe(slot);
+  const round = (await summary(host))!.round;
+  await waitAll([host], (s) => (s.round > round && s.phase === 'aim') || s.phase === 'over', 240_000);
+  const p3 = await player();
+  if (p3.alive) {
+    expect(p3.auto, 'de vuelta, ya no lo lleva un bot').toBe(false);
+    await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name`)).not.toContainText('🤖');
+  }
+  for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
+  expect(errors).toEqual([]);
+});
+
 test('red mala: latencia, variación y pérdida de paquetes', async ({ browser }) => {
   test.setTimeout(720_000);
   const errors: string[] = [];

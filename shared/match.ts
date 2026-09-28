@@ -27,6 +27,7 @@ export interface PlayerState {
   id: string; // id de red ('bot0'… para bots)
   name: string;
   bot: boolean;
+  auto?: boolean; // humano desconectado cuyo castillo lleva un bot esta ronda (WRK-TASK-010)
   difficulty?: Difficulty;
   alive: boolean;
   ammo: AmmoId[]; // en la mano (HAND = 3 distintas por ronda)

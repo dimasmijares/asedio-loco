@@ -77,5 +77,5 @@ Convertir cada limitación accionable en una WRK-TASK con alcance y criterios, p
 
 ## Open Questions
 
-- [ ] ¿Un jugador que se va debe pasar a bot al momento o tras un margen para reconectar? — dimas, antes de WRK-TASK-010.
+- [ ] ¿Un jugador que se va debe pasar a bot al momento o tras un margen para reconectar? — dimas, antes de WRK-TASK-010. Aplicado por defecto en WRK-TASK-010 (28-09-2026), pendiente de que dimas lo confirme: pasa a bot al empezar la ronda siguiente; el resto de la ronda en curso hace de margen.
 - [ ] ¿Hay acceso a un portátil con gráfica integrada para medir? — dimas, antes de WRK-TASK-014.
