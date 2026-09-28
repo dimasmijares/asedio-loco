@@ -465,6 +465,15 @@ button.big {
   font-size: 16px;
 }
 
+.hud-goal {
+  white-space: nowrap;
+  background: rgba(29, 22, 38, 0.7);
+  border: 2px solid #ffd23f;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
 .wind-arrow {
   display: inline-block;
   font-size: 22px;
@@ -818,6 +827,13 @@ kbd {
   .dmg-label.none {
     font-size: 14px;
   }
+}
+
+.res-goal {
+  margin-top: 4px;
+  color: #ffd23f;
+  font-weight: bold;
+  text-align: center;
 }
 
 .res-phrase {
@@ -1549,6 +1565,14 @@ html.big-text .ammo-name {
   .hp-state {
     font-size: 13px;
     width: 14px;
+  }
+  /* Objetivo de la ronda: estrecho, bajo el viento, sin invadir el panel de la ronda. */
+  .hud-goal {
+    font-size: 11px;
+    white-space: normal;
+    max-width: 96px;
+    padding: 3px 7px;
+    text-align: right;
   }
   /* En vertical, bajo el marcador: ocupa el cielo, no el castillo ni el botón de disparo. */
   .coach {

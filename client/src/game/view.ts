@@ -398,6 +398,42 @@ export class WorldView {
     }
   }
 
+  // Dianas del objetivo secundario sobre los castillos rivales (WRK-TASK-043): se ven a través de
+  // los muros y miran siempre a la cámara. Se puede llamar en cada fotograma.
+  private goalMarks: THREE.Object3D[] = [];
+  private goalKey = '';
+  setGoalMarks(points: Vec3[]) {
+    const key = points.map((p) => p.map((x) => x.toFixed(1)).join(',')).join(';');
+    if (key === this.goalKey) return;
+    this.goalKey = key;
+    for (const m of this.goalMarks) this.root.remove(m);
+    this.goalMarks = points.map((p) => {
+      const g = new THREE.Group();
+      const mat = (c: string) => new THREE.MeshBasicMaterial({ color: c, depthTest: false, transparent: true, opacity: 0.9, side: THREE.DoubleSide, toneMapped: false });
+      g.add(new THREE.Mesh(new THREE.RingGeometry(0.75, 0.95, 32), mat('#ffffff')));
+      g.add(new THREE.Mesh(new THREE.RingGeometry(0.4, 0.58, 32), mat('#e63946')));
+      g.add(new THREE.Mesh(new THREE.CircleGeometry(0.18, 16), mat('#e63946')));
+      g.position.set(...p);
+      g.renderOrder = 6;
+      for (const c of g.children) c.renderOrder = 6;
+      g.name = 'goal-mark';
+      this.root.add(g);
+      return g;
+    });
+  }
+
+  get goalMarkCount() {
+    return this.goalMarks.length;
+  }
+
+  private updateGoalMarks(t: number) {
+    const cam = this.stage.camera.position;
+    for (const g of this.goalMarks) {
+      g.lookAt(cam);
+      g.scale.setScalar(1 + Math.sin(t * 4) * 0.08);
+    }
+  }
+
   setShield(slot: number, on: boolean) {
     const cur = this.shields.get(slot);
     if (!on) {
@@ -443,6 +479,7 @@ export class WorldView {
     for (const s of this.shields.values()) (s.material as THREE.MeshToonMaterial).opacity = 0.18 + Math.sin(t * 3) * 0.05;
     this.updateGuard(t);
     this.animateKings(dt, t);
+    this.updateGoalMarks(t);
     this.shake = Math.max(0, this.shake - dt * 1.8);
   }
 

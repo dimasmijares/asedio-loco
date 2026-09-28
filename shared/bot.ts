@@ -1,9 +1,9 @@
 import { AMMO, type AmmoId } from './ammo';
 import { clampAim, solveAim, type Aim } from './ballistics';
-import { BLOCKS_PER_CASTLE, CASTLE_SCALE } from './castle';
+import { BLOCKS_PER_CASTLE, CASTLE_SCALE, buildCastle } from './castle';
 import { castleOrigin, launchPoint, toWorld } from './map';
 import { DEG, hashString, rng, type Rng, type Vec3 } from './math';
-import type { MatchState, PlayerState } from './match';
+import { goalCounts, type GoalKind, type MatchState, type PlayerState } from './match';
 import type { Difficulty } from './protocol';
 
 export interface BotSkill {
@@ -12,12 +12,13 @@ export interface BotSkill {
   pKing: number; // probabilidad de apuntar al rey (si no, a la estructura)
   pWeakest: number; // cuánto pesa ir a por el más débil (frente al más cercano) al elegir objetivo
   lockDelay: [number, number]; // segundos que tarda en confirmar
+  pGoal: number; // probabilidad de ir a por el objetivo secundario de la ronda (WRK-TASK-043)
 }
 
 export const BOT_SKILL: Record<Difficulty, BotSkill> = {
-  facil: { yawSigma: 5.5 * DEG, powerSigma: 0.1, pKing: 0.25, pWeakest: 0.3, lockDelay: [2, 3] },
-  normal: { yawSigma: 3.3 * DEG, powerSigma: 0.055, pKing: 0.4, pWeakest: 0.5, lockDelay: [1.5, 2.5] },
-  dificil: { yawSigma: 1.7 * DEG, powerSigma: 0.03, pKing: 0.6, pWeakest: 0.7, lockDelay: [1, 2] },
+  facil: { yawSigma: 5.5 * DEG, powerSigma: 0.1, pKing: 0.25, pWeakest: 0.3, lockDelay: [2, 3], pGoal: 0.2 },
+  normal: { yawSigma: 3.3 * DEG, powerSigma: 0.055, pKing: 0.4, pWeakest: 0.5, lockDelay: [1.5, 2.5], pGoal: 0.35 },
+  dificil: { yawSigma: 1.7 * DEG, powerSigma: 0.03, pKing: 0.6, pWeakest: 0.7, lockDelay: [1, 2], pGoal: 0.5 },
 };
 
 // Lo que el anfitrión sabe de la ronda para repartir los objetivos entre bots.
@@ -102,6 +103,23 @@ const AIM_POINTS: Partial<Record<AmmoId, Vec3[]>> = {
   chicken: [L(0, 3.4, 0), L(3.25, 3.5, 3.25), L(-3.25, 3.5, 3.25)],
 };
 
+const a0 = (id: AmmoId) => AMMO[id];
+
+// Dónde está el objetivo secundario en el castillo rival (coordenadas del mundo).
+const CASTLES = new Map<number, ReturnType<typeof buildCastle>>();
+export function goalPoint(kind: GoalKind, slot: number, r: Rng): Vec3 | null {
+  let c = CASTLES.get(slot);
+  if (!c) CASTLES.set(slot, (c = buildCastle(slot)));
+  const blocks = c.blocks.filter((b) => goalCounts(kind, b) && (kind !== 'tower' || (b.p[1] > 1.5 && b.p[1] < 4.5)));
+  if (!blocks.length) return null;
+  if (kind === 'glass') {
+    const m: Vec3 = [0, 0, 0];
+    for (const b of blocks) for (let i = 0; i < 3; i++) m[i] += b.p[i] / blocks.length;
+    return m;
+  }
+  return r.pick(blocks).p;
+}
+
 export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number, Vec3>, r: Rng, ctx: TargetContext = {}): BotDecision {
   const skill = BOT_SKILL[me.difficulty ?? 'normal'];
   const rivals = s.players.filter((p) => p.alive && p.slot !== me.slot);
@@ -124,9 +142,11 @@ export function botDecide(s: MatchState, me: PlayerState, kingPos: Record<number
   }
   const ammo: AmmoId = hand[selected] ?? 'rock';
 
-  // Punto de mira.
+  // Punto de mira: el objetivo secundario, el rey o la estructura.
   let point: Vec3;
-  if (r.next() < skill.pKing + (KING_BONUS[ammo] ?? 0) && kingPos[target]) {
+  const goal = s.goal && !a0(ammo).defensive ? goalPoint(s.goal, target, r) : null;
+  if (goal && r.next() < skill.pGoal) point = goal;
+  else if (r.next() < skill.pKing + (KING_BONUS[ammo] ?? 0) && kingPos[target]) {
     const k = kingPos[target];
     point = [k[0], k[1] + 0.2, k[2]];
   } else {

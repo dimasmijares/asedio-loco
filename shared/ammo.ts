@@ -49,8 +49,8 @@ export function ammoWeights(duel: boolean): [AmmoId, number][] {
   return AMMO_IDS.map((id) => [id, AMMO[id].weight * (duel ? DUEL_BOOST[AMMO[id].rarity] : 1)]);
 }
 
-export function drawAmmo(r: Rng, duel = false): AmmoId {
-  const w = ammoWeights(duel);
+export function drawAmmo(r: Rng, duel = false, only?: Rarity[]): AmmoId {
+  const w = ammoWeights(duel).filter(([id]) => !only || only.includes(AMMO[id].rarity));
   const total = w.reduce((s, [, x]) => s + x, 0);
   let t = r.next() * total;
   for (const [id, x] of w) {

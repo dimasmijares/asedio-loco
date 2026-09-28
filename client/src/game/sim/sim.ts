@@ -95,6 +95,21 @@ export interface Stats {
   destroyed: number[]; // bloques destruidos por cada jugador
   lost: number[]; // bloques perdidos por cada castillo
   self: number[]; // bloques propios rotos por el propio jugador (autogoles)
+  broken: { by: number; part: string; mat: string; group: string }[]; // bloques rivales rotos, en orden (objetivos, WRK-TASK-043)
+}
+
+// Pieza del castillo de cada bloque por su id (los ids son los mismos en todos los clientes y tras
+// una migración) y el grupo en que cuenta para un objetivo: cada torre y cada jaula por separado.
+// Los bloques del andamio no son de ninguna pieza.
+const PARTS = new Map<number, { part: string; group: string }>();
+function partOf(id: number) {
+  if (!PARTS.size)
+    for (const slot of [0, 1, 2, 3])
+      for (const b of buildCastle(slot).blocks) {
+        const group = b.part === 'tower' ? `tower@${slot}:${Math.round(b.p[0] * 2)},${Math.round(b.p[2] * 2)}` : b.part === 'glass' ? `glass@${slot}` : `${b.part}@${slot}`;
+        PARTS.set(b.id, { part: b.part, group });
+      }
+  return PARTS.get(id) ?? { part: '', group: '' };
 }
 
 const rotYExtent = (q: Quat, h: Vec3) => {
@@ -139,7 +154,7 @@ export class Sim {
   // rondas 1 y 2 y, al acabar cada una, devuelve a su pedestal a los que se han salido.
   kingGuard = false;
   private kingHome = new Map<number, Vec3>();
-  stats: Stats = { destroyed: [0, 0, 0, 0], lost: [0, 0, 0, 0], self: [0, 0, 0, 0] };
+  stats: Stats = { destroyed: [0, 0, 0, 0], lost: [0, 0, 0, 0], self: [0, 0, 0, 0], broken: [] };
   private nextProj = 2000;
   private fracSeed = 1;
   private pendingFrac = new Map<Rec, Vec3 | null>();
@@ -407,7 +422,10 @@ export class Sim {
       this.events.push({ e: 'rm', id: r.id, why, p, q, v, mat: r.mat!.id, size: r.size, seed: r.id * 7919 + this.fracSeed++ });
       this.stats.lost[r.slot]++;
       if (r.lastHitBy === r.slot) this.stats.self[r.slot]++;
-      if (r.lastHitBy >= 0 && r.lastHitBy !== r.slot) this.stats.destroyed[r.lastHitBy]++;
+      if (r.lastHitBy >= 0 && r.lastHitBy !== r.slot) {
+        this.stats.destroyed[r.lastHitBy]++;
+        this.stats.broken.push({ by: r.lastHitBy, ...partOf(r.id), mat: r.mat!.id });
+      }
     }
     this.wakeAround(p, Math.max(r.size[0], r.size[1], r.size[2]) * 0.75 + 0.4);
   }

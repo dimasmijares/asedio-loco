@@ -23,6 +23,7 @@ test(`equilibrio: ${N} partidas de 4 bots (${DIFF})`, async () => {
     `media: ${avg((r) => r.rounds)} rondas, ${avg((r) => r.seconds)} s`,
     `primera eliminación en la ronda: ${firstElim.join(', ')}`,
     `causas: ${JSON.stringify(causes)}`,
+    `rondas con el objetivo cumplido: ${reports.reduce((s, r) => s + r.goalRounds, 0)} de ${reports.reduce((s, r) => s + r.rounds, 0)}; por tipo [rondas, jugadores]: ${JSON.stringify(reports.reduce((acc, r) => { for (const [k, [a, b]] of Object.entries(r.goalBy)) acc[k] = [(acc[k]?.[0] ?? 0) + a, (acc[k]?.[1] ?? 0) + b]; return acc; }, {} as Record<string, [number, number]>))}`,
   ].join('\n');
   console.log(summary);
   writeFileSync(`tests/balance/ultimo-${DIFF}.txt`, summary + '\n');

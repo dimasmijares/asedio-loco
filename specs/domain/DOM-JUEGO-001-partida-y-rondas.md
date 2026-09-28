@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -47,6 +47,7 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
     - está por debajo de 0,95 m y fuera de su zona de castillo (5,6 m + 0,2 m de margen desde el centro) (`outside`);
     - lo aplastan: fuerza de contacto de más de 600, daño acumulado ≥ 1 o una explosión cercana (`crushed`). Los umbrales están en DOM-JUEGO-004.
 10b. **Escudo real** (ADR-014, WRK-TASK-041): en las rondas 1 y 2 (`KING_GUARD_ROUNDS`), en todas sus fases, ningún rey cae por ninguna de esas causas, y el daño acumulado se pone a 0. Al empezar los resultados de esas rondas, y otra vez al empezar la ronda siguiente, el rey que está fuera de su castillo (por debajo de 0,95 m y fuera de su zona, o a más de 1,5 m de ella) vuelve a su pedestal. El que cae al vacío vuelve en el acto. Desde la ronda 3 rigen las causas de arriba.
+10c. **Objetivo secundario** (ADR-015, WRK-TASK-043): cada ronda, uno para todos, sorteado con la semilla. Puede ser 2 cristales de la misma jaula rival, una pieza de hierro rival o 4 bloques de la misma torre rival. Quien lo cumple con lo que rompe en el impacto, y sigue vivo, recibe en la ronda siguiente una carta rara o épica como primera de su mano (DOM-JUEGO-003).
 11. La eliminación se apunta a quien golpeó al rey por última vez (`lastHitBy`), que suma una baja si no es el propio jugador.
 12. **Victoria:** gana el último rey en pie. Si caen todos los que quedaban en la misma ronda, gana el que tenga más bloques en pie y, si empatan, el que cayó el último. Al terminar la ronda 24 (`MAX_ROUNDS`) gana el vivo con más bloques en pie.
 13. **Cierre rápido:** si durante el apuntado solo queda un rey (por ejemplo, la lava se ha llevado a otro al empezar la ronda), el reloj baja a 0,5 s.
@@ -96,6 +97,8 @@ Una **partida** enfrenta a 2-4 castillos, uno por hueco (0-3) de la isla. Cada c
 | Implemented in | `client/src/game/match/host.ts` | Fases, cuenta atrás (`beginCountdown`, `aimLeft`), escalonado (`STAGGER`), repetición |
 | Tested by | `tests/unit/countdown.test.ts` | Paso `aim` → `countdown` → `impact` con el anfitrión real en Node |
 | Implemented in | `client/src/game/sim/sim.ts` | `checkKings`, `KING_CRUSH_FORCE`, escudo real (`kingGuard`, `restoreKings`) |
+| Tested by | `tests/unit/goals.test.ts` | Sorteo del objetivo y carta de premio |
+| Decided in | ADR-015 | Objetivos secundarios con carta de premio |
 | Tested by | `tests/unit/guard.test.ts` | Escudo real: el rey no cae y vuelve al pedestal |
 | Decided in | ADR-014 | Escudo real en las rondas 1 y 2 |
 | Tested by | `tests/unit/match.test.ts` | Rondas y victoria |

@@ -5,7 +5,7 @@ layer: domain
 domain: juego
 status: active
 confidence: medium
-version: 3.2.0
+version: 3.3.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -37,6 +37,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 2. El reparto usa un generador con semilla `seed ^ hash("ammo:<ronda>:<hueco>")`: con la misma semilla, ronda y hueco sale la misma mano en todos los clientes.
 3. Cada munición se saca con probabilidad proporcional a su peso; si sale una repetida se vuelve a sacar (hasta 50 intentos).
 4. En el duelo (2 reyes vivos) los pesos se multiplican: común 0,55, rara 1,5, épica 2,6, defensiva 0,9.
+4b. **Carta de premio** (ADR-015, WRK-TASK-043): quien cumplió el objetivo secundario de la ronda anterior abre la mano con una carta rara o épica, sacada con los mismos pesos, pero solo entre esas rarezas y con su propia semilla (`bonus:<ronda>:<hueco>`). Las otras dos salen como siempre, sin repetir.
 5. Por sorteo, sin duelo: común 50 %, rara 28 %, épica 9 %, defensiva 13 %. En el duelo: común 26 %, rara 40 %, épica 22 %, defensiva 11 %.
 6. Al disparar se gasta la munición elegida. Si nadie elige, sale la primera de la mano.
 7. Un proyectil que rompe un bloque lo atraviesa y conserva el 60 % de su velocidad (D-013), o lo que diga su `plowKeep` (el piano, el 90 %).

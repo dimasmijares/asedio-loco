@@ -19,6 +19,7 @@ export interface PlayerStats {
   selfHits: number; // bloques propios rotos por su culpa
   shots: number;
   worstMiss: number; // metros por los que falló su peor disparo (sin romper nada)
+  goals?: number; // objetivos secundarios cumplidos (WRK-TASK-043)
 }
 
 export interface PlayerState {
@@ -63,6 +64,9 @@ export interface MatchState {
   fast: boolean;
   elimCount: number;
   replay: number[] | null; // reyes caídos en la ronda cuya caída se repite (fase 'replay')
+  goal: GoalKind | null; // objetivo secundario de la ronda (WRK-TASK-043)
+  goalDone: number[]; // huecos que lo han cumplido en el impacto de esta ronda
+  bonus: number[]; // huecos con carta rara o épica de premio en esta ronda
 }
 
 export const MAX_ROUNDS = 24;
@@ -82,7 +86,7 @@ export function matchPlayersFromRoom(room: RoomState) {
 }
 
 export function newStats(): PlayerStats {
-  return { dealt: 0, lost: 0, kills: 0, bestShot: 0, whiffs: 0, selfHits: 0, shots: 0, worstMiss: 0 };
+  return { dealt: 0, lost: 0, kills: 0, bestShot: 0, whiffs: 0, selfHits: 0, shots: 0, worstMiss: 0, goals: 0 };
 }
 
 export function defaultAim(slot: number, target: number): Aim {
@@ -111,6 +115,9 @@ export function createMatch(players: { slot: number; id: string; name: string; b
     fast,
     elimCount: 0,
     replay: null,
+    goal: null,
+    goalDone: [],
+    bonus: [],
   };
 }
 
@@ -166,6 +173,26 @@ export function ammoRng(seed: number, round: number, slot: number) {
   return rng((seed ^ hashString(`ammo:${round}:${slot}`)) >>> 0);
 }
 
+// Objetivos secundarios (WRK-TASK-043, ADR-015): cada ronda, uno para todos, sorteado con la
+// semilla. Quien lo cumple con su disparo (bloques rivales que caen por él en el impacto) recibe en
+// la ronda siguiente una carta rara o épica garantizada.
+export type GoalKind = 'glass' | 'iron' | 'tower';
+export const GOAL_KINDS: GoalKind[] = ['glass', 'iron', 'tower'];
+export const GOALS: Record<GoalKind, { need: number; text: string; short: string }> = {
+  glass: { need: 2, text: 'Rompe 2 cristales de la misma jaula rival', short: 'Jaula de cristal' },
+  iron: { need: 1, text: 'Rompe una pieza de hierro de un castillo rival', short: 'Pieza de hierro' },
+  tower: { need: 4, text: 'Derriba 4 bloques de la misma torre rival', short: 'Una torre' },
+};
+
+export function goalFor(seed: number, round: number): GoalKind {
+  return GOAL_KINDS[Math.floor(rng((seed ^ hashString(`goal:${round}`)) >>> 0).next() * GOAL_KINDS.length)];
+}
+
+// ¿Cuenta este bloque roto para el objetivo?
+export function goalCounts(kind: GoalKind, b: { part: string; mat: string }) {
+  return kind === 'glass' ? b.part === 'glass' : kind === 'iron' ? b.mat === 'iron' : b.part === 'tower';
+}
+
 // Escudo real (WRK-TASK-041, ADR-014): en las rondas 1 y 2 ningún rey puede caer. Si al final de
 // una de esas rondas un rey está fuera de su castillo, vuelve a su pedestal. Se deduce de la ronda.
 export const KING_GUARD_ROUNDS = 2;
@@ -182,12 +209,17 @@ export function startRound(s: MatchState): MatchState {
   s.lavaY = LAVA_LEVELS[s.lavaLevel];
   s.wind = windForRound(s.seed, s.round, s.fast);
   s.results = null;
+  // Quien cumplió el objetivo de la ronda anterior abre la mano con una carta rara o épica.
+  s.bonus = (s.goalDone ?? []).filter((slot) => s.players.some((p) => p.slot === slot && p.alive));
+  s.goalDone = [];
+  s.goal = goalFor(s.seed, s.round);
   const duel = isDuel(s);
   for (const p of s.players) {
     p.locked = false;
     if (!p.alive) continue;
     const r = ammoRng(s.seed, s.round, p.slot);
     p.ammo = [];
+    if (s.bonus.includes(p.slot)) p.ammo.push(drawAmmo(rng((s.seed ^ hashString(`bonus:${s.round}:${p.slot}`)) >>> 0), duel, ['rara', 'epica']));
     for (let tries = 0; p.ammo.length < HAND && tries < 50; tries++) {
       const a = drawAmmo(r, duel);
       if (!p.ammo.includes(a)) p.ammo.push(a);

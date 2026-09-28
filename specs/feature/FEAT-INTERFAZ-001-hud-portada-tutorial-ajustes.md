@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.9.0
+version: 1.10.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -62,6 +62,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 📡 si está desconectado (en red) y 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
    - Abajo, potencia y elevación, una línea con lo que hace la munición elegida (`#hud-ammo-desc`, WRK-TASK-032: en móvil el `title` de la tarjeta no se ve; se oculta en horizontal con menos de 500 px de alto), 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
+   - **Objetivo secundario** (WRK-TASK-043, ADR-015): el rótulo de la ronda lo anuncia («🎯 Objetivo: …») y, a quien tiene premio, se lo dice («🎁 …»). Durante el apuntado, una chapa con borde amarillo bajo el viento («🎯 Jaula de cristal», con el texto completo en el `title`; en vertical, más estrecha y en dos líneas) y una diana blanca y roja sobre cada castillo rival, que mira a la cámara y se ve a través de los muros (`WorldView.setGoalMarks`). En los resultados, «🎯 … cumple el objetivo», y en la pantalla final, la estadística «Objetivos cumplidos». «Cómo se juega» lo explica.
    - **Escudo real** (WRK-TASK-041, ADR-014): en las rondas 1 y 2 cada rey vivo lleva un halo dorado que gira sobre la cabeza y una columna de luz blanca dorada translúcida (8 m) que late (`WorldView.setKingGuard`). La columna no se dibuja si el rey está a menos de 16 m de la cámara, para que la de tu propio rey no tape la vista al apuntar (WRK-TASK-050). El rótulo de la ronda 1 lo anuncia; el de la 2 avisa de que es la última con escudo, y el de la 3, de que se acaba (el subtítulo admite varias líneas y dura 2,6 s). Cuando el escudo salva a un rey, chispas doradas y el rótulo «ESCUDO REAL». Al volver al pedestal, polvo y chispas. «Cómo se juega» lo explica.
    - **Quién ataca a quién** (WRK-TASK-045): durante la cuenta atrás, un arco de guiones del color de cada jugador vivo va de su catapulta al castillo al que apunta (`AttackArcs`, `render/arcs.ts`). Los guiones avanzan hacia el objetivo y el arco acaba en una punta. Se curva hacia la derecha de la marcha, así que dos jugadores que se atacan entre sí no se tapan. Aparece en 0,35 s y se desvanece en 0,3 s al empezar el impacto. Sale del `MatchState` (`target`), así que un invitado ve los mismos arcos que el anfitrión sin mensajes nuevos. Dos InstancedMesh: dos llamadas de dibujo.
    - Al empezar la cuenta atrás se retira el rótulo que hubiera en pantalla (WRK-TASK-038). Los bloques `@media` de pantallas pequeñas van al final de `style.css` para prevalecer sobre las reglas base.

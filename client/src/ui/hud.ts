@@ -45,6 +45,8 @@ export class Hud {
   alwaysStats = false;
   private banner = h('div', { class: 'hud-banner', id: 'hud-banner' });
   private corner = h('div', { class: 'hud-corner' });
+  // Objetivo secundario de la ronda (WRK-TASK-043).
+  private goal = h('div', { class: 'hud-goal', id: 'hud-goal', hidden: true });
   private stats = h('div', { class: 'hud-stats', id: 'hud-stats' });
   // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
   confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
@@ -99,7 +101,7 @@ export class Hud {
     const gear = h('button', { class: 'hud-mute', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, '⚙️');
     gear.onclick = () => openSettings();
     gear.onpointerdown = (e) => e.stopPropagation();
-    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.stats);
+    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.goal, this.stats);
     this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.banner, this.countdown);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
@@ -215,6 +217,15 @@ export class Hud {
 
   showHelp(show: boolean) {
     this.help.style.display = show ? '' : 'none';
+  }
+
+  setGoal(text: string | null, title = '') {
+    const t = text ?? '';
+    if (this.goal.dataset.t === t) return;
+    this.goal.dataset.t = t;
+    this.goal.hidden = !t;
+    this.goal.title = title;
+    this.goal.replaceChildren(t ? h('span', null, '🎯 ', h('b', null, t)) : '');
   }
 
   setStats(text: string) {

@@ -38,7 +38,7 @@ Para empezar en una sesión nueva: `npm run kdd:pendientes`, elegir la primera t
 | 9 | WRK-TASK-052 · Física más barata para el anfitrión móvil | completed | — | 2026-09-28 |
 | 10 | WRK-TASK-050 · Iluminación del atardecer y sombras de contacto | completed | 052 | 2026-09-28 |
 | 11 | WRK-TASK-042 · Espectador activo tras la eliminación | completed | 041 | 2026-09-28 |
-| 12 | WRK-TASK-043 · Objetivos secundarios por ronda | draft | 041 | — |
+| 12 | WRK-TASK-043 · Objetivos secundarios por ronda | completed | 041 | 2026-09-28 |
 | 13 | WRK-TASK-053 · Revisión de la iluminación por el usuario | draft | 050 | — |
 
 Tareas de otros planes que forman parte de esta propuesta y pueden intercalarse en cualquier momento: WRK-TASK-010 (desconectado → bot) y WRK-TASK-012 (estadísticas con migración) antes de probar con amigos; WRK-TASK-011 (repetición por lava) junto a la 047; WRK-TASK-009 (PWA) cuando se quiera instalar en el móvil. Las pruebas opcionales en Android están en WRK-TASK-040.

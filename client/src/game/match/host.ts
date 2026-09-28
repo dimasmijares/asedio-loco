@@ -4,7 +4,7 @@ import { aimedAt, decideBots, type BotDecision } from '../../../../shared/bot';
 import { kingId } from '../../../../shared/castle';
 import { castleOrigin } from '../../../../shared/map';
 import { lerp, type Vec3 } from '../../../../shared/math';
-import { REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, impactMaxDuration, kingGuarded, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
+import { GOALS, REPLAY_MAX, alivePlayers, buildResults, checkWinner, consumeAmmo, countdownDuration, eliminate, goalCounts, impactMaxDuration, kingGuarded, replayDuration, resultsDuration, startRound, type MatchState, type PlayerState } from '../../../../shared/match';
 import type { Sim, SimEvent } from '../sim/sim';
 
 // Lo que el anfitrión necesita del juego. Lo implementa Game y, en las pruebas de
@@ -50,7 +50,7 @@ export class MatchHost {
   private lastTargets = new Map<number, number>();
   private shots: Shot[] = [];
   private impactStart = 0;
-  private before = { lost: [0, 0, 0, 0], destroyed: [0, 0, 0, 0], self: [0, 0, 0, 0] };
+  private before = { lost: [0, 0, 0, 0], destroyed: [0, 0, 0, 0], self: [0, 0, 0, 0], broken: 0 };
   private projOwner = new Map<number, number>();
   private closestMiss = new Map<number, number>();
   private roundElims: number[] = [];
@@ -233,7 +233,7 @@ export class MatchHost {
     this.shots = [];
     this.roundElims = [];
     const st = this.sim.stats;
-    this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self] };
+    this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self], broken: st.broken.length };
     let i = 0;
     this.lastTargets.clear();
     for (const p of alivePlayers(s).sort((a, b) => a.slot - b.slot)) {
@@ -283,6 +283,20 @@ export class MatchHost {
       p.blocks = this.sim.blocksAlive(p.slot);
     }
     this.closestMiss.clear();
+    // Objetivo secundario: quién lo ha cumplido con lo que ha roto en este impacto.
+    if (s.goal) {
+      // Se cuenta por grupo (la misma torre, la misma jaula): cada jugador, su mejor grupo.
+      const n = new Map<string, number>();
+      const best: Record<number, number> = {};
+      for (const b of st.broken.slice(this.before.broken)) {
+        if (!goalCounts(s.goal, b)) continue;
+        const k = `${b.by}|${s.goal === 'iron' ? 'iron' : b.group}`;
+        n.set(k, (n.get(k) ?? 0) + 1);
+        best[b.by] = Math.max(best[b.by] ?? 0, n.get(k)!);
+      }
+      s.goalDone = s.players.filter((p) => p.alive && (best[p.slot] ?? 0) >= GOALS[s.goal!].need).map((p) => p.slot);
+      for (const slot of s.goalDone) this.player(slot)!.stats.goals = (this.player(slot)!.stats.goals ?? 0) + 1;
+    }
     s.results = buildResults(s, lost, dealt, this.roundElims);
     // Si ha caído algún rey, antes de los resultados se repite su caída en todos los clientes.
     if (this.roundElims.length) {

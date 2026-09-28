@@ -3,7 +3,9 @@ import { AMMO } from '../../../../shared/ammo';
 import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
-import { KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
+import { GOALS, KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
+import { goalPoint } from '../../../../shared/bot';
+import { rng } from '../../../../shared/math';
 import type { Vec3 } from '../../../../shared/math';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
@@ -286,6 +288,10 @@ export class MatchUI {
     this.hud.showTargetButtons(this.canAim() || watch, watch);
     this.hud.setWatch(watch ? (this.watchSlot < 0 ? 'Plano general' : `Castillo de ${nameOf(s, this.watchSlot)}`) : null);
     this.hud.setStats(`${g.fps} fps`);
+    // Objetivo secundario (WRK-TASK-043): chapa en la esquina y dianas en los rivales al apuntar.
+    const goal = s.goal && s.phase === 'aim' ? GOALS[s.goal] : null;
+    this.hud.setGoal(goal ? goal.short : null, goal ? `${goal.text}: premio, una carta rara o épica en la ronda siguiente` : '');
+    g.view.setGoalMarks(goal && s.goal ? s.players.filter((p) => p.alive && p.slot !== this.src.you).map((p) => goalPoint(s.goal!, p.slot, rng(p.slot + 1))).filter((p): p is Vec3 => !!p) : []);
   }
 
   // Siguiente rey de la cola de repeticiones (si no hay nada grabado de él, se salta).
@@ -341,6 +347,8 @@ export class MatchUI {
       if (s.round === 1) sub += `\n🛡️ Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`;
       else if (s.round === KING_GUARD_ROUNDS) sub += '\n🛡️ Última ronda con escudo real';
       else if (s.round === KING_GUARD_ROUNDS + 1) sub += '\nSe acaba el escudo real: los reyes ya pueden caer';
+      if (s.goal) sub += `\n🎯 Objetivo: ${GOALS[s.goal].text}`;
+      if (this.src.you !== null && (s.bonus ?? []).includes(this.src.you)) sub += '\n🎁 Premio por el objetivo: tu primera carta es rara o épica';
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, s.round <= KING_GUARD_ROUNDS + 1 ? 2600 : 1700);
       sfx.fanfare();
@@ -474,7 +482,9 @@ export class MatchUI {
           (r.dealt[p.slot] ?? 0) > 0 ? h('span', { class: 'muted' }, ` · destruyó ${r.dealt[p.slot]}`) : '',
         ),
       );
-    this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows);
+    const done = s.goalDone ?? [];
+    const goal = s.goal && done.length ? h('div', { class: 'res-goal', id: 'res-goal' }, `🎯 ${done.map((slot) => nameOf(s, slot)).join(', ')} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: carta rara o épica en la ronda siguiente`) : '';
+    this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows, goal);
     this.showDamage(s);
   }
 
@@ -540,6 +550,7 @@ export class MatchUI {
     const clown = best((p) => p.stats.worstMiss * 10 + p.stats.whiffs);
     const tank = best((p) => p.blocks);
     const selfie = best((p) => p.stats.selfHits);
+    const goaler = best((p) => p.stats.goals ?? 0);
     const stat = (icon: string, label: string, p: PlayerState | undefined, value: string) =>
       p ? h('div', { class: 'stat' }, h('span', { class: 'stat-icon' }, icon), h('div', null, h('div', { class: 'muted' }, label), h('b', null, p.name), ` · ${value}`)) : '';
     const buttons: Node[] = [];
@@ -571,6 +582,7 @@ export class MatchUI {
             : '',
           selfie && selfie.stats.selfHits > 0 ? stat('⚠️', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios destruidos`) : '',
           stat('🏰', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
+          goaler && (goaler.stats.goals ?? 0) > 0 ? stat('🎯', 'Objetivos cumplidos', goaler, `${goaler.stats.goals} ${goaler.stats.goals === 1 ? 'objetivo' : 'objetivos'}`) : '',
         ),
         ...buttons,
       ),

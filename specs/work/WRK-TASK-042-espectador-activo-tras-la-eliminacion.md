@@ -65,4 +65,5 @@ La opción b o c cambia el equilibrio (RULE-001) y el protocolo (RULE-002).
 - `tests/e2e/espectador.spec.ts` (1280×720 y 390×844) elimina a tu rey en la ronda 1, congela el apuntado de la ronda 2 (los bots fijan su disparo enseguida), cambia de castillo con E o con ▶, comprueba la línea y que la cámara gira alrededor de ese castillo, y vuelve al plano general. 4 de 4 con `--repeat-each 2`. En la prueba de 4 jugadores, el espectador que entra en la ronda 2 tiene los mismos controles.
 - Hallazgo durante la prueba: `setAimInfo(null)` vaciaba cada fotograma la línea del espectador y, en el móvil, no volvía a salir; ahora se respetan.
 - `npm run verify` (44 unitarios) y `npm run e2e -- hud-compact touch controls tutorial` (13 de 13) en verde.
+- CI: la primera vez, `espectador.spec.ts` agotó los 60 s de espera hasta el apuntado de la ronda 2 (SwiftShader). Se amplió a 200 s y pasó.
 
