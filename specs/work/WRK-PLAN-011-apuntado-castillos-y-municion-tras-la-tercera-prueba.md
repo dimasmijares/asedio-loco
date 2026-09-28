@@ -28,7 +28,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | Orden | Tarea | Estado | Dependencias | Entrega |
 |---:|---|---|---|---|
 | 0 | WRK-TASK-060 · Revisión de la interfaz con el artefacto de diseño | draft | — | Lienzo publicado; 1.er comentario → WRK-TASK-061 |
-| 1 | WRK-TASK-054 · Parábola hasta el choque con marca de impacto | draft | 060 (aprobar la marca) | — |
+| 1 | WRK-TASK-054 · Parábola hasta el choque con marca de impacto | completed | 060 (marca aprobada) | 2026-09-28 |
 | 2 | WRK-TASK-055 · Solo munición que vuela en parábola | completed | — | 2026-09-28 |
 | 3 | WRK-TASK-056 · Racimo de cocos que se abre en vuelo y explota | completed | 055 | 2026-09-28 |
 | 4 | WRK-TASK-057 · La lava sube un poco cada ronda | completed | — | 2026-09-28 |

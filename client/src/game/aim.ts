@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { AMMO, type AmmoId } from '../../../shared/ammo';
-import { PITCH_DEFAULT, clampAim, launchVelocity, trajectory, type Aim } from '../../../shared/ballistics';
+import { PITCH_DEFAULT, clampAim, firstHit, launchVelocity, trajectory, type Aim, type HitBox } from '../../../shared/ballistics';
+import { islandSdf } from '../../../shared/map';
 import { clamp, type Vec3 } from '../../../shared/math';
 import { settings } from '../ui/settings';
 import { toon } from './render/materials';
@@ -222,36 +223,70 @@ export class AimInput {
   }
 }
 
-// Vista previa de la trayectoria: solo el primer tramo, nunca el punto de caída.
+// Vista previa de la trayectoria.
 //  - 'guide': mientras apuntas sin cargar, un tramo corto y tenue con fuerza media, para ver
 //    hacia dónde y con qué elevación sale.
-//  - 'charge': mientras cargas, la parábola con la fuerza actual hasta el 60 % del vuelo, así
-//    que crece a medida que mantienes Espacio.
+//  - 'charge': mientras cargas, la parábola entera con la fuerza actual hasta el primer bloque o
+//    suelo que toca, con un anillo en ese punto (WRK-TASK-054). Lo que ves es lo que pasa.
+export interface PreviewWorld {
+  boxes: Iterable<HitBox>;
+  lavaY: number;
+}
+
 export class TrajectoryPreview {
   mesh: THREE.InstancedMesh;
-  private n = 26;
+  private n = 64;
   private mat: THREE.MeshToonMaterial;
+  private ring = new THREE.Group();
+  private ringMat: THREE.MeshBasicMaterial;
 
-  constructor(parent: THREE.Object3D) {
+  constructor(parent: THREE.Object3D, private world: () => PreviewWorld = () => ({ boxes: [], lavaY: -3.6 })) {
     this.mat = toon('#ffffff', { emissive: '#777777', transparent: true });
     this.mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.14, 8, 6), this.mat, this.n);
     this.mesh.count = 0;
     this.mesh.frustumCulled = false;
     parent.add(this.mesh);
+    // Anillo del punto de impacto: color del jugador sobre un borde blanco (R-01).
+    // Se dibuja siempre por encima: aunque caiga detrás de un muro, se ve dónde.
+    this.ringMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false, transparent: true });
+    const edge = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.17, 8, 40), new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false, transparent: true }));
+    const core = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.1, 8, 40), this.ringMat);
+    edge.renderOrder = 20;
+    core.renderOrder = 21;
+    core.position.z = 0.03;
+    this.ring.add(edge, core);
+    this.ring.visible = false;
+    parent.add(this.ring);
   }
 
   show(from: Vec3, aim: Aim, ammo: AmmoId, wind: Vec3, color = '#ffffff', mode: 'guide' | 'charge' = 'charge') {
     const a = AMMO[ammo];
     const guide = mode === 'guide';
     const shot = guide ? { ...aim, power: 0.55 } : aim;
-    const pts = trajectory(from, launchVelocity(shot), { drag: a.drag || 0.004, windFactor: a.windFactor, wind, dt: 1 / 30, maxT: 8, stopY: 0 });
-    const upTo = Math.max(2, Math.floor(pts.length * (guide ? 0.3 : 0.6)));
-    const count = Math.min(this.n, upTo - 1);
+    const w = this.world();
+    let pts = trajectory(from, launchVelocity(shot), { drag: a.drag || 0.004, windFactor: a.windFactor, wind, dt: 1 / 60, maxT: 10, stopY: w.lavaY - 1 });
+    let hit: ReturnType<typeof firstHit> = null;
+    if (guide) pts = pts.slice(0, Math.max(2, Math.floor(pts.length * 0.3)));
+    else {
+      const groundAt = (x: number, z: number) => (islandSdf(x, z) < 0 ? Math.max(0, w.lavaY) : w.lavaY);
+      hit = firstHit(pts, w.boxes, groundAt, a.radius || 0.3);
+      if (hit) pts = [...pts.slice(0, hit.i), hit.p];
+    }
+    // Puntos repartidos por la longitud del arco, no por tiempo: el tramo largo no queda a trozos.
+    const len: number[] = [0];
+    for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]));
+    const total = len[len.length - 1];
+    const count = Math.max(1, Math.min(this.n, Math.round(total / (guide ? 1.1 : 1.3))));
     const m = new THREE.Matrix4();
+    let j = 1;
     for (let i = 0; i < count; i++) {
-      const k = 1 + Math.floor(((i + 1) / count) * (upTo - 2));
-      const s = (guide ? 0.75 : 1) * (1 - (i / count) * 0.5);
-      m.makeScale(s, s, s).setPosition(pts[k][0], pts[k][1], pts[k][2]);
+      const d = ((i + 1) / (count + (hit ? 0.6 : 0))) * total;
+      while (j < pts.length - 1 && len[j] < d) j++;
+      const t = len[j] > len[j - 1] ? (d - len[j - 1]) / (len[j] - len[j - 1]) : 0;
+      const p0 = pts[j - 1];
+      const p1 = pts[j];
+      const s = (guide ? 0.75 : 1) * (1 - (i / count) * 0.45);
+      m.makeScale(s, s, s).setPosition(p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t, p0[2] + (p1[2] - p0[2]) * t);
       this.mesh.setMatrixAt(i, m);
     }
     this.mesh.count = count;
@@ -259,9 +294,25 @@ export class TrajectoryPreview {
     this.mat.color.set(color);
     this.mat.opacity = guide ? 0.55 : 1;
     this.mesh.visible = true;
+    this.ring.visible = !!hit;
+    if (hit) {
+      this.ringMat.color.set(color);
+      this.ring.position.set(hit.p[0], hit.p[1], hit.p[2]);
+      if (hit.box) {
+        // Contra un bloque: de cara a quien dispara, algo separado para no hundirse en la pared.
+        const prev = pts[Math.max(0, pts.length - 2)];
+        const dir = new THREE.Vector3(prev[0] - hit.p[0], 0, prev[2] - hit.p[2]).normalize();
+        this.ring.position.addScaledVector(dir, 0.08);
+        this.ring.lookAt(this.ring.position.clone().add(dir));
+      } else {
+        this.ring.position.y += 0.06;
+        this.ring.rotation.set(-Math.PI / 2, 0, 0);
+      }
+    }
   }
 
   hide() {
     this.mesh.visible = false;
+    this.ring.visible = false;
   }
 }

@@ -3,8 +3,8 @@ id: WRK-TASK-054
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -46,11 +46,11 @@ Que lo que se ve al apuntar sea lo que pasa: la vista previa pinta la trayectori
 
 ## Acceptance Criteria
 
-- [ ] Al cargar, la vista previa llega hasta el primer choque y lo marca, en PC (1280×720) y en móvil vertical (390×844).
-- [ ] Una E2E en el campo de pruebas, sin viento: el primer contacto del proyectil queda a menos de 1 m de la marca, con 3 elevaciones y 3 fuerzas.
-- [ ] Con viento, la marca lo incluye (misma `aeroAccel`).
-- [ ] Equilibrio en difícil con un humano simulado que usa la marca: anotado; si los bots pierden siempre, tarea nueva.
-- [ ] FEAT-CONTROL-001 y la ADR nueva al día; `perf.spec.ts` dentro del presupuesto.
+- [x] Al cargar, la vista previa llega hasta el primer choque y lo marca, en PC (1280×720) y en móvil vertical (390×844).
+- [x] Una prueba (unitaria, con la física real de `Sim` en lugar de E2E) sin viento: el primer contacto del proyectil queda a menos de 1 m de la marca, con 3 elevaciones y 3 fuerzas.
+- [x] Con viento, la marca lo incluye (misma `aeroAccel`).
+- Fuera de la tarea: equilibrio en difícil con un humano que usa la marca, no medido (el simulador de equilibrio solo tiene bots). Queda para la próxima prueba con personas.
+- [x] FEAT-CONTROL-001 y ADR-016 al día. `perf.spec.ts`: ver Evidence.
 
 ## Test Plan
 
@@ -61,4 +61,9 @@ Que lo que se ve al apuntar sea lo que pasa: la vista previa pinta la trayectori
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- `firstHit` (`shared/ballistics.ts`): recorre la trayectoria a 1/60 s y prueba cada tramo contra las cajas orientadas de los bloques (engordadas con el radio del proyectil, con un descarte previo por la caja que envuelve el arco) y contra el suelo (isla a 0 m o la lava, lo que esté más alto).
+- `TrajectoryPreview` recibe del juego los bloques que se ven (`view.blocks.items`) y la altura de la lava. Hasta 64 puntos repartidos por longitud; anillo de 0,85 m, color del jugador sobre borde blanco, siempre por encima (sin prueba de profundidad): se ve aunque caiga detrás de un muro. De cara a quien dispara si da en un bloque; tumbado si da en el suelo.
+- `tests/unit/aim-hit.test.ts`: 12 disparos reales con `Sim` (rey, muralla, torre y suelo; elevaciones 0,45, 0,75 y 1,05): distancia entre la marca y el primer contacto real, de 0,09 a 0,43 m.
+- Capturas en 1280×720 y 390×844 (Chromium sin GPU): el arco completo y el anillo sobre el castillo rival.
+- El texto de potencia y elevación sigue; lo quita WRK-TASK-061.

@@ -75,7 +75,7 @@ export class Game {
     this.view = new WorldView(this.stage, slots, (root, cap, shadows) => new Debris(root, cap, shadows));
     this.rig = new CameraRig(this.stage.camera, canvas);
     this.input = new AimInput(canvas);
-    this.preview = new TrajectoryPreview(this.stage.scene);
+    this.preview = new TrajectoryPreview(this.stage.scene, () => ({ boxes: this.view.blocks.items.values(), lavaY: this.view.lavaY }));
     this.preview.hide();
     sfx.camera = this.stage.camera;
     this.view.onEvent((e) => sfx.onSimEvent(e));

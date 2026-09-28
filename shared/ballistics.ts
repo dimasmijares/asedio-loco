@@ -1,4 +1,4 @@
-import { DEG, clamp, lerp, type Vec3 } from './math';
+import { DEG, clamp, lerp, quatRotate, type Quat, type Vec3 } from './math';
 
 export const GRAVITY = 9.81;
 export const POWER_MIN = 9;
@@ -108,4 +108,79 @@ export function solveAim(p0: Vec3, target: Vec3, pitch: number, o: TrajOpts): Ai
     if (dist < 0.2) break;
   }
   return best;
+}
+
+// Primer choque de una trayectoria (WRK-TASK-054): contra cajas orientadas (los bloques tal como
+// se ven) o contra el suelo. `radius` engorda las cajas con el radio del proyectil.
+export interface HitBox {
+  p: Vec3;
+  q: Quat;
+  size: Vec3;
+}
+
+export interface TrajHit {
+  p: Vec3;
+  i: number; // índice del punto de la trayectoria justo después del choque
+  box: boolean; // true si es un bloque, false si es el suelo
+}
+
+export function firstHit(pts: Vec3[], boxes: Iterable<HitBox>, groundAt: (x: number, z: number) => number, radius = 0): TrajHit | null {
+  // Cajas cerca de la trayectoria: descarte rápido por esfera contra la caja que envuelve el arco.
+  const lo: Vec3 = [Infinity, Infinity, Infinity];
+  const hi: Vec3 = [-Infinity, -Infinity, -Infinity];
+  for (const p of pts)
+    for (let k = 0; k < 3; k++) {
+      lo[k] = Math.min(lo[k], p[k]);
+      hi[k] = Math.max(hi[k], p[k]);
+    }
+  const near: { b: HitBox; inv: Quat; h: Vec3; r: number }[] = [];
+  for (const b of boxes) {
+    const r = Math.hypot(b.size[0], b.size[1], b.size[2]) / 2 + radius;
+    if (b.p[0] + r < lo[0] || b.p[0] - r > hi[0] || b.p[1] + r < lo[1] || b.p[1] - r > hi[1] || b.p[2] + r < lo[2] || b.p[2] - r > hi[2]) continue;
+    near.push({ b, inv: [-b.q[0], -b.q[1], -b.q[2], b.q[3]], h: [b.size[0] / 2 + radius, b.size[1] / 2 + radius, b.size[2] / 2 + radius], r });
+  }
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const c = pts[i];
+    let best = Infinity;
+    for (const n of near) {
+      // Descarte por distancia del segmento al centro.
+      const t = segBoxT(a, c, n.b.p, n.inv, n.h);
+      if (t !== null && t < best) best = t;
+    }
+    const g = groundAt(c[0], c[2]);
+    let tg = Infinity;
+    if (c[1] - radius <= g) {
+      const ga = groundAt(a[0], a[2]);
+      const da = a[1] - radius - ga;
+      const dc = c[1] - radius - g;
+      tg = da <= 0 ? 0 : da / (da - dc);
+    }
+    if (best === Infinity && tg === Infinity) continue;
+    const t = Math.min(best, tg);
+    return { p: [lerp(a[0], c[0], t), lerp(a[1], c[1], t), lerp(a[2], c[2], t)], i, box: best <= tg };
+  }
+  return null;
+}
+
+// Parámetro (0..1) en que el segmento a→c entra en la caja (en su marco local), o null.
+function segBoxT(a: Vec3, c: Vec3, center: Vec3, inv: Quat, h: Vec3): number | null {
+  const la = quatRotate(inv, [a[0] - center[0], a[1] - center[1], a[2] - center[2]]);
+  const lc = quatRotate(inv, [c[0] - center[0], c[1] - center[1], c[2] - center[2]]);
+  let t0 = 0;
+  let t1 = 1;
+  for (let k = 0; k < 3; k++) {
+    const d = lc[k] - la[k];
+    if (Math.abs(d) < 1e-9) {
+      if (la[k] < -h[k] || la[k] > h[k]) return null;
+      continue;
+    }
+    let u = (-h[k] - la[k]) / d;
+    let v = (h[k] - la[k]) / d;
+    if (u > v) [u, v] = [v, u];
+    t0 = Math.max(t0, u);
+    t1 = Math.min(t1, v);
+    if (t0 > t1) return null;
+  }
+  return t0;
 }
