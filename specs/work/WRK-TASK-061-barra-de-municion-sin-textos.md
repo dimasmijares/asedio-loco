@@ -50,6 +50,8 @@ Decisiones del usuario (28-09-2026) sobre las flechas:
 9. **Jugando no se elige castillo objetivo.** Hoy ◀ ▶ (y Q/E) giran la catapulta de golpe hacia otro castillo rival, que queda como «objetivo». Ese objetivo se usa para los arcos de «quién ataca a quién» (WRK-TASK-045) y el encuadre. Desaparece el selector: el objetivo se deduce solo del rumbo, como el castillo rival más cercano a la dirección en que apuntas. En PC, Q/E se quedan como atajo de cámara (punto 8).
 10. **Espectador:** a la derecha, en pequeño, una miniatura por castillo con el nombre del jugador encima y el % de destrucción de su castillo; tocarla lleva la cámara a ese castillo. Sustituye a ◀ ▶ del espectador (WRK-TASK-042). Se enseña antes en el lienzo.
 
+Barra de móvil aprobada (R-03, 28-09-2026). Arreglo pedido: en la maqueta, la franja oscura de la barra tapa el botón de disparo y su anillo de %; en el juego el botón queda siempre por encima.
+
 Propuesta en el lienzo: «Propuesta · Barra de munición sin textos (móvil)», interactiva. Falta la versión de PC y la aprobación del usuario.
 
 ## Acceptance Criteria

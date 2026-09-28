@@ -41,7 +41,7 @@ Que lo que se ve al apuntar sea lo que pasa: la vista previa pinta la trayectori
 
 - Diagnóstico (28-09-2026): la física y la vista previa usan el mismo arrastre (`aeroAccel`) y los proyectiles no tienen amortiguación. Con 40° de elevación y fuerza al 100 %, la vista previa acaba a 53 m y la bala cae a 83 m sin obstáculos; con el arco alargado a ojo parece que llega a 88 m, y el muro rival la para mucho antes.
 - El choque se calcula en el cliente contra los bloques tal como se ven (posición y tamaño de cada instancia, caja orientada) y contra el suelo de la isla y la lava. Paso de 1/60 s y parada en el primer contacto; con unos 700 bloques, filtrar primero por castillo cercano a la trayectoria.
-- Mientras se apunta sin cargar (`guide`), el tramo corto de ahora se mantiene; al cargar (`charge`), el arco completo. La marca es un anillo en el suelo o en la cara del bloque, del color del jugador. Su aspecto se aprueba en WRK-TASK-060.
+- Mientras se apunta sin cargar (`guide`), el tramo corto de ahora se mantiene; al cargar (`charge`), el arco completo. La marca es un anillo en el suelo o en la cara del bloque, del color del jugador. Aspecto aprobado (R-01, 28-09-2026): anillo del color del jugador con borde blanco.
 - Más puntos (hoy 26) o un tubo fino, para que el arco largo no quede a trozos.
 
 ## Acceptance Criteria

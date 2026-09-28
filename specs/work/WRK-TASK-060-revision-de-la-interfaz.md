@@ -44,9 +44,9 @@ Fuera: código del juego. Esta tarea no cambia la interfaz; lo que salga de ella
 
 | Punto | Pregunta | Tarea | Estado |
 |---|---|---|---|
-| R-01 | Marca de impacto: ¿anillo o diana? (la parábola ya está aprobada) | WRK-TASK-054 | Tu turno |
-| R-02 | Colores de castillo por jugador: ¿apruebas los tonos? | WRK-TASK-059 | Tu turno |
-| R-03 | Barra de munición en móvil: ¿apruebas las cartas por rareza y la tarjeta? | WRK-TASK-061 | Tu turno |
+| R-01 | Marca de impacto: ¿anillo o diana? (la parábola ya está aprobada) | WRK-TASK-054 | Aprobado (28-09): anillo |
+| R-02 | Colores de castillo por jugador: ¿apruebas los tonos? | WRK-TASK-059 | Aprobado (28-09): tonos por defecto del tablero |
+| R-03 | Barra de munición en móvil: ¿apruebas las cartas por rareza y la tarjeta? | WRK-TASK-061 | Aprobado (28-09), con un arreglo: el botón de disparo y su anillo de % quedan por encima de la barra |
 | R-04 | Barra de munición y panel de controles en PC | WRK-TASK-061 | En preparación |
 | R-05 | Selector de castillos del espectador | WRK-TASK-061 | En preparación |
 | R-06 | Portada: tipografía y título | WRK-TASK-062 | En preparación |

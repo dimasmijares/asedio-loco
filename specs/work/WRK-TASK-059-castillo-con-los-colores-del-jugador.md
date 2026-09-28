@@ -41,7 +41,7 @@ Que cada castillo se reconozca por el color de su jugador: la piedra en un tono 
 | FEAT-INTERFAZ-001 | El color del castillo coincide con el del marcador y la bandera |
 | ARCH-005 | Sin coste en fps: color por instancia, sin materiales nuevos por jugador |
 
-- Decisión del usuario (28-09-2026): piedra y madera teñidas; cristal y hierro neutros. Los tonos exactos se aprueban en el artefacto de diseño (WRK-TASK-060) antes de tocar el juego.
+- Decisión del usuario (28-09-2026): piedra y madera teñidas; cristal y hierro neutros. Tonos aprobados (R-02, 28-09-2026): HSL con el tono del jugador; piedra saturación 30 % y claridad 40 %, madera 52 % y 60 %; el rojo desplazado a 6° para separarlo de la lava.
 - Los fragmentos y el polvo de un bloque roto conservan su tono, para que se vea de quién es cada trozo.
 - Comprobar contraste con la lava (el jugador rojo o naranja no debe confundirse con ella) y con la luz aprobada en WRK-TASK-053.
 
