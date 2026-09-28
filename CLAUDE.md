@@ -22,11 +22,11 @@ Las instrucciones de trabajo están en @AGENTS.md: `specs/` es la fuente de verd
 El juego está en producción: https://asedio-loco.dimasmijares.workers.dev. Cada push a `main` despliega y ejecuta las E2E contra producción.
 
 - **Terminado:** fases 0-6 (`WRK-PLAN-001`), cambios tras la primera prueba (`WRK-PLAN-002`) y adopción de KDD (`WRK-PLAN-003`).
-- **Juego en móviles** (`WRK-PLAN-004`): M1-M4 hechas; quedan la medida en un Android real (M4b) y la PWA (M5, opcional).
-- **Pendientes sueltos:** `WRK-PLAN-005`.
+- **Juego en móviles** (`WRK-PLAN-004`): M1-M5 hechas (la PWA, el 28-09-2026); queda la medida en un Android real (M4b, `WRK-TASK-040`).
+- **Pendientes sueltos:** `WRK-PLAN-005`: solo queda la gráfica integrada (`WRK-TASK-014`, sin hardware).
 - **Munición con identidad destructiva** (`WRK-PLAN-007`), **claridad del apuntado y del impacto** (`WRK-PLAN-008`) y **castillos de 176 bloques, horizontal, grietas y rendimiento** (`WRK-PLAN-009`): terminados, pendientes de que el usuario los pruebe.
-- **Siguiente entrega:** mejoras propuestas (`WRK-SPEC-010`, `WRK-PLAN-010`): 12 tareas nuevas (WRK-TASK-041 a 052) y 4 de planes anteriores (010, 011, 012, 009), aprobadas por el usuario. Para empezar: `npm run kdd:pendientes` y la primera tarea lista del orden sugerido en `WRK-PLAN-010`. Las tareas 041, 042, 043 y 050 empiezan dando opciones al usuario.
-- **Pruebas opcionales en Android** (solo las puede hacer el usuario): lista A1-A6 en `WRK-TASK-040`. Sin hardware: gráfica integrada (`WRK-TASK-014`).
+- **Mejoras propuestas** (`WRK-SPEC-010`, `WRK-PLAN-010`): las 12 tareas (WRK-TASK-041 a 052) y las 4 de planes anteriores (010, 011, 012, 009) están en producción desde el 28-09-2026. Solo queda `WRK-TASK-053`: que el usuario apruebe la luz nueva (capturas en https://claude.ai/artifact/JM86XSLBDrPBxPsUvzoFYB). Después, `/spec-consolidate WRK-SPEC-010`. Pendiente de confirmar: el desconectado pasa a bot al empezar la ronda siguiente (WRK-SPEC-005, Open Questions).
+- **Pruebas opcionales en Android y iPhone** (solo las puede hacer el usuario): lista A1-A8 en `WRK-TASK-040` (A7 y A8: instalar la PWA). Sin hardware: gráfica integrada (`WRK-TASK-014`).
 - **Toda mejora va a la par en PC y en móvil vertical**, con pruebas en los dos formatos.
 - **Móvil:** se juega en vertical por defecto; se diseña y se prueba primero en vertical.
 

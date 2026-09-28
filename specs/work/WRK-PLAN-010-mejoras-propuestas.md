@@ -54,4 +54,9 @@ Tareas de otros planes que forman parte de esta propuesta y pueden intercalarse 
 
 ## Evidence
 
-Pendiente.
+28-09-2026: las 12 tareas del plan están en producción, cada una con CI en verde, y también las 4 de otros planes que formaban parte de la propuesta (WRK-TASK-010, 011, 012 y 009). Las decisiones del usuario (27-09-2026) están anotadas en cada tarea: escudo real en las rondas 1-2, espectador solo con cámara, munición mejor como premio y luz sutil en todas las calidades.
+
+- Queda WRK-TASK-053: que el usuario apruebe las capturas de la luz nueva (página «Luz del atardecer»). Hasta entonces la entrega sigue activa; después, `/spec-consolidate WRK-SPEC-010`.
+- Decisiones nuevas: ADR-014 (escudo real) y ADR-015 (objetivos con carta de premio). `PROTOCOL_VERSION` pasó de 7 a 11.
+- Riesgo «la protección alarga demasiado las partidas»: medido. Con escudo, objetivos y física nueva, normal pasa de 7,6 a unas 9,5-9,9 rondas y difícil de 5,4 a unas 8. La palanca es `KING_GUARD_ROUNDS`.
+- Riesgo «efectos nuevos bajan los fps en móvil»: medido con `cpu=4 movil`. Tras WRK-TASK-052, el paso de física bajó de 14,5 a unos 10 ms y los fps del banco móvil subieron de 16 a 20-26, con humo, luz y rey animado incluidos.
