@@ -63,7 +63,7 @@ Orden recomendado, de más barato o más útil a menos:
 | 2 | WRK-TASK-013 · Topes al cambiar calidad | completed | — | Topes en caliente (`applyQuality`), prueba `calidad.spec.ts` |
 | 3 | WRK-TASK-010 · Desconectado pasa a bot | completed | — | 2026-09-28 |
 | 4 | WRK-TASK-014 · Medir en gráfica integrada | draft | — | — |
-| 5 | WRK-TASK-012 · Estadísticas con migración | draft | — | — |
+| 5 | WRK-TASK-012 · Estadísticas con migración | completed | — | 2026-09-28 |
 | 6 | WRK-TASK-011 · Repetición por lava | completed | — | 2026-09-28 |
 | 7 | WRK-TASK-016 · Rapier fuera de la portada | completed | — | La portada no pide Rapier (1,1 MB comprimido); prueba en `smoke.spec.ts` |
 | 8 | WRK-TASK-019 · Espectador promovido conserva `mobile` | completed | — | Hecho el 26-09-2026 |

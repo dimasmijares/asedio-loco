@@ -68,6 +68,9 @@ export interface MatchState {
   goal: GoalKind | null; // objetivo secundario de la ronda (WRK-TASK-043)
   goalDone: number[]; // huecos que lo han cumplido en el impacto de esta ronda
   bonus: number[]; // huecos con carta rara o épica de premio en esta ronda
+  // Bloques en pie y castillo al que apunta cada jugador al empezar el impacto: si el anfitrión se
+  // va en pleno impacto, el heredero saca de aquí las cuentas de la ronda (WRK-TASK-012).
+  impact?: { blocks: Record<number, number>; targets: Record<number, number> } | null;
 }
 
 export const MAX_ROUNDS = 24;

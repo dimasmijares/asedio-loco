@@ -233,6 +233,23 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   await expect(host.locator('#player-list li[data-player]')).toHaveCount(3);
   await host.click('#start');
   await waitAll([host, g1, g2], (s) => s.round >= 2 && s.phase !== 'over', 240_000);
+  // Se va en pleno impacto (WRK-TASK-012): el heredero tiene que sacar las cuentas de esa ronda.
+  // Espera en la propia página a que el impacto ya haya roto algún bloque y entonces se va.
+  const hi = await host.evaluate(
+    () =>
+      new Promise<{ round: number }>((done) => {
+        const tick = () => {
+          const m = (window as any).__asedio.mode;
+          const s = m.state;
+          if (s.round >= 2 && s.phase === 'impact' && s.impact) {
+            const start = Object.values(s.impact.blocks as Record<string, number>).reduce((a, b) => a + b, 0);
+            if (start - m.game.view.blockCount() >= 3) return done({ round: s.round });
+          }
+          requestAnimationFrame(tick);
+        };
+        tick();
+      }),
+  );
   const before = (await summary(g1))!;
   await host.context().close();
   const [a, b] = await waitAll([g1, g2], (s) => s.role === 'host' || s.fulls > before.fulls, 30_000);
@@ -240,6 +257,25 @@ test('el anfitrión se va a mitad de partida y otro hereda la partida', async ({
   expect(newHost.role, 'alguien toma el relevo').toBe('host');
   expect(newHost.migrations).toBe(1);
   console.log('migración: nuevo anfitrión en la ronda', newHost.round);
+  // En los resultados de esa ronda, los bloques perdidos de cada castillo son los que faltan
+  // respecto al principio del impacto.
+  const heir = a.role === 'host' ? g1 : g2;
+  const res = await heir.evaluate(
+    (round) =>
+      new Promise<any>((done) => {
+        const tick = () => {
+          const s = (window as any).__asedio.mode.state;
+          if (s.round > round || s.phase === 'over') return done(null);
+          if (s.round === round && (s.phase === 'results' || s.phase === 'replay') && s.results) return done({ lost: s.results.lost, start: s.impact?.blocks, now: Object.fromEntries(s.players.map((p: any) => [p.slot, p.blocks])) });
+          requestAnimationFrame(tick);
+        };
+        tick();
+      }),
+    hi.round,
+  );
+  console.log('migración en el impacto: resultados', JSON.stringify(res));
+  expect(res, 'el heredero muestra los resultados de la ronda de la migración').not.toBeNull();
+  for (const slot of Object.keys(res.now)) expect(res.lost[slot] ?? 0, `perdidos del castillo ${slot}`).toBe(res.start[slot] - res.now[slot]);
   const finals = await waitAll([g1, g2], (s) => s.phase === 'over', 480_000);
   expect(finals[0].winner).not.toBeNull();
   expect(finals[1].winner).toBe(finals[0].winner);

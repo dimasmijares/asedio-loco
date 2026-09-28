@@ -19,7 +19,7 @@ tags:
 
 ## Rule
 
-Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **10**; 7 desde ADR-013, 8 desde ADR-014, 9 desde ADR-015 y 10 desde WRK-TASK-010) en el mismo despliegue.
+Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **11**; 7 desde ADR-013, 8 desde ADR-014, 9 desde ADR-015, 10 desde WRK-TASK-010 y 11 desde WRK-TASK-012) en el mismo despliegue.
 
 Cuenta como dato compartido:
 

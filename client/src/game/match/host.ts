@@ -56,6 +56,7 @@ export class MatchHost {
   private closestMiss = new Map<number, number>();
   private roundElims: number[] = [];
   private realT = 0;
+  private inherited = false; // impacto heredado a medias en una migración (WRK-TASK-012)
   private blocksT = 0;
   // Segundos de apuntado que quedaban al empezar la última cuenta atrás (pruebas: con todos
   // listos debe ser > 0).
@@ -157,6 +158,7 @@ export class MatchHost {
     this.sim.wind = s.wind;
     if (s.phase === 'impact') {
       this.shots = [];
+      this.inherited = true;
       this.endImpact();
     } else if (s.phase === 'replay') {
       this.beginResults();
@@ -251,9 +253,12 @@ export class MatchHost {
     this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self], broken: st.broken.length };
     let i = 0;
     this.lastTargets.clear();
+    s.impact = { blocks: {}, targets: {} };
+    for (const p of s.players) s.impact.blocks[p.slot] = this.sim.blocksAlive(p.slot);
     for (const p of alivePlayers(s).sort((a, b) => a.slot - b.slot)) {
       p.locked = true;
       this.lastTargets.set(p.slot, aimedAt(s, p));
+      s.impact.targets[p.slot] = aimedAt(s, p);
       const ammo = consumeAmmo(p);
       if (!ammo) continue;
       p.stats.shots++;
@@ -282,9 +287,14 @@ export class MatchHost {
     const st = this.sim.stats;
     const lost: Record<number, number> = {};
     const dealt: Record<number, number> = {};
+    // Impacto heredado: esta simulación no vio el principio. Los bloques perdidos salen de los que
+    // había en pie al empezar (en el estado) y los rotos se reparten entre quienes apuntaban a
+    // cada castillo.
+    const inherited = this.inherited && s.impact ? inheritedCounts(s, (slot) => this.sim.blocksAlive(slot)) : null;
+    this.inherited = false;
     for (const p of s.players) {
-      lost[p.slot] = st.lost[p.slot] - this.before.lost[p.slot];
-      dealt[p.slot] = st.destroyed[p.slot] - this.before.destroyed[p.slot];
+      lost[p.slot] = inherited ? inherited.lost[p.slot] : st.lost[p.slot] - this.before.lost[p.slot];
+      dealt[p.slot] = inherited ? inherited.dealt[p.slot] : st.destroyed[p.slot] - this.before.destroyed[p.slot];
       p.stats.lost += lost[p.slot];
       p.stats.dealt += dealt[p.slot];
       p.stats.bestShot = Math.max(p.stats.bestShot, dealt[p.slot]);
@@ -375,4 +385,24 @@ export class MatchHost {
       if (this.state.phase === 'aim' && alivePlayers(this.state).length <= 1) this.state.remaining = Math.min(this.state.remaining, 0.5);
     }
   }
+}
+
+// Cuentas de un impacto heredado (WRK-TASK-012): perdidos = en pie al empezar − en pie ahora; los
+// rotos de cada castillo se reparten a partes iguales entre quienes le apuntaban (aproximado: la
+// simulación nueva no sabe quién rompió qué antes de heredarla).
+export function inheritedCounts(s: MatchState, alive: (slot: number) => number) {
+  const lost: Record<number, number> = {};
+  const dealt: Record<number, number> = {};
+  for (const p of s.players) {
+    const now = alive(p.slot);
+    lost[p.slot] = Math.max(0, (s.impact!.blocks[p.slot] ?? now) - now);
+    dealt[p.slot] = 0;
+  }
+  for (const q of s.players) {
+    const shooters = Object.entries(s.impact!.targets).filter(([from, to]) => to === q.slot && Number(from) !== q.slot).map(([from]) => Number(from));
+    if (!shooters.length) continue;
+    const each = Math.floor(lost[q.slot] / shooters.length);
+    shooters.forEach((from, i) => (dealt[from] += each + (i < lost[q.slot] - each * shooters.length ? 1 : 0)));
+  }
+  return { lost, dealt };
 }

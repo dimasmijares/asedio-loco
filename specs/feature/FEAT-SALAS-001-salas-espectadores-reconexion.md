@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -62,7 +62,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - El cliente reintenta con espera `min(5 s, 0,4 s·2^n)` y manda `ping` cada 5 s.
    - Con el token recupera su hueco (y cierra otra pestaña suya) y pide el estado completo.
    - Si la versión del protocolo no coincide, deja de reintentar y pide recargar.
-6. **Migración de anfitrión** (D-031): si el anfitrión se desconecta en partida, el servidor elige a otro jugador conectado, primero los ordenadores y luego por hueco. Ese cliente reconstruye la física con lo que ve y sigue.
+6. **Migración de anfitrión** (D-031): si el anfitrión se desconecta en partida, el servidor elige a otro jugador conectado, primero los ordenadores y luego por hueco. Ese cliente reconstruye la física con lo que ve y sigue. Si hereda la partida en pleno impacto, la da por terminada y saca las cuentas de la ronda de `MatchState.impact` (WRK-TASK-012). Los bloques perdidos de cada castillo son los que había en pie al empezar el impacto menos los que siguen en pie en su mundo. Los rotos de cada castillo se reparten a partes iguales entre quienes le apuntaban: es una aproximación, porque su simulación no vio quién rompió qué. Los disparos que aún no habían salido se pierden.
    - Si se estaba resolviendo un impacto, se da por terminado. Si se apuntaba, los bots vuelven a decidir y quedan al menos 3 s.
    - En el lobby, el anfitrión tiene 8 s de gracia para recargar sin perder el papel.
 6b. **Desconectado → bot** (WRK-TASK-010): al empezar cada ronda, el anfitrión marca `auto` en los humanos vivos que no están conectados. Su castillo lo lleva un bot con la dificultad de la sala (`decideBots`), su puntería se reenvía a todos como la de un bot y el marcador enseña 🤖 junto a 📡. Si vuelve con su token, sus entradas se ignoran hasta el siguiente apuntado, en el que recupera el control. El resto de la ronda en que se fue hace de margen para reconectar.
