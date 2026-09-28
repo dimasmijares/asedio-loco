@@ -384,6 +384,7 @@ export class WorldView {
 
   private updateGuard(t: number) {
     if (!this.guard.on) return;
+    const cam = this.stage.camera.position;
     if (this.guard.beam) this.guard.beam.opacity = 0.32 + Math.sin(t * 2.4) * 0.08;
     for (const [slot, g] of this.guard.objs) {
       const k = this.kings.get(slot);
@@ -392,6 +393,8 @@ export class WorldView {
       // Sigue al rey sin girar con él (el rey rueda al caer; el halo, no).
       g.position.copy(k.position);
       g.children[0].rotation.z = t * 1.5;
+      // La columna de tu propio rey, junto a la cámara al apuntar, taparía media pantalla.
+      g.children[1].visible = k.position.distanceTo(cam) > 16;
     }
   }
 

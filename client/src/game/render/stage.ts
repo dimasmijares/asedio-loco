@@ -46,10 +46,11 @@ export class Stage {
     this.camera.lookAt(0, 0, 0);
     this.scene.fog = new THREE.Fog('#ffd9b0', 110, 420);
 
-    // Luz: cielo azul arriba, resplandor de lava abajo, sol cálido con sombras.
-    this.scene.add(new THREE.HemisphereLight('#cfeaff', '#ff9a5a', 1.35));
-    this.sun = new THREE.DirectionalLight('#fff1d6', 2.4);
-    this.sun.position.set(-35, 60, 25);
+    // Luz: cielo azul arriba, resplandor de lava abajo, sol cálido de atardecer con sombras. Algo
+    // menos de luz de ambiente y un sol más cálido y bajo dan más contraste entre caras (WRK-TASK-050).
+    this.scene.add(new THREE.HemisphereLight('#cfe4ff', '#ff9150', 1.2));
+    this.sun = new THREE.DirectionalLight('#ffe2b4', 2.65);
+    this.sun.position.set(-40, 52, 28);
     this.sun.castShadow = quality !== 'low';
     const sc = this.sun.shadow.camera;
     sc.left = sc.bottom = -38;

@@ -88,7 +88,19 @@ const CRACK_APPLY = /* glsl */ `
   #endif
 `;
 
-// Material de los bloques: desvanecido cercano (WRK-TASK-034) y grietas según el daño (WRK-TASK-039).
+// Oclusión aproximada (WRK-TASK-050), sin coste de texturas ni pasadas: la parte baja de cada bloque
+// (coordenada local, cubo unidad) y lo que está a ras de suelo (altura en el mundo) se oscurecen un
+// poco, así que las juntas entre hileras y la base del castillo ganan volumen. Todas las calidades.
+const AO_APPLY = /* glsl */ `
+  {
+    float aoBlock = mix(0.8, 1.0, smoothstep(-0.5, -0.12, vCrackP.y));
+    float aoGround = mix(0.78, 1.0, smoothstep(0.0, 1.6, vFadeW.y));
+    diffuseColor.rgb *= aoBlock * aoGround;
+  }
+`;
+
+// Material de los bloques: desvanecido cercano (WRK-TASK-034), grietas según el daño (WRK-TASK-039)
+// y oclusión aproximada (WRK-TASK-050).
 export function withNearFade<T extends THREE.Material>(m: T): T {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uFadeNear = NEAR_FADE;
@@ -97,9 +109,9 @@ export function withNearFade<T extends THREE.Material>(m: T): T {
       .replace('#include <project_vertex>', `#include <project_vertex>\n${FADE_WORLD}\n${CRACK_VERT}`);
     sh.fragmentShader = sh.fragmentShader
       .replace('void main() {', `${FADE_FRAG}\n${CRACK_FRAG}\nvoid main() {\n  nearFade();`)
-      .replace('#include <color_fragment>', `#include <color_fragment>\n${CRACK_APPLY}`);
+      .replace('#include <color_fragment>', `#include <color_fragment>\n${CRACK_APPLY}\n${AO_APPLY}`);
   };
-  m.customProgramCacheKey = () => 'nearFade+cracks';
+  m.customProgramCacheKey = () => 'nearFade+cracks+ao';
   return m;
 }
 
