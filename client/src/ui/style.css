@@ -1839,3 +1839,30 @@ html.big-text .ammo-name {
     height: 104px;
   }
 }
+
+/* R-04 (WRK-TASK-061): la carta elegida sube y brilla; que no pise la tarjeta de encima. */
+.hud-row {
+  margin-top: 10px;
+}
+/* Panel de controles del mismo ancho que el marcador: teclas a la izquierda, texto corto al lado. */
+.hud-help {
+  width: 100%;
+  box-sizing: border-box;
+  justify-self: stretch;
+}
+.help-list {
+  gap: 5px;
+}
+.help-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  white-space: normal;
+  line-height: 1.15;
+}
+.help-row .help-keys {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  min-width: 0;
+}

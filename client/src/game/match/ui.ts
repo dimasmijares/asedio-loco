@@ -38,11 +38,11 @@ export interface MatchUIOptions {
 }
 
 export const AIM_HELP: HelpRow[] = [
-  [['Clic dcho.', 'ratón'], 'apuntar'],
-  [['Espacio', 'clic izdo.'], 'mantener: cargar · soltar: disparar'],
-  [['Q', 'E'], 'cámara: mirar a otro castillo'],
+  [['Clic dcho.'], 'apuntar (arrastra)'],
+  [['Espacio', 'Clic'], 'cargar y disparar'],
+  [['Q', 'E'], 'cámara: otro castillo'],
   [['1', '2', '3'], 'munición'],
-  [['Rueda'], 'acercar la cámara'],
+  [['Rueda'], 'acercar'],
 ];
 
 export const TOUCH_HELP: HelpRow[] = [
