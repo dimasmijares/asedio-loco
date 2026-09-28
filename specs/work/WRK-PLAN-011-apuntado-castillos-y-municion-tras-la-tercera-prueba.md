@@ -35,6 +35,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 5 | WRK-TASK-058 · Castillos con dos filas más | draft | 057 | — |
 | 6 | WRK-TASK-059 · Castillo con los colores del jugador | draft | 058, 060 (aprobar colores) | — |
 | 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | draft | 060 (aprobar la propuesta) | — |
+| 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
 
 ## Risk Assessment
 
