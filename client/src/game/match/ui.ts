@@ -84,6 +84,16 @@ export class MatchUI {
   best: { slot: number; dealt: number; round: number; lavaY: number; snap: ViewSnapshot; clip: ReplayClip; focus: THREE.Vector3 } | null = null;
   private final: { end: ViewSnapshot; skip: HTMLElement; off: () => void } | null = null;
   bestShown = 0; // repeticiones del mejor disparo empezadas (para las pruebas)
+  // Espectador activo (WRK-TASK-042): el eliminado o el espectador elige qué castillo sigue la
+  // cámara durante el apuntado; -1 es el plano general.
+  watchSlot = -1;
+  private watchKeys = (e: KeyboardEvent) => {
+    if (!this.watching() || (e.target as HTMLElement)?.tagName === 'INPUT') return;
+    const d = e.code === 'KeyE' || e.code === 'ArrowRight' || (e.code === 'Tab' && !e.shiftKey) ? 1 : e.code === 'KeyQ' || e.code === 'ArrowLeft' || (e.code === 'Tab' && e.shiftKey) ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    this.cycleWatch(d);
+  };
 
   constructor(readonly game: Game, readonly src: MatchSource, readonly parent: HTMLElement, readonly opts: MatchUIOptions = {}) {
     this.hud = new Hud(parent);
@@ -96,7 +106,8 @@ export class MatchUI {
     input.onFire = (a) => this.fire(a);
     input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
-    this.hud.onTarget = (d) => this.cycleTarget(d);
+    this.hud.onTarget = (d) => (this.watching() ? this.cycleWatch(d) : this.cycleTarget(d));
+    addEventListener('keydown', this.watchKeys);
     input.onSelectSlot = (i) => this.selectAmmo(i);
     this.hud.bindCharge(input);
     this.hud.setHelp(this.hud.touchUi ? TOUCH_HELP : AIM_HELP);
@@ -110,6 +121,19 @@ export class MatchUI {
   me(): PlayerState | undefined {
     const you = this.src.you;
     return you === null ? undefined : this.src.state.players.find((p) => p.slot === you);
+  }
+
+  // Sin rey vivo (eliminado o espectador) mientras sigue la partida.
+  watching() {
+    const me = this.me();
+    return (!me || !me.alive) && this.src.state.phase !== 'over';
+  }
+
+  // Plano general y castillos en pie, en orden.
+  cycleWatch(dir: number) {
+    const order = [-1, ...this.src.state.players.filter((p) => p.alive).map((p) => p.slot)];
+    const i = Math.max(0, order.indexOf(this.watchSlot));
+    this.watchSlot = order[(i + dir + order.length) % order.length];
   }
 
   private canAim() {
@@ -232,7 +256,10 @@ export class MatchUI {
     const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
       if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
-      else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
+      else if (s.phase === 'aim' && this.watchSlot >= 0) {
+        const o = castleOrigin(this.watchSlot);
+        if (g.rig.mode !== 'orbit' || g.rig.radius !== 21 || Math.hypot(g.rig.center.x - o[0], g.rig.center.z - o[2]) > 0.1) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 21, 13, 0.05);
+      } else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
         const o = castleOrigin(s.winner);
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 18) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 18, 11, 0.25);
       } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
@@ -255,7 +282,9 @@ export class MatchUI {
     if (me && me.alive && s.phase === 'aim') this.hud.setAmmo(me.ammo, me.selected, (i) => this.selectAmmo(i));
     else this.hud.setAmmo([], 0, () => {});
     this.hud.showConfirm(!!me?.alive && s.phase === 'aim', !!me?.locked);
-    this.hud.showTargetButtons(this.canAim());
+    const watch = this.watching() && s.phase === 'aim';
+    this.hud.showTargetButtons(this.canAim() || watch, watch);
+    this.hud.setWatch(watch ? (this.watchSlot < 0 ? 'Plano general' : `Castillo de ${nameOf(s, this.watchSlot)}`) : null);
     this.hud.setStats(`${g.fps} fps`);
   }
 
@@ -307,7 +336,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : 'Eres espectador';
+      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
       // Escudo real (WRK-TASK-041): se anuncia al empezar, en la última ronda con él y al acabarse.
       if (s.round === 1) sub += `\n🛡️ Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`;
       else if (s.round === KING_GUARD_ROUNDS) sub += '\n🛡️ Última ronda con escudo real';
@@ -552,6 +581,7 @@ export class MatchUI {
   }
 
   dispose() {
+    removeEventListener('keydown', this.watchKeys);
     if (this.final) {
       this.final.off();
       this.final.skip.remove();

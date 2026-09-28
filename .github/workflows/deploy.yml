@@ -45,7 +45,7 @@ jobs:
       matrix:
         include:
           - grupo: basicas
-            args: lobby smoke perf controls touch hud-compact encuadre calidad tutorial
+            args: lobby smoke perf controls touch hud-compact encuadre calidad tutorial espectador
           - grupo: fisica
             args: physics
           - grupo: solitario

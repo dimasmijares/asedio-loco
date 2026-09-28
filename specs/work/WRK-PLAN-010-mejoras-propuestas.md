@@ -37,7 +37,7 @@ Para empezar en una sesión nueva: `npm run kdd:pendientes`, elegir la primera t
 | 8 | WRK-TASK-051 · Animación del rey | completed | — | 2026-09-28 |
 | 9 | WRK-TASK-052 · Física más barata para el anfitrión móvil | completed | — | 2026-09-28 |
 | 10 | WRK-TASK-050 · Iluminación del atardecer y sombras de contacto | completed | 052 | 2026-09-28 |
-| 11 | WRK-TASK-042 · Espectador activo tras la eliminación | draft | 041 | — |
+| 11 | WRK-TASK-042 · Espectador activo tras la eliminación | completed | 041 | 2026-09-28 |
 | 12 | WRK-TASK-043 · Objetivos secundarios por ronda | draft | 041 | — |
 | 13 | WRK-TASK-053 · Revisión de la iluminación por el usuario | draft | 050 | — |
 

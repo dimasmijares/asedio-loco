@@ -163,6 +163,10 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
       // Si intenta disparar, el servidor lo rechaza.
       await spectator.evaluate(() => (window as any).__asedio.conn.relay('host', { k: 'in', lk: true }));
       await expect.poll(() => spectator!.evaluate(() => (window as any).__asedio.conn.lastError)).toContain('espectadores');
+      // Tiene los mismos controles de cámara que un eliminado (WRK-TASK-042).
+      await spectator.evaluate(() => (window as any).__asedio.mode.ui.cycleWatch(1));
+      expect(await spectator.evaluate(() => (window as any).__asedio.mode.ui.watching())).toBe(true);
+      expect(await spectator.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBeGreaterThanOrEqual(0);
       await spectator.screenshot({ path: info.outputPath('espectador.png') });
       console.log('espectador: ve la ronda', sv.round, 'y no puede disparar');
     }

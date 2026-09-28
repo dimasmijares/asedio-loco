@@ -151,7 +151,8 @@ export class Hud {
 
   setAimInfo(aim: Aim | null, ammo?: AmmoId) {
     if (!aim) {
-      this.aimInfo.textContent = '';
+      // La línea del espectador (setWatch) se queda; la borra setWatch(null).
+      if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
       return;
     }
     const pct = Math.round(aim.power * 100);
@@ -280,8 +281,21 @@ export class Hud {
   }
 
   // Flechas de castillo objetivo: solo en táctil y mientras se puede apuntar.
-  showTargetButtons(show: boolean) {
-    for (const b of this.targetBtns) b.hidden = !(show && this.touchUi);
+  // `always`: también con ratón (el espectador cambia de castillo con ellos, WRK-TASK-042).
+  showTargetButtons(show: boolean, always = false) {
+    for (const b of this.targetBtns) b.hidden = !(show && (this.touchUi || always));
+  }
+
+  // Qué castillo sigue la cámara del espectador, en la línea de la puntería (que entonces no se usa).
+  // Se llama en cada fotograma: solo toca el DOM si cambia lo que hay que enseñar.
+  setWatch(text: string | null) {
+    const cur = (this.aimInfo.firstElementChild as HTMLElement | null)?.dataset.watch;
+    if (!text) {
+      if (cur) this.aimInfo.textContent = '';
+      return;
+    }
+    if (cur === text) return;
+    this.aimInfo.replaceChildren(h('span', { id: 'hud-watch', 'data-watch': text }, '👁 ', h('b', null, text), h('span', { class: 'muted' }, this.touchUi ? '  ·  ◀ ▶ para cambiar' : '  ·  Q/E o ◀ ▶ para cambiar')));
   }
 
   dispose() {

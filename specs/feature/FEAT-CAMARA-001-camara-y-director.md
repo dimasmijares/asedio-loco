@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.4.0
+version: 1.5.0
 created: 2026-09-26
-updated: 2026-09-27
+updated: 2026-09-28
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -65,7 +65,8 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
    - Distancia `radio / tan(27,5°) · 0,8 + 4`; altura al menos 9 m. Suavizado de la cámara 1,6.
    - Tras el último punto sigue 1,2 s más antes de soltar la cámara.
 4. **Sin cámara lenta en directo** (D-060): el juego ya no tiene `timeScale` ni modo de cámara de seguimiento (se quitaron en WRK-TASK-017). La cámara lenta es de la repetición (FEAT-REPLAY-001).
-5. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
+5. **Espectador activo** (WRK-TASK-042): sin rey vivo (eliminado, o espectador que entra con la partida empezada), durante el apuntado Q/E, Tab, las flechas o los botones ◀ ▶ (también con ratón) recorren el plano general y los castillos en pie (`MatchUI.cycleWatch`). La cámara gira alrededor del elegido (radio 21 m, altura 13 m) y la línea de la puntería dice qué se está viendo («Castillo de …» o «Plano general»). El rótulo de la ronda lo explica. En las demás fases manda el director, como para todos.
+6. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
 6. La cámara nunca baja de y = 0,8 m.
 
 ### Outputs
@@ -105,7 +106,8 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 | Implemented in | `client/src/game/camera.ts` | `CameraRig`: modos `orbit`, `aim`, `watch`, zoom y sacudida |
 | Implemented in | `client/src/game/director.ts` | Plano general de la cuenta atrás y panorámica del impacto |
 | Tested by | `tests/tools/countdown-shots.mjs` | Capturas de la cuenta atrás y del principio del impacto |
-| Implemented in | `client/src/game/match/ui.ts` | Elección de plano por fase |
+| Implemented in | `client/src/game/match/ui.ts` | Elección de plano por fase; espectador activo (`watching`, `cycleWatch`, `watchSlot`) |
+| Tested by | `tests/e2e/espectador.spec.ts` | Eliminado que cambia de castillo en PC y en móvil vertical |
 | Implemented in | `client/src/game/game.ts` | Rueda → `rig.zoom` |
 | Tested by | `tests/tools/impact-shots.mjs` | Capturas de la panorámica (revisión manual) |
 | Tested by | `tests/e2e/solo.spec.ts`, `tests/e2e/multiplayer.spec.ts` | Partidas completas sin errores |
