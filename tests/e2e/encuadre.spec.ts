@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-// Plano general (WRK-TASK-035): al empezar el impacto, los 4 castillos en juego caen dentro de la
-// pantalla, en escritorio y en un móvil en vertical. Después, en los resultados, cada castillo en
+// Encuadre del impacto: desde WRK-TASK-063 (aprobado en R-08) el plano va de tu castillo al que
+// apuntas, así que al empezar el impacto esos dos caen dentro de la pantalla, en escritorio y en un
+// móvil en vertical (antes, WRK-TASK-035, los 4 castillos). Después, en los resultados, cada castillo en
 // juego enseña encima el daño de la ronda (WRK-TASK-036).
 for (const [name, vp, mobile] of [
   ['escritorio', { width: 1280, height: 720 }, false],
@@ -18,12 +19,14 @@ for (const [name, vp, mobile] of [
       const ndc = await page.evaluate(() => {
         const g = (window as any).__asedio.game;
         const cam = g.stage.camera;
-        return [...g.view.kings.values()].map((k: any) => {
+        const me = (window as any).__asedio.mode.host.state.players.find((q: any) => q.id === 'you');
+        return [me.slot, me.target].map((slot: number) => {
+          const k = g.view.kings.get(slot);
           const p = k.getWorldPosition(k.position.clone()).project(cam);
           return [p.x, p.y];
         });
       });
-      expect(ndc.length).toBe(4);
+      expect(ndc.length).toBe(2);
       for (const [x, y] of ndc) expect(Math.abs(x) <= 1 && Math.abs(y) <= 1, `castillo en pantalla (${x.toFixed(2)}, ${y.toFixed(2)})`).toBe(true);
 
       // Se espera a las etiquetas y no a la fase: en CI (SwiftShader) los resultados tardan más y
