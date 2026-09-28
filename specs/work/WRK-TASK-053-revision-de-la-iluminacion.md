@@ -3,8 +3,8 @@ id: WRK-TASK-053
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -33,7 +33,7 @@ Sale de WRK-TASK-050: su criterio pedía la aprobación del usuario, y el usuari
 
 ## Acceptance Criteria
 
-- [ ] El usuario aprueba las capturas o pide un ajuste, que se aplica con capturas nuevas en PC y en móvil vertical.
+- [x] El usuario aprueba las capturas o pide un ajuste, que se aplica con capturas nuevas en PC y en móvil vertical.
 
 ## Test Plan
 
@@ -43,4 +43,4 @@ Sale de WRK-TASK-050: su criterio pedía la aprobación del usuario, y el usuari
 
 ## Evidence
 
-Pendiente.
+2026-09-28. El usuario aprueba la luz tal como está en producción, sin ajustes. No se toca código.

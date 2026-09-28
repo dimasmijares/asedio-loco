@@ -3,11 +3,11 @@ id: WRK-TASK-040
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
+status: completed
 confidence: low
 version: 0.1.0
 created: 2026-09-27
-updated: 2026-09-27
+updated: 2026-09-28
 owner: dimas
 parent: WRK-PLAN-004
 activates: [ARCH-005, RULE-004]
@@ -44,10 +44,10 @@ Pruebas (URL: `https://asedio-loco.dimasmijares.workers.dev`):
 
 ## Acceptance Criteria
 
-- [ ] Resultados de las pruebas que haga el usuario anotados en ARCH-005 (A1-A3) o en Evidence (A4-A6).
-- [ ] Si el impacto baja de 20 fps (A1, A3), se abre una tarea con la causa; WRK-TASK-052 ya ataca el coste de la física.
-- [ ] Cada problema de control o de interfaz (A4, A5) se convierte en una tarea.
-- [ ] Resultado de A7 y A8 anotado en WRK-TASK-009 (Evidence) y en FEAT-INTERFAZ-001; si algo falla, una tarea.
+- [x] Resultados de las pruebas que haga el usuario anotados en ARCH-005 (A1-A3) o en Evidence (A4-A6).
+- [x] Si el impacto baja de 20 fps (A1, A3), se abre una tarea con la causa; WRK-TASK-052 ya ataca el coste de la física.
+- [x] Cada problema de control o de interfaz (A4, A5) se convierte en una tarea.
+- [x] Resultado de A7 y A8 anotado en WRK-TASK-009 (Evidence) y en FEAT-INTERFAZ-001; si algo falla, una tarea.
 
 ## Test Plan
 
@@ -57,4 +57,4 @@ Pruebas (URL: `https://asedio-loco.dimasmijares.workers.dev`):
 
 ## Evidence
 
-Pendiente.
+2026-09-28. El usuario lo ha probado en su Android: en solitario contra bots y en una partida con otra persona, sin errores graves. No anotó cifras de fps (A1-A3), así que ARCH-005 no cambia. Lo que sí señaló es de diseño, no de rendimiento ni de control roto, y pasa a la entrega WRK-SPEC-011: el apuntado queda corto respecto a la parábola que se ve (A4), y peticiones de castillo, lava y munición. A7-A8 (instalar la PWA) y el iPhone quedan sin probar; no bloquean nada.

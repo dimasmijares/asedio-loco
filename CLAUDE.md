@@ -22,11 +22,12 @@ Las instrucciones de trabajo están en @AGENTS.md: `specs/` es la fuente de verd
 El juego está en producción: https://asedio-loco.dimasmijares.workers.dev. Cada push a `main` despliega y ejecuta las E2E contra producción.
 
 - **Terminado:** fases 0-6 (`WRK-PLAN-001`), cambios tras la primera prueba (`WRK-PLAN-002`) y adopción de KDD (`WRK-PLAN-003`).
-- **Juego en móviles** (`WRK-PLAN-004`): M1-M5 hechas (la PWA, el 28-09-2026); queda la medida en un Android real (M4b, `WRK-TASK-040`).
+- **Juego en móviles** (`WRK-PLAN-004`): terminado. El usuario lo probó en su Android el 28-09-2026 (`WRK-TASK-040`); falta `/spec-consolidate WRK-SPEC-004`.
 - **Pendientes sueltos:** `WRK-PLAN-005`: solo queda la gráfica integrada (`WRK-TASK-014`, sin hardware).
 - **Munición con identidad destructiva** (`WRK-PLAN-007`), **claridad del apuntado y del impacto** (`WRK-PLAN-008`) y **castillos de 176 bloques, horizontal, grietas y rendimiento** (`WRK-PLAN-009`): terminados, pendientes de que el usuario los pruebe.
-- **Mejoras propuestas** (`WRK-SPEC-010`, `WRK-PLAN-010`): las 12 tareas (WRK-TASK-041 a 052) y las 4 de planes anteriores (010, 011, 012, 009) están en producción desde el 28-09-2026. Solo queda `WRK-TASK-053`: que el usuario apruebe la luz nueva (capturas en https://claude.ai/artifact/JM86XSLBDrPBxPsUvzoFYB). Después, `/spec-consolidate WRK-SPEC-010`. Pendiente de confirmar: el desconectado pasa a bot al empezar la ronda siguiente (WRK-SPEC-005, Open Questions).
-- **Pruebas opcionales en Android y iPhone** (solo las puede hacer el usuario): lista A1-A8 en `WRK-TASK-040` (A7 y A8: instalar la PWA). Sin hardware: gráfica integrada (`WRK-TASK-014`).
+- **Mejoras propuestas** (`WRK-SPEC-010`): todo en producción y la luz aprobada (28-09-2026). Falta `/spec-consolidate WRK-SPEC-010`. Confirmado: el desconectado pasa a bot al empezar la ronda siguiente.
+- **Entrega activa: apuntado, castillos y munición** (`WRK-SPEC-011`, `WRK-PLAN-011`, WRK-TASK-054 a 060), tras la tercera prueba: parábola hasta el choque, solo munición en parábola (fuera piano, burbuja, andamio y gallina), cocos que se abren y explotan, lava que sube cada ronda, dos filas más y castillos del color del jugador. La interfaz y las propuestas se revisan en el lienzo de diseño https://claude.ai/artifact/RWP97U9aWmerrw9ibSeLxA (`WRK-TASK-060`): nada visible cambia sin esa revisión.
+- **Sin hardware:** gráfica integrada (`WRK-TASK-014`). Opcional: instalar la PWA en Android e iPhone (A7-A8 de `WRK-TASK-040`).
 - **Toda mejora va a la par en PC y en móvil vertical**, con pruebas en los dos formatos.
 - **Móvil:** se juega en vertical por defecto; se diseña y se prueba primero en vertical.
 
