@@ -3,8 +3,8 @@ id: WRK-TASK-055
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -45,10 +45,10 @@ Sacar del reparto, por ahora, la munición que no vuela en parábola desde la ca
 
 ## Acceptance Criteria
 
-- [ ] En 10 000 manos sorteadas no sale ninguna munición retirada (unitaria).
-- [ ] El tutorial, «Cómo se juega» y el HUD no nombran munición retirada.
-- [ ] Destrozo y equilibrio (normal y difícil) antes y después, en `tests/balance/`.
-- [ ] DOM-JUEGO-003 al día (tabla, porcentajes por rareza) y ADR nueva «munición solo en parábola».
+- [x] En 10 000 manos sorteadas no sale ninguna munición retirada (unitaria).
+- [x] El tutorial, «Cómo se juega» y el HUD no nombran munición retirada.
+- [x] Destrozo y equilibrio (normal y difícil) antes y después, en `tests/balance/`.
+- [x] DOM-JUEGO-003 al día (tabla, porcentajes por rareza) y ADR nueva «munición solo en parábola».
 
 ## Test Plan
 
@@ -59,4 +59,9 @@ Sacar del reparto, por ahora, la munición que no vuela en parábola desde la ca
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- `retired: true` en piano, burbuja, andamio y gallina (`shared/ammo.ts`); `DEALT_IDS` es lo que se reparte y `ammoWeights` solo lo usa a él. El campo de pruebas sigue ofreciéndolas todas (sirve para probarlas si vuelven).
+- Reparto sin duelo: común 68 %, rara 20 %, épica 12 %. En el duelo: común 37 %, rara 31 %, épica 32 %. Pesos sin cambiar.
+- Unitaria nueva: 20 000 manos sin munición retirada ni defensiva; las 8 que quedan salen todas.
+- «Cómo se juega» ya no nombra las defensivas.
+- Destrozo: sin cambios (ninguna munición cambia). Equilibrio en normal (8 partidas): 9,8 rondas (referencia, 12 partidas) → 8,1 rondas; causas: aplastado 15, fuera 7, lava 5. Sin andamio los castillos no se reparan y la partida se acorta, dentro de 7-11.

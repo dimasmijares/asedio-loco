@@ -3,7 +3,7 @@
 import { drawAmmo, type AmmoId } from './ammo';
 import { BLOCKS_PER_CASTLE } from './castle';
 import { PITCH_DEFAULT, type Aim } from './ballistics';
-import { LAVA_LEVELS, LAVA_RISE_EVERY, WIND_FROM_ROUND, castleOrigin, launchPoint } from './map';
+import { LAVA_FAST_STEPS, LAVA_LEVELS, WIND_FROM_ROUND, castleOrigin, launchPoint } from './map';
 import { hashString, rng, type Vec3 } from './math';
 import { BOT_NAMES } from './players';
 import type { Difficulty, RoomState } from './protocol';
@@ -162,7 +162,7 @@ export function impactMaxDuration(s: MatchState) {
 
 // En modo rápido (pruebas) la lava sube cada ronda para que las partidas sean cortas.
 export function lavaLevelForRound(round: number, fast = false) {
-  return Math.min(LAVA_LEVELS.length - 1, Math.floor((round - 1) / (fast ? 1 : LAVA_RISE_EVERY)));
+  return Math.min(LAVA_LEVELS.length - 1, (round - 1) * (fast ? LAVA_FAST_STEPS : 1));
 }
 
 export function windForRound(seed: number, round: number, fast = false): Vec3 {

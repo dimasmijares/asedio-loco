@@ -36,7 +36,7 @@ La **lava** es un mar que rodea la isla y sube por niveles al empezar ciertas ro
 
 ### Rules
 
-1. **Nivel de lava:** `min(7, floor((ronda − 1) / 3))`. Sube cada 3 rondas (cada ronda con `?fast=1`).
+1. **Nivel de lava** (WRK-TASK-057): sube un poco al empezar cada ronda y se queda quieta: altura −3,6 + 0,444 · (ronda − 1), con tope 5,2 m. Con `?fast=1`, el triple por ronda. La tabla de abajo es la de antes (un salto cada 3 rondas); las alturas de las rondas 1, 4, 7, 10… coinciden con ella.
 2. **Alturas por nivel** (la superficie de la isla está en y = 0):
 
    | Nivel | Rondas | Altura (m) | Efecto |

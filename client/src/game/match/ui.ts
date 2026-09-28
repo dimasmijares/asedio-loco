@@ -190,7 +190,7 @@ export class MatchUI {
 
   onSimEvents(events: SimEvent[]) {
     for (const e of events) {
-      if (e.e === 'fx' && e.kind === 'lavaRise') this.hud.showBanner('LA LAVA SUBE', 'Destruye los bloques que alcanza', 2200, 'bad');
+      if (e.e === 'fx' && e.kind === 'lavaRise' && e.p[1] > -0.3) this.hud.showBanner('LA LAVA SUBE', 'Destruye los bloques que alcanza', 2200, 'bad');
       if (e.e === 'fx' && e.kind === 'kingGuard' && e.slot !== undefined)
         this.hud.showBanner('ESCUDO REAL', `🛡️ ${e.slot === this.src.you ? 'Tu rey se salva' : `El rey de ${nameOf(this.src.state, e.slot)} se salva`}: nadie cae hasta la ronda ${KING_GUARD_ROUNDS + 1}`, 2200, 'guard');
     }

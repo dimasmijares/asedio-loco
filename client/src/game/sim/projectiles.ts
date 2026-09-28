@@ -1,5 +1,5 @@
 import { AMMO, type AmmoId } from '../../../../shared/ammo';
-import { landingPoint, launchVelocity, type Aim } from '../../../../shared/ballistics';
+import { landingPoint, launchVelocity, trajectory, type Aim } from '../../../../shared/ballistics';
 import { buildCastle } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
 import { rng, v3, type Vec3 } from '../../../../shared/math';
@@ -22,9 +22,15 @@ const tv = (v: { x: number; y: number; z: number }): Vec3 => [v.x, v.y, v.z];
 // Ajustes de equilibrio (WRK-TASK-021, medidos con tests/balance/destrozo).
 const LOG_SPIN = 12; // rad/s que mantiene el tronco al rodar
 const LOG_SPEED = 9; // m/s en horizontal que no pierde mientras rueda (apisonadora, WRK-TASK-029)
-// Cocos (WRK-TASK-029): se abren ya cayendo, cerca del castillo, en 6.
-const COCO_SPLIT_VY = -5; // m/s: se abren cuando caen a esta velocidad
+// Cocos (WRK-TASK-056): el racimo se abre hacia el 65 % del vuelo, los 6 siguen la parábola
+// abriéndose en abanico y cada coco explota al tocar algo.
+const COCO_SPLIT_AT = 0.65; // parte del tiempo de vuelo previsto (hasta el suelo de la isla)
+const COCO_SPLIT_VY = -5; // sin puntería conocida (cocos lanzados a mano): se abren al caer así
 const COCO_SPREAD = 1.6; // abre el abanico: metralla por toda la fachada
+const COCO_RADIUS = 2.0;
+const COCO_FORCE = 40;
+const COCO_KING = 0.25; // como los huevos: metralla contra el castillo, no contra el rey
+const COCO_FUSE = 3; // s: si no toca nada, explota igual
 // Gallina bombardera (WRK-TASK-028): botes cortos y bajos hacia el castillo más cercano y, en
 // cada uno, un racimo de huevos que explotan al tocar algo.
 const CHICKEN_BOUNCES = 3;
@@ -89,10 +95,31 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
 
     case 'coconuts': {
       let split = false;
+      // Tiempo de vuelo previsto con la misma balística que la vista previa.
+      let splitT = Infinity;
+      const boom = (e: Rec) => {
+        if (!sim.recs.has(e.id)) return;
+        const p = tv(e.body.translation());
+        sim.removeRec(e, 'proj');
+        sim.explode(p, COCO_RADIUS, COCO_FORCE, e.slot, 'coco', { king: COCO_KING });
+      };
+      const coco: ProjectileBehavior = {
+        maxLife: COCO_FUSE + 0.5,
+        onStep: (e) => void (sim.time - e.born! > COCO_FUSE && boom(e)),
+        onContact: (e) => void (sim.time - e.born! > 0.05 && boom(e)),
+      };
       return {
-        maxLife: 6,
+        maxLife: 8,
+        onSpawn(r) {
+          if (!aim) return;
+          const a = AMMO.coconuts;
+          const n = trajectory(tv(r.body.translation()), tv(r.body.linvel()), { drag: a.drag, windFactor: a.windFactor, wind: sim.wind, dt: 1 / 60, stopY: 0 }).length;
+          splitT = (n / 60) * COCO_SPLIT_AT;
+        },
         onStep(r) {
-          if (split || r.body.linvel().y > COCO_SPLIT_VY) return;
+          if (split) return;
+          const due = aim ? sim.time - r.born! >= splitT : r.body.linvel().y <= COCO_SPLIT_VY;
+          if (!due) return;
           split = true;
           const p = tv(r.body.translation());
           const v = tv(r.body.linvel());
@@ -100,7 +127,8 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           sim.events.push({ e: 'fx', kind: 'split', p });
           const side = v3.norm([v[2], 0, -v[0]]);
           const fwd = v3.norm([v[0], 0, v[2]]);
-          // Abanico cerrado: los 6 caen repartidos sobre el mismo castillo, no por media isla.
+          // Abanico cerrado: los 6 siguen la parábola del racimo y caen repartidos sobre el mismo
+          // castillo, no por media isla. Sin empujón hacia abajo.
           const offs: [number, number][] = [
             [1.6, 0.6],
             [-1.6, 0.6],
@@ -111,7 +139,7 @@ export function behaviorFor(id: AmmoId, sim: Sim, aim?: Aim): ProjectileBehavior
           ];
           for (const [s, f] of offs) {
             const dv = v3.scale(v3.add(v3.scale(side, s), v3.scale(fwd, f)), COCO_SPREAD);
-            sim.spawnProjectile(AMMO.coconuts, r.slot, v3.add(p, v3.scale(dv, 0.15)), v3.add(v, dv), { scale: 0.72, behavior: { maxLife: 5 } });
+            sim.spawnProjectile(AMMO.coconuts, r.slot, v3.add(p, v3.scale(dv, 0.15)), v3.add(v, dv), { scale: 0.72, behavior: coco });
           }
         },
       };

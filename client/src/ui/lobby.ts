@@ -76,8 +76,8 @@ export function showHowTo() {
       isMobileDevice()
         ? h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Arrastra el dedo por la pantalla para girar la catapulta y ajustar la elevación. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola se alarga) y suéltalo para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ cambian de castillo objetivo y el gesto de pellizcar acerca la cámara.')
         : h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar la catapulta y ajustar la elevación. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola se alarga) y suelta para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Q/E cambian de castillo objetivo.'),
-      h('p', null, isMobileDevice() ? '🐄 En cada ronda recibes 3 municiones distintas al azar: toca la tarjeta de la que quieras usar. Las defensivas (andamio y burbuja) protegen tu castillo.' : '🐄 En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3, o con un clic en su tarjeta. Las defensivas (andamio y burbuja) protegen tu castillo.'),
-      h('p', null, '🌋 La lava sube cada 3 rondas y, desde la ronda 6, sopla el viento; la flecha de la esquina indica su dirección.'),
+      h('p', null, isMobileDevice() ? '🐄 En cada ronda recibes 3 municiones distintas al azar: toca la tarjeta de la que quieras usar.' : '🐄 En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3, o con un clic en su tarjeta.'),
+      h('p', null, '🌋 La lava sube un poco en cada ronda y, desde la ronda 6, sopla el viento; la flecha de la esquina indica su dirección.'),
       close,
     ),
   );

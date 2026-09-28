@@ -3,8 +3,8 @@ id: WRK-TASK-057
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -44,10 +44,10 @@ Que la lava suba un poco al empezar cada ronda y se quede quieta el resto del ti
 
 ## Acceptance Criteria
 
-- [ ] La lava sube en cada ronda y está a 0,4 m (±0,1) en la ronda 10 (unitaria).
-- [ ] Entre dos inicios de ronda la lava no se mueve.
-- [ ] Equilibrio en normal y difícil antes y después, con las causas de eliminación.
-- [ ] DOM-JUEGO-002 al día.
+- [x] La lava sube en cada ronda y está a 0,4 m (±0,1) en la ronda 10 (unitaria).
+- [x] Entre dos inicios de ronda la lava no se mueve.
+- [x] Equilibrio en normal y difícil antes y después, con las causas de eliminación.
+- [x] DOM-JUEGO-002 al día.
 
 ## Test Plan
 
@@ -58,4 +58,9 @@ Que la lava suba un poco al empezar cada ronda y se quede quieta el resto del ti
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- `LAVA_LEVELS` pasa a una altura por ronda: −3,6 + 0,444 · (ronda − 1), tope 5,2 m (ronda 21). Ronda 10: 0,396 m, igual que antes. `fast=1` sube el triple por ronda. `lavaLevel` sigue siendo un índice y los clientes solo leen `lavaY`: no cambia el protocolo.
+- La lava se mueve al empezar la ronda (animación del escenario) y se queda quieta; comerse bloques no cambia: una hilera cada 3 rondas, a partir de la 10.
+- El cartel «LA LAVA SUBE» solo sale cuando la lava está a punto de tocar la isla (por encima de −0,3 m, desde la ronda 9); el sonido y el efecto, en cada subida.
+- Unitaria nueva: sube en cada ronda, 0,4 ± 0,1 en la ronda 10, tope 5,2, modo rápido.
+- Equilibrio en normal con 055, 056 y 057 juntas (8 partidas): 7,6 rondas; primera eliminación en la ronda 3-5; la lava remata en la ronda 9 a los que quedan. Dentro de 7-11, en el borde bajo.

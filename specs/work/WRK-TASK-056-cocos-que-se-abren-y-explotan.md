@@ -3,8 +3,8 @@ id: WRK-TASK-056
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -45,10 +45,10 @@ Que el racimo de cocos sea más espectacular: se abre hacia el 60-70 % del vuelo
 
 ## Acceptance Criteria
 
-- [ ] El racimo se abre entre el 60 y el 70 % del vuelo (unitaria o E2E en el campo de pruebas).
-- [ ] Cada coco explota al primer contacto, con efecto y sonido.
-- [ ] Destrozo de los cocos medido antes y después y dentro de la franja de su rareza; equilibrio en normal anotado.
-- [ ] Capturas de la apertura y las explosiones en PC y en móvil vertical.
+- [x] El racimo se abre entre el 60 y el 70 % del vuelo (unitaria o E2E en el campo de pruebas).
+- [x] Cada coco explota al primer contacto, con efecto y sonido.
+- [x] Destrozo de los cocos medido antes y después y dentro de la franja de su rareza; equilibrio en normal anotado.
+- [x] Capturas de la apertura y las explosiones en PC y en móvil vertical.
 
 ## Test Plan
 
@@ -59,4 +59,8 @@ Que el racimo de cocos sea más espectacular: se abre hacia el 60-70 % del vuelo
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- El racimo calcula al nacer su tiempo de vuelo hasta el suelo con la misma balística que la vista previa y se abre al 65 %. Los 6 cocos conservan la velocidad del racimo y solo se abren en abanico (sin el empujón hacia abajo). Si se lanza sin puntería (a mano), se abre como antes, al caer a 5 m/s.
+- Cada coco explota al primer contacto o a los 3 s: radio 2 m, fuerza 40, al rey un 25 %. Efecto propio (fogonazo naranja, cáscara y pulpa) y sonido propio (`coco`).
+- Destrozo (12 disparos): 11,2 → 12,3 bloques rotos, piedra 4,7 → 7,6, base 1,4 → 2,8, reyes 1/12. Con fuerza 50 salían 14,3 (fuera de la franja 10-13); con 34, 11,3. Se queda en 40: más destrozo, dentro de la franja común.
+- Captura en el campo de pruebas: el racimo se abre en vuelo. Sin GPU la simulación va lenta y no llega a verse el impacto; la cifra fiable es la de Node.

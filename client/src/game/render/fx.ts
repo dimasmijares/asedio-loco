@@ -269,6 +269,13 @@ export class Fx {
       for (let i = 0; i < this.n(10); i++) this.bit(p, randDir().multiplyScalar(rnd(3, 7)).add(new THREE.Vector3(0, 3, 0)), { color: i % 2 ? '#ffffff' : '#222222', size: 0.14, max: 1.4 });
       return;
     }
+    if (kind === 'coco') {
+      // Coco explosivo: fogonazo naranja, astillas de cáscara y pulpa blanca.
+      for (let i = 0; i < this.n(14); i++) this.puff(p, randDir().multiplyScalar(rnd(2, 5) * radius * 0.35), { color: i % 3 ? '#ff9f1c' : '#ffd23f', size: rnd(0.35, 0.7), max: rnd(0.3, 0.55), grow: 1.8, drag: 4, gravity: -1 });
+      for (let i = 0; i < this.n(10); i++) this.bit(p, randDir().multiplyScalar(rnd(3, 7)).add(new THREE.Vector3(0, 2, 0)), { color: i % 2 ? '#6b4226' : '#fff8e7', size: 0.12, max: 1.3 });
+      this.ring(p, radius * 0.7);
+      return;
+    }
     if (kind === 'egg') {
       // Huevo bomba: yema, cáscara y un fogonazo pequeño.
       for (let i = 0; i < this.n(10); i++) this.puff(p, randDir().multiplyScalar(rnd(2, 5) * radius * 0.35), { color: i % 3 ? '#ffd23f' : '#ff9f1c', size: rnd(0.3, 0.6), max: rnd(0.3, 0.5), grow: 1.8, drag: 4, gravity: -1 });

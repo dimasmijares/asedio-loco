@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AMMO, AMMO_IDS, ammoWeights, drawAmmo } from '../../shared/ammo';
+import { AMMO, AMMO_IDS, DEALT_IDS, ammoWeights, drawAmmo } from '../../shared/ammo';
 import { LAVA_LEVELS } from '../../shared/map';
 import { rng } from '../../shared/math';
 import { aimDuration, checkWinner, consumeAmmo, createMatch, eliminate, lavaLevelForRound, startRound, windForRound } from '../../shared/match';
@@ -27,12 +27,17 @@ describe('rondas', () => {
     }
   });
 
-  it('la lava sube cada 3 rondas', () => {
-    expect([1, 2, 3, 4, 6, 7, 10].map((r) => lavaLevelForRound(r))).toEqual([0, 0, 0, 1, 1, 2, 3]);
-    expect([1, 2, 3].map((r) => lavaLevelForRound(r, true))).toEqual([0, 1, 2]);
+  it('la lava sube un poco cada ronda (WRK-TASK-057)', () => {
+    const y = (r: number, fast = false) => LAVA_LEVELS[lavaLevelForRound(r, fast)];
+    for (let r = 2; r <= 20; r++) expect(y(r)).toBeGreaterThan(y(r - 1));
+    expect(y(1)).toBe(-3.6);
+    expect(Math.abs(y(10) - 0.4)).toBeLessThan(0.1);
+    expect(y(9)).toBeLessThan(0);
+    expect(y(40)).toBe(5.2);
+    expect(y(4, true)).toBeCloseTo(y(10), 5);
     const s = four();
     for (let i = 0; i < 4; i++) startRound(s);
-    expect(s.lavaY).toBe(LAVA_LEVELS[1]);
+    expect(s.lavaY).toBe(y(4));
   });
 
   it('el viento sopla desde la ronda 6', () => {
@@ -74,7 +79,19 @@ describe('reparto de munición con semilla', () => {
     }
     expect(counts.comun / N).toBeGreaterThan(0.4);
     expect(counts.epica / N).toBeLessThan(0.15);
-    expect(Object.keys(counts)).toHaveLength(4);
+    expect(Object.keys(counts).sort()).toEqual(['comun', 'epica', 'rara']);
+  });
+
+  it('solo reparte munición que vuela en parábola (WRK-TASK-055)', () => {
+    const r = rng(7);
+    const seen = new Set<string>();
+    for (let i = 0; i < 10000; i++) {
+      seen.add(drawAmmo(r, i % 2 === 0));
+      seen.add(drawAmmo(r, false, ['rara', 'epica']));
+    }
+    for (const id of ['piano', 'bubble', 'scaffold', 'chicken']) expect(seen.has(id)).toBe(false);
+    expect([...seen].sort()).toEqual([...DEALT_IDS].sort());
+    expect(DEALT_IDS.some((id) => AMMO[id].defensive)).toBe(false);
   });
 
   it('en el duelo sale munición más rara', () => {
@@ -85,6 +102,7 @@ describe('reparto de munición con semilla', () => {
     };
     expect(w(true)).toBeGreaterThan(w(false) * 1.5);
     expect(AMMO_IDS.length).toBeGreaterThanOrEqual(10);
+    expect(DEALT_IDS).toHaveLength(8);
   });
 });
 

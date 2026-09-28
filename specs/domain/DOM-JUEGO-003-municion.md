@@ -48,7 +48,7 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 |---|---|---|---|---|
 | Pedrusco | común | 22 | Bola de piedra | r 0,45 m, densidad 6, vida 6 s; aplasta al rey con la mitad de fuerza (WRK-TASK-044) |
 | Tronco rodante | común | 14 | Apisonadora: al tocar algo rueda en línea recta en la dirección en que venía y derriba lo que encuentra | r 0,36 m, largo 1,9 m, densidad 3; no baja de 9 m/s ni de 12 rad/s mientras rueda; vida 7,5 s |
-| Racimo de cocos | común | 14 | Metralla: se abre en 6 cocos ya cayendo (a 5 m/s hacia abajo), repartidos por todo el castillo | abanico ×1,6, cocos al 72 % de tamaño, densidad 9 |
+| Racimo de cocos | común | 14 | Metralla explosiva: se abre al 65 % del vuelo en 6 cocos que siguen la parábola en abanico y explotan al tocar algo (WRK-TASK-056) | abanico ×1,6, cocos al 72 % de tamaño; cada coco: radio 2 m, fuerza 40, al rey 25 %, mecha 3 s |
 | Vaca explosiva | rara | 8 | Bomba: muge y explota al tocar algo; deja un cráter | radio 4,8 m, fuerza 108 (rompe piedra cerca del centro) |
 | Sandía pegajosa | rara | 7 | Carga de demolición: se pega y a los 2 s revienta desde dentro | radio 4 m, fuerza 108; los bloques a menos de 2 m no hacen de escudo (`pierce`) |
 | Gallina saltarina | rara | 7 | Bomba de racimo: 3 botes cortos y bajos hacia el castillo rival más cercano; en cada uno suelta un racimo de huevos que explotan al tocar algo | 6, 5 y 5 huevos; cada huevo: radio 2,2 m, fuerza 58 (64 hasta WRK-TASK-052), al rey solo el 25 % del daño y del empuje; mecha de 1,5 s; direcciones con semilla (id de la gallina y bote) |
@@ -58,6 +58,8 @@ Cada ronda, cada jugador vivo recibe una **mano** de 3 municiones distintas y di
 | Bola de nieve | épica | 3 | Alud: crece mientras rueda en línea recta en la dirección en que llegó | radio de 0,45 a 1,5 m (+0,9 m/s), no baja de 9 m/s rodando |
 | Andamio | defensiva | 7 | Reconstruye hasta 15 bloques propios (10 hasta WRK-TASK-033) | los más bajos primero; no si el hueco está ocupado o bajo la lava |
 | Burbuja | defensiva | 6 | Escudo que absorbe un impacto | radio 7,2 m; el primer proyectil rival que entra desaparece y la burbuja se rompe. Mientras dura, las explosiones y campos de fuera no afectan |
+
+10. **Solo parábola** (WRK-TASK-055): piano, burbuja, andamio y gallina están retirados (`retired`) y no salen en el reparto; el campo de pruebas las sigue ofreciendo. Sin defensivas, el sorteo queda en común 68 %, rara 20 %, épica 12 % (duelo: 37 / 31 / 32 %).
 
 ### Constraints
 
