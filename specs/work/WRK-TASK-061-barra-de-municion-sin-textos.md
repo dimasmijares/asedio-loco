@@ -39,12 +39,19 @@ Comentario del usuario, punto por punto:
 4. La munición elegida, mucho más destacada.
 5. Botones de munición más grandes y con el color de su rareza muy visible, para notar cuál es mejor.
 
+Segundo comentario (PC, 28-09-2026):
+
+6. El panel de controles ocupa demasiado: más compacto.
+7. Fuera A/W/S/D del panel (y como atajo de apuntado, si se confirma): en PC se apunta con el ratón.
+8. Q/E, rotulado como cámara. Hoy cambian el castillo objetivo, que mueve la cámara hacia él; el rótulo debe decir eso y nada más.
+
 Propuesta en el lienzo: «Propuesta · Barra de munición sin textos (móvil)», interactiva. Falta la versión de PC y la aprobación del usuario.
 
 ## Acceptance Criteria
 
 - [ ] El usuario aprueba la propuesta en el lienzo (móvil y PC).
 - [ ] HUD sin la línea de potencia y elevación, sin flechas junto a la munición, con cartas por rareza y la elegida destacada, en 1280×720 y 390×844; horizontal sin solapes.
+- [ ] Panel de controles de PC compacto, sin A/W/S/D y con Q/E como cámara.
 - [ ] E2E de HUD en verde (`hud-compact.spec.ts` y las que usan los selectores).
 
 ## Test Plan
