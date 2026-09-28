@@ -61,7 +61,10 @@ test('control: apuntar con clic derecho y cargar con Espacio', async ({ page }, 
   const mid = await me();
   expect(mid.charging).toBe(true);
   expect(mid.inputPower).toBeGreaterThan(early.inputPower);
-  expect(mid.dots, 'la parábola crece').toBeGreaterThanOrEqual(early.dots);
+  // Desde WRK-TASK-054 el arco llega hasta donde choca: con más fuerza puede chocar antes (con el
+  // castillo), así que no tiene por qué tener más puntos. Basta con que se vea mientras se carga.
+  expect(early.dots, 'hay parábola').toBeGreaterThan(0);
+  expect(mid.dots, 'hay parábola').toBeGreaterThan(0);
   await page.screenshot({ path: info.outputPath('cargando.png') });
   await page.keyboard.up('Space');
 
