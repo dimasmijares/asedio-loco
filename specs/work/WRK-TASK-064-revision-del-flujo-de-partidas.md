@@ -3,7 +3,7 @@ id: WRK-TASK-064
 type: spec
 layer: work-task
 scope: ephemeral
-status: active
+status: completed
 confidence: low
 version: 0.1.0
 created: 2026-09-28
@@ -54,8 +54,8 @@ Cambios de protocolo (RULE-002): F2 (arrancar la revancha sin lobby) y F3 (`leav
 
 ## Acceptance Criteria
 
-- [ ] Propuesta publicada como R-07 en el lienzo.
-- [ ] El usuario aprueba, descarta o ajusta cada mejora (F1-F9); cada aprobada es una tarea nueva de WRK-PLAN-011.
+- [x] Propuesta publicada como R-07 en el lienzo.
+- [x] El usuario aprueba, descarta o ajusta cada mejora (F1-F9); cada aprobada es una tarea nueva de WRK-PLAN-011.
 
 ## Test Plan
 
@@ -65,4 +65,4 @@ Cambios de protocolo (RULE-002): F2 (arrancar la revancha sin lobby) y F3 (`leav
 
 ## Evidence
 
-Pendiente.
+2026-09-28. El usuario aprueba las nueve mejoras en R-07 y pide incluirlas en la próxima fase: WRK-TASK-067 (F1, F3), 068 (F2), 069 (F4), 070 (F5, F6), 071 (F7) y 072 (F8, F9).

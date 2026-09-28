@@ -37,9 +37,15 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | draft | 060 (aprobar la propuesta) | — |
 | 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
 | 9 | WRK-TASK-063 · Cámara de impacto centrada en tu disparo | completed | — | 2026-09-28 |
-| 10 | WRK-TASK-064 · Revisión del flujo de partidas | active | — | Propuesta en R-07; esperando al usuario |
+| 10 | WRK-TASK-064 · Revisión del flujo de partidas | completed | — | R-07 aprobado entero (28-09) → 067-072 |
 | 11 | WRK-TASK-065 · Munición a la medida de los castillos de 236 bloques | draft | 058 | — |
 | 12 | WRK-TASK-066 · Física de los castillos altos en un anfitrión móvil | draft | 058 | — |
+| 13 | WRK-TASK-067 · Salir de la partida y de la sala | draft | 064 | — |
+| 14 | WRK-TASK-068 · Revancha en un paso | draft | 064 | — |
+| 15 | WRK-TASK-069 · Invitar más fácil | draft | 064 | — |
+| 16 | WRK-TASK-070 · Sala gestionada tocando las plazas y nombre editable | draft | 064 | — |
+| 17 | WRK-TASK-071 · Llegar tarde con explicación | draft | 064 | — |
+| 18 | WRK-TASK-072 · Final y pausa en solitario | draft | 064 | — |
 
 ## Risk Assessment
 

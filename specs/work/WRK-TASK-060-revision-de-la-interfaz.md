@@ -50,7 +50,7 @@ Fuera: código del juego. Esta tarea no cambia la interfaz; lo que salga de ella
 | R-04 | Barra de munición y panel de controles en PC | WRK-TASK-061 | En preparación |
 | R-05 | Selector de castillos del espectador | WRK-TASK-061 | En preparación |
 | R-06 | Portada: tipografía y título | WRK-TASK-062 | En preparación |
-| R-07 | Flujo de partidas: ¿apruebas F1-F9? | WRK-TASK-064 | Tu turno |
+| R-07 | Flujo de partidas: ¿apruebas F1-F9? | WRK-TASK-064 | Aprobado (28-09): todas, a WRK-TASK-067-072 |
 | R-08 | Ya en el juego: parábola con anillo y cámara del impacto. ¿Te convence? | WRK-TASK-054, 063 | Tu turno |
 | R-09 | Castillos nuevos: dos filas más y colores de cada jugador | WRK-TASK-058, 059 | Aprobado (28-09) |
 
