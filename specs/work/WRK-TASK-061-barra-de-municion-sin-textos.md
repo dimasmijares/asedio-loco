@@ -45,12 +45,19 @@ Segundo comentario (PC, 28-09-2026):
 7. Fuera A/W/S/D del panel (y como atajo de apuntado, si se confirma): en PC se apunta con el ratón.
 8. Q/E, rotulado como cámara. Hoy cambian el castillo objetivo, que mueve la cámara hacia él; el rótulo debe decir eso y nada más.
 
+Decisiones del usuario (28-09-2026) sobre las flechas:
+
+9. **Jugando no se elige castillo objetivo.** Hoy ◀ ▶ (y Q/E) giran la catapulta de golpe hacia otro castillo rival, que queda como «objetivo». Ese objetivo se usa para los arcos de «quién ataca a quién» (WRK-TASK-045) y el encuadre. Desaparece el selector: el objetivo se deduce solo del rumbo, como el castillo rival más cercano a la dirección en que apuntas. En PC, Q/E se quedan como atajo de cámara (punto 8).
+10. **Espectador:** a la derecha, en pequeño, una miniatura por castillo con el nombre del jugador encima y el % de destrucción de su castillo; tocarla lleva la cámara a ese castillo. Sustituye a ◀ ▶ del espectador (WRK-TASK-042). Se enseña antes en el lienzo.
+
 Propuesta en el lienzo: «Propuesta · Barra de munición sin textos (móvil)», interactiva. Falta la versión de PC y la aprobación del usuario.
 
 ## Acceptance Criteria
 
 - [ ] El usuario aprueba la propuesta en el lienzo (móvil y PC).
 - [ ] HUD sin la línea de potencia y elevación, sin flechas junto a la munición, con cartas por rareza y la elegida destacada, en 1280×720 y 390×844; horizontal sin solapes.
+- [ ] El objetivo se deduce del rumbo (unitaria); sin selector de objetivo en la interfaz.
+- [ ] Espectador: selector de castillos a la derecha con nombre y % de destrucción, en PC y móvil.
 - [ ] Panel de controles de PC compacto, sin A/W/S/D y con Q/E como cámara.
 - [ ] E2E de HUD en verde (`hud-compact.spec.ts` y las que usan los selectores).
 

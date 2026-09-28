@@ -44,7 +44,7 @@ Dar a todos los castillos dos filas más de altura (torres, murallas y contrafue
 
 - Hoy: torres de 5 filas, murallas de 4, contrafuertes de 4, forro de 3; 176 bloques. Con dos filas más en torres (+8), murallas (+40) y contrafuertes (+4) salen 228; con el forro también, 252. Pasa de `BLOCK_ID_STRIDE = 200`, y con 4 castillos choca con `KING_ID_BASE = 1000`: subir los dos (p. ej. 300 y 2000).
 - Materiales: las filas nuevas siguen el patrón (piedra abajo, madera arriba). La ventana y los refuerzos de hierro se reparten para que las murallas altas no sean solo piedra.
-- Pregunta abierta en WRK-SPEC-011: si el torreón sube dos filas para que el rey siga a la vista. Preguntar antes de empezar, con la recomendación (sí).
+- Decidido por el usuario (28-09-2026): el torreón sube dos filas (pedestal de 4 filas, `PEDESTAL_TOP` más alto) para que el rey siga asomando por encima de las murallas. Medir si la caída desde más alto mata más reyes.
 - La altura de lava de WRK-TASK-057 y su tope se revisan con la altura nueva.
 
 ## Acceptance Criteria

@@ -72,5 +72,5 @@ El 28-09-2026 el usuario probó WRK-SPEC-010 en su Android: en solitario contra 
 
 ## Open Questions
 
-- [ ] Con dos filas más, ¿sube también el torreón para que el rey siga asomando por encima de las murallas? Recomendado: sí, dos filas de pedestal más. — dimas, antes de WRK-TASK-058.
+- [x] Con dos filas más, ¿sube también el torreón para que el rey siga asomando por encima de las murallas? — dimas. Decidido el 28-09-2026: sí, dos filas de pedestal más.
 - [ ] ¿Qué comentarios deja el usuario en el artefacto de diseño? — dimas, WRK-TASK-060.
