@@ -31,7 +31,7 @@ Decisión del usuario (28-09-2026, WRK-TASK-061): cuando te eliminan, a la derec
 
 ## Acceptance Criteria
 
-- [ ] R-05 aprobado.
+- [x] R-05 aprobado (28-09-2026).
 - [ ] Selector visible solo para el espectador, en PC y móvil vertical, sin solapes (`hud-compact`); tocar un castillo mueve la cámara; «Todos», al plano general.
 - [ ] Sin flechas ◀ ▶ en ningún caso.
 
