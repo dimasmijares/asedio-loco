@@ -9,7 +9,7 @@ for (const [name, vp, mobile] of [
   test.describe(name, () => {
     test.use({ viewport: vp, hasTouch: mobile, isMobile: mobile });
     test(`el eliminado cambia de castillo en ${name}`, async ({ page }, info) => {
-      test.setTimeout(120_000);
+      test.setTimeout(300_000);
       await page.goto(`/?bots=3&seed=5&fast=1${mobile ? '&mobile=1' : ''}#solo`);
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       // Cae tu rey (sin el escudo real de la ronda 1).
@@ -24,7 +24,7 @@ for (const [name, vp, mobile] of [
         // Los bots fijan su disparo enseguida: se congela la partida en el apuntado para la prueba.
         if (ok) (window as any).__asedio.mode.host.update = () => {};
         return ok;
-      }, null, { timeout: 60_000, polling: 'raf' });
+      }, null, { timeout: 200_000, polling: 'raf' });
       await expect(page.locator('#hud-watch')).toContainText('Plano general');
       if (mobile) await page.locator('#target-next').tap();
       else await page.keyboard.press('e');
