@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { AMMO, type AmmoId } from '../../../shared/ammo';
-import { buildCastle, kingId, slotOfBlock, KING_HALF_HEIGHT, KING_ID_BASE, KING_RADIUS } from '../../../shared/castle';
+import { BLOCKS_PER_CASTLE, buildCastle, kingId, slotOfBlock, KING_HALF_HEIGHT, KING_ID_BASE, KING_RADIUS } from '../../../shared/castle';
 import { CATAPULT_LOCAL, castleOrigin, toWorld } from '../../../shared/map';
 import type { MaterialId } from '../../../shared/materials';
 import type { Quat, Vec3 } from '../../../shared/math';
@@ -72,7 +72,8 @@ export class WorldView {
   constructor(readonly stage: Stage, readonly slots: number[], makeDebris: MakeDebris = () => new NoDebris()) {
     stage.scene.add(this.root);
     const shadows = stage.quality !== 'low';
-    this.blocks = new BlockMeshes(this.root, 640, 0.035, shadows);
+    // Caben los 4 castillos enteros de un solo material (WRK-TASK-058: 764 de piedra con 236 bloques).
+    this.blocks = new BlockMeshes(this.root, 4 * BLOCKS_PER_CASTLE, 0.035, shadows);
     this.debris = makeDebris(this.root, DEBRIS_CAP[stage.quality], shadows);
     this.fx = new Fx(this.root, stage.quality);
     for (const slot of [0, 1, 2, 3]) {

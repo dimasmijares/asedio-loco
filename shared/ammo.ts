@@ -26,7 +26,7 @@ export interface AmmoDef {
 }
 
 export const RARITY_LABEL: Record<Rarity, string> = { comun: 'Común', rara: 'Rara', epica: 'Épica', defensiva: 'Defensiva' };
-export const RARITY_COLOR: Record<Rarity, string> = { comun: '#8d99ae', rara: '#3a86ff', epica: '#b5179e', defensiva: '#2a9d8f' };
+export const RARITY_COLOR: Record<Rarity, string> = { comun: '#6c7689', rara: '#3a86ff', epica: '#b5179e', defensiva: '#2a9d8f' };
 
 export const AMMO: Record<AmmoId, AmmoDef> = {
   rock: { id: 'rock', name: 'Pedrusco', rarity: 'comun', icon: '🪨', color: '#8a8f98', desc: 'Bola de piedra maciza. Rompe los bloques en el punto de impacto.', weight: 22, shape: 'ball', radius: 0.45, density: 6, restitution: 0.1, friction: 0.8, drag: 0.004, windFactor: 0.25 },

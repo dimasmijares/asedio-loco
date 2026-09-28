@@ -4,7 +4,7 @@ import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
 import { GOALS, KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
-import { goalPoint } from '../../../../shared/bot';
+import { aimedAt, goalPoint } from '../../../../shared/bot';
 import { rng } from '../../../../shared/math';
 import type { Vec3 } from '../../../../shared/math';
 import { PLAYER_STYLES } from '../../../../shared/players';
@@ -40,8 +40,7 @@ export interface MatchUIOptions {
 export const AIM_HELP: HelpRow[] = [
   [['Clic dcho.', 'ratón'], 'apuntar'],
   [['Espacio', 'clic izdo.'], 'mantener: cargar · soltar: disparar'],
-  [['A', 'D', 'W', 'S'], 'ajuste fino'],
-  [['Q', 'E'], 'castillo objetivo'],
+  [['Q', 'E'], 'cámara: mirar a otro castillo'],
   [['1', '2', '3'], 'munición'],
   [['Rueda'], 'acercar la cámara'],
 ];
@@ -49,7 +48,6 @@ export const AIM_HELP: HelpRow[] = [
 export const TOUCH_HELP: HelpRow[] = [
   [['arrastrar'], 'apuntar'],
   [['🔥'], 'mantener: cargar · soltar: disparar'],
-  [['◀', '▶'], 'castillo objetivo'],
   [['tarjeta'], 'munición'],
   [['pellizcar'], 'acercar la cámara'],
 ];
@@ -138,6 +136,8 @@ export class MatchUI {
     this.watchSlot = order[(i + dir + order.length) % order.length];
   }
 
+  private sentTarget = -1;
+
   private canAim() {
     const me = this.me();
     return !!me && me.alive && !me.locked && this.src.state.phase === 'aim';
@@ -147,6 +147,13 @@ export class MatchUI {
     if (!this.canAim()) return;
     if (this.game.input.aiming) this.tutorial?.event('aim');
     this.pendingAim = a;
+    // El castillo objetivo sale de hacia dónde apuntas (WRK-TASK-061): no hay selector.
+    const me = this.me()!;
+    const t = aimedAt(this.src.state, { ...me, aim: a });
+    if (t !== me.target && t !== this.sentTarget) {
+      this.sentTarget = t;
+      this.src.send({ target: t, aim: a });
+    }
     // Se manda a ~10 Hz: los demás ven tu catapulta girar y tensarse mientras cargas.
     if (performance.now() - this.aimSent > 100) this.flushAim();
   }
@@ -285,7 +292,8 @@ export class MatchUI {
     else this.hud.setAmmo([], 0, () => {});
     this.hud.showConfirm(!!me?.alive && s.phase === 'aim', !!me?.locked);
     const watch = this.watching() && s.phase === 'aim';
-    this.hud.showTargetButtons(this.canAim() || watch, watch);
+    // Las flechas solo para el espectador (jugando, el objetivo sale del rumbo; WRK-TASK-061).
+    this.hud.showTargetButtons(watch, watch);
     this.hud.setWatch(watch ? (this.watchSlot < 0 ? 'Plano general' : `Castillo de ${nameOf(s, this.watchSlot)}`) : null);
     this.hud.setStats(`${g.fps} fps`);
     // Objetivo secundario (WRK-TASK-043): chapa en la esquina y dianas en los rivales al apuntar.

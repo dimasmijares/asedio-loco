@@ -42,7 +42,8 @@ for (const [w, h] of [
       );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
       const r = await rects(page);
-      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(8);
+      // Sin la línea de potencia ni las flechas del jugador (WRK-TASK-061): quedan 6 o 7.
+      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(6);
       for (const [k, a] of Object.entries(r)) {
         expect(a.x >= 0 && a.y >= 0 && a.x + a.w <= w + 0.5 && a.y + a.h <= h + 0.5, `${k} dentro de la pantalla`).toBe(true);
       }

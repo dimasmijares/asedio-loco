@@ -126,15 +126,23 @@ export class Hud {
     if (key === this.ammoKey) return;
     this.ammoKey = key;
     const sel = list[selected];
-    this.ammoDesc.textContent = sel ? AMMO[sel].desc : '';
+    // Tarjeta de la munición elegida (R-03): icono, nombre, rareza y qué hace.
+    if (sel) {
+      const a = AMMO[sel];
+      this.ammoDesc.style.setProperty('--rar', RARITY_COLOR[a.rarity]);
+      this.ammoDesc.replaceChildren(
+        h('span', { class: 'desc-icon' }, a.icon),
+        h('span', { class: 'desc-body' }, h('span', { class: 'desc-head' }, h('b', { class: 'desc-name' }, a.name), h('span', { class: 'desc-rar' }, RARITY_LABEL[a.rarity])), h('span', { class: 'desc-text' }, a.desc)),
+      );
+    } else this.ammoDesc.replaceChildren();
     this.ammo.replaceChildren(
       ...list.map((id, i) => {
         const a = AMMO[id];
         const b = h(
           'button',
-          { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]}` },
+          { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'aria-label': a.name, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]}` },
           h('span', { class: 'ammo-icon' }, a.icon),
-          h('span', { class: 'ammo-name' }, a.name),
+          h('span', { class: 'ammo-rar' }, RARITY_LABEL[a.rarity]),
           keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,
         );
         // Se elige al pulsar, sin esperar a soltar encima; el clic queda para el teclado (Intro).
@@ -157,12 +165,9 @@ export class Hud {
       if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
       return;
     }
-    const pct = Math.round(aim.power * 100);
-    this.aimInfo.replaceChildren(
-      h('span', null, `Potencia `, h('b', null, `${pct}%`), ` (${launchSpeed(aim.power).toFixed(0)} m/s)`),
-      h('span', null, `Elevación `, h('b', null, `${Math.round(aim.pitch / DEG)}°`)),
-      ammo ? h('span', null, AMMO[ammo].icon, ' ', h('b', null, AMMO[ammo].name)) : '',
-    );
+    // Sin potencia ni elevación en texto (WRK-TASK-061): la parábola ya lo dice.
+    void ammo;
+    if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
   }
 
   setWind(w: Vec3 | null, cameraYaw = 0) {

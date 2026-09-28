@@ -84,6 +84,11 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 - **Táctil** (WRK-TASK-006, `isMobileDevice`): un dedo arrastrado por la escena apunta como el clic derecho, con ×1,6 de ganancia (`TOUCH_GAIN`) y la sensibilidad de Ajustes, y sin bloqueo de puntero. La fuerza se carga manteniendo el botón redondo 🔥 de abajo a la derecha. Las flechas ◀ ▶ cambian de castillo objetivo, tocar una tarjeta elige munición y dos dedos pellizcan. En táctil no hay Mayúsculas (precisión) ni A/D/W/S.
 - Con el puntero bloqueado, Chromium sin interfaz entrega mal los movimientos sintéticos: las pruebas usan `?nolock=1`.
 
+### Castillo objetivo y HUD de apuntado (WRK-TASK-061)
+
+- El castillo objetivo sale del rumbo: el rival más cercano a la dirección en que apuntas (`aimedAt`). No hay selector; Q/E siguen girando la vista hacia otro castillo.
+- Sin línea de potencia y elevación. La munición elegida se describe en una tarjeta (icono, nombre, rareza y qué hace) y las cartas llevan el color de su rareza; la elegida crece y brilla.
+
 ## Acceptance Criteria
 
 - [x] Con clic derecho, mover el ratón a la derecha gira el rumbo a la derecha y hacia arriba sube la elevación.

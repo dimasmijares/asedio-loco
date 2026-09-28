@@ -1664,3 +1664,178 @@ html.big-text .ammo-name {
     width: calc(100vw - 20px);
   }
 }
+
+/* ---------- Barra de munición sin textos (WRK-TASK-061, aprobada en R-03) ---------- */
+
+/* Tarjeta de la munición elegida: pergamino con icono, nombre, rareza y qué hace. */
+.hud-ammo-desc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(440px, calc(100vw - 24px));
+  padding: 8px 12px;
+  background: #fbf3dc;
+  color: #1d1626;
+  text-shadow: none;
+  border: 3px solid #1d1626;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #1d1626;
+  text-align: left;
+}
+.desc-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border-radius: 12px;
+  border: 3px solid var(--rar);
+  background: color-mix(in srgb, var(--rar) 18%, #ffffff);
+}
+.desc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.desc-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.desc-name {
+  font-family: var(--display, inherit);
+  font-size: 16px;
+  white-space: nowrap;
+}
+.desc-rar {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--rar);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.desc-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a3f5c;
+  line-height: 1.25;
+}
+
+/* Cartas: grandes, con el color de su rareza muy visible; la elegida crece, sube y brilla. */
+.hud-ammo {
+  align-items: flex-end;
+  gap: 12px;
+}
+.ammo {
+  width: 84px;
+  height: 84px;
+  min-width: 0;
+  padding: 0;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 4px solid var(--rar);
+  border-radius: 18px;
+  background: #fbf3dc;
+  box-shadow: 0 4px 0 #1d1626;
+  transition: transform 0.12s ease, width 0.12s ease, height 0.12s ease;
+}
+.ammo.sel {
+  width: 100px;
+  height: 100px;
+  background: color-mix(in srgb, var(--rar) 18%, #ffffff);
+  transform: translateY(-6px);
+  box-shadow: 0 0 0 4px #ffffff, 0 0 22px 6px var(--rar);
+}
+.ammo-icon {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+.ammo.sel .ammo-icon {
+  font-size: 42px;
+}
+.ammo-rar {
+  width: 100%;
+  padding: 3px 0 4px;
+  background: var(--rar);
+  color: #ffffff;
+  text-shadow: none;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ammo-key {
+  top: 3px;
+  left: 7px;
+  color: #1d1626;
+  text-shadow: none;
+}
+
+/* Ventana baja (móvil en horizontal): todo un poco más pequeño. */
+@media (max-height: 500px) {
+  .hud-ammo-desc {
+    padding: 4px 8px;
+    border-radius: 12px;
+    max-width: min(420px, calc(100vw - 220px));
+  }
+  .desc-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border-radius: 9px;
+  }
+  .desc-text {
+    font-size: 11px;
+  }
+  .ammo {
+    width: 64px;
+    height: 64px;
+  }
+  .ammo.sel {
+    width: 76px;
+    height: 76px;
+  }
+  .ammo-icon {
+    font-size: 26px;
+  }
+  .ammo.sel .ammo-icon {
+    font-size: 32px;
+  }
+  .ammo-rar {
+    font-size: 9px;
+    padding: 2px 0 3px;
+  }
+}
+
+/* Móvil en vertical: la tarjeta a la izquierda, sin tapar el botón de disparo. */
+@media (orientation: portrait) and (max-width: 600px) {
+  .hud-bottom {
+    align-items: flex-start;
+  }
+  .hud-ammo-desc {
+    max-width: calc(100vw - 132px);
+  }
+  .hud-row {
+    align-self: center;
+  }
+  .hud-ammo {
+    gap: 10px;
+  }
+  .ammo {
+    width: 88px;
+    height: 88px;
+  }
+  .ammo.sel {
+    width: 104px;
+    height: 104px;
+  }
+}

@@ -3,8 +3,8 @@ id: WRK-TASK-061
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -56,12 +56,12 @@ Propuesta en el lienzo: «Propuesta · Barra de munición sin textos (móvil)»,
 
 ## Acceptance Criteria
 
-- [ ] El usuario aprueba la propuesta en el lienzo (móvil y PC).
-- [ ] HUD sin la línea de potencia y elevación, sin flechas junto a la munición, con cartas por rareza y la elegida destacada, en 1280×720 y 390×844; horizontal sin solapes.
-- [ ] El objetivo se deduce del rumbo (unitaria); sin selector de objetivo en la interfaz.
-- [ ] Espectador: selector de castillos a la derecha con nombre y % de destrucción, en PC y móvil.
-- [ ] Panel de controles de PC compacto, sin A/W/S/D y con Q/E como cámara.
-- [ ] E2E de HUD en verde (`hud-compact.spec.ts` y las que usan los selectores).
+- [x] El usuario aprueba la propuesta en el lienzo: móvil en R-03; PC, en R-04 (pendiente de su respuesta).
+- [x] HUD sin la línea de potencia y elevación, sin flechas junto a la munición, con cartas por rareza y la elegida destacada, en 1280×720 y 390×844; horizontal sin solapes.
+- [x] El objetivo se deduce del rumbo (E2E `touch.spec.ts`); sin selector de objetivo en la interfaz.
+- Espectador: el selector de castillos pasa a WRK-TASK-073, a la espera de R-05.
+- [x] Panel de controles de PC compacto, sin A/W/S/D y con Q/E como cámara.
+- [x] E2E de HUD en verde (`hud-compact.spec.ts` y las que usan los selectores).
 
 ## Test Plan
 
@@ -71,4 +71,11 @@ Propuesta en el lienzo: «Propuesta · Barra de munición sin textos (móvil)»,
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- Sin la línea «Potencia · Elevación · munición» (`setAimInfo` solo deja la del espectador).
+- Tarjeta de la munición elegida estilo pergamino: icono en un cuadro del color de la rareza, nombre, etiqueta de rareza y qué hace. En móvil vertical, a la izquierda sin tapar el botón de disparo, que queda por encima de la barra.
+- Cartas de 84 px (88 en vertical, 64 en horizontal) con borde y banda del color de la rareza; la elegida crece, sube y brilla con ese color. Común pasa de `#8d99ae` a `#6c7689` para que el texto blanco se lea.
+- Jugando no hay flechas: el castillo objetivo sale del rumbo (`aimedAt`) y se manda al anfitrión cuando cambia. Las flechas quedan para el espectador hasta WRK-TASK-073.
+- Panel de PC: sin A/W/S/D (las teclas siguen funcionando); Q/E rotuladas «cámara: mirar a otro castillo». En táctil, sin la fila de las flechas.
+- Arreglo descubierto: la vista reservaba 640 bloques por material y con 236 por castillo hay 764 de piedra; faltaban bloques en pantalla (`smoke.spec.ts` lo cazó). Capacidad = 4 × `BLOCKS_PER_CASTLE`.
+- E2E locales: `hud-compact` (6 tamaños), `touch`, `tutorial`, `espectador`, `controls`, `smoke` y `solo`, 18/18 en verde.

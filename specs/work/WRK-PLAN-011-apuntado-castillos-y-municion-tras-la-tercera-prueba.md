@@ -34,7 +34,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 4 | WRK-TASK-057 · La lava sube un poco cada ronda | completed | — | 2026-09-28 |
 | 5 | WRK-TASK-058 · Castillos con dos filas más | completed | 057 | 2026-09-28 |
 | 6 | WRK-TASK-059 · Castillo con los colores del jugador | completed | 058, 060 (colores aprobados) | 2026-09-28 |
-| 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | draft | 060 (aprobar la propuesta) | — |
+| 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | completed | 060 (R-03; PC en R-04) | 2026-09-28 |
 | 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
 | 9 | WRK-TASK-063 · Cámara de impacto centrada en tu disparo | completed | — | 2026-09-28 |
 | 10 | WRK-TASK-064 · Revisión del flujo de partidas | completed | — | R-07 aprobado entero (28-09) → 067-072 |
@@ -46,6 +46,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 16 | WRK-TASK-070 · Sala gestionada tocando las plazas y nombre editable | draft | 064 | — |
 | 17 | WRK-TASK-071 · Llegar tarde con explicación | draft | 064 | — |
 | 18 | WRK-TASK-072 · Final y pausa en solitario | draft | 064 | — |
+| 19 | WRK-TASK-073 · Selector de castillos del espectador | draft | 061, R-05 | — |
 
 ## Risk Assessment
 

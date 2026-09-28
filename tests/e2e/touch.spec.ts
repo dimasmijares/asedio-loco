@@ -44,9 +44,12 @@ test('táctil: apuntar arrastrando, flechas, tarjetas, pellizco y botón redondo
   expect(s1.pitch, 'sube').toBeGreaterThan(s0.pitch + 0.1);
   expect(s1.locked, 'apuntar no dispara').toBe(false);
 
-  // Flecha ▶: otro castillo objetivo. Tocar una tarjeta elige munición.
-  await page.locator('#target-next').tap();
-  await expect.poll(async () => (await state(page)).target).not.toBe(s1.target);
+  // Jugando no hay flechas: el castillo objetivo sale de hacia dónde apuntas (WRK-TASK-061).
+  await expect(page.locator('#target-next')).toBeHidden();
+  const t0 = s1.target;
+  for (let i = 0; i < 12 && (await state(page)).target === t0; i++) await drag(cdp, { x: 120, y: 420 }, { x: 250, y: 420 });
+  expect((await state(page)).target, 'al girar hacia otro castillo cambia el objetivo').not.toBe(t0);
+  // Tocar una tarjeta elige munición.
   await page.locator('#hud-ammo .ammo').nth(2).tap();
   await expect.poll(async () => (await state(page)).selected).toBe(2);
 
