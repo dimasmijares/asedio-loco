@@ -3,7 +3,7 @@ id: WRK-PLAN-011
 type: spec
 layer: work-plan
 scope: ephemeral
-status: draft
+status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-28
@@ -37,6 +37,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | draft | 060 (aprobar la propuesta) | — |
 | 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
 | 9 | WRK-TASK-063 · Cámara de impacto centrada en tu disparo | draft | — | — |
+| 10 | WRK-TASK-064 · Revisión del flujo de partidas | active | — | Propuesta en R-07; esperando al usuario |
 
 ## Risk Assessment
 

@@ -50,6 +50,7 @@ Fuera: código del juego. Esta tarea no cambia la interfaz; lo que salga de ella
 | R-04 | Barra de munición y panel de controles en PC | WRK-TASK-061 | En preparación |
 | R-05 | Selector de castillos del espectador | WRK-TASK-061 | En preparación |
 | R-06 | Portada: tipografía y título | WRK-TASK-062 | En preparación |
+| R-07 | Flujo de partidas: ¿apruebas F1-F9? | WRK-TASK-064 | Tu turno |
 
 Decidido fuera del lienzo (28-09-2026): parábola hasta el choque, torreón dos filas más alto, objetivo deducido del rumbo.
 
