@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.10.0
+version: 1.11.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -90,6 +90,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - flechas ◀ ▶ de castillo objetivo;
   - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
+  - **se puede instalar** (PWA, WRK-TASK-009): manifiesto con `display: fullscreen` y `orientation: any`, iconos dibujados por código (`tests/tools/make-icons.mjs`) y metas de Apple para «Añadir a pantalla de inicio». Sin service worker: el juego necesita la red. La instalación en un teléfono real está pendiente del usuario (A7 y A8 de WRK-TASK-040);
   - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical el HUD se recoloca (marcador compacto, viento bajo los botones, fila de tarjetas abajo y botón de disparo encima a la derecha) y la cámara abre el campo de visión para no bajar de 40° de ancho.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
@@ -135,6 +136,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying` |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
+| Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |
 | Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |

@@ -63,7 +63,7 @@ M5 depende de M2: el manifiesto fija la orientación horizontal y la pantalla co
 | M3 | WRK-TASK-007 · HUD compacto | completed | WRK-TASK-006 | Marcador sin nombres, todo más pequeño, botón en la esquina, final en dos columnas |
 | M4 | WRK-TASK-008 · Perfil de rendimiento móvil | completed | WRK-TASK-005 | Baja y 30 fps fuera de la acción; banco con CPU 4× |
 | M4b | WRK-TASK-040 · Medir en un Android real | draft | WRK-TASK-008 | — |
-| M5 | WRK-TASK-009 · PWA (opcional) | draft | WRK-TASK-006 | — |
+| M5 | WRK-TASK-009 · PWA (opcional) | completed | WRK-TASK-006 | 2026-09-28 |
 
 ## Architecture Impact
 

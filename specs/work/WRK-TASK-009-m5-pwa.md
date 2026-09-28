@@ -3,8 +3,8 @@ id: WRK-TASK-009
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-25
 updated: 2026-09-26
@@ -33,7 +33,8 @@ Propuesto:
 
 - `client/index.html` (enlace al manifiesto, `theme-color`, metas de Apple)
 - `client/public/manifest.webmanifest` e icono generado (carpeta nueva; Vite copia `public/` a `dist/client`)
-- `wrangler.jsonc` solo si el tipo MIME del manifiesto no sale bien
+- `wrangler.jsonc` solo si el tipo MIME del manifiesto no sale bien (no hizo falta)
+- `tests/tools/make-icons.mjs` (genera los iconos), `tests/e2e/pwa.spec.ts` (en el grupo `basicas` de CI)
 
 Fuera: service worker para jugar sin conexión (el juego necesita la red para las salas).
 
@@ -50,10 +51,10 @@ Fuera: service worker para jugar sin conexión (el juego necesita la red para la
 
 ## Acceptance Criteria
 
-- [ ] Chrome en Android ofrece instalar la aplicación y se abre a pantalla completa y se puede girar.
-- [ ] En iOS Safari, «Añadir a pantalla de inicio» la abre sin barras del navegador.
-- [ ] Un enlace de sala abierto desde la PWA entra en la sala.
-- [ ] Lighthouse no marca errores en el manifiesto.
+- [x] Chrome ofrece instalar la aplicación: Chromium no da errores de instalabilidad (`Page.getInstallabilityErrors`). En un Android real, abrirla a pantalla completa y girarla es la prueba A7 de WRK-TASK-040, que solo puede hacer el usuario.
+- [x] Metas de Apple (`apple-mobile-web-app-capable`, barra translúcida, icono de 180 px) puestas. Comprobarlo en un iPhone es la prueba A8 de WRK-TASK-040, que solo puede hacer el usuario.
+- [x] Un enlace de sala abierto desde la PWA entra en la sala.
+- [x] Sin errores en el manifiesto. Lighthouse ya no tiene categoría PWA; se usa la misma comprobación de Chromium (`Page.getAppManifest`).
 
 ## Test Plan
 
@@ -65,4 +66,11 @@ Fuera: service worker para jugar sin conexión (el juego necesita la red para la
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+
+- `client/public/manifest.webmanifest`: `display: fullscreen` (con `standalone` de reserva), `orientation: any`, `start_url` y `scope` `/`, colores del HUD (#1d1626) e iconos de 192 y 512 px, uno enmascarable. En `client/index.html`: enlace al manifiesto, `theme-color`, `viewport-fit=cover` y las metas de Apple.
+- Iconos dibujados por código (`tests/tools/make-icons.mjs`, canvas en Chromium): un castillo con corona sobre un atardecer de lava; el enmascarable, con todo dentro de la zona segura.
+- `tests/e2e/pwa.spec.ts`: el manifiesto responde con JSON de tipo correcto y sus iconos son PNG; `Page.getAppManifest` sin errores y `Page.getInstallabilityErrors` vacío; `/#ABCD` sigue llevando a la sala. En local, 1 de 1; en CI se comprueba contra producción, así que también vale el tipo que pone Cloudflare.
+- Sin service worker: fuera del alcance (el juego necesita la red) y Chromium ya no lo exige para instalar.
+- Pendiente del usuario: instalarla en un Android y en un iPhone (A7 y A8 de WRK-TASK-040).
+

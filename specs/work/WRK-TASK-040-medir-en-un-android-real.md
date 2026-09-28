@@ -39,12 +39,15 @@ Pruebas (URL: `https://asedio-loco.dimasmijares.workers.dev`):
 | A4 | Control táctil | Apuntar arrastrando, disparar con 🔥 y cambiar de objetivo con ◀ ▶ | Qué resulta incómodo o impreciso |
 | A5 | Horizontal | Girar el móvil durante una partida | Qué se tapa o se lee mal |
 | A6 | Batería y temperatura | Jugar una partida completa (2-3 minutos) | Si el teléfono se calienta de forma notable |
+| A7 | Instalar en Android (WRK-TASK-009) | En Chrome, menú ⋮ → «Instalar aplicación» o «Añadir a pantalla de inicio», y abrirla desde el icono | Si se abre a pantalla completa, sin barras, y si se puede girar |
+| A8 | Instalar en iPhone (WRK-TASK-009) | En Safari, Compartir → «Añadir a pantalla de inicio», y abrirla desde el icono | Si se abre sin las barras de Safari |
 
 ## Acceptance Criteria
 
 - [ ] Resultados de las pruebas que haga el usuario anotados en ARCH-005 (A1-A3) o en Evidence (A4-A6).
 - [ ] Si el impacto baja de 20 fps (A1, A3), se abre una tarea con la causa; WRK-TASK-052 ya ataca el coste de la física.
 - [ ] Cada problema de control o de interfaz (A4, A5) se convierte en una tarea.
+- [ ] Resultado de A7 y A8 anotado en WRK-TASK-009 (Evidence) y en FEAT-INTERFAZ-001; si algo falla, una tarea.
 
 ## Test Plan
 
