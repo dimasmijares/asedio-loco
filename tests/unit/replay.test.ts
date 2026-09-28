@@ -52,4 +52,18 @@ describe('repetición', () => {
     expect(Math.min(...seen)).toBe(30);
     expect(Math.max(...seen)).toBe(60);
   });
+
+  // WRK-TASK-011: la caída de un rey que se lleva la lava al empezar el apuntado se repite al
+  // acabar el impacto, unos 30 s después; el búfer la conserva y su tramo se puede reproducir.
+  it('conserva una caída de hace 30 s con sus poses', () => {
+    const r = new ReplayRecorder();
+    for (let i = 0; i <= 90; i++) r.pose(i / 30, 1005, [0, -i * 0.01, 0], [0, 0, 0, 1]);
+    r.event(2, { e: 'king', slot: 1, cause: 'lava', by: -1 });
+    for (let t = 3; t <= 33; t += 0.5) r.event(t, { e: 'hit', p: [0, 0, 0], f: 300, mat: 'stone' });
+    expect(r.deathTime(1)).toBe(2);
+    const t0 = r.deathTime(1)! - 2.6;
+    expect(r.posesBetween(t0, 2.8).length).toBeGreaterThan(50);
+    for (let t = 34; t <= 50; t += 0.5) r.event(t, { e: 'hit', p: [0, 0, 0], f: 300, mat: 'stone' });
+    expect(r.deathTime(1), 'a los 48 s ya no está').toBeNull();
+  });
 });

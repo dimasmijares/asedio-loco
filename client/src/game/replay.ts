@@ -7,7 +7,10 @@ import type { SimEvent } from './sim/sim';
 // a cámara lenta sin simular nada. Así todos ven lo mismo que vieron en directo.
 
 const MAX_POSES = 120_000; // entradas del búfer circular (t, id, p, q): ~4 MB
-const KEEP_EVENTS = 15; // segundos de eventos que se guardan
+// Segundos de eventos que se guardan: una ronda entera (WRK-TASK-011), para repetir al final del
+// impacto la caída de un rey que se llevó la lava al empezar el apuntado.
+const KEEP_EVENTS = 45;
+const MAX_EVENTS = 12_000;
 const POSE_STEP = 1 / 30; // cada cuerpo se graba como mucho a 30 Hz
 
 // De dónde lee una reproducción: el búfer en directo o un tramo guardado aparte.
@@ -84,10 +87,12 @@ export class ReplayRecorder implements ReplaySource {
 
   event(t: number, e: SimEvent) {
     this.events.push({ t, e });
-    if (this.events.length > 4000 || (this.events.length && this.events[0].t < t - KEEP_EVENTS)) {
+    if (this.events.length && this.events[0].t < t - KEEP_EVENTS) {
       const cut = this.events.findIndex((x) => x.t >= t - KEEP_EVENTS);
       this.events.splice(0, cut < 0 ? this.events.length : cut);
     }
+    // Tope de memoria: si aun así hay demasiados, fuera el 20 % más antiguo.
+    if (this.events.length > MAX_EVENTS) this.events.splice(0, Math.floor(MAX_EVENTS * 0.2));
   }
 
   // Momento en que cayó cada rey (el último, si hay varios).

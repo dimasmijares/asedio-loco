@@ -308,7 +308,8 @@ export class MatchUI {
       if (!view.startReplay(t0, t1, speed, [slot])) continue;
       this.replaySlot = slot;
       this.replayT = 0;
-      this.hud.showBanner('REPETICIÓN', `Caída del rey de ${nameOf(s, slot)}`, 1800);
+      const cause = s.players.find((p) => p.slot === slot)?.cause;
+      this.hud.showBanner('REPETICIÓN', cause === 'lava' ? `La lava se lleva al rey de ${nameOf(s, slot)}` : `Caída del rey de ${nameOf(s, slot)}`, 1800);
       return;
     }
   }

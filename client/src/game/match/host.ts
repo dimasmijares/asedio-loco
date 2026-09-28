@@ -170,6 +170,9 @@ export class MatchHost {
     const s = this.state;
     const prevLevel = s.lavaLevel;
     startRound(s);
+    // Las caídas de la ronda se cuentan desde aquí: la de un rey que se lleva la lava al empezar el
+    // apuntado también se repite al acabar el impacto (WRK-TASK-011).
+    this.roundElims = [];
     // Escudo real: si la ronda que acaba lo tenía, se recoloca a los reyes que se han salido.
     if (this.sim.kingGuard) this.sim.restoreKings();
     this.sim.kingGuard = kingGuarded(s);
@@ -244,7 +247,6 @@ export class MatchHost {
     s.phase = 'impact';
     s.remaining = 0;
     this.shots = [];
-    this.roundElims = [];
     const st = this.sim.stats;
     this.before = { lost: [...st.lost], destroyed: [...st.destroyed], self: [...st.self], broken: st.broken.length };
     let i = 0;

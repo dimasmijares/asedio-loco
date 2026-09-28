@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -53,7 +53,7 @@ Grabar en cada cliente lo que llega a su vista y, cuando cae un rey, reproducir 
    - Poses en un búfer circular de 120.000 entradas (unos 4 MB). Cada cuerpo se graba como mucho a 30 Hz, con un 10 % de margen.
    - Eventos de los últimos 15 s (tope de 4000).
    - Los tiempos se guardan relativos a `base` (Float32). Al empezar una ronda, si han pasado más de 600 s desde `base`, se reinicia el origen y se pierde lo grabado.
-2. **Fase `replay`** (anfitrión, `MatchHost.endImpact`): si en la ronda cayó algún rey, entra en `replay` con los 2 primeros como mucho (`REPLAY_MAX`). La fase dura `5 s × reyes` y la física se pausa (`simPaused`).
+2. **Fase `replay`** (anfitrión, `MatchHost.endImpact`): si en la ronda cayó algún rey (también en el apuntado, por ejemplo porque la lava subió al empezar la ronda: las caídas se cuentan desde `beginRound`, WRK-TASK-011), entra en `replay` con los 2 primeros como mucho (`REPLAY_MAX`). La fase dura `5 s × reyes` y la física se pausa (`simPaused`).
 3. **Reproducción** (cada cliente, `MatchUI.nextReplay`), por cada rey de la cola:
    - Ventana: de 2,6 s antes de su caída a 0,8 s después. Se estira para llenar su parte de la fase menos 0,4 s. Con 5 s va a ×0,74; con `?fast=1` va más rápida que el directo.
    - Antes de empezar se reponen los bloques rotos desde el inicio de la ventana y los proyectiles que volaban en ese momento. El rey vuelve a estar vivo y con corona.
@@ -61,6 +61,7 @@ Grabar en cada cliente lo que llega a su vista y, cuando cae un rey, reproducir 
    - Cámara: a 9 m del rey, girando despacio (0,35 rad/s) y a una altura que ve por encima de las murallas. Rótulo «REPETICIÓN · ¡Cae el rey de …!» y bandas de cine.
    - Si no hay nada grabado de ese rey, se salta.
 4. **Vuelta al directo:** lo que llega durante la repetición se aparta. Al terminar se deshace lo repuesto y se aplica lo apartado. Un estado completo (`full`) corta la repetición en el acto.
+4b. **Búfer de eventos** (WRK-TASK-011): 45 s (antes 15), para que al acabar el impacto siga grabada la caída de un rey que se llevó la lava al empezar el apuntado, con un tope de 12 000 eventos. Si se llega al tope, fuera el 20 % más antiguo. El rótulo de esa repetición es «La lava se lleva al rey de …».
 5. **Migración:** si el nuevo anfitrión hereda la partida en `replay`, pasa directamente a resultados.
 6. **Mejor disparo al final** (WRK-TASK-047), en cada cliente y sin mensajes nuevos:
    - Al empezar cada impacto, `WorldView.snapshot` guarda los bloques y los reyes tal como están.
@@ -108,7 +109,8 @@ Grabar en cada cliente lo que llega a su vista y, cuando cae un rey, reproducir 
 | Implemented in | `client/src/game/match/host.ts` | Fase `replay`, pausa de la física |
 | Implemented in | `shared/match.ts` | `REPLAY_MAX`, `replayDuration` |
 | Implemented in | `client/src/game/net/netClient.ts` | `applyFull` corta la repetición |
-| Tested by | `tests/unit/replay.test.ts` | Búfer y reproducción |
+| Tested by | `tests/unit/replay.test.ts` | Búfer y reproducción (también una caída de hace 30 s) |
+| Tested by | `tests/e2e/repeticion-lava.spec.ts` | Repetición de un rey que se lleva la lava en el apuntado |
 | Tested by | `tests/e2e/multiplayer.spec.ts` | «4 jugadores hasta el final»: mismas repeticiones en todos |
 | Decided in | D-061 | Repetición grabada, no simulada (protocolo v3) |
 | External ref | `PLAN.md` etapa 4, decisión D4 del usuario | Petición |

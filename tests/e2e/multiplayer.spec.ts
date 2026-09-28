@@ -213,7 +213,8 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
   // Todos los jugadores ven las mismas repeticiones de reyes caídos que el anfitrión.
   // (El que recargó la página se pierde las anteriores a la recarga.)
   for (let i = 1; i < players.length; i++) if (players[i] !== guests[1]) expect(finals[i].replays, `repeticiones del jugador ${i + 1}`).toBe(finals[0].replays);
-  await expect(guests[0].locator('#game-over')).toBeVisible();
+  // Antes de la pantalla final va la repetición del mejor disparo (WRK-TASK-047): hasta ~3,3 s en modo rápido.
+  await expect(guests[0].locator('#game-over')).toBeVisible({ timeout: 20_000 });
   await guests[0].screenshot({ path: info.outputPath('final.png') });
   console.log(`fin: gana ${w} en ${finals[0].round} rondas; rondas comprobadas ${[...checked].join(',')}; repeticiones ${finals[0].replays}`);
   for (const p of [...players, ...(spectator ? [spectator] : [])]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
