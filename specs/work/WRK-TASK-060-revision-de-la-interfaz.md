@@ -52,7 +52,7 @@ Fuera: código del juego. Esta tarea no cambia la interfaz; lo que salga de ella
 | R-06 | Portada: tipografía y título | WRK-TASK-062 | En preparación |
 | R-07 | Flujo de partidas: ¿apruebas F1-F9? | WRK-TASK-064 | Tu turno |
 | R-08 | Ya en el juego: parábola con anillo y cámara del impacto. ¿Te convence? | WRK-TASK-054, 063 | Tu turno |
-| R-09 | Castillos nuevos: dos filas más y colores de cada jugador | WRK-TASK-058, 059 | Tu turno |
+| R-09 | Castillos nuevos: dos filas más y colores de cada jugador | WRK-TASK-058, 059 | Aprobado (28-09) |
 
 Decidido fuera del lienzo (28-09-2026): parábola hasta el choque, torreón dos filas más alto, objetivo deducido del rumbo.
 
