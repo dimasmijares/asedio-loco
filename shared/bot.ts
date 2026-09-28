@@ -81,12 +81,12 @@ export interface BotDecision {
 // Puntos de la estructura a los que apunta cuando no va a por el rey (coordenadas locales).
 const STRUCTURE: Vec3[] = (
   [
-    [0, 2.5, 3.3],
-    [3.25, 3.5, 3.25],
-    [-3.25, 3.5, 3.25],
-    [3.3, 2.5, 0],
-    [-3.3, 2.5, 0],
-    [0, 3.4, 0],
+    [0, 3.5, 3.3],
+    [3.25, 5, 3.25],
+    [-3.25, 5, 3.25],
+    [3.3, 3.5, 0],
+    [-3.3, 3.5, 0],
+    [0, 5.4, 0],
   ] as Vec3[]
 ).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE]);
 
@@ -95,12 +95,12 @@ const STRUCTURE: Vec3[] = (
 const L = (x: number, y: number, z: number): Vec3 => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE];
 const KING_BONUS: Partial<Record<AmmoId, number>> = { melon: 0.3, piano: 0.3, rock: 0.1 };
 const AIM_POINTS: Partial<Record<AmmoId, Vec3[]>> = {
-  log: [L(0, 2.5, 3.3)],
-  snowball: [L(0, 2.5, 3.3)],
-  magnet: [L(0, 2.5, 3.3)], // el portón de hierro
-  cow: [L(0, 3.4, 0), L(0, 2.5, 3.3)],
-  coconuts: [L(0, 3.4, 0)],
-  chicken: [L(0, 3.4, 0), L(3.25, 3.5, 3.25), L(-3.25, 3.5, 3.25)],
+  log: [L(0, 3.5, 3.3)],
+  snowball: [L(0, 3.5, 3.3)],
+  magnet: [L(0, 3.5, 3.3)], // el portón de hierro
+  cow: [L(0, 5.4, 0), L(0, 3.5, 3.3)],
+  coconuts: [L(0, 5.4, 0)],
+  chicken: [L(0, 5.4, 0), L(3.25, 5, 3.25), L(-3.25, 5, 3.25)],
 };
 
 const a0 = (id: AmmoId) => AMMO[id];

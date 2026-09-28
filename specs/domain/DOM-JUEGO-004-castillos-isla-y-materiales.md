@@ -35,14 +35,16 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 2. **Huecos:** los castillos están a ±22 m del centro en cada eje. Hueco 0 = (−x, −z), 1 = (+x, −z), 2 = (+x, +z), 3 = (−x, +z). La fachada (+z local) mira al centro.
 3. **Zona del castillo:** un cuadrado de 5,6 m de semilado (con los contrafuertes). Se usa para saber si el rey está «fuera» (DOM-JUEGO-001).
 4. **Catapulta:** en un bastión estático delante de la fachada, en (0; 1,5; 7,4) local; el disparo sale 1,9 m por encima. No se cae con la muralla (D-008).
-5. **Castillo:** 176 bloques a escala 1,2 (bloque base de 1,2 m), con un forro interior de piedra detrás de cada muralla (3 hileras de los 3 bloques centrales, ADR-013):
-   - 4 torres de 5 bloques (3 de piedra y 2 de madera) con 4 almenas de piedra cada una;
-   - 4 murallas de 4 hileras de 5 bloques: 3 de piedra y una pasarela de madera arriba, con una ventana de cristal en la 3.ª hilera, un portón de hierro en la base de la fachada y dos refuerzos de hierro en la muralla trasera;
-   - 2 contrafuertes laterales de 4 bloques (2 de piedra y 2 de madera) y una almena;
-   - un torreón: pedestal de piedra 2 × 2 × 2, placa de hierro, jaula de 4 cristales y tejado de madera.
-   - En total: 95 de piedra, 33 de madera, 8 de cristal y 4 de hierro.
+5. **Castillo:** 236 bloques a escala 1,2 (bloque base de 1,2 m), con un forro interior de piedra detrás de cada muralla (3 hileras de los 3 bloques centrales, ADR-013). Dos filas más que hasta WRK-TASK-058 (ADR-017):
+   - 4 torres de 7 bloques (5 de piedra y 2 de madera) con 4 almenas de piedra cada una;
+   - 4 murallas de 6 hileras de 5 bloques: 5 de piedra y una pasarela de madera arriba, con una ventana de cristal en la 4.ª hilera, un portón de hierro en la base de la fachada y dos refuerzos de hierro en la muralla trasera;
+   - 2 contrafuertes laterales de 6 bloques (4 de piedra y 2 de madera) y una almena;
+   - un torreón: pedestal de piedra 2 × 2 × 4, placa de hierro, jaula de 4 cristales y tejado de madera.
+   - En total: 191 de piedra (36 del forro), 33 de madera, 8 de cristal y 4 de hierro.
+   - Identificadores: 300 por castillo (`BLOCK_ID_STRIDE`), reyes desde 1500 (`KING_ID_BASE`).
+   - Color (WRK-TASK-059, R-02): la piedra y la madera llevan el tono del jugador (`castleTone`: piedra HSL con saturación 30 % y claridad 40 %, madera 52 % y 60 %; tonos 6°, 202°, 54° y 327°); cristal y hierro, neutros. Los trozos al romperse conservan el tono.
 6. **Uniones rompibles:** entre los bloques de cada torre y sus almenas, en la pasarela de las murallas, en los contrafuertes y en el torreón. Una unión se rompe si la fuerza supera su resistencia o si sus anclajes se separan más de 7 cm.
-7. **Rey:** cápsula de 0,3 m de radio sobre el pedestal (a 2,76 m), dentro de la jaula de cristal. Muere aplastado con una fuerza de contacto de más de 600; entre 270 y 600 acumula daño `(f/600)² · 0,35`; cada explosión le suma `impulso/40`. Muere al llegar a 1.
+7. **Rey:** cápsula de 0,3 m de radio sobre el pedestal (a 5,73 m; 2,76 hasta WRK-TASK-058), dentro de la jaula de cristal. Muere aplastado con una fuerza de contacto de más de 600; entre 270 y 600 acumula daño `(f/600)² · 0,35`; cada explosión le suma `impulso/40`. Muere al llegar a 1.
 8. **Materiales:**
 
    | Material | Densidad | Fricción | Rotura (fuerza) | Resistencia a explosión | Se funde en | Trozos |
@@ -76,7 +78,7 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 - [x] Una torre sin base se derrumba.
 - [x] El cristal se rompe antes que la piedra con el mismo impacto.
 - [x] Un bloque fracturado genera fragmentos que luego se retiran.
-- [ ] Una prueba comprueba que el castillo tiene 176 bloques con el reparto de materiales de la regla 5.
+- [ ] Una prueba comprueba que el castillo tiene 236 bloques con el reparto de materiales de la regla 5.
 
 ## Evidence
 
@@ -90,7 +92,8 @@ La **isla** es un cuadrado redondeado sobre un mar de lava. En cada esquina (hue
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | `shared/map.ts` | Isla, huecos, zona del castillo, catapulta |
-| Implemented in | `shared/castle.ts` | Plano de 176 bloques, uniones, rey, ids |
+| Implemented in | `shared/castle.ts` | Plano de 236 bloques, uniones, rey, ids |
+| Implemented in | `shared/players.ts`, `client/src/game/render/blocks.ts`, `client/src/game/sim/debris.ts` | Tono de cada castillo (`castleTone`, `blockTint`) |
 | Implemented in | `shared/materials.ts` | Propiedades de los materiales, `CHIP_RATIO` |
 | Implemented in | `client/src/game/sim/sim.ts` | Rotura, explosiones, `JOINT_STRAIN`, `KING_CRUSH_FORCE` |
 | Implemented in | `shared/fracture.ts`, `client/src/game/sim/debris.ts` | Troceo y fragmentos |

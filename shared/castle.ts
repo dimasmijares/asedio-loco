@@ -19,8 +19,10 @@ export interface CastleDef {
   kingPos: Vec3;
 }
 
-export const BLOCK_ID_STRIDE = 200;
-export const KING_ID_BASE = 1000;
+// Con 236 bloques por castillo (WRK-TASK-058) el paso sube de 200 a 300 y los reyes, de 1000 a
+// 1500: 4 castillos ocupan 1-1200 y los proyectiles empiezan en 2000.
+export const BLOCK_ID_STRIDE = 300;
+export const KING_ID_BASE = 1500;
 export const kingId = (slot: number) => KING_ID_BASE + slot;
 export const slotOfBlock = (id: number) => Math.floor((id - 1) / BLOCK_ID_STRIDE);
 
@@ -29,7 +31,9 @@ export const KING_HALF_HEIGHT = 0.25; // del cilindro de la cápsula
 // Escala del castillo respecto al diseño original (bloques un 20 % mayores).
 export const CASTLE_SCALE = 1.2;
 const S = CASTLE_SCALE;
-export const PEDESTAL_TOP = 2.3 * S;
+// El torreón sube dos filas con las murallas (WRK-TASK-058): el rey sigue asomando por encima.
+export const PEDESTAL_ROWS = 4;
+export const PEDESTAL_TOP = (PEDESTAL_ROWS + 0.3) * S;
 
 interface LocalBlock {
   mat: MaterialId;
@@ -39,7 +43,7 @@ interface LocalBlock {
   rotY?: number;
 }
 
-// Plano local de un castillo (176 bloques). El eje +z es la fachada, que mira al centro de la isla.
+// Plano local de un castillo (236 bloques; 176 hasta WRK-TASK-058, que sumó dos filas). El eje +z es la fachada, que mira al centro de la isla.
 function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
   const blocks: LocalBlock[] = [];
   const joints: [number, number][] = [];
@@ -51,13 +55,13 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
     [-1, 1],
   ];
 
-  // Torres en las esquinas: 5 bloques apilados unidos entre sí y 4 almenas arriba.
+  // Torres en las esquinas: 7 bloques apilados unidos entre sí y 4 almenas arriba.
   const T = 3.25 * S;
-  const TOWER_ROWS = 5;
+  const TOWER_ROWS = 7;
   for (const [sx, sz] of CORNERS) {
     let prev = -1;
     for (let r = 0; r < TOWER_ROWS; r++) {
-      const i = add({ mat: r < 3 ? 'stone' : 'wood', size: [1.5 * S, S, 1.5 * S], p: [sx * T, (0.5 + r) * S, sz * T], part: 'tower' });
+      const i = add({ mat: r < TOWER_ROWS - 2 ? 'stone' : 'wood', size: [1.5 * S, S, 1.5 * S], p: [sx * T, (0.5 + r) * S, sz * T], part: 'tower' });
       if (prev >= 0) joints.push([prev, i]);
       prev = i;
     }
@@ -67,8 +71,8 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
     }
   }
 
-  // Murallas entre torres: 4 hileras de 5 bloques. Arriba, madera unida como una pasarela.
-  const WALL_ROWS = 4;
+  // Murallas entre torres: 6 hileras de 5 bloques. Arriba, madera unida como una pasarela.
+  const WALL_ROWS = 6;
   const LINING_ROWS = 3;
   const walls: { axis: 'x' | 'z'; fixed: number; side: 'front' | 'back' | 'left' | 'right' }[] = [
     { axis: 'x', fixed: T, side: 'front' },
@@ -82,7 +86,7 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
       for (let k = 0; k < 5; k++) {
         const along = (-2 + k) * S;
         let mat: MaterialId = r === WALL_ROWS - 1 ? 'wood' : 'stone';
-        if (r === 2 && k === 2) mat = 'glass'; // ventana
+        if (r === 3 && k === 2) mat = 'glass'; // ventana
         if (r === 0 && k === 2 && w.side === 'front') mat = 'iron'; // portón
         if (r === 1 && (k === 1 || k === 3) && w.side === 'back') mat = 'iron'; // refuerzo trasero
         const p: Vec3 = w.axis === 'x' ? [along, (0.5 + r) * S, w.fixed] : [w.fixed, (0.5 + r) * S, along];
@@ -108,21 +112,22 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
       }
   }
 
-  // Contrafuertes en el centro de las murallas laterales, por fuera: 4 bloques y una almena.
+  // Contrafuertes en el centro de las murallas laterales, por fuera: 6 bloques y una almena.
+  const BUTTRESS_ROWS = 6;
   for (const sx of [-1, 1]) {
     let prev = -1;
-    for (let r = 0; r < 4; r++) {
-      const i = add({ mat: r < 2 ? 'stone' : 'wood', size: [S, S, 1.2 * S], p: [sx * (T + S), (0.5 + r) * S, 0], part: 'tower' });
+    for (let r = 0; r < BUTTRESS_ROWS; r++) {
+      const i = add({ mat: r < BUTTRESS_ROWS - 2 ? 'stone' : 'wood', size: [S, S, 1.2 * S], p: [sx * (T + S), (0.5 + r) * S, 0], part: 'tower' });
       if (prev >= 0) joints.push([prev, i]);
       prev = i;
     }
-    const c = add({ mat: 'stone', size: [0.5 * S, 0.5 * S, 0.5 * S], p: [sx * (T + S), 4.25 * S, 0], part: 'cren' });
+    const c = add({ mat: 'stone', size: [0.5 * S, 0.5 * S, 0.5 * S], p: [sx * (T + S), (BUTTRESS_ROWS + 0.25) * S, 0], part: 'cren' });
     joints.push([prev, c]);
   }
 
-  // Torreón del rey: pedestal de piedra 2x2x2, placa de hierro, jaula de cristal y tejado de madera.
+  // Torreón del rey: pedestal de piedra 2x2x4, placa de hierro, jaula de cristal y tejado de madera.
   const ped: number[] = [];
-  for (let r = 0; r < 2; r++)
+  for (let r = 0; r < PEDESTAL_ROWS; r++)
     for (const [x, z] of [
       [-0.5, -0.5],
       [0.5, -0.5],
@@ -130,8 +135,8 @@ function localCastle(): { blocks: LocalBlock[]; joints: [number, number][] } {
       [-0.5, 0.5],
     ])
       ped.push(add({ mat: 'stone', size: [0.98 * S, S, 0.98 * S], p: [x * S, (0.5 + r) * S, z * S], part: 'keep' }));
-  const plate = add({ mat: 'iron', size: [2.2 * S, 0.3 * S, 2.2 * S], p: [0, 2.15 * S, 0], part: 'keep' });
-  for (const i of ped.slice(4)) joints.push([i, plate]);
+  const plate = add({ mat: 'iron', size: [2.2 * S, 0.3 * S, 2.2 * S], p: [0, PEDESTAL_TOP - 0.15 * S, 0], part: 'keep' });
+  for (const i of ped.slice(-4)) joints.push([i, plate]);
   const paneH = 1.15 * S;
   const py = PEDESTAL_TOP + paneH / 2;
   const panes = [

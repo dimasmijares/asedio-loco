@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { MATERIAL_IDS, type MaterialId } from '../../../../shared/materials';
+import { KING_ID_BASE, slotOfBlock } from '../../../../shared/castle';
+import { MATERIALS, MATERIAL_IDS, type MaterialId } from '../../../../shared/materials';
+import { castleTone } from '../../../../shared/players';
 import type { Quat, Vec3 } from '../../../../shared/math';
 import { boxOutlineMaterial, toon, withNearFade } from './materials';
 import { tex } from './textures';
@@ -21,6 +23,7 @@ export function blockMaterial(mat: MaterialId): THREE.Material {
 
 interface Item {
   mat: MaterialId;
+  tint: [number, number, number];
   index: number;
   size: Vec3;
   p: Vec3;
@@ -32,6 +35,19 @@ const _p = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _s = new THREE.Vector3();
 const _c = new THREE.Color();
+
+// Tinte de un bloque de castillo (WRK-TASK-059): el color de la instancia multiplica la textura,
+// así que es el tono del jugador dividido por el color base del material. Fuera de los castillos
+// (ids de escenas de prueba), sin tinte.
+const BASE = Object.fromEntries(MATERIAL_IDS.map((m) => [m, new THREE.Color(MATERIALS[m].color)])) as Record<MaterialId, THREE.Color>;
+export function blockTint(id: number, mat: MaterialId): [number, number, number] {
+  const tone = id > 0 && id < KING_ID_BASE ? castleTone(slotOfBlock(id), mat) : null;
+  if (!tone) return [1, 1, 1];
+  // El color de la instancia se aplica en espacio lineal: se convierte el tono sRGB antes de dividir.
+  const t = new THREE.Color().setRGB(tone[0], tone[1], tone[2], THREE.SRGBColorSpace);
+  const b = BASE[mat];
+  return [t.r / b.r, t.g / b.g, t.b / b.b];
+}
 
 // Todos los bloques de un material en un InstancedMesh (una llamada de dibujo),
 // con su contorno compartiendo las mismas matrices.
@@ -74,9 +90,10 @@ export class BlockMeshes {
     if (list.length >= mesh.instanceMatrix.count) return;
     const index = list.length;
     list.push(id);
-    this.items.set(id, { mat, index, size, p, q });
+    const tint = blockTint(id, mat);
+    this.items.set(id, { mat, tint, index, size, p, q });
     mesh.count = this.outlines[mat].count = list.length;
-    mesh.setColorAt(index, _c.setRGB(1, 1, 1));
+    mesh.setColorAt(index, _c.setRGB(tint[0], tint[1], tint[2]));
     this.write(this.items.get(id)!);
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }
@@ -103,7 +120,7 @@ export class BlockMeshes {
     const it = this.items.get(id);
     if (!it) return;
     const k = 1 - Math.min(0.55, d * 0.55);
-    this.meshes[it.mat].setColorAt(it.index, _c.setRGB(k, k * 0.95, k * 0.9));
+    this.meshes[it.mat].setColorAt(it.index, _c.setRGB(k * it.tint[0], k * 0.95 * it.tint[1], k * 0.9 * it.tint[2]));
     this.meshes[it.mat].instanceColor!.needsUpdate = true;
   }
 

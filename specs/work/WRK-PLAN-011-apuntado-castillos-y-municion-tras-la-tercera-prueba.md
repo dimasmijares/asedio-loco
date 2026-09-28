@@ -32,12 +32,14 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 2 | WRK-TASK-055 · Solo munición que vuela en parábola | completed | — | 2026-09-28 |
 | 3 | WRK-TASK-056 · Racimo de cocos que se abre en vuelo y explota | completed | 055 | 2026-09-28 |
 | 4 | WRK-TASK-057 · La lava sube un poco cada ronda | completed | — | 2026-09-28 |
-| 5 | WRK-TASK-058 · Castillos con dos filas más | draft | 057 | — |
-| 6 | WRK-TASK-059 · Castillo con los colores del jugador | draft | 058, 060 (aprobar colores) | — |
+| 5 | WRK-TASK-058 · Castillos con dos filas más | completed | 057 | 2026-09-28 |
+| 6 | WRK-TASK-059 · Castillo con los colores del jugador | completed | 058, 060 (colores aprobados) | 2026-09-28 |
 | 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | draft | 060 (aprobar la propuesta) | — |
 | 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
 | 9 | WRK-TASK-063 · Cámara de impacto centrada en tu disparo | completed | — | 2026-09-28 |
 | 10 | WRK-TASK-064 · Revisión del flujo de partidas | active | — | Propuesta en R-07; esperando al usuario |
+| 11 | WRK-TASK-065 · Munición a la medida de los castillos de 236 bloques | draft | 058 | — |
+| 12 | WRK-TASK-066 · Física de los castillos altos en un anfitrión móvil | draft | 058 | — |
 
 ## Risk Assessment
 

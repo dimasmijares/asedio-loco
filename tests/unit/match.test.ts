@@ -33,7 +33,8 @@ describe('rondas', () => {
     expect(y(1)).toBe(-3.6);
     expect(Math.abs(y(10) - 0.4)).toBeLessThan(0.1);
     expect(y(9)).toBeLessThan(0);
-    expect(y(40)).toBe(5.2);
+    expect(y(40)).toBe(LAVA_LEVELS[LAVA_LEVELS.length - 1]);
+    expect(y(40)).toBeGreaterThan(7);
     expect(y(4, true)).toBeCloseTo(y(10), 5);
     const s = four();
     for (let i = 0; i < 4; i++) startRound(s);

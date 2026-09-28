@@ -133,19 +133,18 @@ export function firstHit(pts: Vec3[], boxes: Iterable<HitBox>, groundAt: (x: num
       lo[k] = Math.min(lo[k], p[k]);
       hi[k] = Math.max(hi[k], p[k]);
     }
-  const near: { b: HitBox; inv: Quat; h: Vec3; r: number }[] = [];
+  const near: { b: HitBox; inv: Quat; h: Vec3; r: number }[] = []; // r: radio de descarte
   for (const b of boxes) {
     const r = Math.hypot(b.size[0], b.size[1], b.size[2]) / 2 + radius;
     if (b.p[0] + r < lo[0] || b.p[0] - r > hi[0] || b.p[1] + r < lo[1] || b.p[1] - r > hi[1] || b.p[2] + r < lo[2] || b.p[2] - r > hi[2]) continue;
-    near.push({ b, inv: [-b.q[0], -b.q[1], -b.q[2], b.q[3]], h: [b.size[0] / 2 + radius, b.size[1] / 2 + radius, b.size[2] / 2 + radius], r });
+    near.push({ b, inv: [-b.q[0], -b.q[1], -b.q[2], b.q[3]], h: [b.size[0] / 2, b.size[1] / 2, b.size[2] / 2], r });
   }
   for (let i = 1; i < pts.length; i++) {
     const a = pts[i - 1];
     const c = pts[i];
     let best = Infinity;
     for (const n of near) {
-      // Descarte por distancia del segmento al centro.
-      const t = segBoxT(a, c, n.b.p, n.inv, n.h);
+      const t = segBoxT(a, c, n.b.p, n.inv, n.h, radius);
       if (t !== null && t < best) best = t;
     }
     const g = groundAt(c[0], c[2]);
@@ -163,8 +162,10 @@ export function firstHit(pts: Vec3[], boxes: Iterable<HitBox>, groundAt: (x: num
   return null;
 }
 
-// Parámetro (0..1) en que el segmento a→c entra en la caja (en su marco local), o null.
-function segBoxT(a: Vec3, c: Vec3, center: Vec3, inv: Quat, h: Vec3): number | null {
+// Parámetro (0..1) en que una bola de radio r que recorre a→c toca la caja (en su marco local), o
+// null. Primero el cruce con la caja engordada (rápido y conservador) y, desde ahí, la distancia
+// exacta de la bola a la caja real en 6 pasos: en las esquinas, una bola que roza no toca.
+function segBoxT(a: Vec3, c: Vec3, center: Vec3, inv: Quat, h: Vec3, r: number): number | null {
   const la = quatRotate(inv, [a[0] - center[0], a[1] - center[1], a[2] - center[2]]);
   const lc = quatRotate(inv, [c[0] - center[0], c[1] - center[1], c[2] - center[2]]);
   let t0 = 0;
@@ -172,15 +173,26 @@ function segBoxT(a: Vec3, c: Vec3, center: Vec3, inv: Quat, h: Vec3): number | n
   for (let k = 0; k < 3; k++) {
     const d = lc[k] - la[k];
     if (Math.abs(d) < 1e-9) {
-      if (la[k] < -h[k] || la[k] > h[k]) return null;
+      if (la[k] < -h[k] - r || la[k] > h[k] + r) return null;
       continue;
     }
-    let u = (-h[k] - la[k]) / d;
-    let v = (h[k] - la[k]) / d;
+    let u = (-h[k] - r - la[k]) / d;
+    let v = (h[k] + r - la[k]) / d;
     if (u > v) [u, v] = [v, u];
     t0 = Math.max(t0, u);
     t1 = Math.min(t1, v);
     if (t0 > t1) return null;
   }
-  return t0;
+  const N = 6;
+  for (let s = 0; s <= N; s++) {
+    const t = t0 + ((t1 - t0) * s) / N;
+    let d2 = 0;
+    for (let k = 0; k < 3; k++) {
+      const x = la[k] + (lc[k] - la[k]) * t;
+      const e = Math.abs(x) - h[k];
+      if (e > 0) d2 += e * e;
+    }
+    if (d2 <= r * r) return t;
+  }
+  return null;
 }

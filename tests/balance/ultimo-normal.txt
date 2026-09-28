@@ -1,5 +1,5 @@
-dificultad normal, 12 partidas
-media: 9.8 rondas, 173.5 s
-primera eliminación en la ronda: 10, 5, 9, 3, 4, 3, 8, 6, 5, 5, 3, 3
-causas: {"lava":21,"crushed":14,"outside":7}
-rondas con el objetivo cumplido: 34 de 117; por tipo [rondas, jugadores]: {"tower":[10,13],"iron":[14,16],"glass":[10,14]}
+dificultad normal, 8 partidas
+media: 8.1 rondas, 161.8 s
+primera eliminación en la ronda: 3, 4, 3, 5, 7, 3, 5, 3
+causas: {"outside":11,"crushed":7,"lava":7,"fell":1}
+rondas con el objetivo cumplido: 32 de 65; por tipo [rondas, jugadores]: {"tower":[11,15],"iron":[10,11],"glass":[11,16]}

@@ -12,6 +12,7 @@ interface Piece {
   size: Vec3;
   born: number;
   life: number;
+  tint?: [number, number, number]; // tono del castillo del que salió (WRK-TASK-059)
 }
 
 const BURST: Record<MaterialId, number> = { glass: 4.5, wood: 2.6, stone: 1.8, iron: 1.2 };
@@ -19,6 +20,7 @@ const _m = new THREE.Matrix4();
 const _p = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _s = new THREE.Vector3();
+const _c = new THREE.Color();
 
 // Fragmentos decorativos: un mundo físico aparte que cada cliente simula por su cuenta
 // (no se sincronizan por red). Los bloques de verdad aparecen aquí como cuerpos
@@ -50,6 +52,7 @@ export class Debris implements DebrisLike {
       m.castShadow = shadows && mat !== 'glass';
       m.frustumCulled = false;
       m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3).fill(1), 3);
       parent.add(m);
       this.meshes[mat] = m;
     }
@@ -77,7 +80,7 @@ export class Debris implements DebrisLike {
   }
 
   // Trocea un bloque roto en fragmentos con la velocidad que llevaba más un estallido.
-  burst(mat: MaterialId, size: Vec3, p: Vec3, q: Quat, v: Vec3, seed: number) {
+  burst(mat: MaterialId, size: Vec3, p: Vec3, q: Quat, v: Vec3, seed: number, tint?: [number, number, number]) {
     const pieces = fracture(size, MATERIALS[mat].pieces, seed);
     const r = rng(seed ^ 0x9e37);
     const qq = new THREE.Quaternion(q[0], q[1], q[2], q[3]);
@@ -102,7 +105,7 @@ export class Debris implements DebrisLike {
           .setRestitution(mat === 'glass' ? 0.3 : 0.1),
         body,
       );
-      this.pieces.push({ body, mat, size: pc.size, born: this.time, life: r.range(3.2, 4.8) });
+      this.pieces.push({ body, mat, size: pc.size, born: this.time, life: r.range(3.2, 4.8), tint });
     }
   }
 
@@ -137,11 +140,14 @@ export class Debris implements DebrisLike {
       const ro = pc.body.rotation();
       _m.compose(_p.set(tr.x, tr.y, tr.z), _q.set(ro.x, ro.y, ro.z, ro.w), _s.set(pc.size[0] * shrink, pc.size[1] * shrink, pc.size[2] * shrink));
       const mesh = this.meshes[pc.mat];
+      const tint = pc.tint;
+      mesh.setColorAt(counts[pc.mat], tint ? _c.setRGB(tint[0], tint[1], tint[2]) : _c.setRGB(1, 1, 1));
       mesh.setMatrixAt(counts[pc.mat]++, _m);
     }
     for (const mat of MATERIAL_IDS) {
       this.meshes[mat].count = counts[mat];
       this.meshes[mat].instanceMatrix.needsUpdate = true;
+      if (this.meshes[mat].instanceColor) this.meshes[mat].instanceColor!.needsUpdate = true;
     }
   }
 

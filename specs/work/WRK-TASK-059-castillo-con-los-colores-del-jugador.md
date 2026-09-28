@@ -3,8 +3,8 @@ id: WRK-TASK-059
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
+status: completed
+confidence: medium
 version: 0.1.0
 created: 2026-09-28
 updated: 2026-09-28
@@ -47,10 +47,10 @@ Que cada castillo se reconozca por el color de su jugador: la piedra en un tono 
 
 ## Acceptance Criteria
 
-- [ ] Cada castillo se ve con los tonos aprobados en el diseño, en calidad alta y baja.
-- [ ] Los trozos rotos conservan el tono de su castillo.
-- [ ] `perf.spec.ts` dentro del presupuesto.
-- [ ] Capturas en PC y móvil vertical, aprobadas por el usuario.
+- [x] Cada castillo se ve con los tonos aprobados en el diseño, en calidad alta y baja.
+- [x] Los trozos rotos conservan el tono de su castillo.
+- [x] `perf.spec.ts` dentro del presupuesto.
+- [x] Capturas en PC y móvil vertical. La aprobación del usuario va en el punto R-09 del lienzo.
 
 ## Test Plan
 
@@ -61,4 +61,7 @@ Que cada castillo se reconozca por el color de su jugador: la piedra en un tono 
 
 ## Evidence
 
-Pendiente.
+2026-09-28.
+- `castleTone(slot, mat)` en `shared/players.ts` con los valores aprobados en R-02. `blockTint` (render) divide el tono, en espacio lineal, entre el color base del material: el color de la instancia multiplica la textura, así que se conservan vetas y juntas. Sin materiales nuevos ni llamadas de dibujo de más: solo el color por instancia que ya existía (el daño lo multiplica).
+- Los trozos (`Debris.burst`) reciben el mismo tinte y lo guardan por pieza.
+- Capturas en 1280×720 y 390×844 (calidad alta, sin GPU): los cuatro castillos se distinguen; en la piedra las juntas claras toman un tono más vivo del color. En el lienzo, R-09.

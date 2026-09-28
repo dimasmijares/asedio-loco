@@ -59,10 +59,10 @@ export function islandSdf(x: number, z: number): number {
 
 // Alturas del mar de lava por ronda (WRK-TASK-057): sube un poco al empezar cada ronda y se queda
 // quieta el resto. Mismo ritmo medio que cuando subía 1,3 m cada 3 rondas: toca la isla en la
-// ronda 10 (0,4 m) y se come una hilera (1,2 m) cada 3 rondas, hasta el tope de 5,2 m.
+// ronda 10 (0,4 m) y se come una hilera (1,2 m) cada 3 rondas, hasta el tope de 7,6 m.
 export const LAVA_START = -3.6;
 export const LAVA_STEP = 0.444; // m por ronda
-export const LAVA_TOP = 5.2;
+export const LAVA_TOP = 7.6; // 5,2 hasta WRK-TASK-058: con el torreón dos filas más alto, la lava tiene que poder llegar al rey
 export const LAVA_LEVELS = Array.from({ length: Math.ceil((LAVA_TOP - LAVA_START) / LAVA_STEP) + 1 }, (_, i) => Math.min(LAVA_TOP, +(LAVA_START + i * LAVA_STEP).toFixed(3)));
 export const LAVA_FAST_STEPS = 3; // con ?fast=1 sube el triple por ronda
 export const WIND_FROM_ROUND = 6;

@@ -35,7 +35,7 @@ const TARGET: Partial<Record<AmmoId, [number, number]>> = {
   snowball: [18, 24],
 };
 // Los mismos puntos de la estructura a los que apuntan los bots.
-const STRUCTURE = ([[0, 2.5, 3.3], [3.25, 3.5, 3.25], [-3.25, 3.5, 3.25], [0, 3.4, 0]] as [number, number, number][]).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE] as [number, number, number]);
+const STRUCTURE = ([[0, 3.5, 3.3], [3.25, 5, 3.25], [-3.25, 5, 3.25], [0, 5.4, 0]] as [number, number, number][]).map(([x, y, z]) => [x * CASTLE_SCALE, y * CASTLE_SCALE, z * CASTLE_SCALE] as [number, number, number]);
 const SHOTS = Number(process.env.SHOTS ?? 6);
 // AMMO=magnet,log mide solo esas (para iterar) y lo deja en destrozo-parcial.txt.
 const ONLY = process.env.AMMO?.split(',') as AmmoId[] | undefined;

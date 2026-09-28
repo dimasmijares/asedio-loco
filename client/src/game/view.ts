@@ -5,7 +5,7 @@ import { CATAPULT_LOCAL, castleOrigin, toWorld } from '../../../shared/map';
 import type { MaterialId } from '../../../shared/materials';
 import type { Quat, Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES } from '../../../shared/players';
-import { BlockMeshes } from './render/blocks';
+import { BlockMeshes, blockTint } from './render/blocks';
 import { Fx } from './render/fx';
 import { toon } from './render/materials';
 import { Catapult, KING_NECK, makeKing, makeProjectile } from './render/models';
@@ -177,7 +177,7 @@ export class WorldView {
         if (e.why === 'frac') {
           // Cada bloque roto suma temblor: cuanto más destrozo, más tiembla (WRK-TASK-032).
           this.shake = Math.min(1.3, this.shake + 0.035);
-          this.debris.burst(e.mat, e.size, e.p, e.q, e.v, e.seed);
+          this.debris.burst(e.mat, e.size, e.p, e.q, e.v, e.seed, blockTint(e.id, e.mat));
           this.fx.shatter(e.p, e.mat);
           this.fx.rubble(e.p);
         } else if (e.why === 'melt') this.fx.fire(e.p, 6);

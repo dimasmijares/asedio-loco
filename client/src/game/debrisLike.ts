@@ -17,7 +17,7 @@ export interface DebrisLike {
   addProxy(id: number, size: Vec3, p: Vec3, q: Quat): void;
   moveProxy(id: number, p: Vec3, q: Quat): void;
   removeProxy(id: number): void;
-  burst(mat: MaterialId, size: Vec3, p: Vec3, q: Quat, v: Vec3, seed: number): void;
+  burst(mat: MaterialId, size: Vec3, p: Vec3, q: Quat, v: Vec3, seed: number, tint?: [number, number, number]): void;
   step(dt: number): void;
 }
 
