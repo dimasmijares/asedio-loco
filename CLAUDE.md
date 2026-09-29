@@ -13,6 +13,8 @@ Las instrucciones de trabajo están en @AGENTS.md: `specs/` es la fuente de verd
 | Cada funcionalidad y sus limitaciones conocidas | `specs/feature/FEAT-*` |
 | Pruebas, herramientas y parámetros de URL | `specs/documentation/DOC-OPS-001` |
 | Cómo revisa el usuario el diseño (puntos R-NN) | `specs/documentation/DOC-OPS-003` |
+| Lienzo de diseño (Revisar, Diseñar, Referencia) | https://claude.ai/artifact/RWP97U9aWmerrw9ibSeLxA |
+| Design system del juego (paleta, letra, componentes) | https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3 (provisional: espera directrices del usuario; se itera en el Proyecto «Asedio Loco» de claude.ai, aquí solo se lee) |
 | Decisiones vigentes y reglas de trabajo | `specs/governance/ADR-*`, `RULE-001` a `RULE-004` |
 | Qué se hizo y cuándo | `specs/work/` (y `git log`) |
 
