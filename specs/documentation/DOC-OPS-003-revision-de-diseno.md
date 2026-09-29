@@ -5,9 +5,9 @@ layer: documentation
 scope: persistent
 status: active
 confidence: low
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-09-29
 owner: dimas
 dependencies:
   - id: DOC-OPS-002
@@ -45,6 +45,15 @@ Que el usuario sepa en diez segundos qué tiene que revisar, dónde y qué se es
 5. **Qué hace el agente:** con cada respuesta, actualiza el estado en «Qué revisar», anota la decisión en la tarea (Implementation Notes y Evidence), responde y resuelve el hilo, y avisa en el chat solo con lo que ha cambiado.
 6. **Las pruebas en el juego** (capturas después de implementar) vuelven como un punto nuevo con su propio identificador.
 
+### Diseñar desde cero (desde el 29-09-2026)
+
+Claude Design y los artifacts son lo mismo: el lienzo es un artifact de tipo Design. Para rediseñar no se trabaja sobre capturas:
+
+7. **Design system «Asedio Loco · estilo»** (https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3): paleta, tipografía, tamaños, radios y componentes. Es la fuente del estilo. Hoy tiene los valores actuales del juego como base provisional y **espera las directrices nuevas del usuario** (paleta incluida); hasta entonces no se diseña nada nuevo sobre él.
+8. **El usuario itera el design system fuera de esta sesión**, desde Claude en claude.ai o a mano en su página. El agente del repositorio no lo cambia salvo que se lo pidan; lo lee (`README.md` y `tokens.json`) antes de tocar el CSS del juego.
+9. **Página «Diseñar» del lienzo**: maquetas editables (no capturas) hechas con el design system, con alternativas A/B/C cuando haga falta. Se crea con el primer rediseño.
+10. **Ciclo:** maqueta en «Diseñar» → comentarios o retoques → aprobada → el agente la pasa al código y despliega → vuelve a «Revisar» como punto R-NN con la captura del juego real junto a la maqueta.
+
 ## Acceptance Criteria
 
 - [ ] El lienzo de WRK-SPEC-011 sigue esta estructura.
@@ -61,4 +70,5 @@ Que el usuario sepa en diez segundos qué tiene que revisar, dónde y qué se es
 | Relation | Target | Description |
 |----------|--------|-------------|
 | Implemented in | Lienzo https://claude.ai/artifact/RWP97U9aWmerrw9ibSeLxA | Páginas Revisar y Referencia, tablero «Qué revisar» |
+| Implemented in | Design system https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3 | Estilo del juego; provisional hasta las directrices nuevas |
 | Tested by | WRK-TASK-060 | Primera revisión con este método |
