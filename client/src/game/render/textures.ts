@@ -126,20 +126,20 @@ export const tex = {
         }
       }),
     ),
-  grass: () =>
-    once('grass', () =>
+  // Tierra terracota de la isla (R-10 D2): grumos algo más claros y más oscuros que el tono base.
+  earth: () =>
+    once('earth', () =>
       canvas(
         128,
         (g, s) => {
-          g.fillStyle = '#7cc84f';
+          g.fillStyle = '#c7663a';
           g.fillRect(0, 0, s, s);
           const r = rng(21);
-          for (let i = 0; i < 500; i++) {
-            const c = r.pick(['#6fbd45', '#8dd65c', '#63ad3c', '#9be36a']);
-            g.fillStyle = c;
-            const x = r.range(0, s);
-            const y = r.range(0, s);
-            g.fillRect(x, y, 2, r.range(3, 7));
+          for (let i = 0; i < 420; i++) {
+            g.fillStyle = r.pick(['#bb5c34', '#d07446', '#c06036', '#d47d4f', '#b45531']);
+            g.beginPath();
+            g.ellipse(r.range(0, s), r.range(0, s), r.range(1, 3.2), r.range(0.8, 2), r.range(0, 3), 0, Math.PI * 2);
+            g.fill();
           }
         },
         14,

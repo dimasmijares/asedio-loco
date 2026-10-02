@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.4.0
 created: 2026-09-26
-updated: 2026-09-28
+updated: 2026-10-02
 owner: dimas
 dependencies:
   - id: ARCH-002
@@ -60,9 +60,10 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 3. **Fragmentos** (D-009): trozos decorativos en un mundo físico local, no sincronizados. Máximo 260 / 170 / 90 y desaparecen a los 3-5 s.
 4. **Rey caído:** confeti con su color, polvo, sacudida de cámara (+0,5), corona oculta, calavera en el marcador y rótulo.
    - **Rey animado** (WRK-TASK-051), solo en el modelo: el rey va articulado (`rig` con pivote en los pies, cabeza con la corona y dos brazos de un solo material y sin contorno). **Susto** durante 1,3 s: brazos arriba, cabeza que tiembla y saltitos. Lo provocan un golpe de fuerza > 300 a menos de 4 m, una explosión a menos de su radio + 3 m, un bloque roto a menos de 3 m o un proyectil que pasa a menos de 3,5 m. **Desmayo** al caer: se tumba de espaldas, con la cabeza ladeada y los brazos abiertos, en la medida en que la cápsula sigue de pie. Sale de `kingAlive`, así que en las repeticiones vuelve a ponerse de pie y a caer. En reposo, respiración suave y balanceo de brazos. Cuesta 2 llamadas de dibujo por rey (los brazos).
-5. **Luz del atardecer y oclusión aproximada** (WRK-TASK-050, en todas las calidades): hemisférica de 1,2 y sol cálido `#ffe2b4` de 2,65, bajo. En el sombreador de los bloques, la parte baja de cada bloque baja al 80 % y lo que está a ras de suelo, al 78 %: las juntas entre hileras y la base de los castillos ganan volumen. Pendiente de la aprobación del usuario (WRK-TASK-053).
+5. **Luz del atardecer y oclusión aproximada** (WRK-TASK-050, en todas las calidades; colores de R-10 D2, WRK-TASK-076): hemisférica de 1,25, rosada arriba (`#f4c9c0`) y ciruela abajo (`#5e1a46`), para que las sombras tiren a ciruela y nunca a negro, y sol cálido `#ffd6a0` de 2,9, rasante (unos 26° sobre el horizonte). En el sombreador de los bloques, la parte baja de cada bloque baja al 80 % y lo que está a ras de suelo, al 78 %: las juntas entre hileras y la base de los castillos ganan volumen. Pendiente de la aprobación del usuario (WRK-TASK-053).
 5. **Grietas** (WRK-TASK-039): un bloque dañado se oscurece y muestra grietas procedurales que se ensanchan con el daño, en el sombreador de los bloques y sin coste de CPU.
-5. **Lava viva** (D-056), en shaders y sin coste de CPU: placas de costra con grietas incandescentes, latido en lo líquido, lava casi blanca junto al acantilado hasta que inunda la isla, y chispas que suben del mar (520 / 320 / 140). Viñeta cálida en los bordes. El nivel sube suavemente hasta el objetivo.
+5. **Escena al atardecer** (R-10 D2, WRK-TASK-076; sección «Escena 3D» del design system): cielo de hueso a crema con el horizonte melocotón y niebla melocotón; sol grande, bajo y pálido; tres capas de montañas planas (naranja, grana y vino de lejos a cerca, una malla, sin luz ni niebla); isla de tierra terracota con laterales vino que se oscurecen hacia ciruela; pinos ciruela, rocas grises cálidas e islotes vino con tapa terracota; contorno noche en bloques y decorado.
+6. **Lava viva** (D-056), en shaders y sin coste de CPU: mar grana con brillos naranja, placas de costra vino con grietas naranja, latido en lo líquido, lava naranja clara junto al acantilado hasta que inunda la isla, y chispas que suben del mar (520 / 320 / 140). Viñeta ciruela en los bordes. El nivel sube suavemente hasta el objetivo.
 6. **Estadísticas finales** (D-035), en `#game-over`:
    - 💥 Mayor destrozo (bloques rivales rotos).
    - 🎯 Mejor disparo (más bloques en una ronda).
@@ -109,7 +110,7 @@ Traducir los `SimEvent` (locales o de la red) en sonido y efectos visuales, y re
 | Implemented in | `client/src/game/render/fx.ts` | Partículas, confeti y humo de derrumbe (`SMOKE_CAP`) |
 | Implemented in | `client/src/game/sim/debris.ts` | Fragmentos locales |
 | Implemented in | `client/src/game/render/materials.ts` | Oclusión aproximada de los bloques (`AO_APPLY`) |
-| Implemented in | `client/src/game/render/stage.ts` | Shader de la lava, chispas, viñeta |
+| Implemented in | `client/src/game/render/stage.ts` | Shader de la lava, chispas, viñeta, cielo, montañas y luz del atardecer |
 | Implemented in | `client/src/game/view.ts` | Efectos por evento (`king`, `boom`…) |
 | Implemented in | `client/src/game/match/host.ts` | Estadísticas por ronda (`endImpact`, `closestMiss`) |
 | Implemented in | `client/src/game/match/ui.ts` | `showOver` |

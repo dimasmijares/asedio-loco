@@ -115,7 +115,8 @@ export function withNearFade<T extends THREE.Material>(m: T): T {
   return m;
 }
 
-const OUTLINE_COLOR = new THREE.Color('#1d1626');
+// Contorno noche, como el de la interfaz (R-10).
+const OUTLINE_COLOR = new THREE.Color('#200432');
 
 // Contorno de cajas instanciadas: una caja agrandada un grosor constante en el mundo,
 // dibujada por dentro (BackSide). Así las esquinas quedan cerradas y el grosor no

@@ -49,6 +49,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 19 | WRK-TASK-073 · Selector de castillos del espectador | draft | 061, R-05 | — |
 | 20 | WRK-TASK-074 · Estilo «Atardecer» en la interfaz (R-10 fase 1: E1-E3) | completed | 060 (R-10) | 2026-10-02 |
 | 21 | WRK-TASK-075 · Munición ilustrada (R-10 fase 1: E4) | completed | 074 | 2026-10-02 |
+| 22 | WRK-TASK-076 · Escena al atardecer (R-10 fase 1: D2) | completed | 074 | 2026-10-02 |
 
 ## Risk Assessment
 
@@ -59,6 +60,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | Con 7 municiones y sin defensivas, la mano se repite y pierde variedad | medium | low | Revisar pesos en 055; la carta de premio (ADR-015) sigue saliendo de raras y épicas |
 | Los cocos explosivos se salen de su franja de destrozo | high | medium | Medir en 056; la palanca es la fuerza de cada coco o pasar el racimo a rara |
 | Dos filas más bajan los fps en móvil | medium | medium | Banco `cpu=4 movil` antes y después (RULE-004) |
+| El cielo crema del atardecer resta contraste a la parábola y a los castillos claros | medium | high | Contorno noche en la parábola y el anillo; capturas de los cuatro castillos (WRK-TASK-076) |
 | El cambio de identificadores de bloque rompe partidas abiertas | high | low | `PROTOCOL_VERSION` (RULE-002) |
 
 ## Evidence

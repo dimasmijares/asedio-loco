@@ -6,6 +6,22 @@ import { tex } from './textures';
 
 export type Quality = 'low' | 'medium' | 'high';
 
+// Escena al atardecer (R-10 D2, sección «Escena 3D» del design system): colores de la paleta.
+const SUNSET = {
+  hueso: '#fff6e2',
+  crema: '#fee7b5',
+  melocoton: '#fdbe7a',
+  naranja: '#fe8932',
+  grana: '#cd1a30',
+  vino: '#7a0c31',
+  ciruela: '#4a0730',
+  terracota: '#c7663a',
+};
+// Sol bajo: la luz entra rasante (unos 26° sobre el horizonte). En el cielo se dibuja más bajo
+// todavía, para que se vea sobre las montañas.
+const SUN_LIGHT = new THREE.Vector3(-40, 26, 28);
+const SUN_SKY = new THREE.Vector3(-40, 8, 28).normalize();
+
 export function islandOutline(n = 12): [number, number][] {
   const pts: [number, number][] = [];
   const inner = ISLAND_HALF - ISLAND_CORNER_R;
@@ -44,13 +60,14 @@ export class Stage {
     this.camera = new THREE.PerspectiveCamera(55, 1, 0.3, 700);
     this.camera.position.set(0, 45, 70);
     this.camera.lookAt(0, 0, 0);
-    this.scene.fog = new THREE.Fog('#ffd9b0', 110, 420);
+    this.scene.fog = new THREE.Fog(SUNSET.melocoton, 110, 420);
 
-    // Luz: cielo azul arriba, resplandor de lava abajo, sol cálido de atardecer con sombras. Algo
-    // menos de luz de ambiente y un sol más cálido y bajo dan más contraste entre caras (WRK-TASK-050).
-    this.scene.add(new THREE.HemisphereLight('#cfe4ff', '#ff9150', 1.2));
-    this.sun = new THREE.DirectionalLight('#ffe2b4', 2.65);
-    this.sun.position.set(-40, 52, 28);
+    // Luz de atardecer (R-10 D2): sol cálido y rasante con sombras; la luz de ambiente, rosada por
+    // arriba y ciruela por abajo, hace que las sombras tiren a ciruela y nunca a negro. El contraste
+    // entre caras sigue siendo el de WRK-TASK-050.
+    this.scene.add(new THREE.HemisphereLight('#f4c9c0', '#5e1a46', 1.25));
+    this.sun = new THREE.DirectionalLight('#ffd6a0', 2.9);
+    this.sun.position.copy(SUN_LIGHT);
     this.sun.castShadow = quality !== 'low';
     const sc = this.sun.shadow.camera;
     sc.left = sc.bottom = -38;
@@ -62,6 +79,7 @@ export class Stage {
     this.scene.add(this.sun);
 
     this.scene.add(this.makeSky());
+    this.scene.add(this.makeMountains());
     this.scene.add(this.makeIsland());
     const { mesh, mat } = this.makeLava();
     this.lava = mesh;
@@ -111,20 +129,60 @@ export class Stage {
       side: THREE.BackSide,
       depthWrite: false,
       fog: false,
-      uniforms: { top: { value: new THREE.Color('#3aa7ff') }, mid: { value: new THREE.Color('#9bd8ff') }, bottom: { value: new THREE.Color('#ffd3a1') }, sunDir: { value: new THREE.Vector3(-35, 60, 25).normalize() } },
+      // Hueso arriba, crema en medio y melocotón en el horizonte; sol grande, bajo y pálido.
+      uniforms: { top: { value: new THREE.Color(SUNSET.hueso) }, mid: { value: new THREE.Color(SUNSET.crema) }, bottom: { value: new THREE.Color(SUNSET.melocoton) }, sun: { value: new THREE.Color(SUNSET.hueso) }, sunDir: { value: SUN_SKY.clone() } },
       vertexShader: /* glsl */ `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
       fragmentShader: /* glsl */ `
-        uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; uniform vec3 sunDir; varying vec3 vDir;
+        uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; uniform vec3 sun; uniform vec3 sunDir; varying vec3 vDir;
         void main(){
           float h = vDir.y;
-          vec3 c = h > 0.15 ? mix(mid, top, smoothstep(0.15, 0.7, h)) : mix(bottom, mid, smoothstep(-0.1, 0.15, h));
+          vec3 c = h > 0.16 ? mix(mid, top, smoothstep(0.16, 0.6, h)) : mix(bottom, mid, smoothstep(0.0, 0.16, h));
           float s = max(dot(vDir, sunDir), 0.0);
-          c += vec3(1.0, 0.9, 0.6) * (smoothstep(0.995, 0.998, s) * 0.8 + pow(s, 24.0) * 0.25);
+          c = mix(c, sun, smoothstep(0.9952, 0.9962, s) * 0.85 + pow(s, 40.0) * 0.18);
           gl_FragColor = vec4(c, 1.0);
+          #include <colorspace_fragment>
         }`,
     });
     const m = new THREE.Mesh(geo, mat);
     m.renderOrder = -10;
+    return m;
+  }
+
+  // Tres capas de montañas alrededor del mar de lava (R-10 D2): naranja a lo lejos, grana en medio
+  // y vino cerca. Siluetas planas sin luz ni niebla, como en las maquetas: una sola malla con
+  // colores por vértice, una llamada de dibujo y unos 350 triángulos.
+  private makeMountains() {
+    const r = rng(44);
+    const layers: [radius: number, hMin: number, hMax: number, segs: number, color: string][] = [
+      [340, 22, 44, 15, SUNSET.naranja],
+      [280, 12, 26, 19, SUNSET.grana],
+      [225, 5, 13, 24, SUNSET.vino],
+    ];
+    const verts: number[] = [];
+    const colors: number[] = [];
+    for (const [rad, hMin, hMax, segs, color] of layers) {
+      const c = new THREE.Color(color);
+      const a0 = r.range(0, Math.PI * 2);
+      // Picos y valles alternos: montañas anchas e irregulares.
+      const pts = Array.from({ length: segs * 2 }, (_, i) => {
+        const a = a0 + ((i + r.range(-0.25, 0.25)) / (segs * 2)) * Math.PI * 2;
+        const h = i % 2 ? r.range(hMin * 0.35, hMin * 0.7) : r.range(hMin, hMax);
+        const d = rad + r.range(-12, 12);
+        return [Math.cos(a) * d, h, Math.sin(a) * d];
+      });
+      const base = -24;
+      for (let i = 0; i < pts.length; i++) {
+        const [x0, y0, z0] = pts[i];
+        const [x1, y1, z1] = pts[(i + 1) % pts.length];
+        verts.push(x0, base, z0, x0, y0, z0, x1, y1, z1, x0, base, z0, x1, y1, z1, x1, base, z1);
+        for (let k = 0; k < 6; k++) colors.push(c.r, c.g, c.b);
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, fog: false }));
+    m.renderOrder = -5;
     return m;
   }
 
@@ -138,7 +196,7 @@ export class Stage {
     const uv = topGeo.attributes.uv as THREE.BufferAttribute;
     const pos = topGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) / 60 + 0.5, pos.getZ(i) / 60 + 0.5);
-    const top = new THREE.Mesh(topGeo, toon('#ffffff', { map: tex.grass() }));
+    const top = new THREE.Mesh(topGeo, toon('#ffffff', { map: tex.earth() }));
     top.receiveShadow = true;
     g.add(top);
 
@@ -161,7 +219,8 @@ export class Stage {
     );
     const verts: number[] = [];
     const colors: number[] = [];
-    const bands = ['#7ab648', '#9b6b43', '#a87a52', '#8a5c38', '#7d5232', '#6b4630', '#5a3a28'].map((c) => new THREE.Color(c));
+    // Borde de tierra terracota y laterales vino que se oscurecen hacia ciruela (R-10 D2).
+    const bands = ['#c7663a', '#9a2f33', '#8a1d33', '#7a0c31', '#6a0a31', '#5a0830', '#4a0730'].map((c) => new THREE.Color(c));
     for (let l = 0; l < rings.length - 1; l++) {
       const a = rings[l];
       const b = rings[l + 1];
@@ -177,7 +236,8 @@ export class Stage {
     for (let i = 0; i < last.length; i++) {
       const i2 = (i + 1) % last.length;
       for (const v of [last[i], new THREE.Vector3(0, -24, 0), last[i2]]) verts.push(v.x, v.y, v.z);
-      for (let k = 0; k < 3; k++) colors.push(0.3, 0.2, 0.15);
+      const tip = new THREE.Color(SUNSET.ciruela);
+      for (let k = 0; k < 3; k++) colors.push(tip.r, tip.g, tip.b);
     }
     const cg = new THREE.BufferGeometry();
     cg.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
@@ -220,7 +280,8 @@ export class Stage {
           float warp = fbm(p * 1.6 - uTime * 0.03);
           float n = fbm(p + vec2(uTime * 0.04, uTime * 0.025) + warp * 0.9);
           // Placas de costra oscura con grietas incandescentes entre ellas; lo líquido late.
-          float crust = smoothstep(0.5, 0.56, n);
+          // Atardecer (R-10 D2): mar grana con brillos naranja; la costra es vino y ocupa menos.
+          float crust = smoothstep(0.62, 0.68, n);
           // Junto al acantilado la lava está más caliente: sin costra y casi blanca.
           float rim = 0.0;
           if (uIsle > 0.0) {
@@ -230,14 +291,19 @@ export class Stage {
           }
           float crack = 1.0 - smoothstep(0.0, 0.03, abs(n - 0.52));
           float pulse = 0.86 + 0.14 * sin(uTime * 1.7 + warp * 9.0);
-          vec3 hot = mix(vec3(1.0, 0.9, 0.3), vec3(1.0, 0.36, 0.05), smoothstep(0.22, 0.5, n)) * pulse;
-          vec3 rock = mix(vec3(0.2, 0.05, 0.05), vec3(0.36, 0.1, 0.06), fbm(p * 5.0));
+          // Colores en sRGB: grana, naranja, vino, ciruela y crema de la paleta.
+          vec3 grana = vec3(0.804, 0.102, 0.188), naranja = vec3(0.996, 0.537, 0.196);
+          vec3 vino = vec3(0.478, 0.047, 0.192), ciruela = vec3(0.29, 0.027, 0.188), crema = vec3(0.996, 0.906, 0.71);
+          vec3 hot = mix(naranja, grana, smoothstep(0.3, 0.4, n)) * pulse;
+          vec3 rock = mix(vino, grana, fbm(p * 5.0) * 0.6);
           vec3 c = mix(hot, rock, crust);
-          c = mix(c, vec3(1.0, 0.72, 0.22), crack * crust);
-          c = mix(c, vec3(1.0, 0.96, 0.62), rim * 0.9);
+          c = mix(c, naranja, crack * crust);
+          c = mix(c, mix(naranja, crema, 0.55), rim * 0.9);
           c = floor(c * 7.0 + 0.5) / 7.0; // toon
-          gl_FragColor = vec4(c, 1.0);
+          // A lineal para mezclar con la niebla, y vuelta a la salida.
+          gl_FragColor = vec4(pow(c, vec3(2.2)), 1.0);
           #include <fog_fragment>
+          #include <colorspace_fragment>
         }`,
     });
     const geo = new THREE.PlaneGeometry(900, 900, 90, 90);
@@ -309,7 +375,7 @@ export class Stage {
         void main(){
           vec2 q = (vUv - 0.5) * vec2(uAspect, 1.0);
           float v = smoothstep(0.55, 1.15, length(q) / sqrt(uAspect * uAspect + 1.0) * 2.0);
-          gl_FragColor = vec4(0.16, 0.06, 0.1, v * 0.45);
+          gl_FragColor = vec4(0.29, 0.027, 0.19, v * 0.4);
         }`,
     });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
@@ -323,7 +389,8 @@ export class Stage {
 
   private makeClouds() {
     const r = rng(12);
-    const mat = toon('#ffffff');
+    // Nubes hueso; la cara en sombra se aclara para que no se vea parda contra el cielo crema.
+    const mat = toon(SUNSET.hueso, { emissive: '#7a5a52' });
     const geo = new THREE.IcosahedronGeometry(1, 1);
     const tmp = new THREE.Group();
     for (let i = 0; i < 16; i++) {
@@ -348,10 +415,11 @@ export class Stage {
   private makeDecor() {
     const g = new THREE.Group();
     const r = rng(5);
-    const trunk = toon('#8b5a2b');
-    const leaves = [toon('#3fae4a'), toon('#57c35a'), toon('#2e8b3d')];
-    const rockMat = toon('#9aa1a8');
-    const flowerCols = ['#ff5d8f', '#ffd23f', '#ffffff', '#b388ff'].map((c) => toon(c));
+    // Pinos ciruela sobre la tierra terracota (R-10 D2).
+    const trunk = toon('#5a2a26');
+    const leaves = [toon(SUNSET.ciruela), toon('#5c1442'), toon('#3d0629')];
+    const rockMat = toon('#a8949c');
+    const flowerCols = [SUNSET.naranja, SUNSET.crema, SUNSET.hueso, SUNSET.grana].map((c) => toon(c));
     let placed = 0;
     // Solo en zonas que no tapan las líneas de tiro: franjas del borde entre castillos
     // y bosquecillos cerca del centro, lejos de las diagonales.
@@ -408,10 +476,10 @@ export class Stage {
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * Math.PI * 2 + 0.4;
       const d = r.range(85, 140);
-      const isle = new THREE.Mesh(new THREE.ConeGeometry(r.range(4, 8), r.range(6, 10), 7), toon('#8a5c38'));
+      const isle = new THREE.Mesh(new THREE.ConeGeometry(r.range(4, 8), r.range(6, 10), 7), toon(SUNSET.vino));
       isle.rotation.x = Math.PI;
       isle.position.set(Math.cos(a) * d, r.range(-2, 12), Math.sin(a) * d);
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry((isle.geometry as THREE.ConeGeometry).parameters.radius, (isle.geometry as THREE.ConeGeometry).parameters.radius, 0.8, 7), toon('#6fbd45'));
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry((isle.geometry as THREE.ConeGeometry).parameters.radius, (isle.geometry as THREE.ConeGeometry).parameters.radius, 0.8, 7), toon(SUNSET.terracota));
       cap.position.y = -(isle.geometry as THREE.ConeGeometry).parameters.height / 2;
       isle.add(cap);
       isle.userData.bob = r.range(0, 6);

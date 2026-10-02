@@ -235,26 +235,42 @@ export interface PreviewWorld {
 
 export class TrajectoryPreview {
   mesh: THREE.InstancedMesh;
+  // Contorno noche de cada punto (R-10 D2): sobre el cielo crema del atardecer, el color del
+  // jugador solo no basta. Esferas algo mayores dibujadas por dentro, con las mismas matrices.
+  private outline: THREE.InstancedMesh;
+  private outlineMat: THREE.MeshBasicMaterial;
   private n = 64;
   private mat: THREE.MeshToonMaterial;
   private ring = new THREE.Group();
   private ringMat: THREE.MeshBasicMaterial;
 
   constructor(parent: THREE.Object3D, private world: () => PreviewWorld = () => ({ boxes: [], lavaY: -3.6 })) {
-    this.mat = toon('#ffffff', { emissive: '#777777', transparent: true });
+    this.mat = toon('#ffffff', { emissive: '#555555', transparent: true });
     this.mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.14, 8, 6), this.mat, this.n);
     this.mesh.count = 0;
     this.mesh.frustumCulled = false;
     parent.add(this.mesh);
-    // Anillo del punto de impacto: color del jugador sobre un borde blanco (R-01).
+    this.outlineMat = new THREE.MeshBasicMaterial({ color: '#200432', side: THREE.BackSide, transparent: true });
+    this.outline = new THREE.InstancedMesh(new THREE.SphereGeometry(0.2, 8, 6), this.outlineMat, this.n);
+    this.outline.count = 0;
+    this.outline.frustumCulled = false;
+    // Las dos son transparentes: el contorno se dibuja antes, si no tapa los puntos.
+    this.outline.renderOrder = 1;
+    this.mesh.renderOrder = 2;
+    parent.add(this.outline);
+    // Anillo del punto de impacto: color del jugador sobre un borde blanco (R-01), con contorno
+    // noche para que se lea sobre la tierra clara del atardecer (R-10 D2).
     // Se dibuja siempre por encima: aunque caiga detrás de un muro, se ve dónde.
     this.ringMat = new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false, transparent: true });
     const edge = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.17, 8, 40), new THREE.MeshBasicMaterial({ color: '#ffffff', depthTest: false, transparent: true }));
     const core = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.1, 8, 40), this.ringMat);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.24, 8, 40), new THREE.MeshBasicMaterial({ color: '#200432', depthTest: false, transparent: true }));
+    rim.renderOrder = 19;
     edge.renderOrder = 20;
     core.renderOrder = 21;
+    edge.position.z = 0.015;
     core.position.z = 0.03;
-    this.ring.add(edge, core);
+    this.ring.add(rim, edge, core);
     this.ring.visible = false;
     parent.add(this.ring);
   }
@@ -288,12 +304,14 @@ export class TrajectoryPreview {
       const s = (guide ? 0.75 : 1) * (1 - (i / count) * 0.45);
       m.makeScale(s, s, s).setPosition(p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t, p0[2] + (p1[2] - p0[2]) * t);
       this.mesh.setMatrixAt(i, m);
+      this.outline.setMatrixAt(i, m);
     }
-    this.mesh.count = count;
-    this.mesh.instanceMatrix.needsUpdate = true;
+    this.mesh.count = this.outline.count = count;
+    this.mesh.instanceMatrix.needsUpdate = this.outline.instanceMatrix.needsUpdate = true;
     this.mat.color.set(color);
     this.mat.opacity = guide ? 0.55 : 1;
-    this.mesh.visible = true;
+    this.outlineMat.opacity = guide ? 0.45 : 1;
+    this.mesh.visible = this.outline.visible = true;
     this.ring.visible = !!hit;
     if (hit) {
       this.ringMat.color.set(color);
@@ -312,7 +330,7 @@ export class TrajectoryPreview {
   }
 
   hide() {
-    this.mesh.visible = false;
+    this.mesh.visible = this.outline.visible = false;
     this.ring.visible = false;
   }
 }

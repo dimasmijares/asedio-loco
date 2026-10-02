@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.3.1
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-10-02
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -67,7 +67,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
    - Si no, manda `{aim, locked: true}`. El disparo es definitivo: el anfitrión ignora cualquier entrada posterior de ese jugador en la ronda.
 6. **Vista previa** (`TrajectoryPreview`, hasta 64 puntos repartidos por la longitud del arco; ADR-016):
    - Sin cargar (`guide`): tramo tenue (opacidad 0,55) con fuerza fija 0,55 hasta el 30 % del vuelo.
-   - Cargando (`charge`): la trayectoria entera con la fuerza actual hasta el primer bloque o suelo que toca (`firstHit`), con un anillo del color del jugador y borde blanco en ese punto, visible aunque quede detrás de un muro. Usa el arrastre y el viento de la munición elegida. Prueba contra la física real: `tests/unit/aim-hit.test.ts` (12 disparos, error de 0,09 a 0,43 m).
+   - Cargando (`charge`): la trayectoria entera con la fuerza actual hasta el primer bloque o suelo que toca (`firstHit`), con un anillo del color del jugador, borde blanco y contorno noche en ese punto, visible aunque quede detrás de un muro. Los puntos de la parábola, del color del jugador, llevan contorno noche para leerse sobre el cielo crema del atardecer (WRK-TASK-076). Usa el arrastre y el viento de la munición elegida. Prueba contra la física real: `tests/unit/aim-hit.test.ts` (12 disparos, error de 0,09 a 0,43 m).
 7. **Red:** la puntería se manda como mucho a ~10 Hz. Los demás ven la catapulta girar y tensarse (D-032).
 8. **Tiempo agotado sin soltar:** el anfitrión dispara con la última puntería recibida.
 
