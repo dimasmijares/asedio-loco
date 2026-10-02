@@ -1934,6 +1934,14 @@ html.big-text .ammo-name {
 .ammo.sel .ammo-icon {
   font-size: 42px;
 }
+/* Ilustración de la munición (R-10 E4): 1,2 em, así sigue los tamaños de cada formato. */
+.ammo-art {
+  display: flex;
+}
+.ammo-art svg {
+  width: 1.2em;
+  height: 1.2em;
+}
 .ammo-rar {
   width: 100%;
   padding: 3px 0 4px;

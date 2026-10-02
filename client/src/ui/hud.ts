@@ -5,6 +5,7 @@ import { PLAYER_STYLES, shortName } from '../../../shared/players';
 import { isMobileDevice } from '../device';
 import type { AimInput } from '../game/aim';
 import { sfx } from '../game/audio';
+import { ammoArt } from './ammoArt';
 import { h } from './dom';
 import { openSettings, settings } from './settings';
 
@@ -132,7 +133,7 @@ export class Hud {
       this.ammoDesc.style.setProperty('--rar', RARITY_COLOR[a.rarity]);
       this.ammoDesc.style.setProperty('--rar-ink', RARITY_INK[a.rarity]);
       this.ammoDesc.replaceChildren(
-        h('span', { class: 'desc-icon' }, a.icon),
+        h('span', { class: 'desc-icon' }, ammoArt(sel)),
         h('span', { class: 'desc-body' }, h('span', { class: 'desc-head' }, h('b', { class: 'desc-name' }, a.name), h('span', { class: 'desc-rar' }, RARITY_LABEL[a.rarity])), h('span', { class: 'desc-text' }, a.desc)),
       );
     } else this.ammoDesc.replaceChildren();
@@ -142,7 +143,7 @@ export class Hud {
         const b = h(
           'button',
           { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'aria-label': a.name, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]};--rar-ink:${RARITY_INK[a.rarity]}` },
-          h('span', { class: 'ammo-icon' }, a.icon),
+          h('span', { class: 'ammo-icon' }, ammoArt(id)),
           h('span', { class: 'ammo-rar' }, RARITY_LABEL[a.rarity]),
           keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,
         );

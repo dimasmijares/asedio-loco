@@ -80,6 +80,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Letra: Lilita One en títulos, botones y cifras; Nunito 600-900 en el texto. Las dos en woff2 desde `client/src/ui/fonts/`.
    - Menús: tarjetas crema con contorno noche y sombra dura; los botones grandes son tablones de madera (veta, clavos, sombra dura, inclinación alterna). El HUD de partida va sobre paneles noche al 86 % y no se inclina.
    - Rarezas: común #A8949C, rara #4FA8E8 y épica #9E2E8A (texto noche, noche y crema); defensiva usa `listo` (#9ED36A) con texto noche.
+   - Munición ilustrada (WRK-TASK-075): cada munición tiene un SVG propio de 48×48 con contorno noche (`client/src/ui/ammoArt.ts`), sin emoji; mide 1,2 em del contenedor.
 
 ### Outputs
 
@@ -139,6 +140,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados, arcos de la cuenta atrás (`showArcs`) y pantalla final |
 | Implemented in | `client/src/game/render/arcs.ts` | `AttackArcs`: quién ataca a quién |
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying`; tokens `--al-*` y tablones (R-10) |
+| Implemented in | `client/src/ui/ammoArt.ts` | Ilustraciones SVG de la munición |
 | Implemented in | `client/src/ui/fonts/` | Lilita One y Nunito en woff2, con sus licencias OFL |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
