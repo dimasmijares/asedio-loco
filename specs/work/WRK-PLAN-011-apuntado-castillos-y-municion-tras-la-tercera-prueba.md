@@ -51,6 +51,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 21 | WRK-TASK-075 · Munición ilustrada (R-10 fase 1: E4) | completed | 074 | 2026-10-02 |
 | 22 | WRK-TASK-076 · Escena al atardecer (R-10 fase 1: D2) | completed | 074 | 2026-10-02 |
 | 23 | WRK-TASK-077 · Bandeja del pulgar en móvil vertical (R-10 fase 2: U1, U3, U8) | completed | 076 | 2026-10-02 |
+| 24 | WRK-TASK-078 · Descripción de la munición al mantener la carta (R-10 fase 2: U2) | completed | 077 | 2026-10-02 |
 
 ## Risk Assessment
 

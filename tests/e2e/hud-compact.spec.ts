@@ -4,8 +4,8 @@ import { AMMO } from '../../shared/ammo';
 // HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y tres en vertical ningún
 // elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia. En vertical,
 // el botón de disparo, el pad y las cartas van dentro de la bandeja del pulgar (R-10 U1).
-const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
-const PORTRAIT = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#target-prev', '#target-next', '#tray'];
+const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
+const PORTRAIT = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#target-prev', '#target-next', '#tray'];
 const IN_TRAY = ['#confirm', '#aim-pad', '#hud-ammo'];
 
 type Box = { x: number; y: number; w: number; h: number };
@@ -44,9 +44,23 @@ for (const [w, h] of [
       await page.goto('/?bots=3&seed=5#solo');
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       await page.waitForTimeout(500);
-      // La descripción más larga de la munición, para comprobar el peor caso.
+      // Tarjeta de descripción (R-10 U2) al mantener el dedo en una carta, con la descripción más
+      // larga: dentro de la pantalla y en dos líneas como mucho.
       const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
-      await page.evaluate((t) => (document.querySelector('#hud-ammo-desc')!.textContent = t), longest);
+      const card = (await page.locator('#hud-ammo .ammo').first().boundingBox())!;
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: card.x + card.width / 2, y: card.y + card.height / 2, id: 0 }] });
+      await expect(page.locator('#ammo-tip')).toBeVisible();
+      const tip = await page.evaluate((t) => {
+        document.querySelector('#ammo-tip .tip-text')!.textContent = t;
+        const r = document.querySelector('#ammo-tip')!.getBoundingClientRect();
+        return { x: r.x, y: r.y, r: r.right, b: r.bottom, text: document.querySelector('#ammo-tip .tip-text')!.getBoundingClientRect().height };
+      }, longest);
+      await page.screenshot({ path: info.outputPath(`tarjeta-${w}x${h}.png`) });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      expect(tip.x >= 0 && tip.y >= 0 && tip.r <= w + 0.5 && tip.b <= h + 0.5, 'tarjeta dentro de la pantalla').toBe(true);
+      expect(tip.text, 'descripción en dos líneas como mucho').toBeLessThanOrEqual(2 * 17 + 1);
+      expect(tip.b, 'por encima de las cartas').toBeLessThan(card.y);
       // En una sola evaluación: el marcador se rehace a menudo y un localizador puede quedarse con filas ya sueltas.
       const shorts = await page.evaluate(() =>
         [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
@@ -55,7 +69,7 @@ for (const [w, h] of [
       const portrait = h > w;
       const r = await rects(page, portrait ? PORTRAIT : PARTS);
       // Sin la línea de potencia ni las flechas del jugador (WRK-TASK-061): quedan 6 o 7.
-      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(portrait ? 5 : 6);
+      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(portrait ? 4 : 6);
       for (const [k, a] of Object.entries(r)) {
         expect(a.x >= 0 && a.y >= 0 && a.x + a.w <= w + 0.5 && a.y + a.h <= h + 0.5, `${k} dentro de la pantalla`).toBe(true);
       }

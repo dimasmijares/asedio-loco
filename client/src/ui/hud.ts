@@ -38,8 +38,18 @@ export class Hud {
   private wind = h('div', { class: 'hud-wind', id: 'hud-wind' });
   private ammo = h('div', { class: 'hud-ammo', id: 'hud-ammo' });
   private aimInfo = h('div', { class: 'hud-aim', id: 'hud-aim' });
-  // Qué hace la munición elegida: en móvil no hay «title» que valga (WRK-TASK-032).
-  private ammoDesc = h('div', { class: 'hud-ammo-desc', id: 'hud-ammo-desc' });
+  // Tarjeta de descripción de una carta (R-10 U2, componente CartaMunicion): sin etiqueta fija; sale
+  // al mantener el dedo sobre la carta (≈ 350 ms) o al pasar el ratón, con una flecha hacia ella.
+  private tip = h('div', { class: 'ammo-tip', id: 'ammo-tip', role: 'tooltip', hidden: true });
+  private tipFor = -1;
+  private tipTimer = 0;
+  private ammoList: AmmoId[] = [];
+  private onAmmoSelect: (i: number) => void = () => {};
+  private endHold = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    clearTimeout(this.tipTimer);
+    this.hideTip();
+  };
   private help = h('div', { class: 'hud-help', id: 'hud-help' });
   private helpList = h('div', { class: 'help-list' });
   private helpOpen = true;
@@ -102,7 +112,7 @@ export class Hud {
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
     this.row.append(this.targetBtns[0], this.ammo, this.targetBtns[1]);
-    this.bottom.append(this.aimInfo, this.ammoDesc, this.row, this.confirmBtn);
+    this.bottom.append(this.aimInfo, this.row, this.confirmBtn);
     const bottom = this.bottom;
     const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
     const toggle = () => {
@@ -134,7 +144,11 @@ export class Hud {
     gear.onclick = () => openSettings();
     gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.goal, this.stats);
-    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.tray, this.banner, this.countdown);
+    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.tray, this.tip, this.banner, this.countdown);
+    // Al levantar el dedo, en cualquier sitio, la tarjeta desaparece (la carta ya quedó elegida).
+    window.addEventListener('pointerup', this.endHold);
+    window.addEventListener('pointercancel', this.endHold);
+    this.ammo.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && this.hideTip());
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
     this.trayObs.observe(this.tray);
@@ -179,46 +193,87 @@ export class Hud {
     this.timer.style.display = sec === null ? 'none' : '';
   }
 
-  // Tarjetas de munición. Se llama en cada fotograma, pero solo se rehacen si cambia algo: si
-  // se rehicieran siempre, un clic que empieza en una tarjeta y acaba en su sustituta se perdía.
+  // Tarjetas de munición. Se llama en cada fotograma: las cartas solo se rehacen si cambia la mano;
+  // al cambiar la elegida, solo se mueve la marca. Rehacerlas al elegir perdía el clic (empezaba en
+  // una carta y acababa en su sustituta) y el dedo que la mantenía.
   setAmmo(list: AmmoId[], selected: number, onSelect: (i: number) => void, keys = true) {
-    const key = `${list.join(',')}|${selected}|${keys}`;
-    if (key === this.ammoKey) return;
-    this.ammoKey = key;
-    this.ammo.classList.toggle('many', list.length > 3);
-    const sel = list[selected];
-    // Tarjeta de la munición elegida (R-03): icono, nombre, rareza y qué hace.
-    if (sel) {
-      const a = AMMO[sel];
-      this.ammoDesc.style.setProperty('--rar', RARITY_COLOR[a.rarity]);
-      this.ammoDesc.style.setProperty('--rar-ink', RARITY_INK[a.rarity]);
-      this.ammoDesc.replaceChildren(
-        h('span', { class: 'desc-icon' }, ammoArt(sel)),
-        h('span', { class: 'desc-body' }, h('span', { class: 'desc-head' }, h('b', { class: 'desc-name' }, a.name), h('span', { class: 'desc-rar' }, RARITY_LABEL[a.rarity])), h('span', { class: 'desc-text' }, a.desc)),
-      );
-    } else this.ammoDesc.replaceChildren();
-    this.ammo.replaceChildren(
-      ...list.map((id, i) => {
-        const a = AMMO[id];
-        const b = h(
-          'button',
-          { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'aria-label': a.name, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]};--rar-ink:${RARITY_INK[a.rarity]}` },
-          h('span', { class: 'ammo-icon' }, ammoArt(id)),
-          h('span', { class: 'ammo-rar' }, RARITY_LABEL[a.rarity]),
-          keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,
-        );
-        // Se elige al pulsar, sin esperar a soltar encima; el clic queda para el teclado (Intro).
-        b.onpointerdown = (e) => {
-          e.stopPropagation();
-          if (e.button === 0) onSelect(i);
-        };
-        b.onclick = (e) => {
-          e.stopPropagation();
-          if (e.detail === 0) onSelect(i);
-        };
-        return b;
-      }),
+    this.onAmmoSelect = onSelect;
+    const key = `${list.join(',')}|${keys}`;
+    if (key !== this.ammoKey) {
+      this.ammoKey = key;
+      this.ammoList = list;
+      this.ammo.classList.toggle('many', list.length > 3);
+      this.hideTip();
+      this.ammo.replaceChildren(...list.map((id, i) => this.ammoCard(id, i, keys && list.length <= 12)));
+    }
+    const cards = this.ammo.children;
+    for (let i = 0; i < cards.length; i++) if (cards[i].classList.contains('sel') !== (i === selected)) cards[i].classList.toggle('sel', i === selected);
+  }
+
+  private ammoCard(id: AmmoId, i: number, key: boolean) {
+    const a = AMMO[id];
+    const b = h(
+      'button',
+      { class: 'ammo', 'aria-label': `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]};--rar-ink:${RARITY_INK[a.rarity]}` },
+      h('span', { class: 'ammo-icon' }, ammoArt(id)),
+      h('span', { class: 'ammo-rar' }, RARITY_LABEL[a.rarity]),
+      key ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,
     );
+    // Se elige al pulsar, sin esperar a soltar encima; el clic queda para el teclado (Intro). Con el
+    // dedo, mantenerla enseña su descripción; con el ratón, basta pasar por encima.
+    b.onpointerdown = (e) => {
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      this.onAmmoSelect(i);
+      if (e.pointerType === 'mouse') return;
+      clearTimeout(this.tipTimer);
+      this.tipTimer = window.setTimeout(() => this.showTip(i), 350);
+    };
+    b.onpointerenter = (e) => e.pointerType === 'mouse' && this.showTip(i);
+    b.onclick = (e) => {
+      e.stopPropagation();
+      if (e.detail === 0) this.onAmmoSelect(i);
+    };
+    // Sin el menú del sistema al mantener el dedo.
+    b.oncontextmenu = (e) => e.preventDefault();
+    return b;
+  }
+
+  // Tarjeta de descripción encima de la carta: nombre, rareza y qué hace. En la bandeja del móvil,
+  // a todo el ancho y pegada a la bandeja; en PC, centrada sobre la carta. Nunca tapa el centro.
+  private showTip(i: number) {
+    const id = this.ammoList[i];
+    const card = this.ammo.children[i] as HTMLElement | undefined;
+    if (!id || !card) return;
+    const a = AMMO[id];
+    this.tipFor = i;
+    const arrow = h('span', { class: 'tip-arrow' });
+    this.tip.replaceChildren(
+      h('span', { class: 'tip-head' }, h('b', { class: 'tip-name' }, a.name), h('span', { class: 'tip-rar', style: `--rar:${RARITY_COLOR[a.rarity]};--rar-ink:${RARITY_INK[a.rarity]}` }, RARITY_LABEL[a.rarity])),
+      h('span', { class: 'tip-text' }, a.desc),
+      arrow,
+    );
+    this.tip.hidden = false;
+    const c = card.getBoundingClientRect();
+    const cx = c.left + c.width / 2;
+    if (this.trayMode) {
+      this.tip.style.left = '';
+      this.tip.style.bottom = `${innerHeight - this.tray.getBoundingClientRect().top + 10}px`;
+    } else {
+      const w = this.tip.offsetWidth;
+      this.tip.style.left = `${clamp(cx - w / 2, 8, innerWidth - w - 8)}px`;
+      // Por encima de la fila (la carta más alta), del anillo y de lo que sube la elegida (13 px) y
+      // con sitio para la flecha.
+      this.tip.style.bottom = `${innerHeight - this.ammo.getBoundingClientRect().top + 27}px`;
+    }
+    const t = this.tip.getBoundingClientRect();
+    arrow.style.left = `${clamp(cx - t.left - 3 - 9, 12, t.width - 36)}px`;
+  }
+
+  private hideTip() {
+    if (this.tipFor < 0 && this.tip.hidden) return;
+    this.tipFor = -1;
+    this.tip.hidden = true;
   }
 
   setAimInfo(aim: Aim | null, ammo?: AmmoId) {
@@ -471,6 +526,9 @@ export class Hud {
   dispose() {
     window.removeEventListener('keydown', this.keyHandler);
     window.removeEventListener('resize', this.onLayout);
+    window.removeEventListener('pointerup', this.endHold);
+    window.removeEventListener('pointercancel', this.endHold);
+    clearTimeout(this.tipTimer);
     this.trayMq.removeEventListener('change', this.onLayout);
     this.trayObs.disconnect();
     this.root.remove();

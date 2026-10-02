@@ -132,3 +132,26 @@ test('control: cargar y disparar manteniendo el clic izquierdo', async ({ page }
   expect((await me()).power).toBeGreaterThanOrEqual(mid.inputPower);
   expect(errors).toEqual([]);
 });
+
+// Descripción de la munición (R-10 U2): sin tarjeta fija; al pasar el ratón por una carta sale su
+// tarjeta encima, con nombre, rareza y qué hace, y se va al salir.
+test('control: la descripción de la munición sale al pasar el ratón', async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/?bots=1&seed=5#solo');
+  await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
+  await expect(page.locator('#hud-ammo-desc')).toHaveCount(0);
+  const tip = page.locator('#ammo-tip');
+  await expect(tip).toBeHidden();
+  const card = page.locator('#hud-ammo .ammo').nth(2);
+  expect(await card.getAttribute('title'), 'sin el «title» del navegador').toBeNull();
+  const label = (await card.getAttribute('aria-label'))!;
+  await card.hover();
+  await expect(tip).toBeVisible();
+  await expect(tip.locator('.tip-name')).toHaveText(label.split(' (')[0]);
+  const t = (await tip.boundingBox())!;
+  const c = (await card.boundingBox())!;
+  expect(t.y + t.height, 'encima de la carta').toBeLessThan(c.y);
+  await page.mouse.move(640, 150);
+  await expect(tip).toBeHidden();
+});

@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.13.0
+version: 1.14.0
 created: 2026-09-26
 updated: 2026-10-02
 owner: dimas
@@ -60,7 +60,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
    - A la izquierda, el marcador: estandarte, nombre, 🤖, «(tú)», % de castillo en pie, ✔ si está listo, 📡 si está desconectado (en red) y 💀 si ha caído. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
-   - Abajo, potencia y elevación, una línea con lo que hace la munición elegida (`#hud-ammo-desc`, WRK-TASK-032: en móvil el `title` de la tarjeta no se ve; se oculta en horizontal con menos de 500 px de alto), 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambian la mano o la selección, y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo).
+   - Abajo, 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambia la mano (al elegir solo se mueve la marca) y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo). Sin tarjeta fija con la descripción: sale al pedirla (punto 9, U2).
    - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps.
    - **Objetivo secundario** (WRK-TASK-043, ADR-015): el rótulo de la ronda lo anuncia («🎯 Objetivo: …») y, a quien tiene premio, se lo dice («🎁 …»). Durante el apuntado, una chapa con borde amarillo bajo el viento («🎯 Jaula de cristal», con el texto completo en el `title`; en vertical, más estrecha y en dos líneas) y una diana blanca y roja sobre cada castillo rival, que mira a la cámara y se ve a través de los muros (`WorldView.setGoalMarks`). En los resultados, «🎯 … cumple el objetivo», y en la pantalla final, la estadística «Objetivos cumplidos». «Cómo se juega» lo explica.
    - **Escudo real** (WRK-TASK-041, ADR-014): en las rondas 1 y 2 cada rey vivo lleva un halo dorado que gira sobre la cabeza y una columna de luz blanca dorada translúcida (8 m) que late (`WorldView.setKingGuard`). La columna no se dibuja si el rey está a menos de 16 m de la cámara, para que la de tu propio rey no tape la vista al apuntar (WRK-TASK-050). El rótulo de la ronda 1 lo anuncia; el de la 2 avisa de que es la última con escudo, y el de la 3, de que se acaba (el subtítulo admite varias líneas y dura 2,6 s). Cuando el escudo salva a un rey, chispas doradas y el rótulo «ESCUDO REAL». Al volver al pedestal, polvo y chispas. «Cómo se juega» lo explica.
@@ -85,6 +85,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Munición ilustrada (WRK-TASK-075): cada munición tiene un SVG propio de 48×48 con contorno noche (`client/src/ui/ammoArt.ts`), sin emoji; mide 1,2 em del contenedor.
 9. **Partida en móvil vertical** (R-10 fase 2, U1-U8; sección «Partida en móvil: zonas» del design system y maquetas de «Nueva versión» a 390×844). Rige con `(orientation: portrait) and (max-width: 600px)` (`TRAY_QUERY`); el HUD pone la clase `tray-mode` y cambia de disposición si se gira el móvil. Sin emoji: iconos SVG de trazo 2,5 px con extremos redondos en `currentColor` (`client/src/ui/icons.ts`).
    - **Bandeja del pulgar** (U1, U3 y U8, WRK-TASK-077): franja ciruela abajo, como mucho el 30 % del alto (252 px a 844), con `radius-lg` arriba y la zona segura del sistema. Botón de disparo a la izquierda (grana, 100 px) y pad de puntería a la derecha (222×112), espejados en modo zurdo; debajo, las cartas en fila (108×62, tecla en la esquina; con más de tres, la fila se desliza). La variable `--k` la reduce en pantallas más bajas o estrechas. Solo se ve mientras se puede apuntar. El tutorial resalta el pad en el paso 1, sin la mano.
+   - **Descripción al mantener la carta** (U2, WRK-TASK-078, también en PC): un toque elige la carta; mantener el dedo 350 ms enseña encima la tarjeta `#ammo-tip` (crema, nombre en Lilita 18 con la chapa de rareza, descripción en Nunito 13 vino en dos líneas como mucho y una flecha hacia la carta). Al soltar desaparece y la carta queda elegida. En la bandeja va a todo el ancho, 10 px por encima; en PC sale al pasar el ratón, centrada sobre la carta y por encima de la fila. Las cartas no llevan `title`; nombre, rareza y descripción van en `aria-label`.
 
 ### Outputs
 

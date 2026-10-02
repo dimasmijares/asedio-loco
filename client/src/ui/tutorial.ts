@@ -26,21 +26,21 @@ const TRAY_FOCUS: Record<Step, string[]> = { ...FOCUS, aim: ['#aim-pad'] };
 
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
-  { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta). Q/E apuntan a otro castillo.' },
+  { id: 'adjust', title: '2 · Elige munición', text: '1, 2 o 3 (o un clic en la tarjeta); al pasar el ratón por encima ves qué hace. Q/E apuntan a otro castillo.' },
   { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo. Si se agota el tiempo, se dispara con la puntería actual.' },
 ];
 
 // En táctil se apunta arrastrando el dedo y se dispara con el botón redondo.
 const TOUCH_STEPS: typeof STEPS = [
   { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por la pantalla: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
-  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta.' },
+  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta. Mantén el dedo encima para ver qué hace.' },
   { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo rojo: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo.' },
 ];
 
 // Con la bandeja del pulgar (móvil vertical): el pad afina y la escena sirve para los giros grandes.
 const TRAY_STEPS: typeof STEPS = [
   { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por el pad: a los lados giras la catapulta, arriba y abajo cambias la elevación. Para girar mucho, arrastra por la escena.' },
-  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una carta.' },
+  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una carta. Mantén el dedo encima para ver qué hace.' },
   { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón rojo: el anillo se llena con la fuerza y la parábola se alarga. Al soltar, el disparo queda listo.' },
 ];
 

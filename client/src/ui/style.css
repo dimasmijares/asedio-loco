@@ -666,18 +666,7 @@ button.big.danger {
   display: none;
 }
 
-.hud-ammo-desc {
-  font-size: 14px;
-  background: var(--al-panel-hud);
-  border-radius: 10px;
-  padding: 2px 12px;
-  text-align: center;
-  max-width: 100%;
-}
 
-.hud-ammo-desc:empty {
-  display: none;
-}
 
 .hud-row {
   display: flex;
@@ -1538,12 +1527,6 @@ html.big-text .ammo-name {
     gap: 10px;
     padding: 2px 10px;
   }
-  .hud-ammo-desc {
-    font-size: 11px;
-    padding: 1px 8px;
-    border-radius: 7px;
-    max-width: min(520px, calc(100vw - 220px));
-  }
   .hud-row {
     gap: 6px;
   }
@@ -1790,10 +1773,6 @@ html.big-text .ammo-name {
     gap: 10px;
     padding: 2px 10px;
   }
-  .hud-ammo-desc {
-    font-size: 12px;
-    padding: 2px 10px;
-  }
   .hud-row {
     gap: 6px;
   }
@@ -1842,67 +1821,6 @@ html.big-text .ammo-name {
 
 /* ---------- Barra de munición sin textos (WRK-TASK-061, aprobada en R-03) ---------- */
 
-/* Tarjeta de la munición elegida: pergamino con icono, nombre, rareza y qué hace. */
-.hud-ammo-desc {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: min(440px, calc(100vw - 24px));
-  padding: 8px 12px;
-  background: var(--al-crema);
-  color: var(--al-noche);
-  text-shadow: none;
-  border: 3px solid var(--al-noche);
-  border-radius: 16px;
-  box-shadow: var(--al-sombra-dura);
-  text-align: left;
-}
-.desc-icon {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  border-radius: 12px;
-  border: 3px solid var(--al-noche);
-  background: var(--al-hueso);
-}
-.desc-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.desc-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.desc-name {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: 16px;
-  white-space: nowrap;
-}
-.desc-rar {
-  padding: 1px 7px;
-  border-radius: 6px;
-  border: 1.5px solid var(--al-noche);
-  background: var(--rar);
-  color: var(--rar-ink);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.desc-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--al-vino);
-  line-height: 1.25;
-}
 
 /* Cartas: grandes, con el color de su rareza muy visible; la elegida crece, sube y brilla. */
 .hud-ammo {
@@ -1976,20 +1894,6 @@ html.big-text .ammo-name {
 
 /* Ventana baja (móvil en horizontal): todo un poco más pequeño. */
 @media (max-height: 500px) {
-  .hud-ammo-desc {
-    padding: 4px 8px;
-    border-radius: 12px;
-    max-width: min(420px, calc(100vw - 220px));
-  }
-  .desc-icon {
-    width: 30px;
-    height: 30px;
-    font-size: 18px;
-    border-radius: 9px;
-  }
-  .desc-text {
-    font-size: 11px;
-  }
   .ammo {
     width: 64px;
     height: 64px;
@@ -2010,13 +1914,10 @@ html.big-text .ammo-name {
   }
 }
 
-/* Móvil en vertical: la tarjeta a la izquierda, sin tapar el botón de disparo. */
+/* Móvil en vertical: cartas algo más grandes (con la bandeja del pulgar mandan sus medidas). */
 @media (orientation: portrait) and (max-width: 600px) {
   .hud-bottom {
     align-items: flex-start;
-  }
-  .hud-ammo-desc {
-    max-width: calc(100vw - 132px);
   }
   .hud-row {
     align-self: center;
@@ -2034,7 +1935,7 @@ html.big-text .ammo-name {
   }
 }
 
-/* R-04 (WRK-TASK-061): la carta elegida sube y brilla; que no pise la tarjeta de encima. */
+/* R-04 (WRK-TASK-061): la carta elegida sube y brilla; que no pise lo que hay encima. */
 .hud-row {
   margin-top: 10px;
 }
@@ -2256,9 +2157,6 @@ html.zurdo .tray-row {
 .hud.tray-mode .hud-bottom {
   bottom: calc(var(--tray-h, 0px) + 10px);
 }
-.hud.tray-mode .hud-ammo-desc {
-  max-width: calc(100vw - 28px);
-}
 
 /* Modo zurdo en Ajustes: una línea de ayuda bajo la casilla. */
 label.check:has(.check-hint) {
@@ -2271,4 +2169,74 @@ label.check:has(.check-hint) {
   font-size: 13px;
   font-weight: 700;
   color: var(--al-vino);
+}
+
+/* ---------- Tarjeta de descripción de una carta (R-10 U2) ----------
+   Componente CartaMunicion: sin etiqueta fija. Sale al mantener el dedo sobre una carta (o al pasar
+   el ratón en PC), con una flecha hacia ella: crema, borde noche, nombre en Lilita 18 y descripción
+   en Nunito 13 vino, en dos líneas como mucho. En la bandeja va a todo el ancho, pegada a ella. */
+.ammo-tip {
+  position: absolute;
+  z-index: 2;
+  width: max-content;
+  max-width: min(340px, calc(100vw - 16px));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--al-crema);
+  color: var(--al-noche);
+  border: 3px solid var(--al-noche);
+  box-shadow: var(--al-sombra-dura);
+  text-shadow: none;
+  pointer-events: none;
+}
+.ammo-tip[hidden] {
+  display: none;
+}
+.hud.tray-mode .ammo-tip {
+  left: 14px;
+  right: 14px;
+  width: auto;
+  max-width: none;
+}
+.tip-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tip-name {
+  font: 400 18px var(--display);
+}
+.tip-rar {
+  padding: 1px 7px;
+  border-radius: 6px;
+  border: 1.5px solid var(--al-noche);
+  background: var(--rar);
+  color: var(--rar-ink);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tip-text {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 17px;
+  color: var(--al-vino);
+}
+.tip-arrow {
+  position: absolute;
+  bottom: -12px;
+  width: 18px;
+  height: 18px;
+  background: var(--al-crema);
+  border-right: 3px solid var(--al-noche);
+  border-bottom: 3px solid var(--al-noche);
+  transform: rotate(45deg);
+}
+/* Mantener el dedo sobre una carta no abre el menú del sistema. */
+.ammo {
+  -webkit-touch-callout: none;
 }

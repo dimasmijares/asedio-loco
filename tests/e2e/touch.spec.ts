@@ -51,9 +51,33 @@ test('táctil: apuntar arrastrando, tarjetas, pellizco, pad y botón de la bande
   const t0 = s1.target;
   for (let i = 0; i < 12 && (await state(page)).target === t0; i++) await drag(cdp, { x: 120, y: 420 }, { x: 250, y: 420 });
   expect((await state(page)).target, 'al girar hacia otro castillo cambia el objetivo').not.toBe(t0);
-  // Tocar una tarjeta elige munición.
+  // Tocar una tarjeta elige munición, sin tarjeta de descripción (R-10 U2).
   await page.locator('#hud-ammo .ammo').nth(2).tap();
   await expect.poll(async () => (await state(page)).selected).toBe(2);
+  await expect(page.locator('#ammo-tip')).toBeHidden();
+  await expect(page.locator('#hud-ammo-desc')).toHaveCount(0);
+  // Mantener el dedo (≈ 350 ms) la enseña encima de la bandeja, con el castillo objetivo a la vista;
+  // al soltar desaparece y la carta queda elegida.
+  const hold = await box(page, '#hud-ammo .ammo:nth-child(2)');
+  await touch(cdp, 'touchStart', [{ x: hold.x + hold.width / 2, y: hold.y + hold.height / 2 }]);
+  await page.waitForTimeout(150);
+  await expect(page.locator('#ammo-tip'), 'un toque corto no la enseña').toBeHidden();
+  await page.waitForTimeout(400);
+  await expect(page.locator('#ammo-tip')).toBeVisible();
+  const tip = await box(page, '#ammo-tip');
+  expect(tip.y + tip.height, 'encima de la bandeja').toBeLessThan((await box(page, '#tray')).y);
+  const castle = await page.evaluate(() => {
+    const g = (window as any).__asedio.game;
+    const me = (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot);
+    const k = g.view.kings.get(me.target);
+    const v = k.getWorldPosition(k.position.clone()).project(g.stage.camera);
+    return { x: ((v.x + 1) / 2) * innerWidth, y: ((1 - v.y) / 2) * innerHeight };
+  });
+  expect(castle.y, 'el castillo objetivo sigue a la vista').toBeLessThan(tip.y);
+  expect(castle.y).toBeGreaterThan(0);
+  await touch(cdp, 'touchEnd', []);
+  await expect(page.locator('#ammo-tip')).toBeHidden();
+  await expect.poll(async () => (await state(page)).selected).toBe(1);
 
   // Pellizcar: separar los dedos acerca la cámara.
   const z0 = (await state(page)).zoom;
