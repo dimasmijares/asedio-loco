@@ -1,11 +1,22 @@
 import { expect, test, type Page } from '@playwright/test';
 import { AMMO } from '../../shared/ammo';
 
-// HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y dos en vertical ningún
-// elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia.
+// HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y tres en vertical ningún
+// elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia. En vertical,
+// el botón de disparo, el pad y las cartas van dentro de la bandeja del pulgar (R-10 U1).
 const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
+const PORTRAIT = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#target-prev', '#target-next', '#tray'];
+const IN_TRAY = ['#confirm', '#aim-pad', '#hud-ammo'];
 
-async function rects(page: Page) {
+type Box = { x: number; y: number; w: number; h: number };
+const cross = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+function noCross(r: Record<string, Box>) {
+  const keys = Object.keys(r);
+  for (let i = 0; i < keys.length; i++)
+    for (let j = i + 1; j < keys.length; j++) expect(cross(r[keys[i]], r[keys[j]]), `${keys[i]} se cruza con ${keys[j]}`).toBe(false);
+}
+
+async function rects(page: Page, parts = PARTS) {
   return page.evaluate((sel) => {
     const out: Record<string, { x: number; y: number; w: number; h: number }> = {};
     for (const s of sel) {
@@ -15,7 +26,7 @@ async function rects(page: Page) {
       if (r.width && r.height) out[s] = { x: r.x, y: r.y, w: r.width, h: r.height };
     }
     return out;
-  }, PARTS);
+  }, parts);
 }
 
 for (const [w, h] of [
@@ -41,20 +52,24 @@ for (const [w, h] of [
         [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
       );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
-      const r = await rects(page);
+      const portrait = h > w;
+      const r = await rects(page, portrait ? PORTRAIT : PARTS);
       // Sin la línea de potencia ni las flechas del jugador (WRK-TASK-061): quedan 6 o 7.
-      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(6);
+      expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(portrait ? 5 : 6);
       for (const [k, a] of Object.entries(r)) {
         expect(a.x >= 0 && a.y >= 0 && a.x + a.w <= w + 0.5 && a.y + a.h <= h + 0.5, `${k} dentro de la pantalla`).toBe(true);
       }
-      const keys = Object.keys(r);
-      for (let i = 0; i < keys.length; i++)
-        for (let j = i + 1; j < keys.length; j++) {
-          const a = r[keys[i]];
-          const b = r[keys[j]];
-          const cross = a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-          expect(cross, `${keys[i]} se cruza con ${keys[j]}`).toBe(false);
-        }
+      noCross(r);
+      if (portrait) {
+        // Bandeja: ≤ 30 % del alto; botón, pad y cartas dentro de ella y sin cruzarse.
+        const tray = r['#tray'];
+        expect(tray, 'bandeja visible').toBeTruthy();
+        expect(tray.h).toBeLessThanOrEqual(h * 0.3 + 0.5);
+        const inner = await rects(page, IN_TRAY);
+        expect(Object.keys(inner).length).toBe(3);
+        for (const [k, a] of Object.entries(inner)) expect(a.x >= tray.x && a.x + a.w <= tray.x + tray.w + 0.5 && a.y >= tray.y && a.y + a.h <= tray.y + tray.h + 0.5, `${k} dentro de la bandeja`).toBe(true);
+        noCross(inner);
+      }
       // Marcador compacto: nombre corto en vez del completo, con porcentaje (WRK-TASK-046).
       expect(await page.locator('.hp-name').first().isVisible()).toBe(false);
       await expect(page.locator('.hp-pct').first()).toBeVisible();

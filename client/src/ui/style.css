@@ -779,21 +779,26 @@ body.touch .hud-confirm {
   justify-content: center;
 }
 
-body.touch .hud-confirm::after {
-  content: 'MANTÉN';
-  font-size: 13px;
-  margin-top: 4px;
-}
-
 body.touch .hud-confirm.charging {
   background: conic-gradient(var(--al-naranja) var(--p), var(--al-crema) var(--p));
-  font-size: 24px;
   transform: scale(1.06);
 }
 
-body.touch .hud-confirm.charging::after,
-body.touch .hud-confirm:disabled::after {
-  content: none;
+/* Contenido del botón redondo (R-10 U3): la llama y «MANTÉN»; al cargar, el porcentaje y «SUELTA». */
+.hud-confirm .fire-ico svg {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.fire-label {
+  font: 400 14px var(--display);
+  margin-top: 1px;
+}
+.fire-pct {
+  font: 400 28px/28px var(--display);
+}
+.fire-sub {
+  font: 900 12px var(--font);
 }
 
 .hud-help {
@@ -2054,4 +2059,216 @@ html.big-text .ammo-name {
   justify-content: flex-start;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+/* ---------- Bandeja del pulgar: móvil vertical (R-10 U1, U3 y U8) ----------
+   Componente BandejaMovil: franja ciruela en el 30 % inferior, con el botón de disparo a la
+   izquierda y el pad de puntería a la derecha (diestro por defecto; el modo zurdo los espeja) y las
+   cartas debajo. Medidas de la maqueta a 390×844; --k las reduce en pantallas más bajas o estrechas.
+   La pone el HUD con la clase tray-mode (misma consulta que TRAY_QUERY). */
+.tray {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex-direction: column;
+  gap: calc(14px * var(--k, 1));
+  padding: calc(14px * var(--k, 1)) 14px max(calc(37px * var(--k, 1)), calc(env(safe-area-inset-bottom) + 6px));
+  background: var(--al-ciruela);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  box-shadow: 0 -4px 0 rgba(32, 4, 50, 0.35);
+  text-shadow: none;
+  pointer-events: auto;
+  touch-action: none;
+}
+.hud.tray-mode.tray-on .tray {
+  display: flex;
+}
+.tray-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+html.zurdo .tray-row {
+  flex-direction: row-reverse;
+}
+
+/* Botón de disparo: grana, 100 px, con anillo crema oscuro. Al mantenerlo, el anillo se llena de naranja. */
+.fire-wrap {
+  flex-shrink: 0;
+  width: calc(118px * var(--k, 1));
+  height: calc(118px * var(--k, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.fire-wrap.charging {
+  background: conic-gradient(var(--al-naranja) 0 var(--p), var(--al-crema-oscuro) var(--p) 100%);
+  border: 3px solid var(--al-noche);
+}
+.hud.tray-mode button.hud-confirm {
+  position: static;
+  width: calc(100px * var(--k, 1));
+  height: calc(100px * var(--k, 1));
+  min-width: 0;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  background: var(--al-grana);
+  color: var(--al-crema);
+  box-shadow: inset 0 -7px 0 var(--al-grana-oscuro), 0 0 0 6px var(--al-crema-oscuro), 0 0 0 9px var(--al-noche);
+  transform: none;
+}
+.hud.tray-mode button.hud-confirm.charging {
+  background: var(--al-grana);
+  color: var(--al-crema);
+  box-shadow: inset 0 -7px 0 var(--al-grana-oscuro), 0 0 0 3px var(--al-noche);
+  transform: scale(0.95);
+}
+.hud.tray-mode .hud-confirm .fire-ico svg {
+  width: calc(40px * var(--k, 1));
+  height: calc(40px * var(--k, 1));
+}
+.hud.tray-mode .fire-label {
+  font-size: calc(15px * var(--k, 1));
+}
+.hud.tray-mode .fire-pct {
+  font-size: calc(32px * var(--k, 1));
+  line-height: calc(30px * var(--k, 1));
+}
+
+/* Pad de puntería: arrastre relativo tipo trackpad (horizontal gira, vertical eleva). La bola
+   sigue al dedo y vuelve al centro; la elevación, en la esquina. Mientras se carga, se apaga. */
+.aim-pad {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(222px * var(--k, 1));
+  height: calc(112px * var(--k, 1));
+  border-radius: 16px;
+  border: 2px dashed rgba(254, 231, 181, 0.4);
+  background: var(--al-noche);
+  touch-action: none;
+  cursor: grab;
+  transition: opacity 0.15s;
+}
+.aim-pad.dim {
+  opacity: 0.45;
+}
+.pad-line {
+  position: absolute;
+  background: rgba(254, 231, 181, 0.14);
+  pointer-events: none;
+}
+.pad-v {
+  left: 50%;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  margin-left: -1px;
+}
+.pad-h {
+  top: 50%;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  margin-top: -1px;
+}
+.pad-knob {
+  position: absolute;
+  left: calc(50% - 20px * var(--k, 1));
+  top: calc(50% - 20px * var(--k, 1));
+  width: calc(40px * var(--k, 1));
+  height: calc(40px * var(--k, 1));
+  border-radius: 50%;
+  background: var(--al-naranja);
+  border: 3px solid var(--al-crema);
+  box-shadow: 0 0 0 3px var(--al-noche);
+  pointer-events: none;
+  transition: transform 0.18s ease-out;
+}
+.aim-pad.drag .pad-knob {
+  transition: none;
+}
+.pad-hint {
+  position: absolute;
+  left: 10px;
+  bottom: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--al-crema);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pad-elev {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font: 400 17px var(--display);
+  color: var(--al-crema);
+  pointer-events: none;
+}
+
+/* Cartas en una fila bajo el botón y el pad: 108×62, la elegida sube 6 px con anillo naranja.
+   Con más de tres (campo de pruebas), la fila se desliza en horizontal. */
+.tray .hud-ammo {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.tray .hud-ammo.many {
+  justify-content: flex-start;
+  overflow-x: auto;
+  margin: -10px -14px -6px;
+  padding: 14px 14px 6px;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+.tray .ammo,
+.tray .ammo.sel {
+  flex-shrink: 0;
+  width: calc(108px * var(--k, 1));
+  height: calc(62px * var(--k, 1));
+}
+.tray .ammo-icon,
+.tray .ammo.sel .ammo-icon {
+  font-size: calc(32px * var(--k, 1));
+}
+.tray .ammo-rar {
+  height: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Lo que queda en la parte de abajo de siempre (la línea del espectador y sus flechas), por encima
+   de la bandeja cuando está. */
+.hud.tray-mode .hud-bottom {
+  bottom: calc(var(--tray-h, 0px) + 10px);
+}
+.hud.tray-mode .hud-ammo-desc {
+  max-width: calc(100vw - 28px);
+}
+
+/* Modo zurdo en Ajustes: una línea de ayuda bajo la casilla. */
+label.check:has(.check-hint) {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.check-hint {
+  flex-basis: 100%;
+  padding-left: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--al-vino);
 }

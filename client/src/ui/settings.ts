@@ -10,13 +10,14 @@ export interface Settings {
   bigText: boolean;
   showFps: boolean;
   shake: boolean; // temblor de cámara con los golpes (se quita solo con «reducir movimiento»)
+  leftHanded: boolean; // modo zurdo (R-10 U8): en la bandeja del móvil, pad a la izquierda y disparo a la derecha
 }
 
 const KEY = 'asedio.settings';
 const QUALITY_KEY = 'asedio.quality';
 
 function load(): Settings {
-  const def: Settings = { quality: isMobileDevice() ? 'low' : 'medium', sensitivity: 1, bigText: false, showFps: false, shake: !matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const def: Settings = { quality: isMobileDevice() ? 'low' : 'medium', sensitivity: 1, bigText: false, showFps: false, shake: !matchMedia('(prefers-reduced-motion: reduce)').matches, leftHanded: false };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<Settings>;
     const q = localStorage.getItem(QUALITY_KEY) as Quality | null;
@@ -30,7 +31,7 @@ export const settings: Settings = load();
 
 function save() {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ sensitivity: settings.sensitivity, bigText: settings.bigText, showFps: settings.showFps, shake: settings.shake }));
+    localStorage.setItem(KEY, JSON.stringify({ sensitivity: settings.sensitivity, bigText: settings.bigText, showFps: settings.showFps, shake: settings.shake, leftHanded: settings.leftHanded }));
     localStorage.setItem(QUALITY_KEY, settings.quality);
   } catch {
     /* sin almacenamiento */
@@ -39,6 +40,10 @@ function save() {
 
 export function applyTextSize() {
   document.documentElement.classList.toggle('big-text', settings.bigText);
+}
+
+export function applyHand() {
+  document.documentElement.classList.toggle('zurdo', settings.leftHanded);
 }
 
 // El juego en marcha (si hay) para aplicar la calidad al momento.
@@ -76,6 +81,7 @@ export function openSettings() {
     settings.bigText = big.checked;
     save();
     applyTextSize();
+applyHand();
   };
   const fps = h('input', { type: 'checkbox', id: 'set-fps', checked: settings.showFps });
   fps.onchange = () => {
@@ -86,6 +92,12 @@ export function openSettings() {
   shake.onchange = () => {
     settings.shake = shake.checked;
     save();
+  };
+  const left = h('input', { type: 'checkbox', id: 'set-left', checked: settings.leftHanded });
+  left.onchange = () => {
+    settings.leftHanded = left.checked;
+    save();
+    applyHand();
   };
   const sens = h('input', { type: 'range', id: 'set-sens', min: '0.4', max: '1.8', step: '0.1', value: String(settings.sensitivity) });
   const sensVal = h('span', { class: 'muted' }, `×${settings.sensitivity.toFixed(1)}`);
@@ -107,6 +119,7 @@ export function openSettings() {
       h('label', { class: 'check' }, sound, ' Sonido (tecla M)'),
       h('label', { class: 'check' }, big, ' Texto grande'),
       h('label', { class: 'check' }, shake, ' Temblor de cámara'),
+      h('label', { class: 'check' }, left, ' Modo zurdo', h('span', { class: 'check-hint' }, 'disparo a la derecha en el móvil')),
       h('label', { class: 'check' }, fps, ' Mostrar fps'),
       h('label', { htmlFor: 'set-sens' }, 'Sensibilidad al apuntar ', sensVal),
       sens,
@@ -115,10 +128,14 @@ export function openSettings() {
   );
   const shut = () => modal.remove();
   close.onclick = shut;
-  modal.onclick = (e) => e.target === modal && shut();
+  // Con llaves: un manejador «onclick» que devuelve false cancela el clic, y las casillas no cambiaban.
+  modal.onclick = (e) => {
+    if (e.target === modal) shut();
+  };
   modal.onpointerdown = (e) => e.stopPropagation();
   document.body.append(modal);
   close.focus();
 }
 
 applyTextSize();
+applyHand();

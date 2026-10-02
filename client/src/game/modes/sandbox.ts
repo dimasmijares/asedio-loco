@@ -33,7 +33,7 @@ export class SandboxMode implements Mode {
     input.setAim({ yaw: Math.atan2(to[0] - lp[0], to[2] - lp[2]), pitch: 0.7, power: 0.72 });
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón de disparo: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     this.hud.bindCharge(input);
     this.hud.showConfirm(true);
     game.rig.lookEnabled = false;
@@ -45,7 +45,7 @@ export class SandboxMode implements Mode {
     this.hud.alwaysStats = true;
     this.hud.setHelp(this.hud.touchUi ? [
       [['arrastrar'], 'apuntar'],
-      [['🔥'], 'mantener: cargar · soltar: disparar'],
+      [['botón'], 'mantener: cargar · soltar: disparar'],
       [['tarjeta'], 'munición'],
       [['pellizcar'], 'acercar la cámara'],
     ] : [
@@ -143,6 +143,8 @@ export class SandboxMode implements Mode {
     } else if (!directing) {
       g.rig.aim(new THREE.Vector3(...launchPoint(this.slot)), g.input.aim.yaw);
     }
+    // Bandeja del pulgar en móvil vertical: la escena se centra en lo que queda libre (R-10 U1).
+    g.stage.setViewShift(this.hud.sceneInset() / 2);
     const alive = g.sim ? g.sim.blocksAlive(this.target) : 0;
     this.hud.setPlayers([
       { slot: this.target, name: 'Castillo objetivo', alive: g.sim?.kings.get(this.target)?.alive ?? true, blocks: alive, maxBlocks: BLOCKS_PER_CASTLE },

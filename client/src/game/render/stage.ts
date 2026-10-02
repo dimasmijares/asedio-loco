@@ -124,7 +124,24 @@ export class Stage {
     const v = Math.max(Math.tan((55 * Math.PI) / 360), minH / this.camera.aspect);
     this.camera.fov = (Math.atan(v) * 360) / Math.PI;
     this.camera.updateProjectionMatrix();
+    this.applyViewShift();
     if (this.vignette) this.vignette.uniforms.uAspect.value = w / h;
+  }
+
+  // Desplazamiento vertical del centro de la imagen, en píxeles de CSS (R-10 U1): con la bandeja
+  // del pulgar abajo, lo que mira la cámara queda en el centro de la parte que se ve por encima.
+  // Se mueve poco a poco hacia lo que pide el modo; con 0, la imagen es la de siempre.
+  viewShift = 0;
+  private viewShiftWant = 0;
+  setViewShift(px: number) {
+    this.viewShiftWant = Math.max(0, px);
+  }
+
+  private applyViewShift() {
+    const w = this.canvas.clientWidth || window.innerWidth;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    if (this.viewShift < 0.5) this.camera.clearViewOffset();
+    else this.camera.setViewOffset(w, h, 0, this.viewShift, w, h);
   }
 
   private makeSky() {
@@ -548,6 +565,11 @@ export class Stage {
     const buf = this.renderer.getDrawingBufferSize(_size);
     this.embers.uniforms.uViewH.value = buf.y;
     this.clouds.rotation.y += dt * 0.004;
+    if (this.viewShift !== this.viewShiftWant) {
+      const d = this.viewShiftWant - this.viewShift;
+      this.viewShift = Math.abs(d) < 0.5 ? this.viewShiftWant : this.viewShift + d * Math.min(1, dt * 6);
+      this.applyViewShift();
+    }
   }
 
   render() {

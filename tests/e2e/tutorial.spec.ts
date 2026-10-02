@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // Tutorial de la primera partida (WRK-TASK-048): en PC y en móvil vertical, los 3 pasos se leen
 // sin tapar ningún control y cada uno resalta el que toca.
-const CONTROLS = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
+const CONTROLS = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo-desc', '#hud-ammo', '#target-prev', '#target-next', '#confirm', '#tray'];
 
 async function overlaps(page: Page) {
   return page.evaluate((sel) => {
@@ -38,10 +38,15 @@ for (const [name, vp, mobile] of [
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       await expect(page.locator('#tutorial')).toBeVisible();
 
-      // 1 · Apunta: la mano (o el ratón) sobre la escena.
+      // 1 · Apunta: la mano (o el ratón) sobre la escena; en móvil vertical, el pad de la bandeja (R-10 U1).
       await expect(page.locator('#tutorial')).toHaveAttribute('data-step', 'aim');
-      await expect(page.locator('.coach-swipe')).toBeVisible();
-      expect(await focused(page)).toEqual([]);
+      if (mobile) {
+        await expect(page.locator('.coach-swipe')).toBeHidden();
+        expect(await focused(page)).toEqual(['#aim-pad']);
+      } else {
+        await expect(page.locator('.coach-swipe')).toBeVisible();
+        expect(await focused(page)).toEqual([]);
+      }
       expect(await overlaps(page), 'el paso 1 no tapa controles').toEqual([]);
       await page.evaluate(() => (window as any).__asedio.mode.ui.tutorial.event('aim'));
 

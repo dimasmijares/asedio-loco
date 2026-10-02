@@ -1,12 +1,13 @@
 import { AMMO, RARITY_COLOR, RARITY_INK, RARITY_LABEL, type AmmoId } from '../../../shared/ammo';
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
-import { DEG, type Vec3 } from '../../../shared/math';
+import { DEG, clamp, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES, shortName } from '../../../shared/players';
-import { isMobileDevice } from '../device';
+import { TRAY_QUERY, isMobileDevice } from '../device';
 import type { AimInput } from '../game/aim';
 import { sfx } from '../game/audio';
 import { ammoArt } from './ammoArt';
 import { h } from './dom';
+import { icon } from './icons';
 import { openSettings, settings } from './settings';
 
 // Una fila de la ayuda de controles: teclas (cada una en su tecla dibujada) y qué hacen.
@@ -68,11 +69,41 @@ export class Hud {
   private countdownText = '';
   private ammoKey = '';
   private countdownTimer = 0;
+  private row = h('div', { class: 'hud-row' });
+  private bottom = h('div', { class: 'hud-bottom' });
+  // Bandeja del pulgar (R-10 U1, componente BandejaMovil): en móvil vertical, disparo, pad de
+  // puntería y cartas en el 30 % inferior. El botón y las cartas son los de siempre, cambiados de sitio.
+  private fireWrap = h('div', { class: 'fire-wrap' });
+  private padKnob = h('span', { class: 'pad-knob' });
+  private padElev = h('span', { class: 'pad-elev', id: 'pad-elev' });
+  private pad = h(
+    'div',
+    { class: 'aim-pad', id: 'aim-pad', role: 'group', 'aria-label': 'Pad de puntería: arrastra a los lados para girar y arriba o abajo para elevar' },
+    h('span', { class: 'pad-line pad-v' }),
+    h('span', { class: 'pad-line pad-h' }),
+    this.padKnob,
+    // U+FE0E: flechas como texto, nunca como emoji.
+    h('span', { class: 'pad-hint' }, '↔\uFE0E gira · ↕\uFE0E eleva'),
+    this.padElev,
+  );
+  private tray = h('div', { class: 'tray', id: 'tray' }, h('div', { class: 'tray-row' }, this.fireWrap, this.pad));
+  trayMode = false;
+  private trayH = 0;
+  private trayMq = matchMedia(TRAY_QUERY);
+  private onLayout = () => this.layout();
+  private trayObs = new ResizeObserver(() => {
+    this.trayH = this.tray.offsetHeight;
+    this.root.style.setProperty('--tray-h', `${this.trayH}px`);
+  });
+  private confirmState = { show: false, locked: false };
+  private confirmKey = '';
+  private firePct: HTMLElement | null = null;
 
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
-    const row = h('div', { class: 'hud-row' }, this.targetBtns[0], this.ammo, this.targetBtns[1]);
-    const bottom = h('div', { class: 'hud-bottom' }, this.aimInfo, this.ammoDesc, row, this.confirmBtn);
+    this.row.append(this.targetBtns[0], this.ammo, this.targetBtns[1]);
+    this.bottom.append(this.aimInfo, this.ammoDesc, this.row, this.confirmBtn);
+    const bottom = this.bottom;
     const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
     const toggle = () => {
       mute.textContent = sfx.toggleMute() ? '🔇' : '🔊';
@@ -103,9 +134,37 @@ export class Hud {
     gear.onclick = () => openSettings();
     gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.goal, this.stats);
-    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.banner, this.countdown);
+    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.tray, this.banner, this.countdown);
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
+    this.trayObs.observe(this.tray);
+    this.trayMq.addEventListener('change', this.onLayout);
+    window.addEventListener('resize', this.onLayout);
+    this.layout();
+  }
+
+  // Coloca el botón de disparo y las cartas en la bandeja (móvil vertical) o donde siempre.
+  private layout() {
+    const on = this.trayMq.matches;
+    this.trayMode = on;
+    this.root.classList.toggle('tray-mode', on);
+    if (on) {
+      if (this.confirmBtn.parentElement !== this.fireWrap) this.fireWrap.append(this.confirmBtn);
+      if (this.ammo.parentElement !== this.tray) this.tray.append(this.ammo);
+    } else {
+      if (this.confirmBtn.parentElement !== this.bottom) this.bottom.append(this.confirmBtn);
+      if (this.ammo.parentElement !== this.row) this.row.insertBefore(this.ammo, this.targetBtns[1]);
+    }
+    // Escala de la bandeja: como mucho el 30 % del alto (252 px a 844: 7 fijos y 245 que escalan) y
+    // que quepan a lo ancho el botón (118 px con su anillo) y el pad (222 px).
+    const k = Math.floor(Math.min(1, (innerHeight * 0.3 - 7) / 245, (innerWidth - 40) / 340) * 1000) / 1000;
+    this.root.style.setProperty('--k', String(k));
+    this.refreshConfirm();
+  }
+
+  // Alto de pantalla que tapa la bandeja, para centrar la escena en lo que queda libre (0 sin ella).
+  sceneInset() {
+    return this.trayMode && this.root.classList.contains('tray-on') ? this.trayH : 0;
   }
 
   private keyHandler: (e: KeyboardEvent) => void;
@@ -126,6 +185,7 @@ export class Hud {
     const key = `${list.join(',')}|${selected}|${keys}`;
     if (key === this.ammoKey) return;
     this.ammoKey = key;
+    this.ammo.classList.toggle('many', list.length > 3);
     const sel = list[selected];
     // Tarjeta de la munición elegida (R-03): icono, nombre, rareza y qué hace.
     if (sel) {
@@ -167,8 +227,11 @@ export class Hud {
       if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
       return;
     }
-    // Sin potencia ni elevación en texto (WRK-TASK-061): la parábola ya lo dice.
+    // Sin potencia ni elevación en texto (WRK-TASK-061): la parábola ya lo dice. En la bandeja del
+    // móvil, la elevación va en una esquina del pad (R-10 U3).
     void ammo;
+    const deg = `${Math.round(aim.pitch / DEG)}°`;
+    if (this.padElev.textContent !== deg) this.padElev.textContent = deg;
     if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
   }
 
@@ -277,23 +340,112 @@ export class Hud {
     };
     b.onpointerup = () => input.releaseCharge();
     b.onpointercancel = () => input.cancelCharge();
+    this.bindPad(input);
   }
 
-  // Fuerza que se está cargando (0..1), o null si no se carga.
+  // Pad de puntería: arrastre relativo (horizontal gira, vertical eleva). La bola sigue al dedo
+  // dentro del pad y vuelve al centro al soltar; el dedo puede seguir por fuera sin perder el arrastre.
+  private bindPad(input: AimInput) {
+    const pad = this.pad;
+    let id = -1;
+    let lx = 0;
+    let ly = 0;
+    let ox = 0;
+    let oy = 0;
+    pad.onpointerdown = (e) => {
+      e.stopPropagation();
+      if (id !== -1 || !input.enabled) return;
+      id = e.pointerId;
+      lx = e.clientX;
+      ly = e.clientY;
+      ox = oy = 0;
+      pad.setPointerCapture?.(e.pointerId);
+      input.padActive = true;
+      pad.classList.add('drag');
+    };
+    pad.onpointermove = (e) => {
+      if (e.pointerId !== id) return;
+      const dx = e.clientX - lx;
+      const dy = e.clientY - ly;
+      lx = e.clientX;
+      ly = e.clientY;
+      input.padMove(dx, dy);
+      const r = pad.getBoundingClientRect();
+      const kr = this.padKnob.offsetWidth / 2 + 4;
+      ox = clamp(ox + dx, -r.width / 2 + kr, r.width / 2 - kr);
+      oy = clamp(oy + dy, -r.height / 2 + kr, r.height / 2 - kr);
+      this.padKnob.style.transform = `translate(${ox}px, ${oy}px)`;
+    };
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== id) return;
+      id = -1;
+      input.padActive = false;
+      pad.classList.remove('drag');
+      this.padKnob.style.transform = '';
+    };
+    pad.onpointerup = end;
+    pad.onpointercancel = end;
+  }
+
+  // Botón redondo (táctil o bandeja del móvil) en lugar del botón largo del PC.
+  private get roundFire() {
+    return this.touchUi || this.trayMode;
+  }
+
+  // Fuerza que se está cargando (0..1), o null si no se carga. En el botón redondo, el anillo se
+  // llena de naranja y dentro van el porcentaje y «SUELTA» (R-10 U3).
   setCharge(p: number | null) {
     const b = this.confirmBtn;
-    b.classList.toggle('charging', p !== null);
-    b.style.setProperty('--p', `${Math.round((p ?? 0) * 100)}%`);
-    if (p !== null) b.textContent = this.touchUi ? `${Math.round(p * 100)} %` : `Fuerza ${Math.round(p * 100)} %`;
+    const was = b.classList.contains('charging');
+    const on = p !== null;
+    if (on !== was) {
+      b.classList.toggle('charging', on);
+      this.fireWrap.classList.toggle('charging', on);
+      this.pad.classList.toggle('dim', on);
+    }
+    if (!on) {
+      if (was) {
+        this.confirmKey = '';
+        this.refreshConfirm();
+      }
+      return;
+    }
+    const pct = `${Math.round(p * 100)}%`;
+    b.style.setProperty('--p', pct);
+    this.fireWrap.style.setProperty('--p', pct);
+    if (!this.roundFire) {
+      b.textContent = `Fuerza ${Math.round(p * 100)} %`;
+      return;
+    }
+    if (!was || !this.firePct || !b.contains(this.firePct)) {
+      this.firePct = h('b', { class: 'fire-pct' });
+      b.replaceChildren(this.firePct, h('span', { class: 'fire-sub' }, 'SUELTA'));
+      this.confirmKey = '';
+    }
+    if (this.firePct.textContent !== pct) this.firePct.textContent = pct;
   }
 
   showConfirm(show: boolean, locked = false) {
     const b = this.confirmBtn;
+    this.confirmState = { show, locked };
     b.style.display = show ? '' : 'none';
     b.disabled = locked;
+    // La bandeja solo está mientras se puede apuntar: tras disparar se recoge (U6).
+    this.root.classList.toggle('tray-on', show && !locked);
+    this.refreshConfirm();
+  }
+
+  // Contenido del botón de disparo; solo se rehace si cambia (se llama en cada fotograma).
+  private refreshConfirm() {
+    const b = this.confirmBtn;
     if (b.classList.contains('charging')) return;
-    // En táctil es un botón redondo abajo a la derecha, al alcance del pulgar.
-    if (this.touchUi) b.textContent = locked ? '✔' : '🔥';
+    const { locked } = this.confirmState;
+    const round = this.roundFire;
+    const key = `${round}|${locked}`;
+    if (key === this.confirmKey) return;
+    this.confirmKey = key;
+    // Redondo: la llama y «MANTÉN» (componente BandejaMovil); con el disparo listo, una marca.
+    if (round) b.replaceChildren(icon(locked ? 'check' : 'flame', 'fire-ico'), locked ? '' : h('span', { class: 'fire-label' }, 'MANTÉN'));
     else b.textContent = locked ? '✔ Disparo listo · esperando al resto de jugadores' : 'Mantén Espacio o clic izquierdo';
     b.setAttribute('aria-label', locked ? 'Disparo listo' : 'Mantén pulsado para cargar y suelta para disparar');
   }
@@ -318,6 +470,9 @@ export class Hud {
 
   dispose() {
     window.removeEventListener('keydown', this.keyHandler);
+    window.removeEventListener('resize', this.onLayout);
+    this.trayMq.removeEventListener('change', this.onLayout);
+    this.trayObs.disconnect();
     this.root.remove();
   }
 }

@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.12.0
+version: 1.13.0
 created: 2026-09-26
 updated: 2026-10-02
 owner: dimas
@@ -73,6 +73,8 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Calidad baja / media / alta, que se aplica al momento, también a los topes de fragmentos y partículas (D-046, WRK-TASK-013).
    - Sonido, texto grande, temblor de cámara (activado salvo con `prefers-reduced-motion`, WRK-TASK-032) y mostrar fps (ocultos por defecto, D-055).
    - Sensibilidad del ratón de ×0,4 a ×1,8 (pasos de 0,1).
+   - Modo zurdo (R-10 U8, WRK-TASK-077): en la bandeja del móvil vertical, pad a la izquierda y disparo a la derecha. Se guarda en `asedio.settings`.
+   - El panel cierra al tocar fuera; un clic dentro ya no se cancela (antes ninguna casilla cambiaba, WRK-TASK-077).
 6. **Accesibilidad** (D-045): colores Okabe-Ito más un emblema por jugador (☀ ☾ ★ ϟ), con tinta oscura sobre amarillo y rosa. Hay texto grande y silencio.
 7. **Pantallas estrechas** (≤ 700 px): marcador de 160 px y ayuda de controles oculta.
 8. **Estilo «Atardecer»** (R-10, WRK-TASK-074): la fuente de verdad es el design system «Asedio Loco · estilo» (https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3).
@@ -81,6 +83,8 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Menús: tarjetas crema con contorno noche y sombra dura; los botones grandes son tablones de madera (veta, clavos, sombra dura e inclinación que alterna −1,2° y +0,9°, solo dentro de un panel de menú). El HUD de partida va sobre paneles noche al 86 % y no se inclina.
    - Rarezas: común #A8949C, rara #4FA8E8 y épica #9E2E8A (texto noche, noche y crema); defensiva usa `listo` (#9ED36A) con texto noche.
    - Munición ilustrada (WRK-TASK-075): cada munición tiene un SVG propio de 48×48 con contorno noche (`client/src/ui/ammoArt.ts`), sin emoji; mide 1,2 em del contenedor.
+9. **Partida en móvil vertical** (R-10 fase 2, U1-U8; sección «Partida en móvil: zonas» del design system y maquetas de «Nueva versión» a 390×844). Rige con `(orientation: portrait) and (max-width: 600px)` (`TRAY_QUERY`); el HUD pone la clase `tray-mode` y cambia de disposición si se gira el móvil. Sin emoji: iconos SVG de trazo 2,5 px con extremos redondos en `currentColor` (`client/src/ui/icons.ts`).
+   - **Bandeja del pulgar** (U1, U3 y U8, WRK-TASK-077): franja ciruela abajo, como mucho el 30 % del alto (252 px a 844), con `radius-lg` arriba y la zona segura del sistema. Botón de disparo a la izquierda (grana, 100 px) y pad de puntería a la derecha (222×112), espejados en modo zurdo; debajo, las cartas en fila (108×62, tecla en la esquina; con más de tres, la fila se desliza). La variable `--k` la reduce en pantallas más bajas o estrechas. Solo se ve mientras se puede apuntar. El tutorial resalta el pad en el paso 1, sin la mano.
 
 ### Outputs
 
@@ -97,7 +101,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
   - **se puede instalar** (PWA, WRK-TASK-009): manifiesto con `display: fullscreen` y `orientation: any`, iconos dibujados por código (`tests/tools/make-icons.mjs`) y metas de Apple para «Añadir a pantalla de inicio». Sin service worker: el juego necesita la red. La instalación en un teléfono real está pendiente del usuario (A7 y A8 de WRK-TASK-040);
-  - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical el HUD se recoloca (marcador compacto, viento bajo los botones, fila de tarjetas abajo y botón de disparo encima a la derecha) y la cámara abre el campo de visión para no bajar de 40° de ancho.
+  - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical, la partida tiene su propia disposición (punto 9 de Behavior) y la cámara abre el campo de visión para no bajar de 40° de ancho.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
   - el marcador se queda en estandarte, nombre corto, porcentaje, barra y ✔/💀 (tu fila, con borde blanco). El nombre corto (`shortName`, WRK-TASK-046) es «Tú» en tu fila, la última palabra en los bots («Lady Pixel» → «Pixel») y la primera en los humanos; el nombre completo queda en el `title` de la fila. El cuerpo de la fila va en dos líneas (nombre arriba; barra y porcentaje debajo) y mide 52 px, en vertical y en horizontal (antes 40-44 px sin nombre);
@@ -141,11 +145,14 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/game/render/arcs.ts` | `AttackArcs`: quién ataca a quién |
 | Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying`; tokens `--al-*` y tablones (R-10) |
 | Implemented in | `client/src/ui/ammoArt.ts` | Ilustraciones SVG de la munición |
+| Implemented in | `client/src/ui/icons.ts` | Iconos SVG del HUD (R-10 fase 2) |
+| Implemented in | `client/src/device.ts` | `TRAY_QUERY`: cuándo rige la partida en móvil vertical |
 | Implemented in | `client/src/ui/fonts/` | Lilita One y Nunito en woff2, con sus licencias OFL |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
 | Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |
 | Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
+| Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, sin solapes y 30 % del alto en vertical |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |
 

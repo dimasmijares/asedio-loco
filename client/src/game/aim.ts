@@ -170,6 +170,21 @@ export class AimInput {
     this.onChange(this.aim);
   }
 
+  // Pad de puntería de la bandeja del pulgar (R-10 U1): arrastre relativo, como un trackpad. Con la
+  // ganancia del ratón, no la del dedo en la escena: el pad es para afinar; los giros grandes, en la escena.
+  padActive = false;
+  padMove(dx: number, dy: number) {
+    if (!this.enabled) return;
+    const k = settings.sensitivity;
+    this.aim = clampAim({ ...this.aim, yaw: this.aim.yaw - dx * 0.0035 * k, pitch: this.aim.pitch - dy * 0.0028 * k });
+    this.onChange(this.aim);
+  }
+
+  // Se está apuntando con el clic derecho, un dedo en la escena o el pad.
+  get steering() {
+    return this.aiming || this.padActive;
+  }
+
   // También lo usa el botón de disparo (mantener pulsado con el ratón o el dedo).
   startCharge(by = 'button') {
     if (!this.enabled || this.charging) return;

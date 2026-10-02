@@ -1,4 +1,4 @@
-import { isMobileDevice } from '../device';
+import { isMobileDevice, trayLayout } from '../device';
 import { h } from './dom';
 
 const KEY = 'asedio.tutorial';
@@ -15,12 +15,14 @@ export function tutorialPending() {
 
 type Step = 'aim' | 'adjust' | 'fire';
 
-// Qué control resalta cada paso (WRK-TASK-048): en el primero, una mano que arrastra sobre la escena.
+// Qué control resalta cada paso (WRK-TASK-048): en el primero, una mano que arrastra sobre la escena
+// o, con la bandeja del móvil vertical (R-10 U1), el pad de puntería.
 const FOCUS: Record<Step, string[]> = {
   aim: [],
   adjust: ['#hud-ammo', '#target-prev', '#target-next'],
   fire: ['#confirm'],
 };
+const TRAY_FOCUS: Record<Step, string[]> = { ...FOCUS, aim: ['#aim-pad'] };
 
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
@@ -31,14 +33,23 @@ const STEPS: { id: Step; title: string; text: string }[] = [
 // En táctil se apunta arrastrando el dedo y se dispara con el botón redondo.
 const TOUCH_STEPS: typeof STEPS = [
   { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por la pantalla: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
-  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta. Las flechas ◀ ▶ apuntan a otro castillo.' },
-  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo 🔥: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo.' },
+  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una tarjeta.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón redondo rojo: la fuerza aumenta mientras lo mantienes y la parábola se alarga. Al soltar, el disparo queda listo.' },
+];
+
+// Con la bandeja del pulgar (móvil vertical): el pad afina y la escena sirve para los giros grandes.
+const TRAY_STEPS: typeof STEPS = [
+  { id: 'aim', title: '1 · Apunta', text: 'Arrastra el dedo por el pad: a los lados giras la catapulta, arriba y abajo cambias la elevación. Para girar mucho, arrastra por la escena.' },
+  { id: 'adjust', title: '2 · Elige munición', text: 'Toca una carta.' },
+  { id: 'fire', title: '3 · ¡Fuego!', text: 'Mantén el botón rojo: el anillo se llena con la fuerza y la parábola se alarga. Al soltar, el disparo queda listo.' },
 ];
 
 // Tutorial de 3 pasos en la primera partida: cada paso avanza al hacer lo que pide.
 export class Tutorial {
   private i = 0;
-  private steps = isMobileDevice() ? TOUCH_STEPS : STEPS;
+  private tray = trayLayout();
+  private steps = this.tray ? TRAY_STEPS : isMobileDevice() ? TOUCH_STEPS : STEPS;
+  private focusOf = this.tray ? TRAY_FOCUS : FOCUS;
   private el: HTMLElement;
   // Mano (táctil) o ratón que se desliza sobre la escena en el paso de apuntar.
   private swipe = h('div', { class: 'coach-swipe', 'aria-hidden': 'true' }, isMobileDevice() ? '👆' : '🖱️');
@@ -58,10 +69,10 @@ export class Tutorial {
 
   private focus(on: boolean) {
     const id = on && !this.done ? this.steps[this.i].id : null;
-    const want = id ? FOCUS[id].map((sel) => document.querySelector(sel)).filter((el): el is Element => !!el) : [];
+    const want = id ? this.focusOf[id].map((sel) => document.querySelector(sel)).filter((el): el is Element => !!el) : [];
     for (const el of document.querySelectorAll('.tut-focus')) if (!want.includes(el)) el.classList.remove('tut-focus');
     for (const el of want) if (!el.classList.contains('tut-focus')) el.classList.add('tut-focus');
-    const swipe = id === 'aim' ? '' : 'none';
+    const swipe = id === 'aim' && !this.tray ? '' : 'none';
     if (this.swipe.style.display !== swipe) this.swipe.style.display = swipe;
   }
 

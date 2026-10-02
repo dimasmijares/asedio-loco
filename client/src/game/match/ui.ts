@@ -47,7 +47,7 @@ export const AIM_HELP: HelpRow[] = [
 
 export const TOUCH_HELP: HelpRow[] = [
   [['arrastrar'], 'apuntar'],
-  [['🔥'], 'mantener: cargar · soltar: disparar'],
+  [['botón'], 'mantener: cargar · soltar: disparar'],
   [['tarjeta'], 'munición'],
   [['pellizcar'], 'acercar la cámara'],
 ];
@@ -104,7 +104,7 @@ export class MatchUI {
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
     input.onFire = (a) => this.fire(a);
-    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón 🔥: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
+    input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón de disparo: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
     this.hud.onTarget = (d) => (this.watching() ? this.cycleWatch(d) : this.cycleTarget(d));
     addEventListener('keydown', this.watchKeys);
@@ -145,7 +145,7 @@ export class MatchUI {
 
   private onAim(a: Aim) {
     if (!this.canAim()) return;
-    if (this.game.input.aiming) this.tutorial?.event('aim');
+    if (this.game.input.steering) this.tutorial?.event('aim');
     this.pendingAim = a;
     // El castillo objetivo sale de hacia dónde apuntas (WRK-TASK-061): no hay selector.
     const me = this.me()!;
@@ -273,6 +273,9 @@ export class MatchUI {
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 18) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 18, 11, 0.25);
       } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
     }
+    // Con la bandeja del pulgar abajo (móvil vertical), lo que mira la cámara sube al centro de la
+    // parte de la escena que queda libre por encima (R-10 U1).
+    g.stage.setViewShift(this.hud.sceneInset() / 2);
 
     // HUD.
     const rem = this.src.remaining();
@@ -354,7 +357,7 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.touchUi ? 'Arrastra para apuntar · mantén 🔥 para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
+      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
       // Escudo real (WRK-TASK-041): se anuncia al empezar, en la última ronda con él y al acabarse.
       if (s.round === 1) sub += `\n🛡️ Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`;
       else if (s.round === KING_GUARD_ROUNDS) sub += '\n🛡️ Última ronda con escudo real';
