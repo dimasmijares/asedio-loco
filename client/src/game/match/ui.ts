@@ -3,11 +3,11 @@ import { AMMO } from '../../../../shared/ammo';
 import type { Aim } from '../../../../shared/ballistics';
 import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
-import { GOALS, KING_GUARD_ROUNDS, kingGuarded, replayDuration, type MatchState, type PlayerState } from '../../../../shared/match';
+import { GOALS, KING_GUARD_ROUNDS, checkWinner, kingGuarded, replayDuration, resultsDuration, type MatchState, type PlayerState } from '../../../../shared/match';
 import { aimedAt, goalPoint } from '../../../../shared/bot';
 import { rng } from '../../../../shared/math';
 import type { Vec3 } from '../../../../shared/math';
-import { PLAYER_STYLES } from '../../../../shared/players';
+import { PLAYER_STYLES, shortName } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
 import { icon } from '../../ui/icons';
@@ -53,6 +53,9 @@ export const TOUCH_HELP: HelpRow[] = [
   [['pellizcar'], 'acercar la cámara'],
 ];
 
+// Órbita (radio y altura) del plano general sobre la hoja de resultados en móvil vertical.
+const SHEET_ORBIT = [50, 46] as const;
+
 const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot === slot)?.name ?? '¿?';
 
 export class MatchUI {
@@ -61,6 +64,12 @@ export class MatchUI {
   private last = { round: 0, phase: '', alive: new Map<number, boolean>(), lava: 0, wind: false };
   private overPanel: HTMLElement | null = null;
   private resultsBox: HTMLElement;
+  // Resultados en móvil vertical (R-10 U7): hoja crema abajo, con el objetivo cumplido, la tabla
+  // pierde / derriba y la cuenta atrás hasta la ronda siguiente. En PC sigue la lista de siempre.
+  private sheet = h('div', { class: 'res-sheet', id: 'results-sheet', hidden: true });
+  private sheetBar = h('span', { class: 'sheet-fill' });
+  private sheetNext = h('span', { class: 'sheet-next' });
+  private sheetH = 0;
   // Daño de la ronda sobre cada castillo (WRK-TASK-036): etiquetas proyectadas a la pantalla.
   private dmgLayer = h('div', { class: 'dmg-labels', id: 'dmg-labels' });
   private dmgLabels: { el: HTMLElement; p: THREE.Vector3 }[] = [];
@@ -100,7 +109,7 @@ export class MatchUI {
     this.hud = new Hud(parent);
     this.director = new Director(game.view, game.rig);
     this.resultsBox = h('div', { class: 'results-box', id: 'results-box' });
-    this.hud.root.append(this.resultsBox, this.dmgLayer);
+    this.hud.root.append(this.resultsBox, this.sheet, this.dmgLayer);
     this.arcs = new AttackArcs(game.stage.scene);
     const input = game.input;
     input.onChange = (a) => this.onAim(a);
@@ -263,9 +272,15 @@ export class MatchUI {
       }
     }
     // Cuenta atrás: la cámara se aleja hasta el plano general. Durante los disparos, panorámica.
-    const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || s.phase === 'results' ? this.director.update(dt) : false;
+    // En móvil vertical, los resultados van en una hoja que tapa media pantalla: en vez del plano
+    // cerrado del director, un plano general de la isla en la parte libre, con las cifras de daño
+    // sobre los castillos (R-10 U7).
+    const sheetView = s.phase === 'results' && this.hud.trayMode;
+    const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || (s.phase === 'results' && !sheetView) ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
-      if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
+      if (sheetView) {
+        if (g.rig.mode !== 'orbit' || g.rig.radius !== SHEET_ORBIT[0]) g.rig.orbit(new THREE.Vector3(0, 2, 0), SHEET_ORBIT[0], SHEET_ORBIT[1], 0.04);
+      } else if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
       else if (s.phase === 'aim' && this.watchSlot >= 0) {
         const o = castleOrigin(this.watchSlot);
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 21 || Math.hypot(g.rig.center.x - o[0], g.rig.center.z - o[2]) > 0.1) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 21, 13, 0.05);
@@ -274,9 +289,13 @@ export class MatchUI {
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 18) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 18, 11, 0.25);
       } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
     }
-    // Con la bandeja del pulgar abajo (móvil vertical), lo que mira la cámara sube al centro de la
-    // parte de la escena que queda libre por encima (R-10 U1).
-    g.stage.setViewShift(this.hud.sceneInset() / 2);
+    // Con la bandeja del pulgar o la hoja de resultados abajo (móvil vertical), lo que mira la cámara
+    // sube al centro de la parte de la escena que queda libre por encima (R-10 U1 y U7).
+    if (s.phase === 'results' && this.hud.trayMode && !this.sheet.hidden) {
+      // Centro de la isla en el centro de la franja libre, entre la parte superior y la hoja.
+      const top = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
+      g.stage.setViewShift(innerHeight / 2 - (top + innerHeight - this.sheetH) / 2);
+    } else g.stage.setViewShift(this.hud.sceneInset() / 2);
 
     // HUD.
     const rem = this.src.remaining();
@@ -288,13 +307,24 @@ export class MatchUI {
       this.lastTick = n;
     } else this.lastTick = -1;
     this.hud.setTimer(s.phase === 'aim' ? rem : null, s.phase === 'aim' && rem < 4);
-    this.hud.setWind(s.wind, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
+    // En móvil vertical el chip del viento solo está mientras se apunta (como en las maquetas).
+    this.hud.setWind(s.phase === 'aim' || !this.hud.trayMode ? s.wind : null, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
     this.hud.setPlayers(
       s.players.map((p) => ({ slot: p.slot, name: p.name, alive: p.alive, blocks: p.blocks, maxBlocks: BLOCKS_PER_CASTLE, locked: s.phase === 'aim' && p.locked, bot: p.bot || p.auto, you: p.slot === this.src.you, connected: p.bot ? true : (this.src.connected?.(p.id) ?? true) })),
     );
     if (me && me.alive && s.phase === 'aim') this.hud.setAmmo(me.ammo, me.selected, (i) => this.selectAmmo(i));
     else this.hud.setAmmo([], 0, () => {});
     this.hud.showConfirm(!!me?.alive && s.phase === 'aim', !!me?.locked);
+    // Tras disparar (móvil vertical): barra fina con quién falta (R-10 U6).
+    if (this.hud.trayMode && me?.alive && me.locked && s.phase === 'aim') {
+      const alive = s.players.filter((p) => p.alive);
+      this.hud.setWait({
+        ammo: me.ammo[me.selected] ?? null,
+        ready: alive.filter((p) => p.locked).map((p) => p.slot),
+        pending: alive.filter((p) => !p.locked).map((p) => ({ slot: p.slot, name: shortName({ name: p.name, bot: p.bot }) })),
+      });
+    } else this.hud.setWait(null);
+    this.updateSheet(s);
     const watch = this.watching() && s.phase === 'aim';
     // Las flechas solo para el espectador (jugando, el objetivo sale del rumbo; WRK-TASK-061).
     this.hud.showTargetButtons(watch, watch);
@@ -502,9 +532,62 @@ export class MatchUI {
         ),
       );
     const done = s.goalDone ?? [];
-    const goal = s.goal && done.length ? h('div', { class: 'res-goal', id: 'res-goal' }, `🎯 ${done.map((slot) => nameOf(s, slot)).join(', ')} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: carta rara o épica en la ronda siguiente`) : '';
+    const goal = s.goal && done.length ? h('div', { class: 'res-goal', id: 'res-goal' }, icon('target'), ` ${done.map((slot) => nameOf(s, slot)).join(', ')} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: carta rara o épica en la ronda siguiente`) : '';
     this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows, goal);
+    this.fillSheet(s);
     this.showDamage(s);
+  }
+
+  // Hoja de resultados del móvil vertical (maqueta «Móvil · Resultados de la ronda»): sin la frase de
+  // la ronda (decisión del usuario del 02-10-2026), con todos los que jugaban la ronda.
+  private fillSheet(s: MatchState) {
+    const r = s.results!;
+    const ends = checkWinner(s) !== null;
+    const done = s.goalDone ?? [];
+    const names = done.map((slot) => nameOf(s, slot));
+    const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}` : names[0];
+    const goal =
+      s.goal && done.length
+        ? h('div', { class: 'sheet-goal', id: 'sheet-goal' }, icon('target'), h('span', null, ends ? `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo` : `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: ${done.length > 1 ? 'empiezan' : 'empieza'} la ronda ${s.round + 1} con una carta rara o épica`))
+        : '';
+    const played = s.players.filter((p) => p.alive || p.eliminatedRound === s.round).sort((a, b) => (r.lost[b.slot] ?? 0) - (r.lost[a.slot] ?? 0));
+    const rows = played.map((p) => {
+      const st = PLAYER_STYLES[p.slot];
+      const lost = r.lost[p.slot] ?? 0;
+      const pct = Math.min(100, Math.round((p.blocks / BLOCKS_PER_CASTLE) * 100));
+      return h(
+        'div',
+        { class: `sheet-row${p.slot === this.src.you ? ' you' : ''}`, 'data-slot': String(p.slot) },
+        h('span', { class: 'sheet-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`),
+        h('span', { class: 'sheet-who' }, h('span', { class: 'sheet-name' }, p.slot === this.src.you ? `${p.name} (tú)` : p.name), h('span', { class: 'sheet-bar' }, h('span', { style: `width:${pct}%;background:${st.color}` }))),
+        h('span', { class: `sheet-num${lost ? ' lost' : ''}` }, lost ? `−${lost}` : '0'),
+        h('span', { class: 'sheet-num' }, String(r.dealt[p.slot] ?? 0)),
+      );
+    });
+    this.sheet.replaceChildren(
+      h('h2', { class: 'sheet-title' }, `Fin de la ronda ${s.round}`),
+      goal,
+      h('div', { class: 'sheet-head' }, h('span'), h('span', null, 'JUGADOR'), h('span', null, 'PIERDE'), h('span', null, 'DERRIBA')),
+      h('div', { class: 'sheet-rows' }, ...rows),
+      h('div', { class: 'sheet-foot' }, h('span', { class: 'sheet-track' }, this.sheetBar), this.sheetNext),
+    );
+    this.sheet.hidden = false;
+    this.sheetH = this.sheet.offsetHeight;
+    this.updateSheet(s);
+  }
+
+  // Cuenta atrás de la hoja: la barra se vacía hasta la ronda siguiente (o el final de la partida).
+  private updateSheet(s: MatchState) {
+    if (s.phase !== 'results') {
+      if (!this.sheet.hidden) this.sheet.hidden = true;
+      return;
+    }
+    if (this.sheet.hidden) return;
+    const rem = Math.max(0, this.src.remaining());
+    this.sheetBar.style.width = `${Math.min(100, (rem / resultsDuration(s)) * 100)}%`;
+    const n = Math.max(1, Math.ceil(rem));
+    const t = checkWinner(s) !== null ? `La partida termina en ${n} s` : `La ronda ${s.round + 1} empieza en ${n} s`;
+    if (this.sheetNext.textContent !== t) this.sheetNext.textContent = t;
   }
 
   // Sobre cada castillo que seguía en juego, los bloques que ha perdido en la ronda.
@@ -532,7 +615,10 @@ export class MatchUI {
     const w = innerWidth;
     const hgt = innerHeight;
     const v = new THREE.Vector3();
-    const rb = this.resultsBox.getBoundingClientRect();
+    const sheet = this.hud.trayMode && !this.sheet.hidden;
+    const rb = (sheet ? this.sheet : this.resultsBox).getBoundingClientRect();
+    // En móvil vertical, entre la parte superior y la hoja de resultados.
+    const top = sheet ? (document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0) : 0;
     for (const { el, p } of this.dmgLabels) {
       v.copy(p).project(cam);
       // Detrás de la cámara la proyección sale invertida: se da la vuelta para anclarla al borde
@@ -543,6 +629,11 @@ export class MatchUI {
       const x = Math.min(w - mx, Math.max(mx, ((v.x + 1) / 2) * w));
       let y = Math.min(hgt - my, Math.max(my, ((1 - v.y) / 2) * hgt));
       let xx = x;
+      if (sheet) {
+        y = Math.max(top + my, Math.min(y, rb.top - my));
+        el.style.transform = `translate(${xx}px, ${y}px) translate(-50%, -50%)`;
+        continue;
+      }
       // Si cae sobre la lista de resultados, baja justo por debajo de ella y, si ahí no cabe (poca
       // altura, móvil en horizontal), se pone al lado de la lista, en el lado que le toca.
       if (x > rb.left - mx && x < rb.right + mx && y > rb.top - my && y < rb.bottom + my) {

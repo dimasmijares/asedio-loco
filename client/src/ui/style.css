@@ -2476,3 +2476,231 @@ label.check:has(.check-hint) {
 .hud.tray-mode .coach {
   top: calc(var(--top-h, 140px) + 22px);
 }
+
+/* ---------- Después de disparar en móvil vertical (R-10 U6 y U7) ---------- */
+
+/* Barra «Disparo listo»: la bandeja se recoge en ella y la escena ocupa toda la pantalla. */
+.m-wait {
+  display: none;
+}
+.hud.tray-mode .m-wait:not([hidden]) {
+  display: flex;
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: max(40px, calc(env(safe-area-inset-bottom) + 6px));
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 18px;
+  background: var(--al-ciruela);
+  border: 3px solid var(--al-noche);
+  box-shadow: var(--al-sombra-dura);
+  text-shadow: none;
+}
+.wait-card {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--al-crema);
+  border: 3px solid var(--al-noche);
+  color: var(--al-noche);
+  font-size: 28px;
+}
+.wait-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wait-title {
+  font: 400 19px var(--display);
+  color: var(--al-crema);
+}
+.wait-sub {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--al-crema-oscuro);
+}
+.wait-embs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+.wait-emb {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+.wait-gap {
+  border: 2px dashed var(--al-crema-oscuro);
+}
+
+/* Hoja de resultados: crema abajo, con el objetivo cumplido destacado, la tabla jugador / pierde /
+   derriba (tú resaltado) y la cuenta atrás hasta la ronda siguiente. Las cifras de daño siguen sobre
+   los castillos, en la parte de la escena que queda libre. En PC, la lista de siempre. */
+.res-sheet {
+  display: none;
+}
+.hud.tray-mode .results-box {
+  display: none;
+}
+.hud.tray-mode .res-sheet:not([hidden]) {
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 16px max(40px, calc(env(safe-area-inset-bottom) + 6px));
+  background: var(--al-crema);
+  color: var(--al-noche);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  text-shadow: none;
+  pointer-events: auto;
+  animation: sheet-up 0.25s ease-out;
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.sheet-title {
+  margin: 0;
+  font: 400 30px var(--display);
+  color: var(--al-noche);
+}
+.sheet-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 18px;
+}
+.sheet-goal > .ico {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--al-listo);
+}
+.sheet-head,
+.sheet-row {
+  display: grid;
+  grid-template-columns: 26px 1fr 64px 64px;
+  align-items: center;
+  gap: 8px;
+}
+.sheet-head {
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--al-vino);
+}
+.sheet-head > span:nth-child(n + 3) {
+  text-align: right;
+}
+.sheet-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sheet-row {
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+}
+.sheet-row.you {
+  background: var(--al-hueso);
+  border-color: var(--al-noche);
+}
+.sheet-emb {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+.sheet-who {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.sheet-name {
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sheet-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--al-crema-oscuro);
+  overflow: hidden;
+}
+.sheet-bar > span {
+  display: block;
+  height: 100%;
+}
+.sheet-num {
+  font: 400 20px var(--display);
+  text-align: right;
+  color: var(--al-noche);
+}
+/* Bloques perdidos: daño, en grana; sin pérdidas, «0» en vino. */
+.sheet-row > .sheet-num:nth-child(3) {
+  color: var(--al-vino);
+}
+.sheet-row > .sheet-num.lost {
+  color: var(--al-grana);
+}
+.sheet-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sheet-track {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--al-crema-oscuro);
+  border: 2px solid var(--al-noche);
+  overflow: hidden;
+}
+.sheet-fill {
+  display: block;
+  height: 100%;
+  background: var(--al-naranja);
+}
+.sheet-next {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--al-vino);
+  text-align: center;
+}

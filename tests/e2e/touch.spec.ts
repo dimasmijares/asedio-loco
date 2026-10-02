@@ -146,3 +146,57 @@ test('modo zurdo: pad a la izquierda y disparo a la derecha', async ({ page }) =
   expect((await box(page, '#confirm')).x, 'otra vez a la izquierda').toBeLessThan(W / 2);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('asedio.settings')!).leftHanded)).toBe(false);
 });
+
+// Después de disparar (R-10 U6 y U7): la bandeja se recoge en una barra fina con quién falta y la
+// escena ocupa toda la pantalla; los resultados van en una hoja crema abajo, con las cifras de daño
+// sobre los castillos, por encima de la hoja.
+test('tras disparar: barra «Disparo listo» y hoja de resultados', async ({ page }) => {
+  test.setTimeout(150_000);
+  const errors = watchErrors(page);
+  await page.goto('/?bots=2&seed=5#solo');
+  await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
+  const cdp = await page.context().newCDPSession(page);
+  // Se congela la partida para que un bot siga sin disparar.
+  await page.evaluate(() => {
+    const host = (window as any).__asedio.mode.host;
+    host._update = host.update;
+    host.update = () => {};
+  });
+  const btn = await box(page, '#confirm');
+  await touch(cdp, 'touchStart', [{ x: btn.x + btn.width / 2, y: btn.y + btn.height / 2 }]);
+  await page.waitForTimeout(700);
+  await touch(cdp, 'touchEnd', []);
+  await page.waitForFunction(() => (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot).locked, null, { timeout: 5000 });
+  await page.evaluate(() => (window as any).__asedio.mode.host.state.players.filter((q: any) => q.bot).forEach((q: any, i: number) => (q.locked = i === 0)));
+  const wait = page.locator('#hud-wait');
+  await expect(wait).toBeVisible();
+  await expect(wait).toContainText('Disparo listo');
+  await expect(wait).toContainText(/Esperando a \S+ · 2 de 3 listos/);
+  await expect(page.locator('#tray')).toBeHidden();
+  await expect.poll(() => page.evaluate(() => (window as any).__asedio.game.stage.viewShift), { message: 'la escena ocupa toda la pantalla' }).toBe(0);
+  const wb = await box(page, '#hud-wait');
+  expect(wb.height, 'barra fina').toBeLessThan(90);
+  await page.screenshot({ path: test.info().outputPath('disparo-listo.png') });
+
+  // Resultados: hoja crema con la tabla (tú resaltado) y la cuenta atrás.
+  await page.evaluate(() => {
+    const host = (window as any).__asedio.mode.host;
+    host.update = host._update;
+  });
+  await page.waitForFunction(() => (window as any).__asedio.mode.host.state.phase === 'results', null, { timeout: 90_000 });
+  const sheet = page.locator('#results-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(page.locator('#results-box')).toBeHidden();
+  await expect(sheet.locator('.sheet-title')).toHaveText('Fin de la ronda 1');
+  await expect(sheet.locator('.sheet-row')).toHaveCount(3);
+  await expect(sheet.locator('.sheet-row.you')).toHaveCount(1);
+  await expect(sheet.locator('.sheet-next')).toHaveText(/^La ronda 2 empieza en \d s$/);
+  // Sube con una animación corta: se mide cuando ha llegado abajo del todo.
+  await expect.poll(async () => Math.round((await box(page, '#results-sheet')).y + (await box(page, '#results-sheet')).height)).toBe(H);
+  await page.waitForTimeout(100);
+  const sb = await box(page, '#results-sheet');
+  const labels = await page.locator('#dmg-labels .dmg-label').evaluateAll((els) => els.map((e) => ({ t: e.textContent, ...e.getBoundingClientRect().toJSON() })));
+  for (const l of labels) expect(l.bottom <= sb.y + 0.5 && l.top >= 0, `«${l.t}» por encima de la hoja`).toBe(true);
+  await page.screenshot({ path: test.info().outputPath('resultados.png') });
+  expect(errors).toEqual([]);
+});

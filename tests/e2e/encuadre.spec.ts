@@ -40,7 +40,8 @@ for (const [name, vp, mobile] of [
       );
       expect(labels.length, 'etiquetas de daño').toBe(4);
       await page.screenshot({ path: info.outputPath('dano.png') });
-      const box = (await page.locator('#results-box').boundingBox())!;
+      // En móvil vertical, la hoja de resultados (R-10 U7); en escritorio, la lista.
+      const box = (await page.locator(mobile ? '#results-sheet' : '#results-box').boundingBox())!;
       for (const l of labels) expect(l.x < box.x + box.width && box.x < l.r && l.y < box.y + box.height && box.y < l.b, `«${l.text}» no tapa la lista de resultados`).toBe(false);
       for (const l of labels) expect(l.x >= 0 && l.y >= 0 && l.r <= vp.width + 0.5 && l.b <= vp.height + 0.5, `«${l.text}» dentro de la pantalla`).toBe(true);
     });

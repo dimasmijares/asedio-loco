@@ -29,6 +29,13 @@ export interface HudPlayer {
   connected?: boolean;
 }
 
+// Barra «Disparo listo» (R-10 U6): munición disparada, quién falta y cuántos están listos.
+export interface HudWait {
+  ammo: AmmoId | null;
+  ready: number[]; // huecos ya listos (con su emblema)
+  pending: { slot: number; name: string }[]; // los que faltan, con su nombre corto
+}
+
 export class Hud {
   root = h('div', { class: 'hud', id: 'hud' });
   private top = h('div', { class: 'hud-top' });
@@ -127,6 +134,9 @@ export class Hud {
   private gear = h('button', { class: 'hud-mute hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
   private windKey = '';
   private playersKey = '';
+  // Tras disparar en móvil vertical, la bandeja se recoge en esta barra fina (R-10 U6).
+  private wait = h('div', { class: 'm-wait', id: 'hud-wait', role: 'status', hidden: true });
+  private waitKey = '';
 
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
@@ -165,7 +175,7 @@ export class Hud {
     this.cornerRow.append(this.wind, mute, this.gear);
     this.corner.append(this.cornerRow, this.goal, this.stats);
     this.left.append(this.players, this.help);
-    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.tray, this.tip, this.banner, this.countdown);
+    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.tray, this.wait, this.tip, this.banner, this.countdown);
     // Al levantar el dedo, en cualquier sitio, la tarjeta desaparece (la carta ya quedó elegida).
     window.addEventListener('pointerup', this.endHold);
     window.addEventListener('pointercancel', this.endHold);
@@ -205,6 +215,28 @@ export class Hud {
     const k = Math.floor(Math.min(1, (innerHeight * 0.3 - 7) / 245, (innerWidth - 40) / 340) * 1000) / 1000;
     this.root.style.setProperty('--k', String(k));
     this.refreshConfirm();
+  }
+
+  // Barra «Disparo listo · esperando a … · N de M listos» con la carta disparada y los emblemas
+  // (los que faltan, como un hueco). Solo en móvil vertical; null la quita. Se rehace si cambia.
+  setWait(w: HudWait | null) {
+    const key = w ? `${w.ammo}|${w.ready.join(',')}|${w.pending.map((p) => `${p.slot}:${p.name}`).join(',')}` : '';
+    if (key === this.waitKey) return;
+    this.waitKey = key;
+    this.wait.hidden = !w;
+    if (!w) return;
+    const total = w.ready.length + w.pending.length;
+    const names = w.pending.map((p) => p.name);
+    const who = names.length ? `Esperando a ${names.length > 1 ? `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}` : names[0]}` : 'Todos listos';
+    const emblem = (slot: number) => {
+      const st = PLAYER_STYLES[slot];
+      return h('span', { class: 'wait-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`);
+    };
+    this.wait.replaceChildren(
+      h('span', { class: 'wait-card' }, w.ammo ? ammoArt(w.ammo) : icon('check')),
+      h('span', { class: 'wait-body' }, h('b', { class: 'wait-title' }, 'Disparo listo'), h('span', { class: 'wait-sub' }, `${who} · ${w.ready.length} de ${total} listos`)),
+      h('span', { class: 'wait-embs', 'aria-hidden': 'true' }, ...w.ready.map(emblem), ...w.pending.map(() => h('span', { class: 'wait-emb wait-gap' }))),
+    );
   }
 
   // Alto de pantalla que tapa la bandeja, para centrar la escena en lo que queda libre (0 sin ella).

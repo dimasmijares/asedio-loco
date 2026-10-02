@@ -1,12 +1,80 @@
 // Capturas de la interfaz en PC (1280×720) y en móvil vertical (390×844), con GPU: portada,
 // «Jugar solo», apuntando y resultados de la ronda. Para revisar el estilo en el lienzo (R-10).
-// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil]
+// Con «fase2», la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta,
+// cargando, disparo listo y resultados, y apuntando en modo zurdo. La partida se congela en el
+// apuntado de la ronda 1 con un viento puesto a mano, para que se vea su chip.
+// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2]
 import { chromium } from '@playwright/test';
 
 const [base, out, only] = process.argv.slice(2);
 if (!base || !out) {
-  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil]');
+  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2]');
   process.exit(1);
+}
+
+if (only === 'fase2') {
+  const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
+  for (const hand of ['diestro', 'zurdo']) {
+    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    if (hand === 'zurdo') await ctx.addInitScript(() => localStorage.setItem('asedio.settings', JSON.stringify({ leftHanded: true })));
+    const p = await ctx.newPage();
+    p.on('pageerror', (e) => console.log(hand, 'pageerror', e.message));
+    const cdp = await ctx.newCDPSession(p);
+    const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((q, id) => ({ x: q.x, y: q.y, id })) });
+    const center = async (sel) => {
+      const r = await p.locator(sel).boundingBox();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    };
+    // Ronda 1, congelada en el apuntado para las capturas: nadie ha disparado y sopla un viento
+    // puesto a mano (en la ronda 1 no hay), para que se vea su chip.
+    await p.goto(`${base}/?bots=3&seed=21&quality=high&tutorial=0&mobile=1#solo`);
+    await p.waitForFunction(() => {
+      const h = window.__asedio?.mode?.host;
+      if (h?.state?.phase !== 'aim') return false;
+      h._update = h.update;
+      h.update = () => {};
+      h.state.players.forEach((q) => (q.locked = false));
+      h.state.remaining = 17;
+      h.state.wind = [1.4, 0, -1.6];
+      return true;
+    }, null, { timeout: 60_000, polling: 'raf' });
+    await p.waitForTimeout(2500);
+    await p.screenshot({ path: `${out}/${hand}-1-apuntando.png` });
+    if (hand === 'zurdo') {
+      await ctx.close();
+      continue;
+    }
+    // Manteniendo la segunda carta: la tarjeta de descripción encima de la bandeja.
+    const card = await center('#hud-ammo .ammo:nth-child(2)');
+    await touch('touchStart', [card]);
+    await p.waitForTimeout(700);
+    await p.screenshot({ path: `${out}/${hand}-2-manteniendo-carta.png` });
+    await touch('touchEnd', []);
+    await p.waitForTimeout(300);
+    // Cargando la fuerza.
+    const fire = await center('#confirm');
+    await touch('touchStart', [fire]);
+    await p.waitForTimeout(950);
+    await p.screenshot({ path: `${out}/${hand}-3-cargando.png` });
+    await touch('touchEnd', []);
+    await p.waitForTimeout(300);
+    // Disparo listo, con un bot que aún no ha disparado.
+    await p.evaluate(() => window.__asedio.mode.host.state.players.filter((q) => q.bot).forEach((q, i) => (q.locked = i !== 2)));
+    await p.waitForTimeout(1200);
+    await p.screenshot({ path: `${out}/${hand}-4-disparo-listo.png` });
+    // Resultados: la partida sigue hasta la hoja de la ronda.
+    await p.evaluate(() => {
+      const h = window.__asedio.mode.host;
+      h.update = h._update;
+    });
+    await p.waitForFunction(() => window.__asedio.mode.host.state.phase === 'results', null, { timeout: 90_000 });
+    await p.evaluate(() => (window.__asedio.mode.host.update = () => {}));
+    await p.waitForTimeout(700);
+    await p.screenshot({ path: `${out}/${hand}-5-resultados.png` });
+    await ctx.close();
+  }
+  await b.close();
+  process.exit(0);
 }
 
 const FORMATS = {
