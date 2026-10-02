@@ -2240,3 +2240,239 @@ label.check:has(.check-hint) {
 .ammo {
   -webkit-touch-callout: none;
 }
+
+/* ---------- Iconos SVG del HUD (R-10, sección «Iconos») ----------
+   1 em y currentColor: toman el tamaño y el color del texto que acompañan. */
+.ico {
+  display: inline-flex;
+  vertical-align: -0.14em;
+}
+.ico svg {
+  width: 1em;
+  height: 1em;
+}
+.wind-arrow {
+  font-size: 20px;
+  vertical-align: -0.1em;
+}
+.hp-bot {
+  margin-left: 4px;
+  font-size: 0.9em;
+  color: var(--al-crema-oscuro);
+}
+.hp-state .ico-check {
+  color: var(--al-listo);
+}
+.hp-state .ico-offline {
+  color: var(--al-crema-oscuro);
+}
+
+/* ---------- Parte superior en móvil vertical (R-10 U4 y U5) ----------
+   Componente Marcador: arriba solo se lee; lo único que se toca es el engranaje. La píldora junta
+   «Ronda N» y los segundos; los cuatro jugadores van en una fila de chips (emblema, nombre corto y
+   barra; el tuyo con borde crema; «listo» con una marca verde; eliminado al 50 % con una cruz);
+   debajo, el viento (flecha y fuerza) y el objetivo (borde naranja), cada uno solo si hay. */
+.m-top {
+  display: none;
+}
+.hud.tray-mode .m-top {
+  display: flex;
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: max(14px, env(safe-area-inset-top));
+  flex-direction: column;
+  gap: 8px;
+  text-shadow: none;
+}
+.hud.tray-mode .hud-top,
+.hud.tray-mode .hud-corner {
+  display: none;
+}
+.m-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.m-round {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 5px 0 14px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-noche);
+  border: 2px solid var(--al-crema-oscuro);
+}
+.m-round-text {
+  font: 400 18px var(--display);
+  color: var(--al-crema);
+  white-space: nowrap;
+}
+.m-round-secs {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--al-naranja);
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 400 18px var(--display);
+  color: var(--al-noche);
+}
+/* Últimos segundos: peligro. */
+.m-round-secs.urgent {
+  background: var(--al-grana);
+  color: var(--al-crema);
+  animation: pulse 0.5s infinite alternate;
+}
+.hud.tray-mode .hud-gear {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--al-noche);
+  background: var(--al-crema);
+  color: var(--al-noche);
+  box-shadow: inset 0 -4px 0 rgba(32, 4, 50, 0.2), 0 4px 0 var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.hud.tray-mode .hud-players {
+  display: flex;
+  gap: 6px;
+  width: auto;
+}
+.hud.tray-mode .hp {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 86px;
+  gap: 4px;
+  padding: 5px 5px 5px 4px;
+  border-radius: 10px;
+  border: 2px solid var(--al-noche);
+  background: var(--al-panel-hud);
+}
+.hud.tray-mode .hp.you {
+  border-color: var(--al-crema);
+}
+.hud.tray-mode .hp.out {
+  opacity: 0.5;
+  filter: none;
+}
+.hud.tray-mode .hp .banner {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  clip-path: none;
+  align-items: center;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+.hud.tray-mode .hp-body {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  line-height: normal;
+}
+.hud.tray-mode .hp-top {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.hud.tray-mode .hp-name,
+.hud.tray-mode .hp-pct {
+  display: none;
+}
+.hud.tray-mode .hp-short {
+  display: block;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 16px;
+  color: var(--al-crema);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud.tray-mode .hp-bar {
+  height: 5px;
+  margin-top: 0;
+  border-radius: 3px;
+}
+/* Listo, eliminado o desconectado: una insignia en la esquina del emblema, sin taparlo, así el
+   nombre usa todo el ancho del chip (decisión del usuario del 03-10-2026). */
+.hud.tray-mode .hp-state {
+  position: absolute;
+  left: 17px;
+  top: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--al-noche);
+  color: var(--al-crema);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+}
+.hud.tray-mode .hp.mark .hp-state {
+  display: flex;
+}
+/* Trazo más grueso a este tamaño (los atributos del SVG ceden ante el CSS). */
+.hud.tray-mode .hp-state .ico svg * {
+  stroke-width: 3.5;
+}
+.m-flags {
+  display: flex;
+  gap: 6px;
+}
+.m-flags[hidden],
+.m-chip[hidden] {
+  display: none;
+}
+.m-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-panel-hud);
+  border: 2px solid var(--al-noche);
+  color: var(--al-crema);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.m-chip > .ico {
+  font-size: 15px;
+}
+.m-goal {
+  border-color: var(--al-naranja);
+}
+.m-wind-arrow {
+  display: inline-flex;
+  font-size: 15px;
+  transition: transform 0.3s;
+}
+.hud.tray-mode .hud-stats {
+  align-self: flex-end;
+  font-size: 12px;
+}
+/* El tutorial, justo debajo de la parte superior. */
+.hud.tray-mode .coach {
+  top: calc(var(--top-h, 140px) + 22px);
+}

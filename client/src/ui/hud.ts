@@ -104,19 +104,39 @@ export class Hud {
   private trayObs = new ResizeObserver(() => {
     this.trayH = this.tray.offsetHeight;
     this.root.style.setProperty('--tray-h', `${this.trayH}px`);
+    this.root.style.setProperty('--top-h', `${this.mTop.offsetHeight}px`);
   });
   private confirmState = { show: false, locked: false };
   private confirmKey = '';
   private firePct: HTMLElement | null = null;
+  // Parte superior en móvil vertical (R-10 U4 y U5, componente Marcador), de solo lectura salvo el
+  // engranaje: ronda y segundos en una píldora, los jugadores en una fila de chips (el mismo
+  // #hud-players, cambiado de sitio) y los chips de viento y objetivo.
+  private roundText = h('span', { class: 'm-round-text' });
+  private roundSecs = h('span', { class: 'm-round-secs', id: 'hud-round-secs' }, '–');
+  private mRow = h('div', { class: 'm-row' }, h('div', { class: 'm-round', id: 'hud-round' }, this.roundText, this.roundSecs));
+  private windArrow = h('span', { class: 'm-wind-arrow' }, icon('arrow'));
+  private windVal = h('b');
+  private windChip = h('span', { class: 'm-chip', id: 'hud-wind-chip', hidden: true }, icon('wind'), this.windArrow, this.windVal);
+  private goalText = h('span');
+  private goalChip = h('span', { class: 'm-chip m-goal', id: 'hud-goal-chip', hidden: true }, icon('target'), this.goalText);
+  private flags = h('div', { class: 'm-flags', id: 'hud-flags', hidden: true }, this.windChip, this.goalChip);
+  private mTop = h('div', { class: 'm-top', id: 'm-top' }, this.mRow);
+  private left = h('div', { class: 'hud-left' });
+  private cornerRow = h('div', { class: 'row', style: 'gap:6px' });
+  private gear = h('button', { class: 'hud-mute hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
+  private windKey = '';
+  private playersKey = '';
 
   constructor(parent: HTMLElement) {
     this.top.append(this.phase, this.timer);
     this.row.append(this.targetBtns[0], this.ammo, this.targetBtns[1]);
     this.bottom.append(this.aimInfo, this.row, this.confirmBtn);
     const bottom = this.bottom;
-    const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, sfx.muted ? '🔇' : '🔊');
+    // Silencio (en PC; en el móvil vertical, el sonido está en Ajustes).
+    const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, icon(sfx.muted ? 'mute' : 'sound'));
     const toggle = () => {
-      mute.textContent = sfx.toggleMute() ? '🔇' : '🔊';
+      mute.replaceChildren(icon(sfx.toggleMute() ? 'mute' : 'sound'));
     };
     mute.onclick = toggle;
     mute.onpointerdown = (e) => e.stopPropagation();
@@ -140,11 +160,12 @@ export class Hud {
       if (e.code === 'KeyH') this.toggleHelp();
     };
     window.addEventListener('keydown', this.keyHandler);
-    const gear = h('button', { class: 'hud-mute', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, '⚙️');
-    gear.onclick = () => openSettings();
-    gear.onpointerdown = (e) => e.stopPropagation();
-    this.corner.append(h('div', { class: 'row', style: 'gap:6px' }, this.wind, mute, gear), this.goal, this.stats);
-    this.root.append(this.top, h('div', { class: 'hud-left' }, this.players, this.help), this.corner, bottom, this.tray, this.tip, this.banner, this.countdown);
+    this.gear.onclick = () => openSettings();
+    this.gear.onpointerdown = (e) => e.stopPropagation();
+    this.cornerRow.append(this.wind, mute, this.gear);
+    this.corner.append(this.cornerRow, this.goal, this.stats);
+    this.left.append(this.players, this.help);
+    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.tray, this.tip, this.banner, this.countdown);
     // Al levantar el dedo, en cualquier sitio, la tarjeta desaparece (la carta ya quedó elegida).
     window.addEventListener('pointerup', this.endHold);
     window.addEventListener('pointercancel', this.endHold);
@@ -152,6 +173,7 @@ export class Hud {
     parent.append(this.root);
     this.confirmBtn.style.display = 'none';
     this.trayObs.observe(this.tray);
+    this.trayObs.observe(this.mTop);
     this.trayMq.addEventListener('change', this.onLayout);
     window.addEventListener('resize', this.onLayout);
     this.layout();
@@ -165,9 +187,18 @@ export class Hud {
     if (on) {
       if (this.confirmBtn.parentElement !== this.fireWrap) this.fireWrap.append(this.confirmBtn);
       if (this.ammo.parentElement !== this.tray) this.tray.append(this.ammo);
+      if (this.gear.parentElement !== this.mRow) {
+        this.mRow.append(this.gear);
+        this.mTop.append(this.players, this.flags, this.stats);
+      }
     } else {
       if (this.confirmBtn.parentElement !== this.bottom) this.bottom.append(this.confirmBtn);
       if (this.ammo.parentElement !== this.row) this.row.insertBefore(this.ammo, this.targetBtns[1]);
+      if (this.gear.parentElement !== this.cornerRow) {
+        this.cornerRow.append(this.gear);
+        this.left.prepend(this.players);
+        this.corner.append(this.stats);
+      }
     }
     // Escala de la bandeja: como mucho el 30 % del alto (252 px a 844: 7 fijos y 245 que escalan) y
     // que quepan a lo ancho el botón (118 px con su anillo) y el pad (222 px).
@@ -183,14 +214,20 @@ export class Hud {
 
   private keyHandler: (e: KeyboardEvent) => void;
 
+  // En móvil vertical, solo la píldora «Ronda N» con los segundos: sin «Fase de apuntado» (U4).
   setPhase(text: string, sub = '') {
     this.phase.replaceChildren(h('b', null, text), sub ? h('span', null, sub) : '');
+    this.roundText.textContent = text;
   }
 
   setTimer(sec: number | null, urgent = false) {
-    this.timer.textContent = sec === null ? '' : String(Math.max(0, Math.ceil(sec)));
+    const t = sec === null ? '' : String(Math.max(0, Math.ceil(sec)));
+    if (this.timer.textContent !== t) this.timer.textContent = t;
     this.timer.classList.toggle('urgent', urgent);
     this.timer.style.display = sec === null ? 'none' : '';
+    const m = t || '–';
+    if (this.roundSecs.textContent !== m) this.roundSecs.textContent = m;
+    this.roundSecs.classList.toggle('urgent', urgent);
   }
 
   // Tarjetas de munición. Se llama en cada fotograma: las cartas solo se rehacen si cambia la mano;
@@ -290,35 +327,63 @@ export class Hud {
     if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
   }
 
+  // Viento: en PC, flecha relativa a la cámara y m/s; en móvil vertical, un chip con flecha y fuerza
+  // («→ 2») que desaparece sin viento (U5). Solo se toca el DOM si cambia algo.
   setWind(w: Vec3 | null, cameraYaw = 0) {
-    if (!w || Math.hypot(w[0], w[2]) < 0.05) {
-      this.wind.replaceChildren(h('span', { class: 'muted' }, '🍃 Sin viento'));
+    const sp = w ? Math.hypot(w[0], w[2]) : 0;
+    // Ángulo de la flecha relativo a la cámara (arriba = hacia donde mira), a grados enteros.
+    const deg = w && sp >= 0.05 ? Math.round((-(Math.atan2(w[0], w[2]) - cameraYaw) * 180) / Math.PI) : 0;
+    const key = sp < 0.05 ? 'none' : `${sp.toFixed(1)}|${deg}`;
+    if (key === this.windKey) return;
+    const was = this.windKey.split('|')[0];
+    this.windKey = key;
+    this.windChip.hidden = sp < 0.05;
+    this.refreshFlags();
+    if (sp < 0.05) {
+      this.wind.replaceChildren(h('span', { class: 'muted' }, icon('wind'), ' Sin viento'));
       return;
     }
-    const sp = Math.hypot(w[0], w[2]);
-    // Ángulo de la flecha relativo a la cámara (arriba = hacia donde mira).
-    const ang = Math.atan2(w[0], w[2]) - cameraYaw;
-    const arrow = h('span', { class: 'wind-arrow', style: `transform: rotate(${(-ang * 180) / Math.PI}deg)` }, '⬆');
-    this.wind.replaceChildren(h('span', null, '💨 Viento '), arrow, h('b', null, ` ${sp.toFixed(1)}`), h('span', { class: 'muted' }, ' m/s'));
+    const rot = `rotate(${deg}deg)`;
+    if (was !== sp.toFixed(1) || !this.wind.querySelector('.wind-arrow')) {
+      this.wind.replaceChildren(h('span', null, icon('wind'), ' Viento '), h('span', { class: 'wind-arrow' }, icon('arrow')), h('b', null, ` ${sp.toFixed(1)}`), h('span', { class: 'muted' }, ' m/s'));
+      this.windVal.textContent = String(Math.max(1, Math.round(sp)));
+      this.windChip.setAttribute('aria-label', `Viento de ${sp.toFixed(1)} m/s`);
+    }
+    (this.wind.querySelector('.wind-arrow') as HTMLElement).style.transform = rot;
+    this.windArrow.style.transform = rot;
   }
 
+  // La fila de viento y objetivo solo ocupa sitio si tiene algo.
+  private refreshFlags() {
+    const empty = this.windChip.hidden && this.goalChip.hidden;
+    if (this.flags.hidden !== empty) this.flags.hidden = empty;
+  }
+
+  // Marcador: en PC, una columna con nombre, porcentaje y barra; en móvil vertical, la misma lista
+  // en una fila de chips (emblema, nombre corto, barra; el tuyo con borde crema). Estado con iconos:
+  // listo, eliminado o desconectado. Se rehace solo si cambia algo (se llama en cada fotograma).
   setPlayers(list: HudPlayer[]) {
+    const key = list.map((p) => `${p.slot}|${p.name}|${p.alive}|${p.blocks}|${p.maxBlocks}|${p.locked}|${p.bot}|${p.you}|${p.connected}`).join(';');
+    if (key === this.playersKey) return;
+    this.playersKey = key;
     this.players.replaceChildren(
       ...list.map((p) => {
         const st = PLAYER_STYLES[p.slot];
         const pct = Math.min(100, Math.round((p.blocks / Math.max(1, p.maxBlocks)) * 100));
+        // Desconectado: su catapulta dispara con la última puntería al acabar el tiempo.
+        const state = !p.alive ? icon('cross') : p.connected === false ? icon('offline') : p.locked ? icon('check') : '';
         return h(
           'div',
-          { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}`, 'data-slot': String(p.slot), title: p.name },
-          h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, st.glyph),
+          { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}${state ? ' mark' : ''}`, 'data-slot': String(p.slot), title: p.name },
+          // U+FE0E: el emblema como texto, nunca como emoji.
+          h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, `${st.glyph}\uFE0E`),
           h(
             'div',
             { class: 'hp-body' },
-            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? ' 🤖' : '', p.you ? ' (tú)' : ''), h('div', { class: 'hp-short' }, shortName(p)), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
+            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? icon('bot', 'hp-bot') : '', p.you ? ' (tú)' : ''), h('div', { class: 'hp-short' }, shortName(p)), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
             h('div', { class: 'hp-bar' }, h('div', { style: `width:${pct}%;background:${st.color}` })),
           ),
-          // 📡: desconectado (su catapulta dispara con la última puntería al acabar el tiempo).
-          h('div', { class: 'hp-state', title: p.connected === false ? 'Desconectado' : '' }, !p.alive ? '💀' : p.connected === false ? '📡' : p.locked ? '✔' : ''),
+          h('div', { class: 'hp-state', title: p.connected === false ? 'Desconectado' : '', 'aria-label': !p.alive ? 'Eliminado' : p.connected === false ? 'Desconectado' : p.locked ? 'Listo' : '' }, state),
         );
       }),
     );
@@ -344,13 +409,18 @@ export class Hud {
     this.help.style.display = show ? '' : 'none';
   }
 
+  // Objetivo de la ronda: chapa en PC y chip con borde naranja en móvil vertical (U5).
   setGoal(text: string | null, title = '') {
     const t = text ?? '';
     if (this.goal.dataset.t === t) return;
     this.goal.dataset.t = t;
     this.goal.hidden = !t;
     this.goal.title = title;
-    this.goal.replaceChildren(t ? h('span', null, '🎯 ', h('b', null, t)) : '');
+    this.goal.replaceChildren(t ? h('span', null, icon('target'), ' ', h('b', null, t)) : '');
+    this.goalText.textContent = t;
+    this.goalChip.hidden = !t;
+    this.goalChip.title = title;
+    this.refreshFlags();
   }
 
   setStats(text: string) {
@@ -376,7 +446,8 @@ export class Hud {
     if (ms) this.countdownTimer = window.setTimeout(() => this.setCountdown(null), ms);
   }
 
-  showBanner(text: string, sub = '', ms = 1800, cls = '') {
+  // El subtítulo puede llevar nodos (líneas con iconos, sin emoji).
+  showBanner(text: string, sub: string | Node = '', ms = 1800, cls = '') {
     this.banner.replaceChildren(h('div', { class: `banner-text ${cls}` }, text), sub ? h('div', { class: 'banner-sub' }, sub) : '');
     this.banner.classList.remove('show');
     void this.banner.offsetWidth;
@@ -520,7 +591,7 @@ export class Hud {
       return;
     }
     if (cur === text) return;
-    this.aimInfo.replaceChildren(h('span', { id: 'hud-watch', 'data-watch': text }, '👁 ', h('b', null, text), h('span', { class: 'muted' }, this.touchUi ? '  ·  ◀ ▶ para cambiar' : '  ·  Q/E o ◀ ▶ para cambiar')));
+    this.aimInfo.replaceChildren(h('span', { id: 'hud-watch', 'data-watch': text }, icon('eye'), ' ', h('b', null, text), h('span', { class: 'muted' }, this.touchUi ? '  ·  ◀ ▶ para cambiar' : '  ·  Q/E o ◀ ▶ para cambiar')));
   }
 
   dispose() {

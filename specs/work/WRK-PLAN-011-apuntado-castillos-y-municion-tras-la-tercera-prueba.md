@@ -7,7 +7,7 @@ status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-10-02
+updated: 2026-10-03
 owner: dimas
 parent: WRK-SPEC-011
 activates: [FEAT-CONTROL-001, DOM-JUEGO-003, DOM-JUEGO-004, RULE-001, RULE-004]
@@ -52,6 +52,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 22 | WRK-TASK-076 · Escena al atardecer (R-10 fase 1: D2) | completed | 074 | 2026-10-02 |
 | 23 | WRK-TASK-077 · Bandeja del pulgar en móvil vertical (R-10 fase 2: U1, U3, U8) | completed | 076 | 2026-10-02 |
 | 24 | WRK-TASK-078 · Descripción de la munición al mantener la carta (R-10 fase 2: U2) | completed | 077 | 2026-10-02 |
+| 25 | WRK-TASK-079 · Parte superior de la partida en móvil vertical (R-10 fase 2: U4, U5) | completed | 078 | 2026-10-03 |
 
 ## Risk Assessment
 

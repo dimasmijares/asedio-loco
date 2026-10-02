@@ -10,6 +10,7 @@ import type { Vec3 } from '../../../../shared/math';
 import { PLAYER_STYLES } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
+import { icon } from '../../ui/icons';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
@@ -199,7 +200,7 @@ export class MatchUI {
     for (const e of events) {
       if (e.e === 'fx' && e.kind === 'lavaRise' && e.p[1] > -0.3) this.hud.showBanner('LA LAVA SUBE', 'Destruye los bloques que alcanza', 2200, 'bad');
       if (e.e === 'fx' && e.kind === 'kingGuard' && e.slot !== undefined)
-        this.hud.showBanner('ESCUDO REAL', `🛡️ ${e.slot === this.src.you ? 'Tu rey se salva' : `El rey de ${nameOf(this.src.state, e.slot)} se salva`}: nadie cae hasta la ronda ${KING_GUARD_ROUNDS + 1}`, 2200, 'guard');
+        this.hud.showBanner('ESCUDO REAL', h('span', null, icon('shield'), ` ${e.slot === this.src.you ? 'Tu rey se salva' : `El rey de ${nameOf(this.src.state, e.slot)} se salva`}: nadie cae hasta la ronda ${KING_GUARD_ROUNDS + 1}`), 2200, 'guard');
     }
   }
 
@@ -357,13 +358,16 @@ export class MatchUI {
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
       const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      let sub = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
+      const first = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
+      // Una línea por aviso, con iconos SVG en lugar de emoji (R-10).
+      const sub = h('span', null, h('div', null, first));
+      const line = (...parts: (Node | string)[]) => sub.append(h('div', null, ...parts));
       // Escudo real (WRK-TASK-041): se anuncia al empezar, en la última ronda con él y al acabarse.
-      if (s.round === 1) sub += `\n🛡️ Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`;
-      else if (s.round === KING_GUARD_ROUNDS) sub += '\n🛡️ Última ronda con escudo real';
-      else if (s.round === KING_GUARD_ROUNDS + 1) sub += '\nSe acaba el escudo real: los reyes ya pueden caer';
-      if (s.goal) sub += `\n🎯 Objetivo: ${GOALS[s.goal].text}`;
-      if (this.src.you !== null && (s.bonus ?? []).includes(this.src.you)) sub += '\n🎁 Premio por el objetivo: tu primera carta es rara o épica';
+      if (s.round === 1) line(icon('shield'), ` Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`);
+      else if (s.round === KING_GUARD_ROUNDS) line(icon('shield'), ' Última ronda con escudo real');
+      else if (s.round === KING_GUARD_ROUNDS + 1) line('Se acaba el escudo real: los reyes ya pueden caer');
+      if (s.goal) line(icon('target'), ` Objetivo: ${GOALS[s.goal].text}`);
+      if (this.src.you !== null && (s.bonus ?? []).includes(this.src.you)) line(icon('gift'), ' Premio por el objetivo: tu primera carta es rara o épica');
       this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, s.round <= KING_GUARD_ROUNDS + 1 ? 2600 : 1700);
       sfx.fanfare();

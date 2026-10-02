@@ -5,7 +5,8 @@ import { AMMO } from '../../shared/ammo';
 // elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia. En vertical,
 // el botón de disparo, el pad y las cartas van dentro de la bandeja del pulgar (R-10 U1).
 const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
-const PORTRAIT = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#target-prev', '#target-next', '#tray'];
+// En vertical, arriba: píldora de la ronda, engranaje, fila de chips y viento y objetivo (R-10 U4, U5).
+const PORTRAIT = ['#hud-round', '#hud-settings', '#hud-players', '#hud-flags', '#hud-aim', '#target-prev', '#target-next', '#tray'];
 const IN_TRAY = ['#confirm', '#aim-pad', '#hud-ammo'];
 
 type Box = { x: number; y: number; w: number; h: number };
@@ -44,6 +45,18 @@ for (const [w, h] of [
       await page.goto('/?bots=3&seed=5#solo');
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       await page.waitForTimeout(500);
+      const portrait = h > w;
+      // Con viento, para medir también su chip (en la ronda 1 no sopla): se fija y se congela.
+      if (portrait) {
+        await expect(page.locator('#hud-wind-chip'), 'sin viento no hay chip').toBeHidden();
+        await page.evaluate(() => {
+          const hud = (window as any).__asedio.mode.ui.hud;
+          hud.setWind([1.6, 0, 1.9], 0);
+          hud.setWind = () => {};
+        });
+        await expect(page.locator('#hud-wind-chip')).toBeVisible();
+        await expect(page.locator('#hud-wind-chip b')).toHaveText('2');
+      }
       // Tarjeta de descripción (R-10 U2) al mantener el dedo en una carta, con la descripción más
       // larga: dentro de la pantalla y en dos líneas como mucho.
       const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
@@ -66,7 +79,6 @@ for (const [w, h] of [
         [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
       );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
-      const portrait = h > w;
       const r = await rects(page, portrait ? PORTRAIT : PARTS);
       // Sin la línea de potencia ni las flechas del jugador (WRK-TASK-061): quedan 6 o 7.
       expect(Object.keys(r).length, `elementos visibles: ${Object.keys(r).join(', ')}`).toBeGreaterThanOrEqual(portrait ? 4 : 6);
@@ -84,9 +96,23 @@ for (const [w, h] of [
         for (const [k, a] of Object.entries(inner)) expect(a.x >= tray.x && a.x + a.w <= tray.x + tray.w + 0.5 && a.y >= tray.y && a.y + a.h <= tray.y + tray.h + 0.5, `${k} dentro de la bandeja`).toBe(true);
         noCross(inner);
       }
-      // Marcador compacto: nombre corto en vez del completo, con porcentaje (WRK-TASK-046).
+      // Marcador compacto: nombre corto en vez del completo (WRK-TASK-046); en horizontal, con
+      // porcentaje; en vertical, una fila de cuatro chips sin porcentaje y sin «Fase de apuntado» (U4).
       expect(await page.locator('.hp-name').first().isVisible()).toBe(false);
-      await expect(page.locator('.hp-pct').first()).toBeVisible();
+      if (portrait) {
+        expect(await page.locator('.hp-pct').first().isVisible()).toBe(false);
+        await expect(page.locator('#hud-phase')).toBeHidden();
+        await expect(page.locator('#mute')).toBeHidden();
+        const chips = await page.locator('#hud-players .hp').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
+        expect(chips.length).toBe(4);
+        for (const c of chips) {
+          expect(Math.abs(c.y - chips[0].y), 'en una fila').toBeLessThan(1);
+          expect(c.width).toBeLessThanOrEqual(86.5);
+        }
+        const gear = r['#hud-settings'];
+        expect(Math.min(gear.w, gear.h), 'engranaje ≥ 44 px').toBeGreaterThanOrEqual(44);
+        await expect(page.locator('#hud-round')).toContainText(/Ronda 1\s*\d+/);
+      } else await expect(page.locator('.hp-pct').first()).toBeVisible();
       expect(shorts.length).toBe(4);
       for (const s of shorts) {
         expect(s.w, `nombre corto «${s.text}» visible`).toBeGreaterThan(4);

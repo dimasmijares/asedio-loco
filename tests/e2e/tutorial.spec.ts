@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // Tutorial de la primera partida (WRK-TASK-048): en PC y en móvil vertical, los 3 pasos se leen
 // sin tapar ningún control y cada uno resalta el que toca.
-const CONTROLS = ['.hud-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm', '#tray'];
+const CONTROLS = ['.hud-top', '#m-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm', '#tray'];
 
 async function overlaps(page: Page) {
   return page.evaluate((sel) => {
