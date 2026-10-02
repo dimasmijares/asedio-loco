@@ -1,4 +1,4 @@
-import { AMMO, RARITY_COLOR, RARITY_LABEL, type AmmoId } from '../../../shared/ammo';
+import { AMMO, RARITY_COLOR, RARITY_INK, RARITY_LABEL, type AmmoId } from '../../../shared/ammo';
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
 import { DEG, type Vec3 } from '../../../shared/math';
 import { PLAYER_STYLES, shortName } from '../../../shared/players';
@@ -130,6 +130,7 @@ export class Hud {
     if (sel) {
       const a = AMMO[sel];
       this.ammoDesc.style.setProperty('--rar', RARITY_COLOR[a.rarity]);
+      this.ammoDesc.style.setProperty('--rar-ink', RARITY_INK[a.rarity]);
       this.ammoDesc.replaceChildren(
         h('span', { class: 'desc-icon' }, a.icon),
         h('span', { class: 'desc-body' }, h('span', { class: 'desc-head' }, h('b', { class: 'desc-name' }, a.name), h('span', { class: 'desc-rar' }, RARITY_LABEL[a.rarity])), h('span', { class: 'desc-text' }, a.desc)),
@@ -140,7 +141,7 @@ export class Hud {
         const a = AMMO[id];
         const b = h(
           'button',
-          { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'aria-label': a.name, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]}` },
+          { class: `ammo${i === selected ? ' sel' : ''}`, title: `${a.name} (${RARITY_LABEL[a.rarity]}): ${a.desc}`, 'aria-label': a.name, 'data-ammo': id, style: `--rar:${RARITY_COLOR[a.rarity]};--rar-ink:${RARITY_INK[a.rarity]}` },
           h('span', { class: 'ammo-icon' }, a.icon),
           h('span', { class: 'ammo-rar' }, RARITY_LABEL[a.rarity]),
           keys && list.length <= 12 ? h('span', { class: 'ammo-key' }, AMMO_KEYS[i]) : null,

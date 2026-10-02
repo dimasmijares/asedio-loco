@@ -1,15 +1,73 @@
+/* Letra (R-10 E2): Lilita One para títulos, botones y cifras; Nunito 600-900 para el texto.
+   Servidas desde el propio repositorio (OFL, licencias junto a los archivos). */
+@font-face {
+  font-family: 'Lilita One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/lilita-one-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lilita One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/lilita-one-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('./fonts/nunito-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('./fonts/nunito-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Paleta «Atardecer» (R-10 E1): los valores de tokens.json del design system. Grana solo para
+   disparo, daño y peligro; naranja solo para lo que se toca o está elegido. */
 :root {
-  --bg: #1b2440;
-  --panel: rgba(255, 250, 240, 0.96);
-  --ink: #2a2233;
-  --ink-soft: #6b5f73;
-  --accent: #ff7a1a;
-  --accent-dark: #c9540a;
-  --good: #1f9d55;
-  --bad: #d63031;
-  --radius: 14px;
-  --font: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
-  --display: 'Arial Black', 'Segoe UI Black', Impact, sans-serif;
+  --al-noche: #200432;
+  --al-noche-profunda: #12021f;
+  --al-velo: rgba(18, 2, 31, 0.72);
+  --al-ciruela: #4a0730;
+  --al-vino: #7a0c31;
+  --al-grana: #cd1a30;
+  --al-grana-oscuro: #8e0f22;
+  --al-naranja: #fe8932;
+  --al-naranja-oscuro: #c4581a;
+  --al-crema: #fee7b5;
+  --al-crema-oscuro: #e9c27e;
+  --al-hueso: #fff6e2;
+  --al-listo: #9ed36a;
+  /* Paneles del HUD: noche al 86 % (componente Marcador). */
+  --al-panel-hud: rgba(32, 4, 50, 0.86);
+  --al-sombra-dura: 0 4px 0 var(--al-noche);
+  --al-sombra-tablon: 0 5px 0 var(--al-noche);
+  --al-radius-sm: 8px;
+  --al-radius-md: 12px;
+  --al-radius-lg: 22px;
+  --al-radius-full: 999px;
+
+  --bg: var(--al-noche);
+  --panel: var(--al-crema);
+  --ink: var(--al-noche);
+  --ink-soft: var(--al-vino);
+  --accent: var(--al-naranja);
+  --accent-dark: var(--al-naranja-oscuro);
+  --bad: var(--al-grana);
+  --radius: var(--al-radius-lg);
+  --font: Nunito, 'Trebuchet MS', system-ui, sans-serif;
+  --display: 'Lilita One', 'Arial Black', system-ui, sans-serif;
 }
 
 * {
@@ -25,6 +83,9 @@ body {
   color: var(--ink);
   font-family: var(--font);
   font-size: 17px;
+  font-weight: 600;
+  /* Lilita One solo tiene un peso: nada de negritas de imitación. */
+  font-synthesis: none;
   user-select: none;
 }
 
@@ -56,7 +117,7 @@ body {
 .panel {
   background: var(--panel);
   border-radius: var(--radius);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25), 0 18px 50px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--al-sombra-tablon);
   border: 3px solid var(--ink);
   padding: 22px 26px;
   width: min(460px, calc(100vw - 32px));
@@ -67,10 +128,14 @@ body {
 .title {
   font-family: var(--display);
   font-size: clamp(42px, 8vw, 84px);
+  font-weight: 400;
   line-height: 0.95;
-  color: #ffd23f;
-  text-shadow: 0 5px 0 #c9540a, 0 9px 0 var(--ink), 0 12px 30px rgba(0, 0, 0, 0.5);
-  -webkit-text-stroke: 3px var(--ink);
+  color: var(--al-crema);
+  /* Contorno noche de 3 px y sombra dura (design system, «Letra»). */
+  text-shadow: 0 6px 0 var(--ink);
+  /* Con paint-order el trazo queda por fuera: 6 px de trazo son 3 px de contorno visible. */
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
   text-align: center;
   margin: 0 0 18px;
   letter-spacing: 1px;
@@ -94,12 +159,13 @@ body {
 h2 {
   margin: 0 0 12px;
   font-family: var(--display);
+  font-weight: 400;
   font-size: 24px;
 }
 
 label {
   display: block;
-  font-weight: bold;
+  font-weight: 800;
   margin: 10px 0 4px;
   font-size: 15px;
   color: var(--ink-soft);
@@ -112,22 +178,30 @@ select {
   font-size: 18px;
   padding: 10px 12px;
   border: 3px solid var(--ink);
-  border-radius: 10px;
-  background: #fff;
+  border-radius: var(--al-radius-md);
+  background: var(--al-hueso);
   color: var(--ink);
+  font-weight: 700;
 }
 
+input::placeholder {
+  color: var(--al-vino);
+  opacity: 0.75;
+}
+
+/* Botones (componente Botones): Lilita One, contorno noche de 3 px y sombra dura. */
 button {
   font: inherit;
-  font-weight: bold;
+  font-family: var(--display);
+  font-weight: 400;
   font-size: 18px;
   cursor: pointer;
   border: 3px solid var(--ink);
-  border-radius: 12px;
+  border-radius: var(--al-radius-md);
   padding: 10px 18px;
-  background: #fff;
+  background: var(--al-crema);
   color: var(--ink);
-  box-shadow: 0 4px 0 var(--ink);
+  box-shadow: var(--al-sombra-dura);
   transition: transform 0.06s, box-shadow 0.06s;
 }
 
@@ -137,21 +211,92 @@ button:active:not(:disabled) {
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
+  box-shadow: none;
   cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--al-naranja);
+  outline-offset: 2px;
 }
 
 button.primary {
   background: var(--accent);
-  color: #fff;
-  text-shadow: 0 2px 0 var(--accent-dark);
+  color: var(--ink);
 }
 
+/* Tablón de madera pintada (R-10 E3): veta, brillo arriba, canto abajo, sombra dura y dos clavos.
+   En los menús se inclina un poco, alternando, como clavado a mano; el HUD de partida no tiene. */
 button.big {
+  --tilt: -1.2deg;
+  position: relative;
   width: 100%;
-  font-size: 22px;
-  padding: 14px;
+  min-height: 64px;
+  padding: 8px 26px;
   margin-top: 14px;
+  font-size: clamp(18px, 4.6vw, 26px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background-color: var(--al-crema);
+  background-image: repeating-linear-gradient(177deg, rgba(32, 4, 50, 0) 0 10px, rgba(32, 4, 50, 0.07) 10px 12px);
+  box-shadow: inset 0 3px 0 rgba(255, 246, 226, 0.45), inset 0 -6px 0 rgba(32, 4, 50, 0.22), var(--al-sombra-tablon);
+  transform: rotate(var(--tilt));
+}
+
+button.big:nth-of-type(even) {
+  --tilt: 0.8deg;
+}
+
+button.big:nth-of-type(3n) {
+  --tilt: -0.6deg;
+}
+
+button.big::before,
+button.big::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: rgba(32, 4, 50, 0.55);
+}
+
+button.big::before {
+  left: 10px;
+}
+
+button.big::after {
+  right: 10px;
+}
+
+button.big:active:not(:disabled) {
+  transform: translateY(3px) rotate(var(--tilt));
+  box-shadow: inset 0 3px 0 rgba(255, 246, 226, 0.45), inset 0 -6px 0 rgba(32, 4, 50, 0.22), 0 2px 0 var(--ink);
+}
+
+button.big:disabled {
+  box-shadow: inset 0 3px 0 rgba(255, 246, 226, 0.45), inset 0 -6px 0 rgba(32, 4, 50, 0.22);
+}
+
+button.big.primary {
+  background-color: var(--al-naranja);
+}
+
+/* Acciones secundarias de texto largo (hasta que la fase 3 las acorte). */
+#sandbox {
+  font-size: clamp(16px, 4.1vw, 20px);
+}
+
+/* Tablón de peligro: salir de la partida. */
+button.big.danger {
+  background-color: var(--al-grana);
+  color: var(--al-crema);
 }
 
 .row {
@@ -171,7 +316,7 @@ button.big {
 
 .error {
   color: var(--bad);
-  font-weight: bold;
+  font-weight: 800;
   min-height: 1.2em;
   margin-top: 8px;
 }
@@ -190,8 +335,8 @@ button.big {
   gap: 10px;
   padding: 8px 10px;
   border: 3px solid var(--ink);
-  border-radius: 10px;
-  background: #fff;
+  border-radius: var(--al-radius-md);
+  background: var(--al-hueso);
   min-height: 50px;
 }
 
@@ -211,12 +356,11 @@ button.big {
   padding-top: 3px;
   font-size: 17px;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   flex: none;
 }
 
 .players .name {
-  font-weight: bold;
+  font-weight: 800;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -225,11 +369,11 @@ button.big {
 
 .tag {
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 800;
   padding: 2px 8px;
-  border-radius: 99px;
+  border-radius: var(--al-radius-full);
   background: var(--ink);
-  color: #fff;
+  color: var(--al-crema);
 }
 
 .tag.off {
@@ -237,7 +381,7 @@ button.big {
 }
 
 .tag.bot {
-  background: #6c5ce7;
+  background: var(--al-ciruela);
 }
 
 .link-box {
@@ -262,10 +406,11 @@ button.big {
   bottom: 30px;
   transform: translateX(-50%);
   background: var(--ink);
-  color: #fff;
+  color: var(--al-crema);
   padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: bold;
+  border: 2px solid var(--al-crema-oscuro);
+  border-radius: var(--al-radius-md);
+  font-weight: 800;
   z-index: 100;
   pointer-events: none;
   animation: toast 2.2s forwards;
@@ -292,8 +437,12 @@ button.big {
   inset: 0;
   pointer-events: none;
   z-index: 5;
-  color: #fff;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+  color: var(--al-crema);
+  text-shadow: 0 2px 0 var(--al-noche);
+}
+
+.hud .muted {
+  color: var(--al-crema-oscuro);
 }
 
 .hud button {
@@ -311,9 +460,9 @@ button.big {
 }
 
 .hud-phase {
-  background: rgba(29, 22, 38, 0.72);
-  border: 3px solid rgba(255, 255, 255, 0.85);
-  border-radius: 12px;
+  background: var(--al-panel-hud);
+  border: 3px solid var(--al-crema-oscuro);
+  border-radius: var(--al-radius-md);
   padding: 6px 16px;
   text-align: center;
   font-size: 18px;
@@ -321,6 +470,7 @@ button.big {
 
 .hud-phase b {
   font-family: var(--display);
+  font-weight: 400;
   font-size: 22px;
   display: block;
 }
@@ -338,14 +488,16 @@ button.big {
   line-height: 58px;
   text-align: center;
   border-radius: 50%;
-  background: #ffd23f;
+  background: var(--al-naranja);
   color: var(--ink);
   text-shadow: none;
   border: 4px solid var(--ink);
 }
 
+/* Últimos segundos: peligro. */
 .hud-timer.urgent {
-  background: #ff5d5d;
+  background: var(--al-grana);
+  color: var(--al-crema);
   animation: pulse 0.5s infinite alternate;
 }
 
@@ -375,14 +527,14 @@ button.big {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(29, 22, 38, 0.7);
+  background: var(--al-panel-hud);
   border-radius: 10px;
   padding: 5px 8px;
-  border: 2px solid transparent;
+  border: 2px solid var(--al-noche);
 }
 
 .hp.you {
-  border-color: #fff;
+  border-color: var(--al-crema);
 }
 
 .hp.out {
@@ -410,14 +562,14 @@ button.big {
 .hp-pct {
   margin-left: auto;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 800;
   opacity: 0.8;
   font-variant-numeric: tabular-nums;
 }
 
 .hp-name {
   min-width: 0;
-  font-weight: bold;
+  font-weight: 800;
   font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
@@ -430,7 +582,7 @@ button.big {
 
 .hp-bar {
   height: 7px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(254, 231, 181, 0.22);
   border-radius: 4px;
   overflow: hidden;
   margin-top: 3px;
@@ -459,7 +611,8 @@ button.big {
 
 .hud-wind {
   white-space: nowrap;
-  background: rgba(29, 22, 38, 0.7);
+  background: var(--al-panel-hud);
+  border: 2px solid var(--al-noche);
   border-radius: 10px;
   padding: 6px 12px;
   font-size: 16px;
@@ -467,8 +620,8 @@ button.big {
 
 .hud-goal {
   white-space: nowrap;
-  background: rgba(29, 22, 38, 0.7);
-  border: 2px solid #ffd23f;
+  background: var(--al-panel-hud);
+  border: 2px solid var(--al-naranja);
   border-radius: 10px;
   padding: 4px 10px;
   font-size: 14px;
@@ -477,7 +630,7 @@ button.big {
 .wind-arrow {
   display: inline-block;
   font-size: 22px;
-  color: #72ddf7;
+  color: var(--al-crema);
   transition: transform 0.3s;
 }
 
@@ -503,7 +656,7 @@ button.big {
   display: flex;
   gap: 18px;
   font-size: 17px;
-  background: rgba(29, 22, 38, 0.6);
+  background: var(--al-panel-hud);
   border-radius: 10px;
   padding: 4px 14px;
 }
@@ -514,7 +667,7 @@ button.big {
 
 .hud-ammo-desc {
   font-size: 14px;
-  background: rgba(29, 22, 38, 0.6);
+  background: var(--al-panel-hud);
   border-radius: 10px;
   padding: 2px 12px;
   text-align: center;
@@ -558,15 +711,12 @@ button.big {
   align-items: center;
   min-width: 78px;
   padding: 6px 8px 4px;
+  font-family: var(--font);
   font-size: 13px;
-  border-color: var(--rar);
-  box-shadow: 0 4px 0 var(--rar);
   position: relative;
-  background: rgba(255, 250, 240, 0.95);
 }
 
 .ammo.sel {
-  background: #ffd23f;
   transform: translateY(-4px);
 }
 
@@ -585,19 +735,24 @@ button.big {
   top: 2px;
   left: 5px;
   font-size: 11px;
-  opacity: 0.6;
 }
 
-.hud-confirm {
+/* Botón de disparo: grana, que es el color del fuego (componente BandejaMovil). Con «button»
+   delante para ganar a «button.primary». */
+button.hud-confirm {
   font-size: 20px;
   padding: 10px 26px;
   min-width: 320px;
   touch-action: none;
+  background: var(--al-grana);
+  color: var(--al-crema);
+  text-shadow: none;
+  box-shadow: inset 0 -5px 0 var(--al-grana-oscuro), var(--al-sombra-dura);
 }
 
-/* Mientras se carga, el botón se llena de izquierda a derecha con la fuerza. */
+/* Mientras se carga, el botón se llena de izquierda a derecha con la fuerza, en naranja. */
 .hud-confirm.charging {
-  background: linear-gradient(to right, #ffd23f var(--p), var(--accent) var(--p));
+  background: linear-gradient(to right, var(--al-naranja) var(--p), var(--al-crema) var(--p));
   color: var(--ink);
   text-shadow: none;
   transform: translateY(3px);
@@ -624,13 +779,13 @@ body.touch .hud-confirm {
 }
 
 body.touch .hud-confirm::after {
-  content: 'mantén';
-  font-size: 12px;
+  content: 'MANTÉN';
+  font-size: 13px;
   margin-top: 4px;
 }
 
 body.touch .hud-confirm.charging {
-  background: conic-gradient(#ffd23f var(--p), var(--accent) var(--p));
+  background: conic-gradient(var(--al-naranja) var(--p), var(--al-crema) var(--p));
   font-size: 24px;
   transform: scale(1.06);
 }
@@ -642,7 +797,7 @@ body.touch .hud-confirm:disabled::after {
 
 .hud-help {
   width: max-content;
-  background: rgba(29, 22, 38, 0.72);
+  background: var(--al-panel-hud);
   border-radius: 12px;
   padding: 6px 10px 8px;
   font-size: 13px;
@@ -656,7 +811,6 @@ body.touch .hud-confirm:disabled::after {
   color: inherit;
   padding: 2px 0 4px;
   font-size: 13px;
-  font-weight: bold;
   cursor: pointer;
 }
 
@@ -668,7 +822,7 @@ body.touch .hud-confirm:disabled::after {
 .help-toggle:active:not(:disabled) {
   transform: none;
   box-shadow: none;
-  color: #ffd23f;
+  color: var(--al-naranja);
 }
 
 .hud-help.closed .help-list {
@@ -699,11 +853,11 @@ kbd {
   min-width: 20px;
   padding: 1px 5px;
   border-radius: 5px;
-  background: #fffaf0;
+  background: var(--al-crema);
   color: var(--ink);
   border: 1.5px solid var(--ink);
   box-shadow: 0 2px 0 var(--ink);
-  font: bold 11px var(--font);
+  font: 800 11px var(--font);
   text-align: center;
   text-shadow: none;
   line-height: 16px;
@@ -728,22 +882,24 @@ kbd {
 .banner-text {
   font-family: var(--display);
   font-size: clamp(38px, 7vw, 76px);
-  color: #ffd23f;
-  -webkit-text-stroke: 3px var(--ink);
+  color: var(--al-crema);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
   text-shadow: 0 6px 0 var(--ink);
 }
 
+/* Rey eliminado: peligro. */
 .banner-text.bad {
-  color: #ff6b6b;
+  color: var(--al-grana);
 }
 
 .banner-text.guard {
-  color: #ffd23f;
+  color: var(--al-crema-oscuro);
 }
 
 .banner-sub {
   font-size: 22px;
-  font-weight: bold;
+  font-weight: 800;
   margin-top: 6px;
   white-space: pre-line;
 }
@@ -797,7 +953,7 @@ kbd {
 
 .dmg-label.none {
   font-size: 18px;
-  color: #ffffff;
+  color: var(--al-crema);
   -webkit-text-stroke: 4px var(--ink);
 }
 
@@ -829,17 +985,18 @@ kbd {
   }
 }
 
+/* Objetivo cumplido: confirmación sobre oscuro. */
 .res-goal {
   margin-top: 4px;
-  color: #ffd23f;
-  font-weight: bold;
+  color: var(--al-listo);
+  font-weight: 800;
   text-align: center;
 }
 
 .res-phrase {
   font-family: var(--display);
   font-size: 26px;
-  color: #ffd23f;
+  color: var(--al-crema);
   -webkit-text-stroke: 5px var(--ink);
   paint-order: stroke fill;
   text-shadow: 0 3px 0 var(--ink);
@@ -851,7 +1008,7 @@ kbd {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(29, 22, 38, 0.72);
+  background: var(--al-panel-hud);
   border-radius: 10px;
   padding: 4px 12px;
   font-size: 16px;
@@ -864,7 +1021,7 @@ kbd {
 }
 
 .over-overlay {
-  background: rgba(20, 14, 30, 0.35);
+  background: rgba(18, 2, 31, 0.35);
   z-index: 20;
 }
 
@@ -875,7 +1032,7 @@ kbd {
 
 .over-title {
   font-size: 40px;
-  color: var(--accent);
+  color: var(--ink);
   margin-bottom: 4px;
 }
 
@@ -890,9 +1047,9 @@ kbd {
   display: flex;
   gap: 12px;
   align-items: center;
-  background: #fff;
+  background: var(--al-hueso);
   border: 3px solid var(--ink);
-  border-radius: 10px;
+  border-radius: var(--al-radius-md);
   padding: 8px 12px;
 }
 
@@ -909,7 +1066,7 @@ kbd {
   font-size: 18px;
   padding: 4px 10px;
   box-shadow: 0 3px 0 var(--ink);
-  background: rgba(255, 250, 240, 0.92);
+  background: var(--al-crema);
 }
 
 /* Fondo animado de la portada y el lobby */
@@ -929,7 +1086,7 @@ kbd {
 
 /* Ajustes */
 .modal {
-  background: rgba(20, 14, 30, 0.45);
+  background: var(--al-velo);
   z-index: 50;
 }
 
@@ -949,6 +1106,7 @@ label.check {
   align-items: center;
   gap: 8px;
   color: var(--ink);
+  font-weight: 700;
   font-size: 17px;
   margin-top: 14px;
 }
@@ -975,11 +1133,14 @@ input[type='range'] {
   font-size: clamp(56px, 11vw, 120px);
 }
 
+/* Sobre la escena: crema con contorno noche, legible sobre el cielo y sobre la lava. */
 .subtitle {
-  color: #fff;
-  font-weight: bold;
+  color: var(--al-crema);
+  font-weight: 800;
   font-size: 20px;
-  text-shadow: 0 2px 0 var(--ink), 0 0 12px rgba(0, 0, 0, 0.5);
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 var(--ink);
   margin: -6px 0 14px;
   text-align: center;
 }
@@ -1029,9 +1190,9 @@ html.big-text .ammo-name {
   color: var(--ink);
   text-shadow: none;
   border: 3px solid var(--ink);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 12px 16px 10px;
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: var(--al-sombra-dura);
   pointer-events: auto;
   font-size: 16px;
   display: grid;
@@ -1040,8 +1201,14 @@ html.big-text .ammo-name {
 
 .coach b {
   font-family: var(--display);
+  font-weight: 400;
   font-size: 19px;
-  color: var(--accent-dark);
+  color: var(--ink);
+}
+
+.coach > div {
+  color: var(--al-vino);
+  font-weight: 700;
 }
 
 .coach.pop {
@@ -1066,7 +1233,7 @@ html.big-text .ammo-name {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #cfc6d6;
+  background: var(--al-crema-oscuro);
 }
 
 .coach-dots span.on {
@@ -1091,10 +1258,10 @@ html.big-text .ammo-name {
 @keyframes tut-focus {
   0%,
   100% {
-    box-shadow: 0 0 0 3px #ffffff, 0 0 0 3px rgba(255, 210, 63, 0.9);
+    box-shadow: 0 0 0 3px var(--al-noche), 0 0 0 6px rgba(254, 137, 50, 0.95);
   }
   50% {
-    box-shadow: 0 0 0 3px #ffffff, 0 0 0 14px rgba(255, 210, 63, 0);
+    box-shadow: 0 0 0 3px var(--al-noche), 0 0 0 16px rgba(254, 137, 50, 0);
   }
 }
 
@@ -1109,7 +1276,7 @@ html.big-text .ammo-name {
   top: 58%;
   font-size: 44px;
   pointer-events: none;
-  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 3px 0 var(--al-noche));
   animation: coach-swipe 2.2s ease-in-out infinite;
 }
 
@@ -1132,7 +1299,7 @@ html.big-text .ammo-name {
     animation: none;
   }
   .tut-focus {
-    box-shadow: 0 0 0 3px #ffffff;
+    box-shadow: 0 0 0 3px var(--al-noche), 0 0 0 6px var(--al-naranja);
   }
 }
 
@@ -1155,9 +1322,10 @@ html.big-text .ammo-name {
 
 .hud-countdown span {
   font-family: var(--display);
-  color: #ffd23f;
-  -webkit-text-stroke: 4px var(--ink);
-  text-shadow: 0 8px 0 var(--ink), 0 0 60px rgba(255, 180, 60, 0.55);
+  color: var(--al-crema);
+  -webkit-text-stroke: 8px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 8px 0 var(--ink);
   animation: cd-pop 1s ease-out both;
 }
 
@@ -1167,7 +1335,8 @@ html.big-text .ammo-name {
 
 .hud-countdown .cd-go {
   font-size: clamp(80px, 15vw, 180px);
-  color: #ff7a3d;
+  /* «¡FUEGO!»: el disparo. */
+  color: var(--al-grana);
 }
 
 @keyframes cd-pop {
@@ -1207,7 +1376,7 @@ html.big-text .ammo-name {
   height: 34px;
   padding: 0 14px;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--al-crema);
 }
 
 .hud.replaying::before,
@@ -1217,7 +1386,7 @@ html.big-text .ammo-name {
   left: 0;
   right: 0;
   height: 9vh;
-  background: #0b0710;
+  background: var(--al-noche-profunda);
   pointer-events: none;
   animation: bars 0.35s ease-out;
 }
@@ -1229,8 +1398,8 @@ html.big-text .ammo-name {
 .hud.replaying::after {
   bottom: 0;
   content: '▶ REPETICIÓN';
-  color: #ffd23f;
-  font: bold 16px var(--display);
+  color: var(--al-crema);
+  font: 400 16px var(--display);
   letter-spacing: 2px;
   display: flex;
   align-items: center;
@@ -1674,12 +1843,12 @@ html.big-text .ammo-name {
   gap: 10px;
   max-width: min(440px, calc(100vw - 24px));
   padding: 8px 12px;
-  background: #fbf3dc;
-  color: #1d1626;
+  background: var(--al-crema);
+  color: var(--al-noche);
   text-shadow: none;
-  border: 3px solid #1d1626;
+  border: 3px solid var(--al-noche);
   border-radius: 16px;
-  box-shadow: 0 4px 0 #1d1626;
+  box-shadow: var(--al-sombra-dura);
   text-align: left;
 }
 .desc-icon {
@@ -1691,8 +1860,8 @@ html.big-text .ammo-name {
   justify-content: center;
   font-size: 24px;
   border-radius: 12px;
-  border: 3px solid var(--rar);
-  background: color-mix(in srgb, var(--rar) 18%, #ffffff);
+  border: 3px solid var(--al-noche);
+  background: var(--al-hueso);
 }
 .desc-body {
   display: flex;
@@ -1706,24 +1875,26 @@ html.big-text .ammo-name {
   gap: 6px;
 }
 .desc-name {
-  font-family: var(--display, inherit);
+  font-family: var(--display);
+  font-weight: 400;
   font-size: 16px;
   white-space: nowrap;
 }
 .desc-rar {
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: 6px;
+  border: 1.5px solid var(--al-noche);
   background: var(--rar);
-  color: #ffffff;
+  color: var(--rar-ink);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .desc-text {
   font-size: 12px;
-  font-weight: 600;
-  color: #4a3f5c;
+  font-weight: 700;
+  color: var(--al-vino);
   line-height: 1.25;
 }
 
@@ -1739,18 +1910,19 @@ html.big-text .ammo-name {
   padding: 0;
   justify-content: space-between;
   overflow: hidden;
-  border: 4px solid var(--rar);
-  border-radius: 18px;
-  background: #fbf3dc;
-  box-shadow: 0 4px 0 #1d1626;
+  border: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-md);
+  background: #f3d9a4;
+  box-shadow: var(--al-sombra-dura);
   transition: transform 0.12s ease, width 0.12s ease, height 0.12s ease;
 }
+/* La elegida sube y lleva anillo naranja (componente CartaMunicion). */
 .ammo.sel {
   width: 100px;
   height: 100px;
-  background: color-mix(in srgb, var(--rar) 18%, #ffffff);
+  background: var(--al-crema);
   transform: translateY(-6px);
-  box-shadow: 0 0 0 4px #ffffff, 0 0 22px 6px var(--rar);
+  box-shadow: 0 0 0 3px var(--al-noche), 0 0 0 7px var(--al-naranja), 0 6px 0 7px var(--al-noche);
 }
 .ammo-icon {
   flex-grow: 1;
@@ -1766,18 +1938,26 @@ html.big-text .ammo-name {
   width: 100%;
   padding: 3px 0 4px;
   background: var(--rar);
-  color: #ffffff;
+  border-top: 2px solid var(--al-noche);
+  color: var(--rar-ink);
   text-shadow: none;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .ammo-key {
-  top: 3px;
-  left: 7px;
-  color: #1d1626;
+  top: 4px;
+  left: 5px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--al-noche);
+  color: var(--al-crema);
   text-shadow: none;
+  font-weight: 900;
+  line-height: 18px;
+  text-align: center;
 }
 
 /* Ventana baja (móvil en horizontal): todo un poco más pequeño. */

@@ -4,9 +4,9 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.1.2
+version: 1.1.3
 created: 2026-09-26
-updated: 2026-09-28
+updated: 2026-10-02
 owner: dimas
 dependencies:
   - id: ARCH-001
@@ -80,6 +80,7 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 **5. Herramientas de captura y seguimiento** (`tests/tools/`, `<base>` es la URL del sitio)
 
 - `node tests/tools/review.mjs <base> <carpeta>`: portada, apuntado, carga, impacto y resultados, con GPU.
+- `node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil]`: portada, «Jugar solo», apuntando y resultados en 1280×720 y en 390×844, con GPU (revisión de estilo, R-10).
 - `node tests/tools/impact-shots.mjs <base> <carpeta> [ronda]`: la cámara panorámica.
 - `node tests/tools/countdown-shots.mjs <base> <carpeta> [ronda]`: la cuenta atrás (3, 2, 1, ¡FUEGO!) y cómo se aleja la cámara hasta el plano general.
 - `node tests/tools/replay-shots.mjs <base> <carpeta>`: la repetición.

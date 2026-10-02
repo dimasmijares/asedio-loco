@@ -26,7 +26,10 @@ export interface AmmoDef {
 }
 
 export const RARITY_LABEL: Record<Rarity, string> = { comun: 'Común', rara: 'Rara', epica: 'Épica', defensiva: 'Defensiva' };
-export const RARITY_COLOR: Record<Rarity, string> = { comun: '#6c7689', rara: '#3a86ff', epica: '#b5179e', defensiva: '#2a9d8f' };
+// Colores de rareza del design system «Atardecer» (R-10) y el texto que va encima. Defensiva usa
+// `listo` (decisión del usuario, 02-10-2026): no tiene token propio.
+export const RARITY_COLOR: Record<Rarity, string> = { comun: '#A8949C', rara: '#4FA8E8', epica: '#9E2E8A', defensiva: '#9ED36A' };
+export const RARITY_INK: Record<Rarity, string> = { comun: '#200432', rara: '#200432', epica: '#FEE7B5', defensiva: '#200432' };
 
 export const AMMO: Record<AmmoId, AmmoDef> = {
   rock: { id: 'rock', name: 'Pedrusco', rarity: 'comun', icon: '🪨', color: '#8a8f98', desc: 'Bola de piedra maciza. Rompe los bloques en el punto de impacto.', weight: 22, shape: 'ball', radius: 0.45, density: 6, restitution: 0.1, friction: 0.8, drag: 0.004, windFactor: 0.25 },

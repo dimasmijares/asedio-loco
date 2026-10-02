@@ -572,7 +572,7 @@ export class MatchUI {
       buttons.push(b);
     } else if (this.opts.onRematch) buttons.push(h('p', { class: 'muted' }, 'Esperando a que el anfitrión pida la revancha…'));
     if (this.opts.onExit) {
-      const b = h('button', { class: 'big', id: 'exit' }, 'Salir');
+      const b = h('button', { class: 'big danger', id: 'exit' }, 'Salir');
       b.onclick = () => this.opts.onExit!();
       buttons.push(b);
     }

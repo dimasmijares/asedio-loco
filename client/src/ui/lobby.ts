@@ -160,7 +160,7 @@ export class LobbyView {
             banner,
             h('span', { class: 'name' }, p.name),
             p.id === room.hostId ? h('span', { class: 'tag' }, 'Anfitrión') : null,
-            p.id === this.conn.you.id ? h('span', { class: 'tag', style: `background:${st.color};color:#000` }, 'Tú') : null,
+            p.id === this.conn.you.id ? h('span', { class: 'tag', style: `background:${st.color};color:var(--al-noche)` }, 'Tú') : null,
             p.connected ? null : h('span', { class: 'tag off' }, 'Desconectado'),
           ),
         );
@@ -168,7 +168,7 @@ export class LobbyView {
         botsLeft--;
         list.append(h('li', { 'data-bot': 'true' }, banner, h('span', { class: 'name' }, `Bot (${DIFF_LABEL[room.config.difficulty]})`), h('span', { class: 'tag bot' }, 'Bot')));
       } else {
-        list.append(h('li', { class: 'empty' }, h('div', { class: 'banner', style: 'background:#bbb' }), 'Plaza libre'));
+        list.append(h('li', { class: 'empty' }, h('div', { class: 'banner', style: 'background:var(--al-crema-oscuro)' }), 'Plaza libre'));
       }
     }
 

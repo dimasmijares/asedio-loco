@@ -7,7 +7,7 @@ status: draft
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-02
 owner: dimas
 parent: WRK-PLAN-011
 activates: [FEAT-INTERFAZ-001, FEAT-CONTROL-001, PROD-JUGAR-001, DOC-OPS-003]
@@ -53,6 +53,7 @@ Fuera: código del juego. Esta tarea no cambia la interfaz; lo que salga de ella
 | R-07 | Flujo de partidas: ¿apruebas F1-F9? | WRK-TASK-064 | Aprobado (28-09): todas, a WRK-TASK-067-072 |
 | R-08 | Ya en el juego: parábola con anillo y cámara del impacto | WRK-TASK-054, 063 | Aprobado (28-09) |
 | R-09 | Castillos nuevos: dos filas más y colores de cada jugador | WRK-TASK-058, 059 | Aprobado (28-09) |
+| R-10 | Nueva versión «Atardecer»: estilo (E1-E4), colores de jugador (D1), escena (D2) y UX (U1-U11) | Fase 1: WRK-TASK-074 a 076 | Aprobado (01-10); fase 1 en el juego (02-10) |
 
 Decidido fuera del lienzo (28-09-2026): parábola hasta el choque, torreón dos filas más alto, objetivo deducido del rumbo.
 

@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.11.0
+version: 1.12.0
 created: 2026-09-26
-updated: 2026-09-28
+updated: 2026-10-02
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -75,6 +75,11 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Sensibilidad del ratón de ×0,4 a ×1,8 (pasos de 0,1).
 6. **Accesibilidad** (D-045): colores Okabe-Ito más un emblema por jugador (☀ ☾ ★ ϟ), con tinta oscura sobre amarillo y rosa. Hay texto grande y silencio.
 7. **Pantallas estrechas** (≤ 700 px): marcador de 160 px y ayuda de controles oculta.
+8. **Estilo «Atardecer»** (R-10, WRK-TASK-074): la fuente de verdad es el design system «Asedio Loco · estilo» (https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3).
+   - Colores solo de sus tokens, como variables `--al-<token>` en `style.css`: noche, ciruela, vino, grana, naranja, crema y derivados. Grana solo para disparo, daño y peligro; naranja solo para lo que se toca o está elegido. Los jugadores mantienen los Okabe-Ito (D1).
+   - Letra: Lilita One en títulos, botones y cifras; Nunito 600-900 en el texto. Las dos en woff2 desde `client/src/ui/fonts/`.
+   - Menús: tarjetas crema con contorno noche y sombra dura; los botones grandes son tablones de madera (veta, clavos, sombra dura, inclinación alterna). El HUD de partida va sobre paneles noche al 86 % y no se inclina.
+   - Rarezas: común #A8949C, rara #4FA8E8 y épica #9E2E8A (texto noche, noche y crema); defensiva usa `listo` (#9ED36A) con texto noche.
 
 ### Outputs
 
@@ -133,7 +138,8 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/backdrop.ts` | Fondo animado |
 | Implemented in | `client/src/game/match/ui.ts` | `AIM_HELP`, resultados, arcos de la cuenta atrás (`showArcs`) y pantalla final |
 | Implemented in | `client/src/game/render/arcs.ts` | `AttackArcs`: quién ataca a quién |
-| Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying` |
+| Implemented in | `client/src/ui/style.css` | `@media (max-width: 700px)`, `.big-text`, `.replaying`; tokens `--al-*` y tablones (R-10) |
+| Implemented in | `client/src/ui/fonts/` | Lilita One y Nunito en woff2, con sus licencias OFL |
 | Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
 | Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |

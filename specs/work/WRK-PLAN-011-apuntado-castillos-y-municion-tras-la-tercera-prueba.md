@@ -7,7 +7,7 @@ status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-02
 owner: dimas
 parent: WRK-SPEC-011
 activates: [FEAT-CONTROL-001, DOM-JUEGO-003, DOM-JUEGO-004, RULE-001, RULE-004]
@@ -47,6 +47,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 17 | WRK-TASK-071 · Llegar tarde con explicación | draft | 064 | — |
 | 18 | WRK-TASK-072 · Final y pausa en solitario | draft | 064 | — |
 | 19 | WRK-TASK-073 · Selector de castillos del espectador | draft | 061, R-05 | — |
+| 20 | WRK-TASK-074 · Estilo «Atardecer» en la interfaz (R-10 fase 1: E1-E3) | completed | 060 (R-10) | 2026-10-02 |
 
 ## Risk Assessment
 
