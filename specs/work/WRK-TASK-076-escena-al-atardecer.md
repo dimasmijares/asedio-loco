@@ -45,6 +45,7 @@ Fuera: modelos de catapultas, reyes y proyectiles, colores de castillo (R-02, `s
 - **Montañas:** tres anillos de siluetas planas a 225, 280 y 340 m (vino, grana y naranja de cerca a lejos), sin luz ni niebla, en una sola malla con colores por vértice: una llamada de dibujo y unos 350 triángulos. Bajas para que quede cielo a la vista en la portada.
 - **Isla:** tapa de tierra terracota (#C7663A, textura propia) y laterales vino que se oscurecen hacia ciruela. Islotes vino con tapa terracota. Pinos ciruela, rocas gris cálido y flores de la paleta.
 - **Lava:** mar grana con brillos naranja; costra vino en menos superficie (umbral 0,62); naranja clara junto al acantilado. Se calcula en sRGB y se pasa a lineal para mezclar con la niebla.
+  - Ajuste tras revisar las capturas (02-10-2026): más tranquila. Grana oscurecida hacia vino (placas al 30 % y al 62 % de vino), vetas naranja de un 1 % de ancho solo donde una segunda capa de ruido lo permite, sin el naranja amarillento que salía al posterizar, movimiento a la mitad y franja del acantilado más estrecha y sin crema.
 - **Legibilidad:** sobre el cielo crema, los puntos de la parábola del color del jugador se perdían (sobre todo el rojo y el amarillo): llevan contorno noche (esferas algo mayores por dentro, mismas matrices, una llamada más). El anillo de impacto conserva el color del jugador sobre borde blanco (R-01) y gana un contorno noche. Contorno de bloques y decorado en noche (#200432).
 
 ## Acceptance Criteria

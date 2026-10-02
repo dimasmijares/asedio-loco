@@ -260,7 +260,7 @@ export class Stage {
         #include <fog_pars_vertex>
         void main(){
           vec4 w = modelMatrix * vec4(position, 1.0);
-          w.y += sin(w.x * 0.15 + uTime * 0.8) * 0.12 + cos(w.z * 0.12 + uTime * 0.6) * 0.12;
+          w.y += sin(w.x * 0.15 + uTime * 0.4) * 0.12 + cos(w.z * 0.12 + uTime * 0.3) * 0.12;
           vW = w.xyz;
           vec4 mvPosition = viewMatrix * w;
           gl_Position = projectionMatrix * mvPosition;
@@ -277,29 +277,26 @@ export class Stage {
         float sdIsle(vec2 p, float halfSide){ float r = ${ISLAND_CORNER_R.toFixed(1)}; vec2 q = abs(p) - vec2(halfSide - r); return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
         void main(){
           vec2 p = vW.xz * 0.07;
-          float warp = fbm(p * 1.6 - uTime * 0.03);
-          float n = fbm(p + vec2(uTime * 0.04, uTime * 0.025) + warp * 0.9);
-          // Placas de costra oscura con grietas incandescentes entre ellas; lo líquido late.
-          // Atardecer (R-10 D2): mar grana con brillos naranja; la costra es vino y ocupa menos.
-          float crust = smoothstep(0.62, 0.68, n);
-          // Junto al acantilado la lava está más caliente: sin costra y casi blanca.
-          float rim = 0.0;
+          // Lava tranquila (R-10, tras revisar la fase 1): es fondo, no compite con la interfaz. Base
+          // grana oscurecida hacia vino en placas grandes y lentas; brillos naranja finos y escasos.
+          float t = uTime * 0.5;
+          float warp = fbm(p * 1.6 - t * 0.03);
+          float n = fbm(p + vec2(t * 0.04, t * 0.025) + warp * 0.9);
+          // Colores en sRGB: grana, vino y naranja de la paleta.
+          vec3 grana = vec3(0.804, 0.102, 0.188), vino = vec3(0.478, 0.047, 0.192), naranja = vec3(0.996, 0.537, 0.196);
+          vec3 granaOscura = mix(grana, vino, 0.3);
+          vec3 c = mix(granaOscura, mix(grana, vino, 0.62), smoothstep(0.5, 0.53, n));
+          // Vetas: líneas finas en el borde de las placas, y solo en una parte del mar.
+          float vein = 1.0 - smoothstep(0.0, 0.009, abs(n - 0.515));
+          float few = smoothstep(0.52, 0.6, fbm(p * 0.45 + 7.3 + t * 0.01));
+          float pulse = 0.75 + 0.25 * sin(uTime * 0.8 + warp * 6.0);
+          c = mix(c, naranja, vein * few * pulse);
+          // Junto al acantilado, una franja estrecha más caliente, en naranja y sin llegar al amarillo.
           if (uIsle > 0.0) {
             float d = sdIsle(vW.xz, uIsle);
-            rim = clamp(exp(-max(d, 0.0) * 0.55) * (0.75 + 0.25 * sin(uTime * 2.2 + vW.x * 0.3 + vW.z * 0.2)), 0.0, 1.0);
-            crust *= 1.0 - rim;
+            float rim = clamp(exp(-max(d, 0.0) * 1.1) * (0.8 + 0.2 * sin(uTime * 1.1 + vW.x * 0.3 + vW.z * 0.2)), 0.0, 1.0);
+            c = mix(c, naranja, rim * 0.7);
           }
-          float crack = 1.0 - smoothstep(0.0, 0.03, abs(n - 0.52));
-          float pulse = 0.86 + 0.14 * sin(uTime * 1.7 + warp * 9.0);
-          // Colores en sRGB: grana, naranja, vino, ciruela y crema de la paleta.
-          vec3 grana = vec3(0.804, 0.102, 0.188), naranja = vec3(0.996, 0.537, 0.196);
-          vec3 vino = vec3(0.478, 0.047, 0.192), ciruela = vec3(0.29, 0.027, 0.188), crema = vec3(0.996, 0.906, 0.71);
-          vec3 hot = mix(naranja, grana, smoothstep(0.3, 0.4, n)) * pulse;
-          vec3 rock = mix(vino, grana, fbm(p * 5.0) * 0.6);
-          vec3 c = mix(hot, rock, crust);
-          c = mix(c, naranja, crack * crust);
-          c = mix(c, mix(naranja, crema, 0.55), rim * 0.9);
-          c = floor(c * 7.0 + 0.5) / 7.0; // toon
           // A lineal para mezclar con la niebla, y vuelta a la salida.
           gl_FragColor = vec4(pow(c, vec3(2.2)), 1.0);
           #include <fog_fragment>
