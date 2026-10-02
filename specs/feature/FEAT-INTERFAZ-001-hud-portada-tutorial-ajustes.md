@@ -78,7 +78,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 8. **Estilo «Atardecer»** (R-10, WRK-TASK-074): la fuente de verdad es el design system «Asedio Loco · estilo» (https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3).
    - Colores solo de sus tokens, como variables `--al-<token>` en `style.css`: noche, ciruela, vino, grana, naranja, crema y derivados. Grana solo para disparo, daño y peligro; naranja solo para lo que se toca o está elegido. Los jugadores mantienen los Okabe-Ito (D1).
    - Letra: Lilita One en títulos, botones y cifras; Nunito 600-900 en el texto. Las dos en woff2 desde `client/src/ui/fonts/`.
-   - Menús: tarjetas crema con contorno noche y sombra dura; los botones grandes son tablones de madera (veta, clavos, sombra dura, inclinación alterna). El HUD de partida va sobre paneles noche al 86 % y no se inclina.
+   - Menús: tarjetas crema con contorno noche y sombra dura; los botones grandes son tablones de madera (veta, clavos, sombra dura e inclinación que alterna −1,2° y +0,9°, solo dentro de un panel de menú). El HUD de partida va sobre paneles noche al 86 % y no se inclina.
    - Rarezas: común #A8949C, rara #4FA8E8 y épica #9E2E8A (texto noche, noche y crema); defensiva usa `listo` (#9ED36A) con texto noche.
    - Munición ilustrada (WRK-TASK-075): cada munición tiene un SVG propio de 48×48 con contorno noche (`client/src/ui/ammoArt.ts`), sin emoji; mide 1,2 em del contenedor.
 

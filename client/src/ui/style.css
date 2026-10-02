@@ -229,9 +229,10 @@ button.primary {
 }
 
 /* Tablón de madera pintada (R-10 E3): veta, brillo arriba, canto abajo, sombra dura y dos clavos.
-   En los menús se inclina un poco, alternando, como clavado a mano; el HUD de partida no tiene. */
+   En los menús se inclina alternando el sentido, entre ±0,5° y ±1,5° (componente Botones), como
+   clavado a mano. Fuera de un panel de menú no se inclina: el HUD de partida va recto. */
 button.big {
-  --tilt: -1.2deg;
+  --tilt: 0deg;
   position: relative;
   width: 100%;
   min-height: 64px;
@@ -247,12 +248,12 @@ button.big {
   transform: rotate(var(--tilt));
 }
 
-button.big:nth-of-type(even) {
-  --tilt: 0.8deg;
+.panel button.big:nth-of-type(odd) {
+  --tilt: -1.2deg;
 }
 
-button.big:nth-of-type(3n) {
-  --tilt: -0.6deg;
+.panel button.big:nth-of-type(even) {
+  --tilt: 0.9deg;
 }
 
 button.big::before,
