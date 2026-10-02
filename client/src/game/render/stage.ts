@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { CATAPULT_LOCAL, ISLAND_CORNER_R, ISLAND_HALF, castleOrigin, toWorld } from '../../../../shared/map';
+import { CASTLE_HALF, CATAPULT_LOCAL, ISLAND_CORNER_R, ISLAND_HALF, castleOrigin, castleYaw, toWorld } from '../../../../shared/map';
 import { rng } from '../../../../shared/math';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { mergeStatic, outline, toon } from './materials';
 import { tex } from './textures';
 
@@ -21,6 +22,8 @@ const SUNSET = {
 // todavía, para que se vea sobre las montañas.
 const SUN_LIGHT = new THREE.Vector3(-40, 26, 28);
 const SUN_SKY = new THREE.Vector3(-40, 8, 28).normalize();
+// Mitad del lado de la sombra de contacto de cada castillo (m): algo más que su contorno.
+const SHADOW_HALF = CASTLE_HALF + 1.8;
 
 export function islandOutline(n = 12): [number, number][] {
   const pts: [number, number][] = [];
@@ -81,6 +84,7 @@ export class Stage {
     this.scene.add(this.makeSky());
     this.scene.add(this.makeMountains());
     this.scene.add(this.makeIsland());
+    this.scene.add(this.makeContactShadows());
     const { mesh, mat } = this.makeLava();
     this.lava = mesh;
     this.lavaMat = mat;
@@ -186,6 +190,40 @@ export class Stage {
     return m;
   }
 
+  // Sombra de contacto en la base de cada castillo (ajuste de R-10): una orla ciruela que se
+  // desvanece fuera del contorno del castillo y lo separa del suelo terracota, sobre todo al rojo.
+  // Las cuatro en una malla: una llamada de dibujo.
+  private makeContactShadows() {
+    const size = 64;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d')!;
+    const img = g.createImageData(size, size);
+    const inner = CASTLE_HALF / SHADOW_HALF;
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        // Distancia de «caja» al centro, de 0 a 1 en el borde de la sombra.
+        const d = Math.max(Math.abs((x + 0.5) / size - 0.5), Math.abs((y + 0.5) / size - 0.5)) * 2;
+        const a = d <= inner ? 1 : Math.max(0, 1 - (d - inner) / (1 - inner)) ** 1.6;
+        img.data.set([74, 7, 48, Math.round(a * 255)], (y * size + x) * 4);
+      }
+    g.putImageData(img, 0, 0);
+    const map = new THREE.CanvasTexture(c);
+    map.colorSpace = THREE.SRGBColorSpace;
+    const geos = [0, 1, 2, 3].map((slot) => {
+      const geo = new THREE.PlaneGeometry(SHADOW_HALF * 2, SHADOW_HALF * 2);
+      geo.rotateX(-Math.PI / 2);
+      geo.rotateY(castleYaw(slot));
+      const o = castleOrigin(slot);
+      geo.translate(o[0], 0.03, o[2]);
+      return geo;
+    });
+    const mat = new THREE.MeshBasicMaterial({ map, transparent: true, opacity: 0.7, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+    const m = new THREE.Mesh(mergeGeometries(geos), mat);
+    m.renderOrder = 1;
+    return m;
+  }
+
   private makeIsland() {
     const g = new THREE.Group();
     const ring = islandOutline(12);
@@ -220,7 +258,7 @@ export class Stage {
     const verts: number[] = [];
     const colors: number[] = [];
     // Borde de tierra terracota y laterales vino que se oscurecen hacia ciruela (R-10 D2).
-    const bands = ['#c7663a', '#9a2f33', '#8a1d33', '#7a0c31', '#6a0a31', '#5a0830', '#4a0730'].map((c) => new THREE.Color(c));
+    const bands = ['#b26d50', '#9a2f33', '#8a1d33', '#7a0c31', '#6a0a31', '#5a0830', '#4a0730'].map((c) => new THREE.Color(c));
     for (let l = 0; l < rings.length - 1; l++) {
       const a = rings[l];
       const b = rings[l + 1];

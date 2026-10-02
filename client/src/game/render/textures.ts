@@ -127,16 +127,18 @@ export const tex = {
       }),
     ),
   // Tierra terracota de la isla (R-10 D2): grumos algo más claros y más oscuros que el tono base.
+  // El tono base va menos saturado que #C7663A porque el sol cálido lo aviva: con la luz de la
+  // escena, la explanada se ve #C7663A y los castillos se separan mejor del suelo.
   earth: () =>
     once('earth', () =>
       canvas(
         128,
         (g, s) => {
-          g.fillStyle = '#c7663a';
+          g.fillStyle = '#b26d50';
           g.fillRect(0, 0, s, s);
           const r = rng(21);
           for (let i = 0; i < 420; i++) {
-            g.fillStyle = r.pick(['#bb5c34', '#d07446', '#c06036', '#d47d4f', '#b45531']);
+            g.fillStyle = r.pick(['#a76348', '#ba7c60', '#ac674b', '#be866c', '#a15b44']);
             g.beginPath();
             g.ellipse(r.range(0, s), r.range(0, s), r.range(1, 3.2), r.range(0.8, 2), r.range(0, 3), 0, Math.PI * 2);
             g.fill();
