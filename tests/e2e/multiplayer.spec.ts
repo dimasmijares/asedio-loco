@@ -157,7 +157,15 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
       expect(sv.you).toBeNull();
       const hv = (await summary(host))!;
       expect(Math.abs(sv.round - hv.round)).toBeLessThanOrEqual(1);
-      expect(Math.abs(sv.blocks - hv.blocks)).toBeLessThanOrEqual(10);
+      // Los bloques se comparan hasta que coinciden: la instantánea del espectador y el recuento del
+      // anfitrión se leen en momentos distintos, y entre medias la lava (sube cada ronda) puede estar
+      // fundiendo bloques o empezar un impacto (fallaba a veces en CI, 03-10-2026).
+      await expect
+        .poll(async () => {
+          const [a, b] = await Promise.all([summary(spectator!), summary(host)]);
+          return a && b && a.round === b.round && a.phase === b.phase ? Math.abs(a.blocks - b.blocks) : Infinity;
+        }, { timeout: 20_000 })
+        .toBeLessThanOrEqual(10);
       await expect(spectator.locator('#confirm')).toBeHidden();
       // Si intenta disparar, el servidor lo rechaza.
       await spectator.evaluate(() => (window as any).__asedio.conn.relay('host', { k: 'in', lk: true }));

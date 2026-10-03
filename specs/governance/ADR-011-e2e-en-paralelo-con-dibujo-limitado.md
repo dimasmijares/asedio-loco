@@ -4,9 +4,9 @@ type: adr
 layer: governance
 status: accepted
 confidence: high
-version: 1.0.0
+version: 1.1.0
 created: 2026-09-25
-updated: 2026-09-26
+updated: 2026-10-03
 owner: dimas
 deciders:
   - dimas
@@ -38,6 +38,7 @@ Las pruebas E2E se ejecutan contra producción tras cada despliegue. Con toda la
 **Positive:**
 
 - Una ejecución completa, con despliegue, tarda unos 4 minutos. Esperar a CI entre etapas sale barato (RULE-003).
+- Actualización del 03-10-2026: con más pruebas, `basicas` llegó a 14 minutos; se partió en `basicas`, `hud`, `espectador-repeticion` y `menus-y-marca` (11 trabajos) y `npm run e2e:grupos` impide que una prueba nueva se quede fuera de todos.
 - Menos falsos fallos por lentitud del runner.
 
 **Negative:**

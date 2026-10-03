@@ -4,7 +4,7 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.1.5
+version: 1.2.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -71,10 +71,11 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 
 **4. E2E (Playwright)**
 
-- `npm run e2e`: en local. Compila y levanta `wrangler dev` en el puerto 8787.
+- `npm run e2e`: en local. Compila y levanta `wrangler dev` en el puerto 8787 (o reutiliza el que esté en marcha). Antes de empezar, `tests/e2e/global-setup.ts` comprueba que ese servidor sirve la compilación de `dist/client`; si no (un `wrangler dev` o `workerd` huérfano de una sesión anterior), para con un aviso: hay que cerrar los procesos del puerto 8787. Un servidor dejado en segundo plano por el agente muere al acabar su tiempo, pero su `workerd` puede quedarse sirviendo una compilación vieja.
 - `npm run e2e:prod`: contra `https://asedio-loco.dimasmijares.workers.dev`. Solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
-- CI la ejecuta tras cada despliegue en 7 trabajos: `basicas` (`lobby smoke perf controls`), `fisica`, `solitario`, `cuatro-jugadores`, `migracion` (`-g "anfitrión"`), `revancha` y `red-mala`. Las capturas quedan como artefactos `capturas-e2e-<grupo>` durante 7 días.
-- `npm run ci:estado` resume la última ejecución (trabajos, ✓/✘ y errores). `-- <id>` para otra y `-- --wait` para esperar a que termine. Necesita `gh` con sesión.
+- CI la ejecuta tras cada despliegue en 11 trabajos: `basicas` (`lobby smoke perf controls calidad pwa`), `hud` (`touch hud-compact tutorial encuadre`), `espectador-repeticion`, `menus-y-marca` (`portada marca`), `fisica`, `solitario`, `cuatro-jugadores`, `migracion` (`-g "anfitrión"`), `revancha`, `red-mala` y `desconexion`. Las capturas quedan como artefactos `capturas-e2e-<grupo>` durante 7 días. En CI cada prueba tiene un reintento: si solo pasa a la segunda sale como «flaky» y se apunta como tarea (RULE-003).
+- `npm run e2e:grupos` (CI lo ejecuta antes de desplegar): comprueba que cada prueba E2E está en algún grupo de `deploy.yml`. Un archivo nuevo hay que añadirlo a un grupo; si no, CI se para (el 03-10-2026 `portada.spec` y `marca.spec` llevaban horas sin pasar por CI).
+- `npm run ci:estado` resume la ejecución del commit actual (trabajos, ✓/✘, «flaky» y errores); si aún no existe, la última. `-- <id>` para otra y `-- --wait` para esperar a que aparezca y termine. Necesita `gh` con sesión.
 - Chromium sin interfaz necesita estos flags para WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` (ya están en `playwright.config.ts`).
 
 **5. Herramientas de captura y seguimiento** (`tests/tools/`, `<base>` es la URL del sitio)

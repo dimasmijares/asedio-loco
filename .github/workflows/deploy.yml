@@ -25,6 +25,8 @@ jobs:
       - run: npm ci
       - name: Especificaciones KDD (grafo, huérfanos y ciclo de vida)
         run: npm run kdd:check
+      - name: Cada prueba E2E está en algún grupo de e2e-prod
+        run: npm run e2e:grupos
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -45,7 +47,13 @@ jobs:
       matrix:
         include:
           - grupo: basicas
-            args: lobby smoke perf controls touch hud-compact encuadre calidad tutorial espectador repeticion-lava pwa
+            args: lobby smoke perf controls calidad pwa
+          - grupo: hud
+            args: touch hud-compact tutorial encuadre
+          - grupo: espectador-repeticion
+            args: espectador repeticion-lava
+          - grupo: menus-y-marca
+            args: portada marca
           - grupo: fisica
             args: physics
           - grupo: solitario

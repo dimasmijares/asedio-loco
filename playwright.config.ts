@@ -9,6 +9,10 @@ export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 120_000,
   expect: { timeout: 15_000 },
+  // En CI contra producción, un reintento: una prueba que solo pasa a la segunda sale como «flaky» en
+  // `npm run ci:estado` y se apunta como tarea (RULE-003), pero no tumba el despliegue entero.
+  retries: remote && process.env.CI ? 1 : 0,
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],
