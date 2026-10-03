@@ -197,7 +197,9 @@ for (const fmt of FORMATS) {
       // REVANCHA: otra partida al momento, sin pasar por la sala, con los mismos jugadores y el bot.
       await a.click('#rematch');
       for (const p of [a, b]) {
-        await expect.poll(() => game(p)).toBe(first + 1);
+        // Al llegar la revancha, cada página desmonta la partida y monta otra (física y 3D por software
+        // en CI): mientras tanto no responde, así que se le da tiempo.
+        await expect.poll(() => game(p), { timeout: 60_000 }).toBe(first + 1);
         await expect.poll(() => phase(p), { timeout: 150_000 }).toBe('aim');
         await expect(p.locator('#lobby')).toHaveCount(0);
         expect(await p.evaluate(() => (window as any).__asedio.mode.state.players.map((q: any) => q.name).sort())).toEqual(['Ana', 'Beto', 'Sir Bot']);
