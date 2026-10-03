@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { BOT_NAMES, NAME_TITLES, randomName, shortName } from '../../shared/players';
+import { BOT_NAMES, NAME_TITLES, botName, randomName, shortName, soloSlots } from '../../shared/players';
+import { matchPlayersFromRoom } from '../../shared/match';
 import { MAX_NAME_LEN, sanitizeName } from '../../shared/protocol';
 
 describe('nombre corto del marcador compacto (WRK-TASK-046)', () => {
@@ -19,6 +20,21 @@ describe('nombre corto del marcador compacto (WRK-TASK-046)', () => {
     const shorts = BOT_NAMES.map((name) => shortName({ name, bot: true }));
     expect(new Set(shorts).size).toBe(BOT_NAMES.length);
     for (const s of shorts) expect(s.length).toBeLessThanOrEqual(7);
+  });
+});
+
+describe('bots: una sola fuente para «Jugar solo», la partida y la sala', () => {
+  it('cada hueco tiene su bot; en solitario, tú en el 0 y, con un rival, el de enfrente', () => {
+    expect([1, 2, 3].map(botName)).toEqual(['Conde Clic', 'Reina Rúter', 'Sir Bot']);
+    expect(soloSlots(1)).toEqual([0, 2]);
+    expect(soloSlots(2)).toEqual([0, 1, 2]);
+    expect(soloSlots(3)).toEqual([0, 1, 2, 3]);
+  });
+
+  it('la sala rellena con los mismos bots', () => {
+    const room = { players: [{ slot: 0, id: 'a', name: 'Ana', connected: true }], config: { bots: 3, difficulty: 'normal' } } as never;
+    const bots = matchPlayersFromRoom(room).filter((p) => p.bot);
+    expect(bots.map((p) => p.name)).toEqual([1, 2, 3].map(botName));
   });
 });
 

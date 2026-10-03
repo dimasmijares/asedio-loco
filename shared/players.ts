@@ -8,7 +8,13 @@ export const PLAYER_STYLES = [
   { name: 'Rosa', color: '#CC79A7', ink: '#1d1626', emblem: 'rayo', glyph: 'ϟ' },
 ] as const;
 
-export const BOT_NAMES = ['Sir Bot', 'Lady Pixel', 'Barón Byte', 'Duquesa Tuerca', 'Conde Clic', 'Reina Rúter'];
+// Bots: una sola fuente para «Jugar solo», la partida en solitario y la sala (R-10, R-11). El bot de
+// cada hueco se llama siempre igual, así los rivales que se anuncian son los que juegan.
+export const BOT_NAMES = ['Lady Pixel', 'Conde Clic', 'Reina Rúter', 'Sir Bot'];
+export const botName = (slot: number) => BOT_NAMES[slot % BOT_NAMES.length];
+
+// Huecos de una partida en solitario con `bots` rivales (1-3): tú en el 0 y, con uno, el de enfrente.
+export const soloSlots = (bots: number) => [0, 2, 1, 3].slice(0, 1 + bots).sort();
 
 // Nombres al azar de la portada (R-10 U9): un título, como los de los bots, y algo corto y de andar
 // por casa («Duque Pepino»). Lo que distingue a cada uno es la segunda palabra.

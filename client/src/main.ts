@@ -89,7 +89,7 @@ async function startSandbox() {
 
 // Partida contra bots. Parámetros opcionales en la URL (útiles para las pruebas):
 // ?bots=3&dif=normal&fast=1&autoplay=1&seed=42#solo
-async function startSolo(opts: { name: string; bots: number; difficulty: Difficulty; names?: string[] }) {
+async function startSolo(opts: { name: string; bots: number; difficulty: Difficulty }) {
   ui.replaceChildren();
   void hideBackdrop();
   const q = new URLSearchParams(location.search);
@@ -176,10 +176,10 @@ function boot() {
     },
     onSolo: () =>
       showSoloSetup(ui, {
-        onStart: (bots, difficulty, names) => {
+        onStart: (bots, difficulty) => {
           enterFullscreen();
           history.replaceState(null, '', '#solo');
-          void startSolo({ name: savedName(), bots, difficulty, names });
+          void startSolo({ name: savedName(), bots, difficulty });
         },
         onSandbox: () => {
           enterFullscreen();

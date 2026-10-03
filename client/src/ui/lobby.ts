@@ -1,5 +1,5 @@
 import { DIFFICULTIES, MAX_NAME_LEN, MAX_PLAYERS, ROOM_CODE_RE, sanitizeName, type Difficulty } from '../../../shared/protocol';
-import { BOT_NAMES, PLAYER_STYLES, randomName } from '../../../shared/players';
+import { PLAYER_STYLES, botName, randomName, soloSlots } from '../../../shared/players';
 import { isMobileDevice, trayLayout } from '../device';
 import type { Connection } from '../net/connection';
 import { ammoArt } from './ammoArt';
@@ -211,17 +211,14 @@ function segmented<T extends string | number>(id: string, label: string, options
 // Jugar solo (R-10 U10, maqueta «Móvil · Jugar solo»): hoja crema abajo en móvil y tarjeta centrada
 // en PC, con volver, rivales y dificultad en selectores segmentados, los rivales que tocan con su
 // emblema y su nombre, EMPEZAR y el campo de pruebas como enlace.
-export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty, names: string[]) => void; onSandbox: () => void; onBack: () => void }) {
+export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty) => void; onSandbox: () => void; onBack: () => void }) {
   let bots = 3;
   let diff: Difficulty = 'normal';
-  // Los rivales salen de la lista de bots a partir de un punto al azar; la partida usa estos mismos.
-  const from = Math.floor(Math.random() * BOT_NAMES.length);
-  const names = () => Array.from({ length: bots }, (_, i) => BOT_NAMES[(from + i) % BOT_NAMES.length]);
   const rivals = h('div', { class: 'solo-rivals', id: 'solo-rivals' });
   const renderRivals = () => {
-    // Los huecos de los bots, como en la partida (SoloMode): con uno, el de enfrente.
-    const slots = [0, 2, 1, 3].slice(0, 1 + bots).sort().slice(1);
-    const n = names();
+    // Huecos y nombres de shared/players (soloSlots, botName): los mismos que usa la partida.
+    const slots = soloSlots(bots).slice(1);
+    const n = slots.map(botName);
     rivals.replaceChildren(
       h('span', { class: 'solo-embs', 'aria-hidden': 'true' }, ...slots.map((s) => h('span', { class: 'emb', style: `background:${PLAYER_STYLES[s].color};color:${PLAYER_STYLES[s].ink}` }, `${PLAYER_STYLES[s].glyph}︎`))),
       h('span', { class: 'solo-names' }, n.length > 1 ? `${n.slice(0, -1).join(', ')} y ${n[n.length - 1]}` : n[0]),
@@ -231,7 +228,7 @@ export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number,
   const back = roundBtn('solo-back', 'back', 'Volver');
   back.onclick = () => opts.onBack();
   const start = plank('solo-start', 'Empezar', true);
-  start.onclick = () => opts.onStart(bots, diff, names());
+  start.onclick = () => opts.onStart(bots, diff);
   const sandbox = h('button', { class: 'link-btn', id: 'sandbox', type: 'button' }, 'Campo de pruebas · munición sin límite');
   sandbox.onclick = () => opts.onSandbox();
   root.replaceChildren(

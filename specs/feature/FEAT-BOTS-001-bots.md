@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -50,6 +50,7 @@ Decidir por cada bot, al empezar la ronda, a quién dispara, con qué munición 
 
 ### Behavior
 
+0. **Nombres:** el bot de cada hueco se llama siempre igual (`botName`: 1 Conde Clic, 2 Reina Rúter, 3 Sir Bot; 0 Lady Pixel), en solitario y en la sala. «Jugar solo» anuncia esos mismos (`soloSlots`), así que los rivales que se ven antes de empezar son los que juegan (WRK-TASK-087).
 1. **Objetivo:** un sorteo ponderado entre los rivales vivos (`pickTarget`). Todos empiezan con peso 1, y el peso se multiplica:
    - por `1 + 2·pWeakest` si es el más débil (±2 bloques);
    - por `2 − pWeakest` si su rey es el más cercano (±1 m);
@@ -61,7 +62,7 @@ Decidir por cada bot, al empezar la ronda, a quién dispara, con qué munición 
    - Defensiva (andamio o burbuja) si su castillo está por debajo del 80 % y sale un 75 %, o si todas son defensivas. Con una defensiva no cambia la puntería.
    - Si no, la de mayor rareza: épica > rara > común.
 3. **Punto de mira** según la munición (WRK-TASK-033): con probabilidad `pKing` (+0,3 con sandía y piano, +0,1 con el pedrusco) el rey (+0,2 m); si no, un punto propio de la munición: tronco, bola de nieve e imán a la base de la muralla de delante (donde está el portón de hierro); vaca, cocos y gallina al centro o a las torres; el resto, uno de 6 puntos de la estructura (murallas, torres, torreón), a escala 1,2.
-4. **Puntería:** `solveAim` con el mismo modelo balístico del juego (arrastre de la munición y viento). Elevación al azar: 0,35-0,55 rad para tronco y bola de nieve, que ruedan; 0,55-0,95 rad para el resto. Después, un error gaussiano en el rumbo y en la fuerza.
+4. **Puntería:** `solveAim` con el mismo modelo balístico del juego (arrastre de la munición; el viento queda a cero, ADR-018). Elevación al azar: 0,35-0,55 rad para tronco y bola de nieve, que ruedan; 0,55-0,95 rad para el resto. Después, un error gaussiano en el rumbo y en la fuerza.
 5. **Ritmo:** la catapulta gira suavemente hacia la solución y confirma tras un retraso al azar (×0,25 con `?fast=1`).
 
 | Dificultad | Error de rumbo | Error de fuerza | `pKing` | `pWeakest` | Confirma a los |

@@ -5,7 +5,7 @@ import { BLOCKS_PER_CASTLE } from './castle';
 import { PITCH_DEFAULT, type Aim } from './ballistics';
 import { LAVA_FAST_STEPS, LAVA_LEVELS, castleOrigin, launchPoint } from './map';
 import { hashString, rng, type Vec3 } from './math';
-import { BOT_NAMES } from './players';
+import { botName } from './players';
 import type { Difficulty, RoomState } from './protocol';
 
 export type Phase = 'intro' | 'aim' | 'countdown' | 'impact' | 'replay' | 'results' | 'over';
@@ -84,7 +84,7 @@ export function matchPlayersFromRoom(room: RoomState) {
   const bots: typeof humans = [];
   for (let slot = 0; slot < 4 && bots.length < room.config.bots; slot++) {
     if (used.has(slot)) continue;
-    bots.push({ slot, id: `bot${slot}`, name: BOT_NAMES[slot % BOT_NAMES.length], bot: true, difficulty: room.config.difficulty });
+    bots.push({ slot, id: `bot${slot}`, name: botName(slot), bot: true, difficulty: room.config.difficulty });
   }
   return [...humans, ...bots].sort((a, b) => a.slot - b.slot);
 }
