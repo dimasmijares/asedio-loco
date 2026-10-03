@@ -40,3 +40,11 @@ export async function canvasNotBlack(page: Page) {
   expect(stats!.colors, 'el canvas tiene variedad de colores').toBeGreaterThan(8);
   return stats!;
 }
+
+// Nombre en la portada (R-10 U9): se edita con el lápiz de la píldora «Juegas como».
+export async function setName(page: Page, name: string) {
+  await page.click('#name-edit');
+  await page.fill('#name', name);
+  await page.press('#name', 'Enter');
+  await expect(page.locator('#name-text')).toBeVisible();
+}

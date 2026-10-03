@@ -35,7 +35,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 5 | WRK-TASK-058 · Castillos con dos filas más | completed | 057 | 2026-09-28 |
 | 6 | WRK-TASK-059 · Castillo con los colores del jugador | completed | 058, 060 (colores aprobados) | 2026-09-28 |
 | 7 | WRK-TASK-061 · Barra de munición sin textos y con la rareza a la vista | completed | 060 (R-03; PC en R-04) | 2026-09-28 |
-| 8 | WRK-TASK-062 · Portada: tipografía y maquetación | draft | 060 (aprobar la propuesta) | — |
+| 8 | WRK-TASK-062 · Portada: tipografía y maquetación | completed | 060 (aprobar la propuesta) | 2026-10-03, con la portada de R-10 (WRK-TASK-081) |
 | 9 | WRK-TASK-063 · Cámara de impacto centrada en tu disparo | completed | — | 2026-09-28 |
 | 10 | WRK-TASK-064 · Revisión del flujo de partidas | completed | — | R-07 aprobado entero (28-09) → 067-072 |
 | 11 | WRK-TASK-065 · Munición a la medida de los castillos de 236 bloques | draft | 058 | — |
@@ -54,6 +54,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 24 | WRK-TASK-078 · Descripción de la munición al mantener la carta (R-10 fase 2: U2) | completed | 077 | 2026-10-02 |
 | 25 | WRK-TASK-079 · Parte superior de la partida en móvil vertical (R-10 fase 2: U4, U5) | completed | 078 | 2026-10-03 |
 | 26 | WRK-TASK-080 · Después de disparar en móvil vertical (R-10 fase 2: U6, U7) | completed | 079 | 2026-10-03 |
+| 27 | WRK-TASK-081 · Portada «Atardecer» (R-10 fase 3: U9) | completed | 080 | 2026-10-03 |
 
 ## Risk Assessment
 

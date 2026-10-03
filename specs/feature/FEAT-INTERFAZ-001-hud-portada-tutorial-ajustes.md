@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.16.0
+version: 1.17.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -49,13 +49,16 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 
 ### Behavior
 
-1. **Portada:** título, nombre, «Crear sala» (o «Entrar en la sala ABCD»), «Jugar solo contra bots» (rivales 1-3, dificultad, campo de pruebas), «Cómo se juega» y «Ajustes».
-   - Fondo animado: la isla con los 4 castillos y la cámara girando, sin física (D-043) y sin descargar Rapier: la vista recibe los fragmentos desde fuera (`DebrisLike`) y el fondo usa `NoDebris` (WRK-TASK-016). No se crea en navegadores automatizados salvo con `?backdrop=1`. Se desmonta al empezar la partida y vuelve con la revancha.
-2. **Cómo se juega:** una ventana con 4 párrafos (rey, apuntado de 20 s, 3 municiones, lava y viento).
+1. **Portada** (R-10 U9, WRK-TASK-081; maquetas «Móvil · Portada» y «PC · Portada»): título «ASEDIO / LOCO» en dos líneas (crema, contorno noche y sombra dura) y, en móvil, «Castillos, catapultas y vacas explosivas»; la píldora «Juegas como <nombre>» con el dado (otro al azar) y el lápiz (se edita en el sitio); los tablones JUGAR SOLO (naranja), CREAR SALA y UNIRSE CON CÓDIGO (crema), y los botones redondos de ayuda y ajustes.
+   - **Nombre:** la primera vez, uno al azar (`randomName`, «Duque Pepino»), guardado en `asedio.name`; no hace falta escribirlo para empezar. Vacío al editarlo, otro al azar.
+   - **Unirse con código:** en PC, el campo y UNIRSE en una fila; en móvil, el tablón se abre en esa fila. Se comprueba con `GET /api/rooms/:code` y avisa si el código está mal o la sala no existe. Con un enlace de invitación (`#ABCD`), «Te invitan a la sala ABCD» y ENTRAR como tablón principal.
+   - **Disposición:** en vertical, el título sobre el cielo y el menú abajo, sobre noche al 55 %; en horizontal, una columna de 520 px sobre noche al 88 % con la escena a la derecha. Se aprieta en ventanas bajas.
+   - Fondo animado: la isla con los 4 castillos y la cámara girando, sin física (D-043) y sin descargar Rapier: la vista recibe los fragmentos desde fuera (`DebrisLike`) y el fondo usa `NoDebris` (WRK-TASK-016). La cámara va baja, con el cielo detrás del título, y la isla se encuadra en lo que deja libre el menú. No se crea en navegadores automatizados salvo con `?backdrop=1`. Se desmonta al empezar la partida y vuelve con la revancha.
+2. **Cómo se juega:** una ventana con 6 puntos, cada uno con su icono SVG y sin emoji (rey, apuntado de 20 s según el formato, 3 municiones, objetivo, escudo real, lava y viento).
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).
    - Se puede saltar. Al terminar se guarda y no vuelve. En solitario da 10 s más de apuntado en la ronda 1.
-   - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano 👆 (🖱️ en PC) se desliza sobre la escena. En el 2, un anillo noche con pulso naranja resalta las tarjetas y las flechas ◀ ▶. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
+   - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano (un ratón en PC), en SVG, se desliza sobre la escena. En el 2, un anillo noche con pulso naranja resalta las tarjetas y las flechas ◀ ▶. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
 4. **HUD de partida:**
    - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
@@ -151,8 +154,9 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Implemented in | `client/src/ui/icons.ts` | Iconos SVG del HUD (R-10 fase 2) |
 | Implemented in | `client/src/device.ts` | `TRAY_QUERY`: cuándo rige la partida en móvil vertical |
 | Implemented in | `client/src/ui/fonts/` | Lilita One y Nunito en woff2, con sus licencias OFL |
-| Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName` |
+| Implemented in | `shared/players.ts` | `PLAYER_STYLES` (Okabe-Ito y emblemas), `shortName`, `randomName` |
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
+| Tested by | `tests/e2e/portada.spec.ts` | Portada y «Jugar solo» en PC y en vertical: nombre al azar, unirse con código, invitación, tamaños y solapes |
 | Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |
 | Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
 | Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, descripción al mantener, parte superior, barra «Disparo listo» y hoja de resultados en vertical |

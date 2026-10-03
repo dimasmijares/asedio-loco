@@ -7,7 +7,7 @@ test('humo: portada y campo de pruebas sin errores', async ({ page }, info) => {
   test.setTimeout(90_000);
   const errors = watchErrors(page);
   await page.goto('/');
-  await expect(page.locator('.home-wrap .title')).toBeVisible();
+  await expect(page.locator('#home .home-title')).toBeVisible();
   await expect(page.locator('#home')).toBeVisible();
   await page.screenshot({ path: info.outputPath('portada.png') });
 

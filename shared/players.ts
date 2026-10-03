@@ -10,13 +10,27 @@ export const PLAYER_STYLES = [
 
 export const BOT_NAMES = ['Sir Bot', 'Lady Pixel', 'Barón Byte', 'Duquesa Tuerca', 'Conde Clic', 'Reina Rúter'];
 
-// Nombre corto para el marcador compacto (WRK-TASK-046): «Tú» en la fila propia; en los bots, la
-// última palabra, que es la que los distingue («Lady Pixel» → «Pixel»); en los humanos, la primera.
+// Nombres al azar de la portada (R-10 U9): un título, como los de los bots, y algo corto y de andar
+// por casa («Duque Pepino»). Lo que distingue a cada uno es la segunda palabra.
+export const NAME_TITLES = ['Sir', 'Lady', 'Barón', 'Baronesa', 'Duque', 'Duquesa', 'Conde', 'Condesa', 'Rey', 'Reina', 'Capitán', 'Capitana', 'Marqués', 'Marquesa'];
+const NAME_WORDS = ['Pepino', 'Churro', 'Fideo', 'Turrón', 'Bigote', 'Rábano', 'Pelusa', 'Tostada', 'Mostaza', 'Cebolla', 'Patata', 'Buñuelo', 'Boniato', 'Melón', 'Queso', 'Grillo'];
+
+// Un nombre al azar de como mucho 16 letras (MAX_NAME_LEN), distinto de `not` y de los de los bots.
+export function randomName(rand: () => number = Math.random, not = ''): string {
+  for (;;) {
+    const n = `${NAME_TITLES[Math.floor(rand() * NAME_TITLES.length)]} ${NAME_WORDS[Math.floor(rand() * NAME_WORDS.length)]}`;
+    if (n.length <= 16 && n !== not && !BOT_NAMES.includes(n)) return n;
+  }
+}
+
+// Nombre corto para el marcador compacto (WRK-TASK-046): «Tú» en la fila propia; en los bots y en los
+// nombres con título («Duque Pepino»), la última palabra, que es la que los distingue («Lady Pixel» →
+// «Pixel»); en los demás humanos, la primera.
 export function shortName(p: { name: string; bot?: boolean; you?: boolean }) {
   if (p.you) return 'Tú';
   const words = p.name.trim().split(/\s+/).filter(Boolean);
   if (!words.length) return '?';
-  return p.bot ? words[words.length - 1] : words[0];
+  return p.bot || (words.length > 1 && NAME_TITLES.includes(words[0])) ? words[words.length - 1] : words[0];
 }
 
 // Tonos del castillo de cada jugador (WRK-TASK-059, aprobados en R-02): la piedra en un tono

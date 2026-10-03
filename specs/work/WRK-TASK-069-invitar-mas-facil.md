@@ -7,7 +7,7 @@ status: draft
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-03
 owner: dimas
 parent: WRK-PLAN-011
 activates: [FEAT-SALAS-001, FEAT-INTERFAZ-001]
@@ -41,4 +41,4 @@ F4: código de sala grande y legible, «Compartir» del sistema en móvil (Web S
 
 ## Evidence
 
-Pendiente.
+2026-10-03. El campo «Unirse con código» de la portada ya está hecho con la portada de R-10 (WRK-TASK-081); faltan el código grande en la sala y «Compartir».

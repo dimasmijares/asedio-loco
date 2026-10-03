@@ -162,24 +162,24 @@ function boot() {
   const home = showHome(ui, {
     code,
     // En móvil, pantalla completa al entrar (hace falta el gesto del usuario).
-    onJoin: (name) => {
+    onJoin: (c) => {
       enterFullscreen();
-      enterRoom(code!, name);
+      enterRoom(c, savedName());
     },
-    onCreate: async (name) => {
+    onCreate: async () => {
       enterFullscreen();
       try {
-        enterRoom(await createRoom(), name);
+        enterRoom(await createRoom(), savedName());
       } catch (e) {
         home.error((e as Error).message);
       }
     },
-    onSolo: (name) =>
+    onSolo: () =>
       showSoloSetup(ui, {
         onStart: (bots, difficulty) => {
           enterFullscreen();
           history.replaceState(null, '', '#solo');
-          void startSolo({ name, bots, difficulty });
+          void startSolo({ name: savedName(), bots, difficulty });
         },
         onSandbox: () => {
           enterFullscreen();

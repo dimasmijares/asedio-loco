@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { setName } from './helpers';
 
 // Fase 0.6: un jugador crea la sala, otro entra con el enlace y ambos ven la lista.
 function watchErrors(page: Page) {
@@ -15,14 +16,14 @@ test('crear sala, unirse por enlace y ver la lista de conectados', async ({ brow
   const errB = watchErrors(b);
 
   await a.goto('/');
-  await a.fill('#name', 'Ana');
+  await setName(a, 'Ana');
   await a.click('#create');
   await expect(a.locator('#lobby h2')).toHaveText(/Sala [A-Z]{4}/);
   const link = await a.inputValue('#room-link');
   expect(link).toMatch(/#[A-Z]{4}$/);
 
   await b.goto(link);
-  await b.fill('#name', 'Beto<script>');
+  await setName(b, 'Beto<script>');
   await b.click('#join');
 
   for (const p of [a, b]) {

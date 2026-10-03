@@ -27,11 +27,3 @@ export function toast(msg: string) {
   document.body.append(t);
   setTimeout(() => t.remove(), 2300);
 }
-
-export function titleEl(text = 'ASEDIO LOCO') {
-  return h(
-    'h1',
-    { class: 'title', 'aria-label': text },
-    ...Array.from(text).map((ch, i) => h('span', { style: `animation-delay:${i * 0.09}s`, 'aria-hidden': 'true' }, ch === ' ' ? ' ' : ch)),
-  );
-}

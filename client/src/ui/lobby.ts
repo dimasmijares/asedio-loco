@@ -1,68 +1,167 @@
-import { DIFFICULTIES, MAX_PLAYERS, type Difficulty, type RoomState } from '../../../shared/protocol';
-import { PLAYER_STYLES } from '../../../shared/players';
-import { isMobileDevice } from '../device';
+import { DIFFICULTIES, MAX_NAME_LEN, MAX_PLAYERS, ROOM_CODE_RE, sanitizeName, type Difficulty } from '../../../shared/protocol';
+import { PLAYER_STYLES, randomName } from '../../../shared/players';
+import { isMobileDevice, trayLayout } from '../device';
 import type { Connection } from '../net/connection';
-import { h, titleEl, toast } from './dom';
+import { ammoArt } from './ammoArt';
+import { h, toast } from './dom';
+import { icon, type IconName } from './icons';
 import { openSettings } from './settings';
 
 const NAME_KEY = 'asedio.name';
 const DIFF_LABEL: Record<Difficulty, string> = { facil: 'Fácil', normal: 'Normal', dificil: 'Difícil' };
 
+// Nombre del jugador, guardado en el dispositivo. La primera vez, uno al azar (R-10 U9): ya no hace
+// falta escribirlo para empezar.
 export function savedName(): string {
+  let n = '';
   try {
-    return localStorage.getItem(NAME_KEY) ?? '';
+    n = sanitizeName(localStorage.getItem(NAME_KEY) ?? '');
   } catch {
-    return '';
+    /* sin almacenamiento */
   }
+  return n || storeName(randomName());
 }
 
-export function showHome(root: HTMLElement, opts: { code?: string; onCreate: (name: string) => void; onJoin: (name: string) => void; onSolo: (name: string) => void }) {
-  const input = h('input', { id: 'name', maxLength: 16, placeholder: 'Tu nombre', value: savedName(), autocomplete: 'nickname' });
-  const err = h('div', { class: 'error', id: 'home-error' });
-  const getName = () => {
-    const n = input.value.trim();
-    try {
-      localStorage.setItem(NAME_KEY, n);
-    } catch {
-      /* sin almacenamiento */
-    }
-    return n;
+function storeName(n: string) {
+  try {
+    localStorage.setItem(NAME_KEY, n);
+  } catch {
+    /* sin almacenamiento */
+  }
+  return n;
+}
+
+// Píldora «Juegas como <nombre>» con el dado (otro al azar) y el lápiz (editarlo en el sitio).
+function namePill() {
+  const text = h('b', { class: 'name-text', id: 'name-text' }, savedName());
+  const dice = h('button', { class: 'pill-btn dice', id: 'name-random', type: 'button', 'aria-label': 'Nombre al azar', title: 'Nombre al azar' }, icon('dice'));
+  const edit = h('button', { class: 'pill-btn', id: 'name-edit', type: 'button', 'aria-label': 'Cambiar nombre', title: 'Cambiar nombre' }, icon('pencil'));
+  const pill = h('div', { class: 'name-pill', id: 'name-pill' }, h('span', { class: 'name-as' }, 'Juegas como'), text, dice, edit);
+  dice.onclick = () => (text.textContent = storeName(randomName(Math.random, savedName())));
+  edit.onclick = () => {
+    if (pill.classList.contains('editing')) return;
+    const input = h('input', { id: 'name', class: 'name-input', maxLength: MAX_NAME_LEN, value: savedName(), autocomplete: 'nickname', 'aria-label': 'Tu nombre' });
+    let done = false;
+    // Al terminar (Intro o al salir del campo) se guarda; vacío, otro al azar. Escape lo deja como estaba.
+    const finish = (keep: boolean) => {
+      if (done) return;
+      done = true;
+      if (keep) text.textContent = storeName(sanitizeName(input.value) || randomName(Math.random, savedName()));
+      input.replaceWith(text);
+      pill.classList.remove('editing');
+    };
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') finish(true);
+      if (e.key === 'Escape') finish(false);
+    };
+    input.onblur = () => finish(true);
+    text.replaceWith(input);
+    pill.classList.add('editing');
+    input.focus();
+    input.select();
+  };
+  return pill;
+}
+
+// Tablón de menú (componente Botones): naranja el principal y crema los demás.
+const plank = (id: string, label: string, primary = false) => h('button', { class: `big plank${primary ? ' primary' : ''}`, id, type: 'button' }, label);
+
+// Botón redondo crema con un icono (ayuda, ajustes, volver).
+const roundBtn = (id: string, name: IconName, label: string) => h('button', { class: 'round-btn', id, type: 'button', 'aria-label': label, title: label }, icon(name));
+
+// Portada (R-10 U9, maquetas «Móvil · Portada» y «PC · Portada»): título en dos líneas, el nombre al
+// azar, JUGAR SOLO, CREAR SALA y UNIRSE CON CÓDIGO, y abajo la ayuda y los ajustes. En móvil vertical,
+// el título sobre el cielo y el menú abajo; en PC, una columna a la izquierda y la escena a la derecha.
+// Con un enlace de invitación (#ABCD), ENTRAR es la acción principal (decisión del usuario, 03-10-2026).
+export function showHome(root: HTMLElement, opts: { code?: string; onCreate: () => void; onJoin: (code: string) => void; onSolo: () => void }) {
+  const err = h('div', { class: 'home-error', id: 'home-error', role: 'alert', hidden: true });
+  const fail = (msg: string) => {
+    err.textContent = msg;
+    err.hidden = !msg;
   };
   const busy = (b: HTMLButtonElement, fn: () => void) => () => {
+    fail('');
     b.disabled = true;
     fn();
   };
-  const create = h('button', { class: opts.code ? '' : 'primary big', id: 'create' }, opts.code ? 'Crear otra sala' : 'Crear sala');
-  create.onclick = busy(create, () => opts.onCreate(getName()));
-  const solo = h('button', { class: 'big', id: 'solo' }, 'Jugar solo contra bots');
-  solo.onclick = () => opts.onSolo(getName());
-  const children: Node[] = [h('label', { htmlFor: 'name' }, 'Nombre'), input];
+  const solo = plank('solo', 'Jugar solo', !opts.code);
+  solo.onclick = () => opts.onSolo();
+  const create = plank('create', 'Crear sala');
+  create.onclick = busy(create, () => opts.onCreate());
+  const planks: Node[] = [];
+  const wrap = h('div', { class: `home${opts.code ? ' invited' : ''}`, id: 'home' });
   if (opts.code) {
-    const join = h('button', { class: 'primary big', id: 'join' }, `Entrar en la sala ${opts.code}`);
-    join.onclick = busy(join, () => opts.onJoin(getName()));
-    children.push(join, h('div', { class: 'row', style: 'margin-top:10px' }, create));
+    const enter = plank('join', 'Entrar', true);
+    enter.onclick = busy(enter, () => opts.onJoin(opts.code!));
+    planks.push(enter, solo, create);
   } else {
-    children.push(create, solo);
+    // Unirse con código: en PC, el campo y UNIRSE en una fila; en móvil, el tablón se abre en esa
+    // misma fila (decisión del usuario, 03-10-2026).
+    const code = h('input', { id: 'code', class: 'code-input', maxLength: 4, placeholder: 'CÓDIGO', autocomplete: 'off', autocapitalize: 'characters', spellcheck: false, 'aria-label': 'Código de sala' });
+    const go = plank('join-code', 'Unirse');
+    const join = async () => {
+      const c = code.value.trim().toUpperCase();
+      if (!ROOM_CODE_RE.test(c)) return fail('El código de sala son 4 letras');
+      fail('');
+      go.disabled = true;
+      try {
+        const r = await fetch(`/api/rooms/${c}`);
+        const info = (await r.json()) as { exists?: boolean };
+        if (!info.exists) throw new Error(`No hay ninguna sala con el código ${c}`);
+        opts.onJoin(c);
+      } catch (e) {
+        go.disabled = false;
+        fail(e instanceof SyntaxError || e instanceof TypeError ? 'No se pudo comprobar la sala; prueba otra vez' : (e as Error).message);
+      }
+    };
+    go.onclick = () => void join();
+    code.oninput = () => (code.value = code.value.toUpperCase().replace(/[^A-Z]/g, ''));
+    code.onkeydown = (e) => {
+      if (e.key === 'Enter') void join();
+    };
+    const open = plank('join-open', 'Unirse con código');
+    open.onclick = () => {
+      wrap.classList.add('join-open');
+      code.focus();
+    };
+    planks.push(solo, create, open, h('div', { class: 'join-row', id: 'join-row' }, code, go));
   }
-  const settingsBtn = h('button', { id: 'open-settings' }, '⚙️ Ajustes');
-  settingsBtn.onclick = () => openSettings();
-  const howBtn = h('button', { id: 'how-to' }, '❓ Cómo se juega');
-  howBtn.onclick = () => showHowTo();
-  children.push(err, h('div', { class: 'home-links' }, howBtn, settingsBtn));
-  root.replaceChildren(
-    h('div', { class: 'home-wrap' }, titleEl(), h('div', { class: 'subtitle' }, 'Castillos, catapultas y vacas explosivas · hasta 4 jugadores'), h('div', { class: 'panel', id: 'home' }, ...children)),
+  const how = roundBtn('how-to', 'help', 'Cómo se juega');
+  how.onclick = () => showHowTo();
+  const gear = roundBtn('open-settings', 'gear', 'Ajustes');
+  gear.onclick = () => openSettings();
+  wrap.append(
+    h(
+      'div',
+      { class: 'home-head' },
+      h('h1', { class: 'home-title', 'aria-label': 'Asedio Loco' }, h('span', { 'aria-hidden': 'true' }, 'ASEDIO'), h('span', { 'aria-hidden': 'true' }, 'LOCO')),
+      h('p', { class: 'home-sub' }, 'Castillos, catapultas y vacas explosivas'),
+    ),
+    h(
+      'div',
+      { class: 'home-menu' },
+      namePill(),
+      opts.code ? h('p', { class: 'home-invite', id: 'home-invite' }, 'Te invitan a la sala ', h('b', null, opts.code)) : null,
+      h('div', { class: 'home-planks' }, ...planks),
+      err,
+      h('div', { class: 'home-round' }, how, gear),
+    ),
   );
-  input.focus();
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') (root.querySelector('#join') ?? create).dispatchEvent(new MouseEvent('click'));
-  });
-  return { error: (msg: string) => ((err.textContent = msg), root.querySelectorAll('button').forEach((b) => (b.disabled = false))) };
+  root.replaceChildren(wrap);
+  return { error: (msg: string) => (fail(msg), root.querySelectorAll('button').forEach((b) => (b.disabled = false))) };
 }
 
-// Resumen de cómo se juega (también accesible desde la portada).
+// Resumen de cómo se juega (también accesible desde la portada), con iconos en vez de emoji (R-10).
 export function showHowTo() {
   document.getElementById('howto')?.remove();
-  const close = h('button', { class: 'primary big' }, 'Entendido');
+  const close = h('button', { class: 'primary big', id: 'howto-close' }, 'Entendido');
+  const touch = isMobileDevice();
+  const item = (ico: Node, text: string) => h('p', { class: 'howto-item' }, h('span', { class: 'howto-ico' }, ico), h('span', null, text));
+  const aim = trayLayout()
+    ? 'Todos apuntan a la vez durante 20 s. Arrastra el dedo por el pad de la bandeja: a los lados giras la catapulta y arriba o abajo cambias la elevación (para girar mucho, arrastra por la escena). Mantén el botón rojo para cargar la fuerza y suéltalo para disparar; después ya no se puede cambiar.'
+    : touch
+      ? 'Todos apuntan a la vez durante 20 s. Arrastra el dedo por la pantalla para girar la catapulta y cambiar la elevación. Mantén el botón rojo para cargar la fuerza y suéltalo para disparar; después ya no se puede cambiar. Las flechas cambian de castillo objetivo.'
+      : 'Todos apuntan a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar la catapulta y cambiar la elevación. Mantén Espacio o el clic izquierdo para cargar la fuerza y suelta para disparar; después ya no se puede cambiar. Q y E cambian de castillo objetivo y H enseña los controles.';
   const modal = h(
     'div',
     { class: 'overlay modal', id: 'howto', role: 'dialog', 'aria-label': 'Cómo se juega' },
@@ -70,19 +169,24 @@ export function showHowTo() {
       'div',
       { class: 'panel' },
       h('h2', null, 'Cómo se juega'),
-      h('p', null, '👑 Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
-      h('p', null, '🎯 Cada ronda hay un objetivo secundario (una jaula de cristal, una pieza de hierro o bloques de torre de un rival). Quien lo cumple con su disparo empieza la ronda siguiente con una carta rara o épica.'),
-      h('p', null, '🛡️ Escudo real: en las rondas 1 y 2 ningún rey puede caer. Si al final de la ronda un rey está fuera de su castillo, vuelve a su pedestal.'),
-      isMobileDevice()
-        ? h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Arrastra el dedo por la pantalla para girar la catapulta y ajustar la elevación. Mantén el botón redondo 🔥 para cargar la fuerza (la parábola se alarga) y suéltalo para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Las flechas ◀ ▶ cambian de castillo objetivo y el gesto de pellizcar acerca la cámara.')
-        : h('p', null, '🎯 Todos los jugadores apuntan a la vez durante 20 s. Mantén el clic derecho y mueve el ratón para girar la catapulta y ajustar la elevación. Mantén Espacio o el clic izquierdo para cargar la fuerza (la parábola se alarga) y suelta para disparar; después ya no se puede cambiar. Cuando todos están listos empieza la cuenta atrás: 3, 2, 1, ¡fuego! Q/E cambian de castillo objetivo.'),
-      h('p', null, isMobileDevice() ? '🐄 En cada ronda recibes 3 municiones distintas al azar: toca la tarjeta de la que quieras usar.' : '🐄 En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3, o con un clic en su tarjeta.'),
-      h('p', null, '🌋 La lava sube un poco en cada ronda y, desde la ronda 6, sopla el viento; la flecha de la esquina indica su dirección.'),
+      item(icon('crown'), 'Cada castillo protege a su rey. Gana el último rey en pie: cae si sale despedido fuera de su castillo, si lo aplastan o si toca la lava.'),
+      item(icon(touch ? 'hand' : 'mouse'), aim),
+      item(
+        ammoArt('cow'),
+        touch
+          ? 'En cada ronda recibes 3 municiones distintas al azar: toca una carta para elegirla y mantén el dedo encima para ver qué hace.'
+          : 'En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3 o con un clic en su carta; al pasar el ratón ves qué hace.',
+      ),
+      item(icon('target'), 'Cada ronda hay un objetivo secundario (una jaula de cristal, una pieza de hierro o bloques de torre de un rival). Quien lo cumple empieza la ronda siguiente con una carta rara o épica.'),
+      item(icon('shield'), 'Escudo real: en las rondas 1 y 2 ningún rey puede caer. Si al final de la ronda un rey está fuera de su castillo, vuelve a su pedestal.'),
+      item(icon('wind'), 'La lava sube un poco en cada ronda y, desde la ronda 6, sopla el viento: su chip, arriba, dice hacia dónde y con qué fuerza.'),
       close,
     ),
   );
   close.onclick = () => modal.remove();
-  modal.onclick = (e) => e.target === modal && modal.remove();
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.remove();
+  };
   document.body.append(modal);
 }
 
@@ -177,7 +281,7 @@ export class LobbyView {
       h('div', { class: 'muted' }, 'Comparte este enlace para invitar a otros jugadores:'),
       h('div', { class: 'link-box' }, linkInput, copy),
       list,
-      h('div', { class: 'muted', id: 'spectators' }, room.spectators ? `👀 ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}` : ''),
+      h('div', { class: 'muted', id: 'spectators' }, room.spectators ? h('span', null, icon('eye'), ` ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}`) : ''),
     ];
 
     if (this.conn.you.role === 'spectator') {

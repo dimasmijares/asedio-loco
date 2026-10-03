@@ -133,15 +133,22 @@ export class Stage {
   // Se mueve poco a poco hacia lo que pide el modo; con 0, la imagen es la de siempre.
   viewShift = 0;
   private viewShiftWant = 0;
-  setViewShift(px: number) {
+  // Desplazamiento horizontal (fondo de la portada en PC, R-10 U9): positivo lleva lo que mira la
+  // cámara a la derecha, al centro de la escena que deja libre la columna del menú.
+  private viewShiftX = 0;
+  setViewShift(px: number, x = this.viewShiftX) {
     this.viewShiftWant = Math.max(0, px);
+    if (x !== this.viewShiftX) {
+      this.viewShiftX = x;
+      this.applyViewShift();
+    }
   }
 
   private applyViewShift() {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
-    if (this.viewShift < 0.5) this.camera.clearViewOffset();
-    else this.camera.setViewOffset(w, h, 0, this.viewShift, w, h);
+    if (this.viewShift < 0.5 && Math.abs(this.viewShiftX) < 0.5) this.camera.clearViewOffset();
+    else this.camera.setViewOffset(w, h, -this.viewShiftX, this.viewShift, w, h);
   }
 
   private makeSky() {

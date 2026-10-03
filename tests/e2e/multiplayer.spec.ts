@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import { canvasNotBlack, watchErrors } from './helpers';
+import { canvasNotBlack, setName, watchErrors } from './helpers';
 
 // Secciones 5.2-5.6: partida completa con 4 clientes, consistencia entre clientes,
 // espectador, reconexión y anfitrión caído.
@@ -40,7 +40,7 @@ const summary = (p: Page) => p.evaluate(() => (window as any).__asedio?.mode?.su
 
 async function createRoom(host: Page, extra = '') {
   await host.goto(`/?fast=1&autoplay=1${SLOW}${extra}`);
-  await host.fill('#name', 'Anfitrión');
+  await setName(host, 'Anfitrión');
   await host.click('#create');
   await expect(host.locator('#room-link')).toBeVisible();
   return new URL(await host.inputValue('#room-link')).hash;
@@ -48,7 +48,7 @@ async function createRoom(host: Page, extra = '') {
 
 async function join(p: Page, hash: string, name: string, extra = '') {
   await p.goto(`/?autoplay=1${extra}${hash}`);
-  await p.fill('#name', name);
+  await setName(p, name);
   await p.click('#join');
 }
 
@@ -151,7 +151,7 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     if (!spectator && h.round >= 2 && h.phase === 'aim') {
       spectator = await newPlayer(browser, errors, 'espectador');
       await spectator.goto(`/?render=1${hash}`);
-      await spectator.fill('#name', 'Mirón');
+      await setName(spectator, 'Mirón');
       await spectator.click('#join');
       const [sv] = await waitAll([spectator], (s) => s.fulls > 0);
       expect(sv.spectator).toBe(true);

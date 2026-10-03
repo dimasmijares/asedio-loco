@@ -7,7 +7,7 @@ status: draft
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-03
 owner: dimas
 parent: WRK-PLAN-011
 activates: [FEAT-SALAS-001, FEAT-INTERFAZ-001]
@@ -41,4 +41,4 @@ F5 y F6: el anfitrión toca «Plaza libre» para añadir un bot, un bot para qui
 
 ## Evidence
 
-Pendiente.
+2026-10-03. En la portada, el nombre ya es al azar desde la primera vez y se edita con el lápiz (vacío, otro al azar), con la portada de R-10 (WRK-TASK-081); falta editarlo dentro de la sala y gestionar las plazas.

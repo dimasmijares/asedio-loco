@@ -22,5 +22,5 @@ test('el manifiesto es válido y la aplicación se puede instalar', async ({ pag
   expect(inst.installabilityErrors).toEqual([]);
   // Un enlace de sala sigue entrando en la sala (el manifiesto no cambia las rutas).
   await page.goto('/#ABCD');
-  await expect(page.locator('#join, #name')).not.toHaveCount(0);
+  await expect(page.locator('#join')).toBeVisible();
 });

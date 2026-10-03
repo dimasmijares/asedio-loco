@@ -1,5 +1,6 @@
 import { isMobileDevice, trayLayout } from '../device';
 import { h } from './dom';
+import { icon } from './icons';
 
 const KEY = 'asedio.tutorial';
 
@@ -52,7 +53,7 @@ export class Tutorial {
   private focusOf = this.tray ? TRAY_FOCUS : FOCUS;
   private el: HTMLElement;
   // Mano (táctil) o ratón que se desliza sobre la escena en el paso de apuntar.
-  private swipe = h('div', { class: 'coach-swipe', 'aria-hidden': 'true' }, isMobileDevice() ? '👆' : '🖱️');
+  private swipe = h('div', { class: 'coach-swipe', 'aria-hidden': 'true' }, icon(isMobileDevice() ? 'hand' : 'mouse'));
   private t = 0;
   done = false;
 

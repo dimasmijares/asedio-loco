@@ -3,11 +3,11 @@ id: WRK-TASK-062
 type: spec
 layer: work-task
 scope: ephemeral
-status: draft
-confidence: low
-version: 0.1.0
+status: completed
+confidence: medium
+version: 0.2.0
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-03
 owner: dimas
 parent: WRK-PLAN-011
 activates: [FEAT-INTERFAZ-001]
@@ -38,9 +38,9 @@ Comentario del usuario en el lienzo (28-09-2026, «Móvil · Portada»): mejorar
 
 ## Acceptance Criteria
 
-- [ ] Propuesta aprobada en el lienzo.
-- [ ] El título cabe entero de 360 a 1440 px de ancho (E2E que mide que no se sale).
-- [ ] Capturas en PC y móvil vertical.
+- [x] Propuesta aprobada en el lienzo (R-10 U9, que sustituye a R-06, aprobada el 01-10-2026).
+- [x] El título cabe entero de 360 a 1440 px de ancho (`tests/e2e/portada.spec.ts`, de 360 a 1280 px, en dos líneas).
+- [x] Capturas en PC y móvil vertical (tablero «R-10 fase 3 · en el juego»).
 
 ## Test Plan
 
@@ -50,4 +50,4 @@ Comentario del usuario en el lienzo (28-09-2026, «Móvil · Portada»): mejorar
 
 ## Evidence
 
-Pendiente.
+2026-10-03. Hecho con la portada de R-10 (WRK-TASK-081): título «ASEDIO / LOCO» en dos líneas con Lilita One, que ya se sirve desde el repositorio (WRK-TASK-074).
