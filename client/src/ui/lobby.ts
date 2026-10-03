@@ -1,5 +1,5 @@
 import { DIFFICULTIES, MAX_NAME_LEN, MAX_PLAYERS, ROOM_CODE_RE, sanitizeName, type Difficulty } from '../../../shared/protocol';
-import { PLAYER_STYLES, randomName } from '../../../shared/players';
+import { BOT_NAMES, PLAYER_STYLES, randomName } from '../../../shared/players';
 import { isMobileDevice, trayLayout } from '../device';
 import type { Connection } from '../net/connection';
 import { ammoArt } from './ammoArt';
@@ -190,28 +190,72 @@ export function showHowTo() {
   document.body.append(modal);
 }
 
-// Configuración de la partida en solitario: cuántos bots y de qué dificultad.
-export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty) => void; onSandbox: () => void; onBack: () => void }) {
-  const bots = h('select', { id: 'solo-bots', 'aria-label': 'Número de bots' });
-  for (let i = 1; i <= 3; i++) bots.append(h('option', { value: String(i), selected: i === 3 }, `${i} bot${i > 1 ? 's' : ''}`));
-  const diff = h('select', { id: 'solo-difficulty', 'aria-label': 'Dificultad' });
-  for (const d of DIFFICULTIES) diff.append(h('option', { value: d, selected: d === 'normal' }, DIFF_LABEL[d]));
-  const start = h('button', { class: 'primary big', id: 'solo-start' }, 'Empezar partida');
-  start.onclick = () => opts.onStart(Number(bots.value), diff.value as Difficulty);
-  const sandbox = h('button', { class: 'big', id: 'sandbox' }, 'Campo de pruebas (munición ilimitada)');
-  sandbox.onclick = () => opts.onSandbox();
-  const back = h('button', { style: 'margin-top:12px' }, '← Volver');
+// Selector segmentado de 48 px (R-10 U10): la opción elegida en naranja sobre una pista crema oscuro.
+function segmented<T extends string | number>(id: string, label: string, options: [T, string][], value: T, onChange: (v: T) => void) {
+  const row = h('div', { class: 'segm', id, role: 'radiogroup', 'aria-label': label });
+  const render = (v: T) =>
+    row.replaceChildren(
+      ...options.map(([val, text]) => {
+        const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(val === v), 'data-v': String(val), class: val === v ? 'on' : '' }, text);
+        b.onclick = () => {
+          render(val);
+          onChange(val);
+        };
+        return b;
+      }),
+    );
+  render(value);
+  return h('div', { class: 'segm-field' }, h('span', { class: 'segm-label' }, label), row);
+}
+
+// Jugar solo (R-10 U10, maqueta «Móvil · Jugar solo»): hoja crema abajo en móvil y tarjeta centrada
+// en PC, con volver, rivales y dificultad en selectores segmentados, los rivales que tocan con su
+// emblema y su nombre, EMPEZAR y el campo de pruebas como enlace.
+export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty, names: string[]) => void; onSandbox: () => void; onBack: () => void }) {
+  let bots = 3;
+  let diff: Difficulty = 'normal';
+  // Los rivales salen de la lista de bots a partir de un punto al azar; la partida usa estos mismos.
+  const from = Math.floor(Math.random() * BOT_NAMES.length);
+  const names = () => Array.from({ length: bots }, (_, i) => BOT_NAMES[(from + i) % BOT_NAMES.length]);
+  const rivals = h('div', { class: 'solo-rivals', id: 'solo-rivals' });
+  const renderRivals = () => {
+    // Los huecos de los bots, como en la partida (SoloMode): con uno, el de enfrente.
+    const slots = [0, 2, 1, 3].slice(0, 1 + bots).sort().slice(1);
+    const n = names();
+    rivals.replaceChildren(
+      h('span', { class: 'solo-embs', 'aria-hidden': 'true' }, ...slots.map((s) => h('span', { class: 'emb', style: `background:${PLAYER_STYLES[s].color};color:${PLAYER_STYLES[s].ink}` }, `${PLAYER_STYLES[s].glyph}︎`))),
+      h('span', { class: 'solo-names' }, n.length > 1 ? `${n.slice(0, -1).join(', ')} y ${n[n.length - 1]}` : n[0]),
+    );
+  };
+  renderRivals();
+  const back = roundBtn('solo-back', 'back', 'Volver');
   back.onclick = () => opts.onBack();
+  const start = plank('solo-start', 'Empezar', true);
+  start.onclick = () => opts.onStart(bots, diff, names());
+  const sandbox = h('button', { class: 'link-btn', id: 'sandbox', type: 'button' }, 'Campo de pruebas · munición sin límite');
+  sandbox.onclick = () => opts.onSandbox();
   root.replaceChildren(
     h(
       'div',
-      { class: 'panel', id: 'solo-setup' },
-      h('h2', null, 'Jugar solo'),
-      h('p', { class: 'muted' }, 'Partida contra bots. Gana el último rey en pie.'),
-      h('div', { class: 'row' }, h('div', null, h('label', { htmlFor: 'solo-bots' }, 'Rivales'), bots), h('div', null, h('label', { htmlFor: 'solo-difficulty' }, 'Dificultad'), diff)),
-      start,
-      sandbox,
-      back,
+      { class: 'solo-wrap' },
+      h(
+        'div',
+        { class: 'solo-card', id: 'solo-setup', role: 'dialog', 'aria-label': 'Jugar solo' },
+        h('div', { class: 'solo-head' }, back, h('h2', null, 'Jugar solo')),
+        segmented('solo-bots', 'Rivales', [[1, '1'], [2, '2'], [3, '3']], bots, (v) => {
+          bots = v;
+          renderRivals();
+        }),
+        rivals,
+        segmented(
+          'solo-difficulty',
+          'Dificultad',
+          DIFFICULTIES.map((d) => [d, DIFF_LABEL[d]] as [Difficulty, string]),
+          diff,
+          (v) => (diff = v),
+        ),
+        h('div', { class: 'solo-actions' }, start, sandbox),
+      ),
     ),
   );
 }

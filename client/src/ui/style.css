@@ -1085,7 +1085,8 @@ input[type='range'] {
    En vertical: el título sobre el cielo y el menú abajo, sobre la escena oscurecida. En horizontal
    (PC): todo en una columna a la izquierda, sobre noche al 88 %, y la escena a la derecha. Antes de
    que cargue el fondo animado se ve el color del cielo. */
-body:has(.home) {
+body:has(.home),
+body:has(.solo-wrap) {
   background: var(--al-crema);
 }
 
@@ -1484,6 +1485,205 @@ body:has(.home) {
     right: 30px;
     width: auto;
     margin: 0;
+  }
+}
+
+/* ---------- Jugar solo (R-10 U10, maqueta «Móvil · Jugar solo») ----------
+   Hoja crema abajo en móvil y tarjeta centrada de 420 px en PC, sobre la escena con un velo. */
+.solo-wrap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(18, 2, 31, 0.45);
+}
+.solo-card {
+  width: 100%;
+  max-width: 600px;
+  min-height: min(560px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px 20px max(40px, calc(env(safe-area-inset-bottom) + 16px));
+  background: var(--al-crema);
+  color: var(--al-noche);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  animation: sheet-up 0.25s ease-out;
+}
+.solo-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.solo-head h2 {
+  margin: 0;
+  font-size: 32px;
+}
+.solo-head .round-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+.segm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.segm-label {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--al-vino);
+}
+.segm {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--al-crema-oscuro);
+  border: 3px solid var(--al-noche);
+}
+.segm button {
+  flex: 1;
+  height: 48px;
+  padding: 0;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background: transparent;
+  box-shadow: none;
+  font-size: 19px;
+  color: var(--al-noche);
+}
+.segm button.on {
+  border-color: var(--al-noche);
+  background: var(--al-naranja);
+  box-shadow: 0 3px 0 var(--al-noche);
+}
+.segm button:active:not(:disabled) {
+  transform: none;
+}
+.solo-rivals {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -10px;
+}
+.solo-embs {
+  display: flex;
+  gap: 6px;
+}
+.emb {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+.solo-names {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+.solo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: auto;
+}
+.solo-actions .plank {
+  margin: 0;
+  min-height: 68px;
+  font-size: 28px;
+}
+/* Acción secundaria como enlace (campo de pruebas): vino subrayado, 48 px de alto. */
+.link-btn {
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font: 900 16px var(--font);
+  color: var(--al-vino);
+  text-decoration: underline;
+}
+.link-btn:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (orientation: landscape) {
+  .solo-wrap {
+    align-items: center;
+  }
+  .solo-card {
+    width: 420px;
+    min-height: 0;
+    max-height: calc(100% - 24px);
+    padding: 22px 24px 24px;
+    border: 3px solid var(--al-noche);
+    border-radius: var(--al-radius-lg);
+    box-shadow: var(--al-sombra-tablon);
+  }
+  .solo-actions {
+    margin-top: 6px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  .solo-card {
+    gap: 12px;
+    padding: 14px 20px 16px;
+  }
+  .solo-actions .plank {
+    min-height: 52px;
+    font-size: 24px;
+  }
+}
+
+/* Móvil tumbado: en dos columnas (rivales a la izquierda; dificultad y EMPEZAR a la derecha). */
+@media (orientation: landscape) and (max-height: 460px) {
+  .solo-card {
+    width: min(700px, calc(100vw - 24px));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 10px;
+    align-content: start;
+  }
+  .solo-head {
+    grid-column: 1 / -1;
+  }
+  .solo-card > :nth-child(2) {
+    grid-area: 2 / 1;
+  }
+  .solo-card > :nth-child(3) {
+    grid-area: 3 / 1;
+    margin-top: 0;
+    align-items: flex-start;
+  }
+  .solo-card > :nth-child(4) {
+    grid-area: 2 / 2;
+  }
+  .solo-card > :nth-child(5) {
+    grid-area: 3 / 2;
+    gap: 4px;
+    margin-top: 0;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
   }
 }
 

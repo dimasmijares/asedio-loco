@@ -55,6 +55,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 25 | WRK-TASK-079 · Parte superior de la partida en móvil vertical (R-10 fase 2: U4, U5) | completed | 078 | 2026-10-03 |
 | 26 | WRK-TASK-080 · Después de disparar en móvil vertical (R-10 fase 2: U6, U7) | completed | 079 | 2026-10-03 |
 | 27 | WRK-TASK-081 · Portada «Atardecer» (R-10 fase 3: U9) | completed | 080 | 2026-10-03 |
+| 28 | WRK-TASK-082 · Jugar solo con selectores grandes (R-10 fase 3: U10) | completed | 081 | 2026-10-03 |
 
 ## Risk Assessment
 

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { watchErrors } from './helpers';
 
-// Portada de R-10 (U9): en PC y en móvil vertical, todo dentro de la pantalla,
+// Portada y «Jugar solo» de R-10 (U9, U10): en PC y en móvil vertical, todo dentro de la pantalla,
 // sin cruces y con lo táctil de 44 px o más; el nombre al azar se guarda en el dispositivo.
 type Box = { x: number; y: number; w: number; h: number; sel: string };
 
@@ -98,6 +98,39 @@ for (const [name, vp, mobile] of [
       await expect(page.locator('#join')).toHaveText(/entrar/i);
       await expect(page.locator('#join-open')).toHaveCount(0);
       await checkLayout(page, '.home-title, #name-random, #name-edit, .home-planks > *, #how-to, #open-settings', vp);
+      expect(errors).toEqual([]);
+    });
+
+    test(`jugar solo en ${name}`, async ({ page }) => {
+      test.setTimeout(90_000);
+      const errors = watchErrors(page);
+      await page.goto('/');
+      await page.click('#solo');
+      await expect(page.locator('#solo-setup')).toBeVisible();
+      // Selectores segmentados de 48 px; la opción elegida, en naranja.
+      for (const b of await boxes(page, '#solo-bots button, #solo-difficulty button')) expect(b.h).toBeGreaterThanOrEqual(48);
+      await expect(page.locator('#solo-bots button.on')).toHaveText('3');
+      await expect(page.locator('#solo-difficulty button.on')).toHaveText('Normal');
+      await expect(page.locator('#solo-rivals .emb')).toHaveCount(3);
+      await page.click('#solo-bots button[data-v="1"]');
+      await expect(page.locator('#solo-rivals .emb')).toHaveCount(1);
+      await page.click('#solo-bots button[data-v="2"]');
+      await expect(page.locator('#solo-rivals .emb')).toHaveCount(2);
+      await page.click('#solo-difficulty button[data-v="facil"]');
+      await checkLayout(page, '#solo-back, #solo-bots, #solo-difficulty, #solo-rivals, #solo-start, #sandbox', vp);
+      expect(await emoji(page, '#solo-setup')).toEqual([]);
+      // Volver lleva a la portada.
+      await page.click('#solo-back');
+      await expect(page.locator('#home')).toBeVisible();
+      await page.click('#solo');
+      await page.click('#solo-bots button[data-v="2"]');
+      // Los rivales que se anuncian son los de la partida.
+      const rivals = (await page.locator('#solo-rivals .solo-names').textContent())!;
+      await page.click('#solo-start');
+      await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase, null, { timeout: 60_000 });
+      const bots = await page.evaluate(() => (window as any).__asedio.mode.host.state.players.filter((p: { bot: boolean }) => p.bot).map((p: { name: string }) => p.name));
+      expect(bots.length).toBe(2);
+      expect(rivals).toBe(`${bots[0]} y ${bots[1]}`);
       expect(errors).toEqual([]);
     });
   });

@@ -14,6 +14,7 @@ export interface SoloOptions {
   fast?: boolean;
   seed?: number;
   autoplay?: boolean; // el jugador humano también lo controla un bot (pruebas)
+  names?: string[]; // los rivales elegidos en «Jugar solo» (R-10 U10); sin ellos, al azar
 }
 
 // Partida local contra bots: el propio navegador es el anfitrión.
@@ -30,7 +31,7 @@ export class SoloMode implements Mode {
     const slots = [0, 2, 1, 3].slice(0, 1 + o.bots).sort();
     const seed = o.seed ?? (Math.random() * 2 ** 31) >>> 0;
     const players = slots.map((slot, i) =>
-      i === 0 ? { slot, id: 'you', name: o.name || 'Jugador', bot: !!o.autoplay, difficulty: 'dificil' as Difficulty } : { slot, id: `bot${slot}`, name: BOT_NAMES[(seed + i) % BOT_NAMES.length], bot: true, difficulty: o.difficulty },
+      i === 0 ? { slot, id: 'you', name: o.name || 'Jugador', bot: !!o.autoplay, difficulty: 'dificil' as Difficulty } : { slot, id: `bot${slot}`, name: o.names?.[i - 1] ?? BOT_NAMES[(seed + i) % BOT_NAMES.length], bot: true, difficulty: o.difficulty },
     );
     const state = createMatch(players, seed, !!o.fast);
     this.host = new MatchHost(this.game, state);

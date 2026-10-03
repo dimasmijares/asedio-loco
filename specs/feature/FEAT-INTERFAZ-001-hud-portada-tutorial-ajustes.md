@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.17.0
+version: 1.18.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -54,6 +54,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - **Unirse con código:** en PC, el campo y UNIRSE en una fila; en móvil, el tablón se abre en esa fila. Se comprueba con `GET /api/rooms/:code` y avisa si el código está mal o la sala no existe. Con un enlace de invitación (`#ABCD`), «Te invitan a la sala ABCD» y ENTRAR como tablón principal.
    - **Disposición:** en vertical, el título sobre el cielo y el menú abajo, sobre noche al 55 %; en horizontal, una columna de 520 px sobre noche al 88 % con la escena a la derecha. Se aprieta en ventanas bajas.
    - Fondo animado: la isla con los 4 castillos y la cámara girando, sin física (D-043) y sin descargar Rapier: la vista recibe los fragmentos desde fuera (`DebrisLike`) y el fondo usa `NoDebris` (WRK-TASK-016). La cámara va baja, con el cielo detrás del título, y la isla se encuadra en lo que deja libre el menú. No se crea en navegadores automatizados salvo con `?backdrop=1`. Se desmonta al empezar la partida y vuelve con la revancha.
+   - **Jugar solo** (R-10 U10, WRK-TASK-082; maqueta «Móvil · Jugar solo»): hoja crema abajo en móvil y tarjeta centrada de 420 px en PC (en un móvil tumbado, en dos columnas). Volver, «Rivales» (1/2/3) y «Dificultad» (Fácil/Normal/Difícil) en selectores segmentados de 48 px; bajo los rivales, sus emblemas y sus nombres, que son los de la partida (`SoloOptions.names`); EMPEZAR como tablón naranja y «Campo de pruebas · munición sin límite» como enlace.
 2. **Cómo se juega:** una ventana con 6 puntos, cada uno con su icono SVG y sin emoji (rey, apuntado de 20 s según el formato, 3 municiones, objetivo, escudo real, lava y viento).
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).
