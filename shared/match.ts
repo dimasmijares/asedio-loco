@@ -81,11 +81,10 @@ export const HAND = 3; // municiones distintas para elegir en cada ronda
 export function matchPlayersFromRoom(room: RoomState) {
   const humans = room.players.map((p) => ({ slot: p.slot, id: p.id, name: p.name, bot: false as boolean, difficulty: undefined as Difficulty | undefined }));
   const used = new Set(humans.map((p) => p.slot));
-  const bots: typeof humans = [];
-  for (let slot = 0; slot < 4 && bots.length < room.config.bots; slot++) {
-    if (used.has(slot)) continue;
-    bots.push({ slot, id: `bot${slot}`, name: botName(slot), bot: true, difficulty: room.config.difficulty });
-  }
+  // Cada bot en su plaza y con el nombre de esa plaza (R-11 S2, D2).
+  const bots = [...new Set(room.config.botSlots)]
+    .filter((slot) => slot >= 0 && slot < 4 && !used.has(slot))
+    .map((slot) => ({ slot, id: `bot${slot}`, name: botName(slot), bot: true, difficulty: room.config.difficulty as Difficulty | undefined }));
   return [...humans, ...bots].sort((a, b) => a.slot - b.slot);
 }
 

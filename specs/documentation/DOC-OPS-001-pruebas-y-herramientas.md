@@ -4,7 +4,7 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.4.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -71,7 +71,7 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 
 **4. E2E (Playwright)**
 
-- `npm run e2e`: en local. Compila y levanta `wrangler dev` en el puerto 8787 (o reutiliza el que esté en marcha). Antes de empezar, `tests/e2e/global-setup.ts` comprueba que ese servidor sirve la compilación de `dist/client`; si no (un `wrangler dev` o `workerd` huérfano de una sesión anterior), para con un aviso: hay que cerrar los procesos del puerto 8787. Un servidor dejado en segundo plano por el agente muere al acabar su tiempo, pero su `workerd` puede quedarse sirviendo una compilación vieja.
+- `npm run e2e`: en local. Compila y levanta `wrangler dev` en el puerto 8787 (o reutiliza el que esté en marcha). Antes de empezar, `tests/e2e/global-setup.ts` comprueba que ese servidor sirve la compilación de `dist/client` y que habla el mismo `PROTOCOL_VERSION` que el código (`/api/health`: un `wrangler dev` viejo puede recargar los estáticos y seguir con el worker anterior, y entonces los clientes reciben «Versión antigua» y las pruebas esperan sin fin); si no (un `wrangler dev` o `workerd` huérfano de una sesión anterior), para con un aviso: hay que cerrar los procesos del puerto 8787. Un servidor dejado en segundo plano por el agente muere al acabar su tiempo, pero su `workerd` puede quedarse sirviendo una compilación vieja.
 - `npm run e2e:prod`: contra `https://asedio-loco.dimasmijares.workers.dev`. Solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
 - CI la ejecuta tras cada despliegue en 11 trabajos: `basicas` (`lobby smoke perf controls calidad pwa`), `hud` (`touch hud-compact tutorial encuadre`), `espectador-repeticion`, `menus-y-marca` (`portada marca sala`), `fisica`, `solitario`, `cuatro-jugadores`, `migracion` (`-g "anfitrión"`), `revancha`, `red-mala` y `desconexion`. Las capturas quedan como artefactos `capturas-e2e-<grupo>` durante 7 días. En CI cada prueba tiene un reintento: si solo pasa a la segunda sale como «flaky» y se apunta como tarea (RULE-003).
 - `npm run e2e:grupos` (CI lo ejecuta antes de desplegar): comprueba que cada prueba E2E está en algún grupo de `deploy.yml`. Un archivo nuevo hay que añadirlo a un grupo; si no, CI se para (el 03-10-2026 `portada.spec` y `marca.spec` llevaban horas sin pasar por CI).

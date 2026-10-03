@@ -37,7 +37,7 @@ test('crear sala, unirse por enlace y ver la lista de conectados', async ({ brow
   await b.reload();
   await expect(b.locator('#player-list li[data-player]')).toHaveCount(2);
   await expect(a.locator('#player-list li[data-player]')).toHaveCount(2);
-  await expect(a.locator('#player-list .tag.off')).toHaveCount(0);
+  await expect(a.locator('#player-list .seat-chip.off')).toHaveCount(0);
 
   expect(errA).toEqual([]);
   expect(errB).toEqual([]);

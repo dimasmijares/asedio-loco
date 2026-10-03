@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.4.0
+version: 1.5.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -46,7 +46,8 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 | Enlace `/#ABCD` | URL | — | Abre la portada con «Entrar en la sala ABCD» |
 | Nombre | Texto | No | Saneado a 16 caracteres; vacío → «Jugador N» |
 | Token | `localStorage asedio.token.<código>` | No | Se guarda al recibir `welcome` |
-| `config {bots, difficulty, fast}` | Mensaje | Solo anfitrión, en lobby | Bots de relleno 0 a huecos libres; `fast` solo por `?fast=1` |
+| `config {difficulty, fast}` | Mensaje | Solo anfitrión, en la sala | Dificultad de los bots; `fast` solo por `?fast=1` |
+| `seat {slot, bot}` | Mensaje | Solo anfitrión, en la sala | Tocar una plaza (R-11 S2, WRK-TASK-070): libre → bot; bot o desconectado → libre. Las plazas con bot van en `config.botSlots` |
 | `start`, `lobby`, `yield` | Mensajes | Solo anfitrión | Empezar, revancha, ceder |
 | `leave` | Mensaje | Cualquiera | Salir de la sala o de la partida: la plaza queda libre al momento (R-07 F1 y F3, WRK-TASK-067) |
 | `mobile` en `hello` | booleano | No | `pointer: coarse` sin puntero fino; `?mobile=1/0` lo fuerza |
@@ -56,9 +57,12 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 1. **Crear y entrar:** quien crea la sala es el anfitrión. Si al recargar hay token de esa sala, se entra directo sin pasar por la portada.
 2. **Sala** (R-11, maquetas «Móvil · Sala» y «PC · Sala» del lienzo): en vertical, «Salir de la sala» y el engranaje arriba, la tarjeta del código y, debajo, la hoja crema con las plazas; en horizontal, una columna noche de 520 px a la izquierda («Salir de la sala», «Sala de <anfitrión>», el código, la ayuda y los ajustes) y la tarjeta de las plazas, de 600 px, a la derecha. Es el mismo DOM (`#room`); lo coloca `client/src/ui/flujo.css`.
    - **Código e invitación** (R-11 S1, WRK-TASK-069): el código en cuatro letras grandes (`#room-code`, 56×68 en móvil y 64×76 en PC) con «Tus amigos lo escriben en «Unirse con código»». En móvil, COMPARTIR abre la hoja del sistema (`navigator.share`, con el enlace y un texto con el código; si no existe o falla, copia el enlace) y el botón redondo copia el código; en PC, COPIAR ENLACE y CÓDIGO. Cada copia lo confirma con un aviso.
-   - Lista de 4 huecos con color y emblema, «Anfitrión», «Tú», «Desconectado» y huecos de bot.
-   - El anfitrión elige bots y dificultad. «Empezar partida» exige al menos 2 castillos (jugadores conectados + bots).
-   - En el lobby, un jugador desconectado cede su hueco a uno nuevo si la sala está llena.
+   - **Plazas** (R-11 S2 y S6, WRK-TASK-070): «Jugadores · N de 4» y cuatro filas de 58 px (68 en PC). El color y el emblema van con la plaza (1 ☀ rojo, 2 ☾ azul, 3 ★ amarillo, 4 ϟ rosa), no con quien entra. Tu fila, con borde y sombra, lleva TÚ (y ANFITRIÓN si lo eres); los demás, ANFITRIÓN, CONECTADO o DESCONECTADO; los bots, BOT. Solo el anfitrión toca las plazas: una libre (borde discontinuo y el emblema del color de la plaza en discontinuo) añade un bot; un bot o un jugador desconectado muestran «Quitar» y al tocarlos la plaza queda libre. Los invitados ven «Plaza libre».
+   - **Bots por plaza** (D2): cada bot va en su plaza y se llama siempre igual (plaza 2 Conde Clic, 3 Reina Rúter, 4 Sir Bot; la 1, Lady Pixel, si queda libre). Un humano que entra con la sala llena de humanos y bots ocupa la plaza del primer bot: los humanos van antes que los bots.
+   - **Dificultad** (D1): bajo las plazas y solo si hay algún bot, el selector Fácil / Normal / Difícil (Normal por defecto); los invitados la leen como texto («Bots en dificultad Normal»).
+   - **Nombre** (R-11 S3): en tu fila, el dado (otro al azar) y el lápiz, que abre el nombre en un campo que ocupa la fila; Intro o ✓ lo guardan (y en el dispositivo, como en la portada); vacío, otro al azar; Escape lo deja. Mientras se edita, en vertical la tarjeta del código se recoge y la hoja sube por encima del teclado.
+   - **Empezar** (S5): EMPEZAR solo lo ve el anfitrión, desactivado con menos de 2 castillos («Hace falta al menos otro jugador o un bot»). Los invitados ven «Esperando a que <anfitrión> empiece» y «Solo el anfitrión cambia las plazas y empieza la partida».
+   - En la sala, un jugador desconectado cede su plaza a uno nuevo si la sala está llena.
 3. **Empezar:** se quitan los desconectados. Si el anfitrión es un móvil y hay un ordenador, el ordenador pasa a ser el anfitrión antes de la primera ronda (D-065).
 4. **Espectadores** (D-033): quien entra con la partida empezada o con la sala llena es espectador. Pide `hi` y recibe un `full`. El servidor rechaza sus `relay` («Los espectadores no pueden jugar»).
 5. **Reconexión:**
@@ -102,6 +106,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 - [x] Un móvil que crea la sala cede el papel a un ordenador desde el principio, sin migración.
 - [x] La revancha vuelve al lobby con la misma sala y los mismos jugadores, y solo el anfitrión ve el botón.
 - [x] Los nombres se sanean a 16 caracteres y los códigos tienen 4 letras sin I ni O.
+- [x] Con dos dispositivos, añadir y quitar bots, cambiar la dificultad y cambiar el nombre se ve en los dos; el anfitrión quita a un jugador desconectado tocando su plaza (`tests/e2e/sala.spec.ts`).
 - [x] Quien sale de la sala deja su plaza libre al momento en los demás dispositivos; si era el anfitrión, lo hereda otro, y la confirmación dice quién (`tests/e2e/sala.spec.ts`, PC y móvil vertical).
 - [x] Quien sale de una partida en red vuelve a la portada y su castillo lo lleva un bot desde la ronda siguiente; en solitario, se vuelve a la portada (`tests/e2e/sala.spec.ts`).
 
@@ -116,7 +121,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 
 | Relation | Target | Description |
 |----------|--------|-------------|
-| Implemented in | `server/index.ts` | `Room`: hello, config, start, lobby, yield, leave, relay, `pickNewHost`, alarmas |
+| Implemented in | `server/index.ts` | `Room`: hello, config, seat, start, lobby, yield, leave, relay, `pickNewHost`, `freeSlot`, alarmas |
 | Implemented in | `client/src/ui/sheet.ts` | Hoja de confirmación y aviso (salir, eliminado) |
 | Implemented in | `client/src/net/connection.ts` | Reconexión, token, ping, `isMobileDevice` |
 | Implemented in | `client/src/ui/lobby.ts` | Portada, lobby y configuración |

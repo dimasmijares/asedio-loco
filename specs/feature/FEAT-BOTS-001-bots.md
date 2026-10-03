@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.4.0
 created: 2026-09-26
 updated: 2026-09-28
 owner: dimas
@@ -50,7 +50,7 @@ Decidir por cada bot, al empezar la ronda, a quién dispara, con qué munición 
 
 ### Behavior
 
-0. **Nombres:** el bot de cada hueco se llama siempre igual (`botName`: 1 Conde Clic, 2 Reina Rúter, 3 Sir Bot; 0 Lady Pixel), en solitario y en la sala. «Jugar solo» anuncia esos mismos (`soloSlots`), así que los rivales que se ven antes de empezar son los que juegan (WRK-TASK-087).
+0. **Nombres:** el bot de cada hueco se llama siempre igual (`botName`: 1 Conde Clic, 2 Reina Rúter, 3 Sir Bot; 0 Lady Pixel), en solitario y en la sala. «Jugar solo» anuncia esos mismos (`soloSlots`), así que los rivales que se ven antes de empezar son los que juegan (WRK-TASK-087). En la sala, el anfitrión pone cada bot en una plaza concreta (`config.botSlots`, R-11 S2, WRK-TASK-070) y lleva el nombre de esa plaza.
 1. **Objetivo:** un sorteo ponderado entre los rivales vivos (`pickTarget`). Todos empiezan con peso 1, y el peso se multiplica:
    - por `1 + 2·pWeakest` si es el más débil (±2 bloques);
    - por `2 − pWeakest` si su rey es el más cercano (±1 m);

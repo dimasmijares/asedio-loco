@@ -406,3 +406,340 @@ body:has(.room) {
     padding: 14px 16px 16px;
   }
 }
+
+/* ---------- Plazas de la sala (R-11 S2, S3, S5, S6) ----------
+   Filas de 58 px (68 en horizontal): emblema de 40 px con el color de la plaza, nombre en Lilita y
+   chapas de estado. Lo que se toca, 44 px o más. */
+.seats {
+  margin: 0;
+  gap: 8px;
+}
+.seat-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 10px;
+  border-radius: 14px;
+  border: 3px solid var(--al-noche);
+  background: var(--al-hueso);
+  color: var(--al-noche);
+  font-family: var(--font);
+  text-align: left;
+  box-shadow: none;
+}
+button.seat-card {
+  cursor: pointer;
+}
+button.seat-card:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.seat.me .seat-card {
+  box-shadow: var(--al-sombra-dura);
+}
+.seat-card.bot,
+.seat-card.off {
+  background: #f6dfb0;
+}
+button.seat-card.off {
+  border-style: dashed;
+  border-color: var(--al-grana);
+}
+.seat-card.off .seat-body {
+  opacity: 0.75;
+}
+.seat-card.free {
+  border: 3px dashed var(--al-crema-oscuro);
+  background: rgba(255, 246, 226, 0.4);
+}
+.seat-card.free.host {
+  border-color: var(--al-vino);
+  background: rgba(255, 246, 226, 0.55);
+}
+.seat-emb {
+  flex: none;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 3px solid var(--al-noche);
+  font: 900 22px/1 var(--font);
+}
+.seat-emb.free {
+  border-style: dashed;
+  color: var(--al-vino);
+  font-size: 20px;
+}
+.seat-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.seat-name {
+  font: 400 18px/20px var(--display);
+  color: var(--al-noche);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seat-sub {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+.seat-free {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+.seat-chips {
+  display: flex;
+  gap: 4px;
+}
+.seat-chips:empty {
+  display: none;
+}
+.seat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.seat-chip .ico {
+  font-size: 10px;
+}
+.seat-chip.you {
+  background: var(--al-naranja);
+  color: var(--al-noche);
+}
+.seat-chip.host {
+  background: var(--al-noche);
+  color: var(--al-crema);
+}
+.seat-chip.bot {
+  background: #a8949c;
+  color: var(--al-noche);
+}
+.seat-chip.on {
+  background: #2a9d3f;
+  color: #fff;
+}
+.seat-chip.off {
+  background: var(--al-grana);
+  color: var(--al-crema);
+}
+.seat-quit {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--al-radius-full);
+  border: 2px solid var(--al-grana);
+  color: var(--al-grana);
+  font: 900 13px var(--font);
+}
+.seat-quit .ico {
+  font-size: 14px;
+}
+.seat-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  color: var(--al-noche);
+  font-size: 20px;
+}
+.seat-btn.dice {
+  color: var(--al-naranja-oscuro);
+  font-size: 22px;
+}
+.seat-btn.ok {
+  border: 3px solid var(--al-noche);
+  background: var(--al-naranja);
+  box-shadow: 0 3px 0 var(--al-noche);
+}
+.seat-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.seat-input {
+  height: 44px;
+  padding: 0 10px;
+  border: 3px solid var(--al-naranja);
+  border-radius: 10px;
+  background: var(--al-hueso);
+  font: 400 18px var(--display);
+}
+.seat-input:focus-visible {
+  outline: none;
+}
+
+/* Dificultad de los bots (D1): «Bots» y el selector en una fila; los invitados la leen. */
+.room-diff {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.room-diff-label,
+.room-diff-text {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--al-vino);
+  white-space: nowrap;
+}
+.room-diff-label .ico,
+.room-diff-text .ico {
+  font-size: 16px;
+}
+.room-diff-text {
+  margin: 2px 0 0;
+  padding: 0 2px;
+  font-weight: 800;
+}
+.room-diff-text b {
+  color: var(--al-noche);
+}
+.room-diff .segm {
+  flex: 1;
+  padding: 3px;
+  gap: 3px;
+  border-radius: 12px;
+}
+.room-diff .segm button {
+  height: 44px;
+  font-size: 17px;
+}
+.room-spect {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+
+/* EMPEZAR o «Esperando a que … empiece», abajo del todo (S5). */
+.room-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.room-foot .plank {
+  --tilt: 0deg;
+  margin: 0;
+  min-height: 64px;
+  font-size: 26px;
+}
+.room-note {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--al-vino);
+  text-align: center;
+}
+.room-wait {
+  height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font: 400 19px var(--display);
+  text-align: center;
+}
+.wait-dots {
+  display: flex;
+  gap: 5px;
+}
+.wait-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--al-naranja);
+  animation: wait-dot 1.2s infinite ease-in-out;
+}
+.wait-dots i:nth-child(2) {
+  background: var(--al-crema-oscuro);
+  animation-delay: 0.2s;
+}
+.wait-dots i:nth-child(3) {
+  background: var(--al-vino);
+  animation-delay: 0.4s;
+}
+@keyframes wait-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wait-dots i {
+    animation: none;
+  }
+}
+
+/* Editando el nombre en vertical: la tarjeta del código se recoge y la hoja sube por encima del
+   teclado (maqueta «Móvil · Sala, cambiando el nombre»). */
+@media (orientation: portrait) {
+  .room.editing-name .code-card {
+    display: none;
+  }
+  .room.editing-name .room-sheet {
+    top: calc(max(14px, env(safe-area-inset-top)) + 72px);
+  }
+}
+
+@media (orientation: landscape) {
+  .seat-card {
+    height: 68px;
+  }
+  .seats {
+    gap: 10px;
+  }
+}
+@media (orientation: landscape) and (max-height: 620px) {
+  .seat-card {
+    height: 54px;
+  }
+  .seats {
+    gap: 6px;
+  }
+  .room-foot .plank {
+    min-height: 54px;
+    font-size: 22px;
+  }
+}

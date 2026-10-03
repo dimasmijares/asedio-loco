@@ -382,6 +382,98 @@ export class LobbyView {
     });
   }
 
+  // Tu nombre en tu fila (R-11 S3): el dado pone otro al azar; el lápiz lo abre en un campo que ocupa
+  // la fila (la tarjeta del código se recoge para que la hoja quede por encima del teclado). Intro o
+  // el ✓ lo guardan; vacío, otro al azar. Escape lo deja como estaba.
+  private editing: HTMLInputElement | null = null;
+
+  private saveName(raw: string) {
+    const cur = this.conn.room?.players.find((p) => p.id === this.conn.you?.id)?.name ?? savedName();
+    const name = storeName(sanitizeName(raw) || randomName(Math.random, cur));
+    this.conn.name = name;
+    this.conn.send({ t: 'name', name });
+    this.stopEditing();
+  }
+
+  private startEditing(name: string) {
+    const input = h('input', { id: 'room-name', class: 'seat-input', maxLength: MAX_NAME_LEN, value: name, autocomplete: 'nickname', enterKeyHint: 'done', 'aria-label': 'Tu nombre' });
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') this.saveName(input.value);
+      if (e.key === 'Escape') this.stopEditing();
+    };
+    this.editing = input;
+    this.render();
+    input.focus();
+    input.select();
+  }
+
+  private stopEditing() {
+    this.editing = null;
+    this.render();
+  }
+
+  // Una plaza (R-11 S2, S3, S6): color y emblema de la plaza; tu fila con el dado y el lápiz. El
+  // anfitrión toca una plaza libre para añadir un bot y un bot o un jugador desconectado para quitarlo.
+  private seat(slot: number) {
+    const room = this.conn.room!;
+    const you = this.conn.you!;
+    const host = this.conn.isHost;
+    const st = PLAYER_STYLES[slot];
+    const p = room.players.find((x) => x.slot === slot);
+    const bot = !p && room.config.botSlots.includes(slot);
+    const emb = h('span', { class: 'seat-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}︎`);
+    const chip = (cls: string, text: string, ico?: IconName) => h('span', { class: `seat-chip ${cls}` }, ico ? icon(ico) : null, text);
+    const body = (name: Node | string, ...chips: (Node | string)[]) => h('span', { class: 'seat-body' }, h('span', { class: 'seat-name' }, name), h('span', { class: 'seat-chips' }, ...chips));
+    const quit = () => h('span', { class: 'seat-quit' }, icon('cross'), 'Quitar');
+    const tap = (bot: boolean) => () => this.conn.send({ t: 'seat', slot, bot });
+    const li = h('li', { class: 'seat', 'data-slot': String(slot) });
+    if (p) {
+      li.dataset.player = p.id;
+      const isHost = p.id === room.hostId;
+      if (p.id === you.id) {
+        li.classList.add('me');
+        const dice = h('button', { class: 'seat-btn dice', id: 'room-name-random', type: 'button', 'aria-label': 'Nombre al azar', title: 'Nombre al azar' }, icon('dice'));
+        // Sin quitar el foco al campo (si se está editando, el dado escribe en él).
+        dice.onpointerdown = (e) => e.preventDefault();
+        dice.onclick = () => {
+          if (this.editing) this.editing.value = randomName(Math.random, this.editing.value);
+          else this.saveName(randomName(Math.random, p.name));
+        };
+        if (this.editing) {
+          const ok = h('button', { class: 'seat-btn ok', id: 'room-name-save', type: 'button', 'aria-label': 'Guardar nombre', title: 'Guardar nombre' }, icon('check'));
+          ok.onpointerdown = (e) => e.preventDefault();
+          ok.onclick = () => this.saveName(this.editing!.value);
+          li.append(h('div', { class: 'seat-card' }, emb, h('span', { class: 'seat-body' }, this.editing), dice, ok));
+        } else {
+          const edit = h('button', { class: 'seat-btn', id: 'room-name-edit', type: 'button', 'aria-label': 'Cambiar nombre', title: 'Cambiar nombre' }, icon('pencil'));
+          edit.onclick = () => this.startEditing(p.name);
+          li.append(h('div', { class: 'seat-card' }, emb, body(h('span', { id: 'room-name-text' }, p.name), chip('you', 'TÚ'), isHost ? chip('host', 'ANFITRIÓN', 'crown') : ''), dice, edit));
+        }
+      } else if (!p.connected && host) {
+        const b = h('button', { class: 'seat-card off', type: 'button', 'aria-label': `Quitar ${p.name}` }, emb, body(p.name, chip('off', 'DESCONECTADO', 'offline')), quit());
+        b.onclick = tap(false);
+        li.append(b);
+      } else li.append(h('div', { class: `seat-card${p.connected ? '' : ' off'}` }, emb, body(p.name, isHost ? chip('host', 'ANFITRIÓN', 'crown') : '', p.connected ? chip('on', 'CONECTADO') : chip('off', 'DESCONECTADO', 'offline'))));
+    } else if (bot) {
+      li.dataset.bot = String(slot);
+      const name = botName(slot);
+      if (host) {
+        const b = h('button', { class: 'seat-card bot', type: 'button', 'aria-label': `Quitar ${name}` }, emb, body(name, chip('bot', 'BOT', 'bot')), quit());
+        b.onclick = tap(false);
+        li.append(b);
+      } else li.append(h('div', { class: 'seat-card bot' }, emb, body(name, chip('bot', 'BOT', 'bot'))));
+    } else {
+      li.classList.add('empty');
+      const free = h('span', { class: 'seat-emb free', style: `border-color:${st.color}` }, icon('plus'));
+      if (host) {
+        const b = h('button', { class: 'seat-card free host', id: `seat-add-${slot}`, type: 'button', 'aria-label': `Añadir un bot en la plaza ${slot + 1}` }, free, h('span', { class: 'seat-body' }, h('span', { class: 'seat-name' }, 'Añadir bot'), h('span', { class: 'seat-sub' }, 'o espera a que entre alguien')));
+        b.onclick = tap(true);
+        li.append(b);
+      } else li.append(h('div', { class: 'seat-card free' }, free, h('span', { class: 'seat-free' }, 'Plaza libre')));
+    }
+    return li;
+  }
+
   render() {
     const room = this.conn.room;
     if (!this.root.contains(this.el)) return;
@@ -396,61 +488,54 @@ export class LobbyView {
       this.el.replaceChildren(h('h2', null, 'Conectando…'), h('p', { class: 'muted' }, this.conn.status === 'closed' ? 'Reintentando la conexión…' : 'Entrando en la sala'));
       return;
     }
-    const host = room.players.find((p) => p.id === room.hostId);
-    this.title.replaceChildren(...(host ? ['Sala de', h('br'), host.name] : [`Sala ${room.code}`]));
+    const you = this.conn.you;
+    const hostP = room.players.find((p) => p.id === room.hostId);
+    this.title.replaceChildren(...(hostP ? ['Sala de', h('br'), hostP.name] : [`Sala ${room.code}`]));
     const isHost = this.conn.isHost;
+    // Si se está editando el nombre y ya no estás en la sala (has pasado a espectador), se deja.
+    if (this.editing && !room.players.some((p) => p.id === you.id)) this.editing = null;
+    document.getElementById('room')?.classList.toggle('editing-name', !!this.editing);
+    // Rehacer la lista mueve el campo del nombre: se le devuelve el foco y la selección.
+    const input = this.editing;
+    const focused = !!input && document.activeElement === input;
+    const sel = input ? [input.selectionStart, input.selectionEnd] : null;
 
-    const list = h('ul', { class: 'players', id: 'player-list' });
-    const bySlot = new Map(room.players.map((p) => [p.slot, p]));
-    let botsLeft = room.config.bots;
-    for (let slot = 0; slot < MAX_PLAYERS; slot++) {
-      const st = PLAYER_STYLES[slot];
-      const p = bySlot.get(slot);
-      const banner = h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, st.glyph);
-      if (p) {
-        list.append(
-          h(
-            'li',
-            { 'data-player': p.id },
-            banner,
-            h('span', { class: 'name' }, p.name),
-            p.id === room.hostId ? h('span', { class: 'tag' }, 'Anfitrión') : null,
-            p.id === this.conn.you.id ? h('span', { class: 'tag', style: `background:${st.color};color:var(--al-noche)` }, 'Tú') : null,
-            p.connected ? null : h('span', { class: 'tag off' }, 'Desconectado'),
-          ),
-        );
-      } else if (botsLeft > 0) {
-        botsLeft--;
-        list.append(h('li', { 'data-bot': 'true' }, banner, h('span', { class: 'name' }, `Bot (${DIFF_LABEL[room.config.difficulty]})`), h('span', { class: 'tag bot' }, 'Bot')));
-      } else {
-        list.append(h('li', { class: 'empty' }, h('div', { class: 'banner', style: 'background:var(--al-crema-oscuro)' }), 'Plaza libre'));
+    const list = h('ul', { class: 'players seats', id: 'player-list' }, ...[0, 1, 2, 3].map((slot) => this.seat(slot)));
+    const bots = room.config.botSlots.length;
+    const n = room.players.length + bots;
+    const hint = this.editing ? 'El nombre lo ven todos en la sala' : isHost ? (isMobileDevice() ? 'Toca una plaza para cambiarla' : 'Haz clic en una plaza para cambiarla') : '';
+    const parts: Node[] = [h('div', { class: 'room-head' }, h('h2', null, 'Jugadores ', h('span', { class: 'room-count' }, `· ${n} de ${MAX_PLAYERS}`)), h('span', { class: 'room-hint' }, hint)), list];
+
+    // Dificultad de los bots (D1): solo si hay alguno; el anfitrión la cambia y los demás la leen.
+    if (bots && isHost) {
+      const row = h('div', { class: 'segm', id: 'bot-difficulty', role: 'radiogroup', 'aria-label': 'Dificultad de los bots' });
+      for (const d of DIFFICULTIES) {
+        const on = d === room.config.difficulty;
+        const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(on), 'data-v': d, class: on ? 'on' : '' }, DIFF_LABEL[d]);
+        b.onclick = () => this.conn.send({ t: 'config', config: { difficulty: d } });
+        row.append(b);
       }
-    }
+      parts.push(h('div', { class: 'room-diff' }, h('span', { class: 'room-diff-label' }, icon('bot'), 'Bots'), row));
+    } else if (bots) parts.push(h('p', { class: 'room-diff-text', id: 'bot-difficulty-text' }, icon('bot'), h('span', null, 'Bots en dificultad ', h('b', null, DIFF_LABEL[room.config.difficulty]))));
+    if (room.spectators) parts.push(h('p', { class: 'room-spect', id: 'spectators' }, icon('eye'), ` ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}`));
 
-    const n = room.players.length + room.config.bots;
-    const parts: Node[] = [
-      h('div', { class: 'room-head' }, h('h2', null, 'Jugadores ', h('span', { class: 'room-count' }, `· ${n} de ${MAX_PLAYERS}`))),
-      list,
-      h('div', { class: 'muted', id: 'spectators' }, room.spectators ? h('span', null, icon('eye'), ` ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}`) : ''),
-    ];
-
-    if (this.conn.you.role === 'spectator') {
-      parts.push(h('p', { class: 'muted', id: 'spectator-note' }, 'La sala está completa: participas como espectador.'));
-    } else if (isHost) {
-      const free = MAX_PLAYERS - room.players.length;
-      const bots = h('select', { id: 'bots', 'aria-label': 'Bots de relleno' });
-      for (let i = 0; i <= free; i++) bots.append(h('option', { value: String(i), selected: i === room.config.bots }, i === 0 ? 'Sin bots' : `${i} bot${i > 1 ? 's' : ''}`));
-      bots.onchange = () => this.conn.send({ t: 'config', config: { bots: Number(bots.value) } });
-      const diff = h('select', { id: 'difficulty', 'aria-label': 'Dificultad de los bots' });
-      for (const d of DIFFICULTIES) diff.append(h('option', { value: d, selected: d === room.config.difficulty }, DIFF_LABEL[d]));
-      diff.onchange = () => this.conn.send({ t: 'config', config: { difficulty: diff.value as Difficulty } });
-      const total = room.players.filter((p) => p.connected).length + room.config.bots;
-      const start = h('button', { class: 'primary big', id: 'start', disabled: total < 2 }, total < 2 ? 'Se necesitan al menos 2 jugadores (añade bots)' : 'Empezar partida');
+    // EMPEZAR solo para el anfitrión, desactivado con menos de 2 castillos (S5); los demás esperan.
+    const foot = h('div', { class: 'room-foot' });
+    if (you.role === 'spectator') foot.append(h('p', { class: 'room-note', id: 'spectator-note' }, 'La sala está completa: participas como espectador.'));
+    else if (isHost) {
+      const start = h('button', { class: 'big plank primary', id: 'start', type: 'button', disabled: n < 2 }, 'Empezar');
       start.onclick = () => this.conn.send({ t: 'start' });
-      parts.push(h('div', { class: 'row' }, h('div', null, h('label', { htmlFor: 'bots' }, 'Bots'), bots), h('div', null, h('label', { htmlFor: 'difficulty' }, 'Dificultad'), diff)), start);
-    } else {
-      parts.push(h('p', { class: 'muted', id: 'waiting' }, 'Esperando a que el anfitrión empiece la partida…'));
-    }
+      foot.append(start, h('p', { class: 'room-note', id: 'start-hint' }, n < 2 ? 'Hace falta al menos otro jugador o un bot' : 'Empieza cuando quieras: las plazas libres no juegan'));
+    } else
+      foot.append(
+        h('div', { class: 'room-wait', id: 'waiting', role: 'status' }, h('span', { class: 'wait-dots', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('span', null, `Esperando a que ${hostP?.name ?? 'el anfitrión'} empiece`)),
+        h('p', { class: 'room-note' }, 'Solo el anfitrión cambia las plazas y empieza la partida'),
+      );
+    parts.push(foot);
     this.el.replaceChildren(...parts);
+    if (input && focused) {
+      input.focus({ preventScroll: true });
+      if (sel) input.setSelectionRange(sel[0], sel[1]);
+    }
   }
 }

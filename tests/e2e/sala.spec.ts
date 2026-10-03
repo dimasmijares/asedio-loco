@@ -97,6 +97,78 @@ for (const fmt of FORMATS) {
       expect((a as Page & { errs?: string[] }).errs).toEqual([]);
     });
 
+    test(`plazas, dificultad y nombre se ven en los dos dispositivos (${name})`, async ({ browser }) => {
+      const a = await device(browser, fmt);
+      const b = await device(browser, fmt);
+      const code = await createRoom(a, fmt, 'Ana');
+      // Solo, EMPEZAR está desactivado (S5).
+      await expect(a.locator('#start')).toBeDisabled();
+      await expect(a.locator('#start-hint')).toHaveText('Hace falta al menos otro jugador o un bot');
+      await join(b, fmt, code, 'Beto');
+      await expect(a.locator('#start')).toBeEnabled();
+      // El invitado no ve EMPEZAR ni puede tocar las plazas; espera al anfitrión por su nombre.
+      await expect(b.locator('#start')).toHaveCount(0);
+      await expect(b.locator('#waiting')).toHaveText('Esperando a que Ana empiece');
+      await expect(b.locator('#player-list button.seat-card')).toHaveCount(0);
+      for (const p of [a, b]) await expect(p.locator('.room-count')).toHaveText('· 2 de 4');
+
+      // Plaza libre → bot, con el nombre fijo de esa plaza (D2: plaza 4, Sir Bot).
+      await a.click('#seat-add-3');
+      for (const p of [a, b]) {
+        await expect(p.locator('#player-list li[data-bot="3"]')).toContainText('Sir Bot');
+        await expect(p.locator('.room-count')).toHaveText('· 3 de 4');
+      }
+      // La dificultad solo aparece con bots: Normal por defecto; el anfitrión la cambia y el invitado la lee.
+      await expect(a.locator('#bot-difficulty [aria-checked="true"]')).toHaveText('Normal');
+      await expect(b.locator('#bot-difficulty-text')).toHaveText('Bots en dificultad Normal');
+      await a.click('#bot-difficulty [data-v="dificil"]');
+      await expect(b.locator('#bot-difficulty-text')).toHaveText('Bots en dificultad Difícil');
+      await a.click('#seat-add-2');
+      await expect(b.locator('#player-list li[data-bot="2"]')).toContainText('Reina Rúter');
+      // Tocar un bot lo quita.
+      await a.click('#player-list li[data-bot="3"] button');
+      await a.click('#player-list li[data-bot="2"] button');
+      for (const p of [a, b]) {
+        await expect(p.locator('#player-list li[data-bot]')).toHaveCount(0);
+        await expect(p.locator('#bot-difficulty, #bot-difficulty-text')).toHaveCount(0);
+      }
+
+      // Nombre en tu fila (S3): lápiz, Intro; el dado; vacío, uno al azar.
+      await b.click('#room-name-edit');
+      await b.fill('#room-name', 'Bea');
+      await b.press('#room-name', 'Enter');
+      await expect(a.locator('#player-list')).toContainText('Bea');
+      await b.click('#room-name-random');
+      await expect(b.locator('#room-name-text')).not.toHaveText('Bea');
+      const dice = (await b.locator('#room-name-text').textContent())!;
+      await expect(a.locator('#player-list')).toContainText(dice);
+      await b.click('#room-name-edit');
+      await b.fill('#room-name', '');
+      await b.click('#room-name-save');
+      await expect(b.locator('#room-name-text')).not.toHaveText(dice);
+      await expect(b.locator('#room-name-text')).toHaveText(/^\S+ \S+$/);
+      const bName = (await b.locator('#room-name-text').textContent())!;
+      await expect(a.locator('#player-list')).toContainText(bName);
+      // Se guarda en el dispositivo, como el de la portada.
+      expect(await b.evaluate(() => localStorage.getItem('asedio.name'))).toBe(bName);
+
+      // Un jugador desconectado: el anfitrión lo quita tocando su plaza.
+      const c = await device(browser, fmt);
+      await join(c, fmt, code, 'Cata');
+      await expect(humans(a)).toHaveCount(3);
+      await c.context().close();
+      const gone = a.locator('#player-list li[data-player] button[aria-label="Quitar Cata"]');
+      await expect(gone).toBeVisible({ timeout: 15_000 });
+      await expect(b.locator('#player-list .seat-chip.off')).toHaveText('DESCONECTADO');
+      await gone.click();
+      for (const p of [a, b]) await expect(humans(p)).toHaveCount(2);
+
+      await a.click('#seat-add-3');
+      await checkLayout(a, vp, '.seat-card, #bot-difficulty, #start', '#player-list button, #bot-difficulty button, #start, #leave-room');
+      await checkLayout(b, vp, '.seat-card, #bot-difficulty-text, #waiting', '#player-list button, #leave-room');
+      for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
+    });
+
     test(`salir de la sala libera la plaza y el anfitrión se hereda (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);
@@ -113,7 +185,7 @@ for (const fmt of FORMATS) {
       await expect(c.locator('#home')).toBeVisible();
       for (const p of [a, b]) {
         await expect(humans(p)).toHaveCount(2);
-        await expect(p.locator('#player-list .tag.off')).toHaveCount(0);
+        await expect(p.locator('#player-list .seat-chip.off')).toHaveCount(0);
       }
       // Recargar la portada ya no vuelve a meterle en la sala.
       await c.reload();

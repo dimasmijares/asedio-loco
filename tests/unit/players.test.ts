@@ -32,9 +32,20 @@ describe('bots: una sola fuente para «Jugar solo», la partida y la sala', () =
   });
 
   it('la sala rellena con los mismos bots', () => {
-    const room = { players: [{ slot: 0, id: 'a', name: 'Ana', connected: true }], config: { bots: 3, difficulty: 'normal' } } as never;
+    const room = { players: [{ slot: 0, id: 'a', name: 'Ana', connected: true }], config: { botSlots: [3, 1, 2], difficulty: 'normal' } } as never;
     const bots = matchPlayersFromRoom(room).filter((p) => p.bot);
     expect(bots.map((p) => p.name)).toEqual([1, 2, 3].map(botName));
+  });
+
+  it('cada bot de la sala va en su plaza (R-11 S2), y nunca encima de un humano', () => {
+    const room = { players: [{ slot: 0, id: 'a', name: 'Ana', connected: true }, { slot: 2, id: 'b', name: 'Beto', connected: true }], config: { botSlots: [3, 2], difficulty: 'dificil' } } as never;
+    const all = matchPlayersFromRoom(room);
+    expect(all.map((p) => [p.slot, p.name, p.bot])).toEqual([
+      [0, 'Ana', false],
+      [2, 'Beto', false],
+      [3, 'Sir Bot', true],
+    ]);
+    expect(all.find((p) => p.bot)!.difficulty).toBe('dificil');
   });
 });
 

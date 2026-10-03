@@ -24,7 +24,8 @@ describe('parseClientMsg', () => {
     expect(parseClientMsg('{"t":"yield"}')).toEqual({ t: 'yield' });
     expect(parseClientMsg('{"t":"leave"}')).toEqual({ t: 'leave' });
     expect(parseClientMsg('{"t":"relay","to":"all","d":{"k":"aim","yaw":1}}')).toEqual({ t: 'relay', to: 'all', d: { k: 'aim', yaw: 1 } });
-    expect(parseClientMsg('{"t":"config","config":{"bots":2}}')).toEqual({ t: 'config', config: { bots: 2 } });
+    expect(parseClientMsg('{"t":"config","config":{"difficulty":"facil"}}')).toEqual({ t: 'config', config: { difficulty: 'facil' } });
+    expect(parseClientMsg('{"t":"seat","slot":3,"bot":true}')).toEqual({ t: 'seat', slot: 3, bot: true });
   });
   it('rechaza JSON roto, tipos desconocidos y campos malos', () => {
     expect(parseClientMsg('{no json')).toBeNull();
@@ -33,7 +34,11 @@ describe('parseClientMsg', () => {
     expect(parseClientMsg('{"t":"hello","v":1,"name":"x","token":"../../etc"}')).toBeNull();
     expect(parseClientMsg('{"t":"relay","to":"all","d":[1,2]}')).toBeNull();
     expect(parseClientMsg('{"t":"relay","to":"all","d":{"x":1}}')).toBeNull();
-    expect(parseClientMsg('{"t":"config","config":{"bots":9}}')).toBeNull();
+    // Las plazas con bot van plaza a plaza (`seat`), no en `config`.
+    expect(parseClientMsg('{"t":"config","config":{"botSlots":[1,2]}}')).toBeNull();
+    expect(parseClientMsg('{"t":"seat","slot":4,"bot":true}')).toBeNull();
+    expect(parseClientMsg('{"t":"seat","slot":1.5,"bot":true}')).toBeNull();
+    expect(parseClientMsg('{"t":"seat","slot":1,"bot":"sí"}')).toBeNull();
     expect(parseClientMsg('{"t":"config","config":{"difficulty":"imposible"}}')).toBeNull();
     expect(parseClientMsg(123)).toBeNull();
   });
@@ -45,8 +50,8 @@ describe('parseClientMsg', () => {
 
 describe('sanitizeConfig', () => {
   it('valida cada campo', () => {
-    expect(sanitizeConfig({ bots: 3, difficulty: 'dificil', fast: true })).toEqual({ bots: 3, difficulty: 'dificil', fast: true });
-    expect(sanitizeConfig({ bots: 1.5 })).toBeNull();
+    expect(sanitizeConfig({ difficulty: 'dificil', fast: true })).toEqual({ difficulty: 'dificil', fast: true });
+    expect(sanitizeConfig({ botSlots: [1] })).toBeNull();
     expect(sanitizeConfig({ fast: 'si' })).toBeNull();
   });
 });

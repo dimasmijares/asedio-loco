@@ -27,6 +27,7 @@ const ICONS = {
   pencil: `<g ${STROKE}><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></g>`,
   back: `<g ${STROKE}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></g>`,
   // Sala (R-11): salir, compartir, copiar, enlace.
+  plus: `<path d="M12 5v14M5 12h14" ${STROKE}/>`,
   logout: `<g ${STROKE}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></g>`,
   share: `<g ${STROKE}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></g>`,
   copy: `<g ${STROKE}><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></g>`,

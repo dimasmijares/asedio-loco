@@ -63,14 +63,16 @@ function enterRoom(code: string, name: string) {
     }
   };
   conn.on('room', () => void sync());
-  // Para pruebas: ?fast=1&bots=N configuran la sala si eres el anfitrión.
+  // Para pruebas: ?fast=1&bots=N configuran la sala si eres el anfitrión. Los N bots van en las
+  // plazas libres empezando por la última, así los invitados que entren después ocupan las primeras.
   const q = new URLSearchParams(location.search);
   conn.on('welcome', () => {
-    if (!conn.isHost || conn.room?.inGame) return;
-    const config: { fast?: boolean; bots?: number } = {};
-    if (q.get('fast') === '1') config.fast = true;
-    if (q.get('bots')) config.bots = Math.min(3, Math.max(0, Number(q.get('bots')) || 0));
-    if (Object.keys(config).length) conn.send({ t: 'config', config });
+    const room = conn.room;
+    if (!conn.isHost || !room || room.inGame) return;
+    if (q.get('fast') === '1') conn.send({ t: 'config', config: { fast: true } });
+    const used = new Set([...room.players.map((p) => p.slot), ...room.config.botSlots]);
+    const n = Math.min(3, Math.max(0, Number(q.get('bots')) || 0));
+    for (const slot of [3, 2, 1, 0].filter((i) => !used.has(i)).slice(0, n)) conn.send({ t: 'seat', slot, bot: true });
   });
 }
 

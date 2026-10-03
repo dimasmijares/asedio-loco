@@ -64,11 +64,32 @@ export class Room extends DurableObject<Env> {
     super(ctx, env);
     ctx.blockConcurrencyWhile(async () => {
       this.s = (await ctx.storage.get<Stored>('s')) ?? null;
+      // Salas guardadas antes de las plazas con bot (protocolo 14): sin bots.
+      if (this.s && !Array.isArray(this.s.config.botSlots)) this.s.config = { ...DEFAULT_CONFIG, ...this.s.config, botSlots: [] };
     });
   }
 
   private fresh(code: string): Stored {
-    return { code, players: [], hostId: null, config: { ...DEFAULT_CONFIG }, inGame: false };
+    return { code, players: [], hostId: null, config: { ...DEFAULT_CONFIG, botSlots: [] }, inGame: false };
+  }
+
+  // Plazas con bot que no ocupa un humano.
+  private bots() {
+    const s = this.s!;
+    const used = new Set(s.players.map((p) => p.slot));
+    return [...new Set(s.config.botSlots)].filter((i) => !used.has(i)).sort((a, b) => a - b);
+  }
+
+  // Plaza para un humano nuevo: la primera libre; si no hay, la del primer bot (los humanos van antes
+  // que los bots). Null si la ocupan cuatro humanos.
+  private freeSlot(): number | null {
+    const s = this.s!;
+    const used = new Set(s.players.map((p) => p.slot));
+    const bots = new Set(this.bots());
+    const slot = [0, 1, 2, 3].find((i) => !used.has(i) && !bots.has(i)) ?? [0, 1, 2, 3].find((i) => !used.has(i));
+    if (slot === undefined) return null;
+    s.config.botSlots = s.config.botSlots.filter((i) => i !== slot);
+    return slot;
   }
 
   private save() {
@@ -131,8 +152,7 @@ export class Room extends DurableObject<Env> {
       .map((p) => ({ id: p.id, name: p.name, slot: p.slot, connected: this.isConnected(p.id, except) }))
       .sort((a, b) => a.slot - b.slot);
     const spectators = this.sockets(except).filter((w) => this.attach(w).role === 'spectator').length;
-    const bots = Math.min(s.config.bots, MAX_PLAYERS - players.length);
-    return { code: s.code, hostId: s.hostId, players, spectators, config: { ...s.config, bots }, inGame: s.inGame };
+    return { code: s.code, hostId: s.hostId, players, spectators, config: { ...s.config, botSlots: this.bots() }, inGame: s.inGame };
   }
 
   // `skip`: no se le envía (ya recibió su welcome). `gone`: conexión que se está cerrando.
@@ -202,9 +222,8 @@ export class Room extends DurableObject<Env> {
         const gone = s.players.find((p) => p.id !== s.hostId && !this.isConnected(p.id, ws));
         if (gone) s.players = s.players.filter((p) => p !== gone);
       }
-      if (s.players.length < MAX_PLAYERS) {
-        const used = new Set(s.players.map((p) => p.slot));
-        const slot = [0, 1, 2, 3].find((i) => !used.has(i))!;
+      const slot = this.freeSlot();
+      if (slot !== null) {
         player = { id: hex(4), name, slot, token: hex(16) };
         s.players.push(player);
       }
@@ -238,11 +257,24 @@ export class Room extends DurableObject<Env> {
         s.config = { ...s.config, ...m.config };
         this.save();
         return this.broadcastRoom();
+      case 'seat': {
+        // R-11 S2: el anfitrión toca una plaza. Libre → bot; bot → libre; jugador desconectado → libre.
+        if (!isHost || s.inGame) return this.send(ws, { t: 'error', code: 'permiso', msg: 'Solo el anfitrión puede cambiar las plazas' });
+        const human = s.players.find((p) => p.slot === m.slot);
+        if (human) {
+          if (m.bot || human.id === s.hostId || this.isConnected(human.id)) return;
+          s.players = s.players.filter((p) => p !== human);
+        } else if (m.bot) {
+          if (!s.config.botSlots.includes(m.slot)) s.config.botSlots = [...s.config.botSlots, m.slot];
+        } else s.config.botSlots = s.config.botSlots.filter((i) => i !== m.slot);
+        this.save();
+        return this.broadcastRoom();
+      }
       case 'start':
         if (!isHost || s.inGame) return this.send(ws, { t: 'error', code: 'permiso', msg: 'Solo el anfitrión puede empezar' });
         s.players = s.players.filter((p) => this.isConnected(p.id));
-        s.config.bots = Math.min(s.config.bots, MAX_PLAYERS - s.players.length);
-        if (s.players.length + s.config.bots < 2) return this.send(ws, { t: 'error', code: 'pocos', msg: 'Hacen falta al menos 2 castillos (añade bots)' });
+        s.config.botSlots = this.bots();
+        if (s.players.length + s.config.botSlots.length < 2) return this.send(ws, { t: 'error', code: 'pocos', msg: 'Hacen falta al menos 2 castillos (añade bots)' });
         // Si el anfitrión es un móvil y hay un ordenador en la sala, la física la lleva el ordenador.
         if (a.mobile) {
           const desktop = s.players.find((p) => this.sockets().some((w) => this.attach(w).pid === p.id && !this.attach(w).mobile));
@@ -258,9 +290,9 @@ export class Room extends DurableObject<Env> {
         // Los espectadores pasan a jugar si hay hueco.
         for (const w of this.sockets()) {
           const wa = this.attach(w);
-          if (wa.role !== 'spectator' || s.players.length >= MAX_PLAYERS) continue;
-          const used = new Set(s.players.map((p) => p.slot));
-          const slot = [0, 1, 2, 3].find((i) => !used.has(i))!;
+          if (wa.role !== 'spectator') continue;
+          const slot = this.freeSlot();
+          if (slot === null) break;
           const player = { id: hex(4), name: wa.name || `Jugador ${slot + 1}`, slot, token: hex(16) };
           s.players.push(player);
           // Se conserva el resto del adjunto: sobre todo `mobile`, que decide quién puede ser anfitrión.

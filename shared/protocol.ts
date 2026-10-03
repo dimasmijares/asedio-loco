@@ -2,7 +2,7 @@
 // mensajes de control (hello, config, start…). Todo lo relativo a la partida
 // viaja dentro de `relay` y el servidor lo retransmite sin interpretarlo.
 
-export const PROTOCOL_VERSION = 13;
+export const PROTOCOL_VERSION = 14;
 export const MAX_PLAYERS = 4;
 export const MAX_NAME_LEN = 16;
 export const MAX_MSG_BYTES = 64 * 1024;
@@ -13,7 +13,9 @@ export type Difficulty = 'facil' | 'normal' | 'dificil';
 export const DIFFICULTIES: readonly Difficulty[] = ['facil', 'normal', 'dificil'];
 
 export interface RoomConfig {
-  bots: number; // bots de relleno (0-3), limitados por los huecos libres
+  // Plazas con bot (R-11 S2): el anfitrión las añade y las quita tocando la plaza. Un humano que
+  // entra con la sala llena ocupa la de un bot.
+  botSlots: number[];
   difficulty: Difficulty;
   fast: boolean; // modo rápido para pruebas: fases más cortas
 }
@@ -40,6 +42,8 @@ export type ClientMsg =
   | { t: 'hello'; v: number; name: string; token?: string; mobile?: boolean }
   | { t: 'name'; name: string }
   | { t: 'config'; config: Partial<RoomConfig> }
+  // El anfitrión toca una plaza (R-11 S2): libre → bot; bot o desconectado → libre.
+  | { t: 'seat'; slot: number; bot: boolean }
   | { t: 'start' }
   | { t: 'lobby' } // revancha: vuelve al lobby con los mismos jugadores
   | { t: 'yield' } // el anfitrión cede el papel (p. ej. al pasar a segundo plano)
@@ -60,7 +64,7 @@ export interface RelayData {
   [key: string]: unknown;
 }
 
-export const DEFAULT_CONFIG: RoomConfig = { bots: 0, difficulty: 'normal', fast: false };
+export const DEFAULT_CONFIG: RoomConfig = { botSlots: [], difficulty: 'normal', fast: false };
 
 // Deja solo letras, números, espacios y algo de puntuación inofensiva.
 export function sanitizeName(input: unknown): string {
@@ -75,13 +79,13 @@ export function sanitizeName(input: unknown): string {
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 
+const isSlot = (x: unknown): x is number => typeof x === 'number' && Number.isInteger(x) && x >= 0 && x < MAX_PLAYERS;
+
+// Las plazas con bot no se cambian con `config`, sino plaza a plaza con `seat`.
 export function sanitizeConfig(input: unknown): Partial<RoomConfig> | null {
   if (!isObj(input)) return null;
   const out: Partial<RoomConfig> = {};
-  if ('bots' in input) {
-    if (typeof input.bots !== 'number' || !Number.isInteger(input.bots) || input.bots < 0 || input.bots > MAX_PLAYERS - 1) return null;
-    out.bots = input.bots;
-  }
+  if ('botSlots' in input) return null;
   if ('difficulty' in input) {
     if (!DIFFICULTIES.includes(input.difficulty as Difficulty)) return null;
     out.difficulty = input.difficulty as Difficulty;
@@ -116,6 +120,9 @@ export function parseClientMsg(raw: unknown): ClientMsg | null {
       const config = sanitizeConfig(m.config);
       return config ? { t: 'config', config } : null;
     }
+    case 'seat':
+      if (!isSlot(m.slot) || typeof m.bot !== 'boolean') return null;
+      return { t: 'seat', slot: m.slot, bot: m.bot };
     case 'start':
     case 'lobby':
     case 'yield':

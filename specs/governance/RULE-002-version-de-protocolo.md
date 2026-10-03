@@ -19,7 +19,7 @@ tags:
 
 ## Rule
 
-Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **13**; 7 desde ADR-013, 8 desde ADR-014, 9 desde ADR-015, 10 desde WRK-TASK-010, 11 desde WRK-TASK-012 y 13 desde WRK-TASK-067, el mensaje `leave`) en el mismo despliegue.
+Si un cambio altera algo que dos clientes deben entender igual, debe subir `PROTOCOL_VERSION` en `shared/protocol.ts` (hoy vale **14**; 7 desde ADR-013, 8 desde ADR-014, 9 desde ADR-015, 10 desde WRK-TASK-010, 11 desde WRK-TASK-012 13 desde WRK-TASK-067, el mensaje `leave`, y 14 desde WRK-TASK-070: plazas con bot y mensaje `seat`) en el mismo despliegue.
 
 Cuenta como dato compartido:
 
