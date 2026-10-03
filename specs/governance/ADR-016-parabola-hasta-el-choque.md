@@ -35,5 +35,5 @@ En la tercera prueba (28-09-2026) el usuario notó que la bala caía siempre muc
 
 ## Consequences
 
-- Apuntar es mucho más fácil: la dificultad queda en el viento (la marca ya lo incluye), en elegir dónde dar y en el tiempo. Hay que vigilar el equilibrio contra bots.
+- Apuntar es mucho más fácil: la dificultad queda en elegir dónde dar, en la fuerza y en el tiempo (el viento, que la marca ya incluía, se quitó en ADR-018). Hay que vigilar el equilibrio contra bots.
 - La marca no conoce la rotura: si el disparo rompe el primer bloque, sigue más allá de la marca.

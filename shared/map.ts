@@ -65,4 +65,3 @@ export const LAVA_STEP = 0.444; // m por ronda
 export const LAVA_TOP = 7.6; // 5,2 hasta WRK-TASK-058: con el torreón dos filas más alto, la lava tiene que poder llegar al rey
 export const LAVA_LEVELS = Array.from({ length: Math.ceil((LAVA_TOP - LAVA_START) / LAVA_STEP) + 1 }, (_, i) => Math.min(LAVA_TOP, +(LAVA_START + i * LAVA_STEP).toFixed(3)));
 export const LAVA_FAST_STEPS = 3; // con ?fast=1 sube el triple por ronda
-export const WIND_FROM_ROUND = 6;

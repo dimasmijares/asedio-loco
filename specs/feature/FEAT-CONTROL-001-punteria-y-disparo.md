@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.4.0
+version: 1.5.0
 created: 2026-09-26
-updated: 2026-10-02
+updated: 2026-10-03
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -66,8 +66,8 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
    - Menos de 0,12 s (`MIN_CHARGE`): no dispara y avisa «Mantén Espacio».
    - Si no, manda `{aim, locked: true}`. El disparo es definitivo: el anfitrión ignora cualquier entrada posterior de ese jugador en la ronda.
 6. **Vista previa** (`TrajectoryPreview`, hasta 64 puntos repartidos por la longitud del arco; ADR-016):
-   - Sin cargar (`guide`): tramo tenue (opacidad 0,55) con fuerza fija 0,55 hasta el 30 % del vuelo.
-   - Cargando (`charge`): la trayectoria entera con la fuerza actual hasta el primer bloque o suelo que toca (`firstHit`), con un anillo del color del jugador, borde blanco y contorno noche en ese punto, visible aunque quede detrás de un muro. Los puntos de la parábola, del color del jugador, llevan contorno noche para leerse sobre el cielo crema del atardecer (WRK-TASK-076). Usa el arrastre y el viento de la munición elegida. Prueba contra la física real: `tests/unit/aim-hit.test.ts` (12 disparos, error de 0,09 a 0,43 m).
+   - Sin cargar (`guide`): tramo tenue (opacidad 0,55) con fuerza fija 0,55 (`GUIDE_POWER`) hasta el 30 % del vuelo y, desde el 03-10-2026 (WRK-TASK-085), el anillo de impacto donde caería un disparo con esa fuerza. Al cargar, el anillo avanza por la misma línea con la fuerza real. Así la marca de puntería es siempre el anillo del color del jugador, y no la chincheta del objetivo (FEAT-INTERFAZ-001).
+   - Cargando (`charge`): la trayectoria entera con la fuerza actual hasta el primer bloque o suelo que toca (`firstHit`), con un anillo del color del jugador, borde blanco y contorno noche en ese punto, visible aunque quede detrás de un muro. Los puntos de la parábola, del color del jugador, llevan contorno noche para leerse sobre el cielo crema del atardecer (WRK-TASK-076). Usa el arrastre y el viento de la munición elegida (el juego ya no tiene viento, ADR-018). Prueba contra la física real: `tests/unit/aim-hit.test.ts` (12 disparos, error de 0,09 a 0,43 m) y `tests/e2e/marca.spec.ts` (marca al apuntar, parábola e impacto real, con y sin un viento puesto a mano, en móvil y en PC: menos de 0,15 m). Un tiro que roza el borde de un bloque puede tocarlo en la parábola y no en la física (unos centímetros de diferencia en el vuelo).
 7. **Red:** la puntería se manda como mucho a ~10 Hz. Los demás ven la catapulta girar y tensarse (D-032).
 8. **Tiempo agotado sin soltar:** el anfitrión dispara con la última puntería recibida.
 9. **Móvil vertical: bandeja del pulgar** (R-10 U1, U3 y U8, WRK-TASK-077):
@@ -120,6 +120,7 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 | Implemented in | `shared/ballistics.ts` | `clampAim`, `PITCH_MIN/MAX`, `POWER_MIN/MAX` |
 | Implemented in | `client/src/game/match/host.ts` | `setInput` ignora entradas tras `locked` |
 | Tested by | `tests/e2e/controls.spec.ts` | Clic derecho, Espacio, disparo definitivo |
+| Tested by | `tests/e2e/marca.spec.ts` | Marca al apuntar = parábola al cargar = impacto real, con y sin viento |
 | Tested by | `tests/e2e/touch.spec.ts` | Dedo en la escena, pad de la bandeja, botón de disparo y modo zurdo en móvil vertical |
 | Tested by | (falta) | Adelanto con todos listos: `controls.spec.ts` solo espera `phase !== 'aim'`, que también se cumple si se agota el reloj. Falta una prueba que mida que la ronda sale antes de los 20 s |
 | Decided in | D-059, D-062, D-032 | Control nuevo, salvaguardas del puntero, puntería entre jugadores |

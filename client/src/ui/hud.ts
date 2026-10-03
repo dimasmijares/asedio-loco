@@ -1,6 +1,6 @@
 import { AMMO, RARITY_COLOR, RARITY_INK, RARITY_LABEL, type AmmoId } from '../../../shared/ammo';
 import { launchSpeed, type Aim } from '../../../shared/ballistics';
-import { DEG, clamp, type Vec3 } from '../../../shared/math';
+import { DEG, clamp } from '../../../shared/math';
 import { PLAYER_STYLES, shortName } from '../../../shared/players';
 import { TRAY_QUERY, isMobileDevice } from '../device';
 import type { AimInput } from '../game/aim';
@@ -130,17 +130,14 @@ export class Hud {
   private roundSecs = h('span', { class: 'm-round-secs', id: 'hud-round-secs' }, '–');
   private roundPill = h('div', { class: 'm-round', id: 'hud-round' }, this.roundText, this.roundSecs);
   private mRow = h('div', { class: 'm-row' });
-  private windArrow = h('span', { class: 'm-wind-arrow' }, icon('arrow'));
-  private windVal = h('b');
-  private windChip = h('span', { class: 'm-chip', id: 'hud-wind-chip', hidden: true }, icon('wind'), this.windArrow, this.windVal);
   private goalText = h('span');
   private goalChip = h('span', { class: 'm-chip m-goal', id: 'hud-goal-chip', hidden: true }, icon('target'), this.goalText);
-  private flags = h('div', { class: 'm-flags', id: 'hud-flags', hidden: true }, this.windChip, this.goalChip);
+  // Sin viento desde el 03-10-2026: arriba solo queda el chip del objetivo.
+  private flags = h('div', { class: 'm-flags', id: 'hud-flags', hidden: true }, this.goalChip);
   private mTop = h('div', { class: 'm-top', id: 'm-top' }, this.mRow);
   private left = h('div', { class: 'hud-left' });
   private cornerRow = h('div', { class: 'hud-corner-row' });
   private gear = h('button', { class: 'hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
-  private windKey = '';
   private playersKey = '';
   // Tras disparar en móvil vertical, la bandeja se recoge en esta barra fina (R-10 U6).
   private wait = h('div', { class: 'm-wait', id: 'hud-wait', role: 'status', hidden: true });
@@ -372,27 +369,9 @@ export class Hud {
     if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
   }
 
-  // Viento (componente Marcador, U5 y U11): un chip con flecha relativa a la cámara y fuerza
-  // redondeada («→ 2») que desaparece sin viento; los m/s, en su `title`. Solo toca el DOM si cambia.
-  setWind(w: Vec3 | null, cameraYaw = 0) {
-    const sp = w ? Math.hypot(w[0], w[2]) : 0;
-    // Ángulo de la flecha relativo a la cámara (arriba = hacia donde mira), a grados enteros.
-    const deg = w && sp >= 0.05 ? Math.round((-(Math.atan2(w[0], w[2]) - cameraYaw) * 180) / Math.PI) : 0;
-    const key = sp < 0.05 ? 'none' : `${sp.toFixed(1)}|${deg}`;
-    if (key === this.windKey) return;
-    this.windKey = key;
-    this.windChip.hidden = sp < 0.05;
-    this.refreshFlags();
-    if (sp < 0.05) return;
-    this.windVal.textContent = String(Math.max(1, Math.round(sp)));
-    this.windChip.setAttribute('aria-label', `Viento de ${sp.toFixed(1)} m/s`);
-    this.windChip.title = `Viento de ${sp.toFixed(1)} m/s`;
-    this.windArrow.style.transform = `rotate(${deg}deg)`;
-  }
-
   // La fila de viento y objetivo solo ocupa sitio si tiene algo.
   private refreshFlags() {
-    const empty = this.windChip.hidden && this.goalChip.hidden;
+    const empty = this.goalChip.hidden;
     if (this.flags.hidden !== empty) this.flags.hidden = empty;
   }
 

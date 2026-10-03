@@ -46,17 +46,8 @@ for (const [w, h] of [
       await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
       await page.waitForTimeout(500);
       const portrait = h > w;
-      // Con viento, para medir también su chip (en la ronda 1 no sopla): se fija y se congela.
-      if (portrait) {
-        await expect(page.locator('#hud-wind-chip'), 'sin viento no hay chip').toBeHidden();
-        await page.evaluate(() => {
-          const hud = (window as any).__asedio.mode.ui.hud;
-          hud.setWind([1.6, 0, 1.9], 0);
-          hud.setWind = () => {};
-        });
-        await expect(page.locator('#hud-wind-chip')).toBeVisible();
-        await expect(page.locator('#hud-wind-chip b')).toHaveText('2');
-      }
+      // Sin viento (03-10-2026): no hay chip del viento.
+      await expect(page.locator('#hud-wind-chip')).toHaveCount(0);
       // Tarjeta de descripción (R-10 U2) al mantener el dedo en una carta, con la descripción más
       // larga: dentro de la pantalla y en dos líneas como mucho.
       const longest = Object.values(AMMO).map((a) => a.desc).sort((a, b) => b.length - a.length)[0];
@@ -137,11 +128,6 @@ for (const [w, h] of [
     await page.setViewportSize({ width: w, height: h });
     await page.goto('/?bots=3&seed=5#solo');
     await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
-    await page.evaluate(() => {
-      const hud = (window as any).__asedio.mode.ui.hud;
-      hud.setWind([1.6, 0, 1.9], 0);
-      hud.setWind = () => {};
-    });
     const PC = ['#hud-round', '#hud-players', '.hud-corner', '#hud-ammo', '#hud-power', '#help-toggle', '#hud-elev'];
     const r = await rects(page, PC);
     expect(Object.keys(r).sort()).toEqual([...PC].sort());
@@ -154,7 +140,6 @@ for (const [w, h] of [
     expect(chips.length).toBe(4);
     for (const c of chips) expect(Math.abs(c.x - chips[0].x), 'en columna').toBeLessThan(1);
     await expect(page.locator('.hp-short').first()).toBeVisible();
-    await expect(page.locator('#hud-wind-chip b')).toHaveText('2');
     await expect(page.locator('#hud-goal-chip')).toBeVisible();
     // Abajo: cartas de 92×92, barra de 300 px y la pista; sin el botón largo de disparo.
     for (const c of await page.locator('#hud-ammo .ammo').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()))) {

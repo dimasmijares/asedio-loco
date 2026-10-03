@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AMMO, AMMO_IDS, DEALT_IDS, ammoWeights, drawAmmo } from '../../shared/ammo';
 import { LAVA_LEVELS } from '../../shared/map';
 import { rng } from '../../shared/math';
-import { aimDuration, checkWinner, consumeAmmo, createMatch, eliminate, lavaLevelForRound, startRound, windForRound } from '../../shared/match';
+import { aimDuration, checkWinner, consumeAmmo, createMatch, eliminate, lavaLevelForRound, startRound } from '../../shared/match';
 
 const four = () =>
   createMatch(
@@ -41,10 +41,12 @@ describe('rondas', () => {
     expect(s.lavaY).toBe(y(4));
   });
 
-  it('el viento sopla desde la ronda 6', () => {
-    expect(windForRound(1, 5)).toEqual([0, 0, 0]);
-    const w = windForRound(1, 6);
-    expect(Math.hypot(w[0], w[2])).toBeGreaterThan(1.5);
+  it('no sopla el viento en ninguna ronda (decisión del 03-10-2026)', () => {
+    const s = four();
+    for (let i = 0; i < 12; i++) {
+      startRound(s);
+      expect(s.wind).toEqual([0, 0, 0]);
+    }
   });
 
   it('20 s para apuntar, también en el duelo', () => {

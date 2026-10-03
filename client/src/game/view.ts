@@ -399,27 +399,30 @@ export class WorldView {
     }
   }
 
-  // Dianas del objetivo secundario sobre los castillos rivales (WRK-TASK-043): se ven a través de
-  // los muros y miran siempre a la cámara. Se puede llamar en cada fotograma.
-  private goalMarks: THREE.Object3D[] = [];
+  // Objetivo secundario sobre los castillos rivales (WRK-TASK-043): una chincheta con la diana del
+  // chip del objetivo (noche, borde naranja, diana crema) clavada encima del bloque, que se ve a
+  // través de los muros. Antes era una diana plana sobre el muro y se confundía con la marca de
+  // puntería (03-10-2026); la marca de impacto es el anillo del color del jugador. Se puede llamar
+  // en cada fotograma.
+  private goalMarks: THREE.Sprite[] = [];
   private goalKey = '';
+  private goalTex: THREE.CanvasTexture | null = null;
   setGoalMarks(points: Vec3[]) {
     const key = points.map((p) => p.map((x) => x.toFixed(1)).join(',')).join(';');
     if (key === this.goalKey) return;
     this.goalKey = key;
     for (const m of this.goalMarks) this.root.remove(m);
+    this.goalTex ??= goalPinTexture();
     this.goalMarks = points.map((p) => {
-      const g = new THREE.Group();
-      const mat = (c: string) => new THREE.MeshBasicMaterial({ color: c, depthTest: false, transparent: true, opacity: 0.9, side: THREE.DoubleSide, toneMapped: false });
-      g.add(new THREE.Mesh(new THREE.RingGeometry(0.75, 0.95, 32), mat('#ffffff')));
-      g.add(new THREE.Mesh(new THREE.RingGeometry(0.4, 0.58, 32), mat('#e63946')));
-      g.add(new THREE.Mesh(new THREE.CircleGeometry(0.18, 16), mat('#e63946')));
-      g.position.set(...p);
-      g.renderOrder = 6;
-      for (const c of g.children) c.renderOrder = 6;
-      g.name = 'goal-mark';
-      this.root.add(g);
-      return g;
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.goalTex, depthTest: false, transparent: true, toneMapped: false }));
+      // La punta abajo, sobre el bloque.
+      s.center.set(0.5, 0);
+      s.scale.set(GOAL_PIN[0], GOAL_PIN[1], 1);
+      s.position.set(p[0], p[1] + 0.4, p[2]);
+      s.renderOrder = 6;
+      s.name = 'goal-mark';
+      this.root.add(s);
+      return s;
     });
   }
 
@@ -427,12 +430,10 @@ export class WorldView {
     return this.goalMarks.length;
   }
 
+  // Un leve bote para que se note que es un aviso y no parte del castillo.
   private updateGoalMarks(t: number) {
-    const cam = this.stage.camera.position;
-    for (const g of this.goalMarks) {
-      g.lookAt(cam);
-      g.scale.setScalar(1 + Math.sin(t * 4) * 0.08);
-    }
+    const k = 1 + Math.sin(t * 3) * 0.06;
+    for (const s of this.goalMarks) s.scale.set(GOAL_PIN[0] * k, GOAL_PIN[1] * k, 1);
   }
 
   setShield(slot: number, on: boolean) {
@@ -609,3 +610,44 @@ export class WorldView {
 }
 
 export { kingId };
+
+// Chincheta del objetivo secundario: círculo noche con borde naranja y la diana en crema, como el
+// chip del objetivo del HUD, con una punta larga hacia el bloque, así la cabeza flota sobre la torre.
+// Se dibuja una vez y la comparten todas. Medida en metros (ancho, alto) de la textura de 128×224.
+const GOAL_PIN = [3, 5.25];
+function goalPinTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 224;
+  const g = c.getContext('2d')!;
+  const disc = (r: number, color: string) => {
+    g.beginPath();
+    g.arc(64, 62, r, 0, Math.PI * 2);
+    g.fillStyle = color;
+    g.fill();
+  };
+  g.beginPath();
+  g.moveTo(46, 100);
+  g.lineTo(82, 100);
+  g.lineTo(64, 220);
+  g.closePath();
+  g.fillStyle = '#FE8932';
+  g.fill();
+  g.lineWidth = 5;
+  g.strokeStyle = '#200432';
+  g.stroke();
+  disc(60, '#200432');
+  disc(55, '#FE8932');
+  disc(46, '#200432');
+  g.strokeStyle = '#FEE7B5';
+  g.lineWidth = 7;
+  for (const r of [32, 17]) {
+    g.beginPath();
+    g.arc(64, 62, r, 0, Math.PI * 2);
+    g.stroke();
+  }
+  disc(6, '#FEE7B5');
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}

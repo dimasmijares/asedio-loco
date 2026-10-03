@@ -239,10 +239,13 @@ export class AimInput {
 }
 
 // Vista previa de la trayectoria.
-//  - 'guide': mientras apuntas sin cargar, un tramo corto y tenue con fuerza media, para ver
-//    hacia dónde y con qué elevación sale.
+//  - 'guide': mientras apuntas sin cargar, un tramo corto y tenue con la fuerza de la guía y el
+//    anillo de impacto donde caería un disparo con esa fuerza (03-10-2026: antes no había anillo
+//    y la diana del objetivo pasaba por la marca de puntería).
 //  - 'charge': mientras cargas, la parábola entera con la fuerza actual hasta el primer bloque o
-//    suelo que toca, con un anillo en ese punto (WRK-TASK-054). Lo que ves es lo que pasa.
+//    suelo que toca, con el anillo en ese punto (WRK-TASK-054): avanza por la misma línea al cargar.
+//    Lo que ves es lo que pasa: la física usa la misma trayectoria (arrastre y, si lo hubiera, viento).
+export const GUIDE_POWER = 0.55;
 export interface PreviewWorld {
   boxes: Iterable<HitBox>;
   lavaY: number;
@@ -258,6 +261,8 @@ export class TrajectoryPreview {
   private mat: THREE.MeshToonMaterial;
   private ring = new THREE.Group();
   private ringMat: THREE.MeshBasicMaterial;
+  // Punto de impacto de la última vista previa (para las pruebas: marca = parábola = impacto).
+  hit: Vec3 | null = null;
 
   constructor(parent: THREE.Object3D, private world: () => PreviewWorld = () => ({ boxes: [], lavaY: -3.6 })) {
     this.mat = toon('#ffffff', { emissive: '#555555', transparent: true });
@@ -293,16 +298,16 @@ export class TrajectoryPreview {
   show(from: Vec3, aim: Aim, ammo: AmmoId, wind: Vec3, color = '#ffffff', mode: 'guide' | 'charge' = 'charge') {
     const a = AMMO[ammo];
     const guide = mode === 'guide';
-    const shot = guide ? { ...aim, power: 0.55 } : aim;
+    const shot = guide ? { ...aim, power: GUIDE_POWER } : aim;
     const w = this.world();
     let pts = trajectory(from, launchVelocity(shot), { drag: a.drag || 0.004, windFactor: a.windFactor, wind, dt: 1 / 60, maxT: 10, stopY: w.lavaY - 1 });
-    let hit: ReturnType<typeof firstHit> = null;
+    const groundAt = (x: number, z: number) => (islandSdf(x, z) < 0 ? Math.max(0, w.lavaY) : w.lavaY);
+    const hit = firstHit(pts, w.boxes, groundAt, a.radius || 0.3);
+    if (hit) pts = [...pts.slice(0, hit.i), hit.p];
+    this.hit = hit ? [...hit.p] : null;
+    const full = pts;
+    // Con la guía, el arco se queda corto; el anillo sí marca dónde caería.
     if (guide) pts = pts.slice(0, Math.max(2, Math.floor(pts.length * 0.3)));
-    else {
-      const groundAt = (x: number, z: number) => (islandSdf(x, z) < 0 ? Math.max(0, w.lavaY) : w.lavaY);
-      hit = firstHit(pts, w.boxes, groundAt, a.radius || 0.3);
-      if (hit) pts = [...pts.slice(0, hit.i), hit.p];
-    }
     // Puntos repartidos por la longitud del arco, no por tiempo: el tramo largo no queda a trozos.
     const len: number[] = [0];
     for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]));
@@ -311,7 +316,7 @@ export class TrajectoryPreview {
     const m = new THREE.Matrix4();
     let j = 1;
     for (let i = 0; i < count; i++) {
-      const d = ((i + 1) / (count + (hit ? 0.6 : 0))) * total;
+      const d = ((i + 1) / (count + (hit && !guide ? 0.6 : 0))) * total;
       while (j < pts.length - 1 && len[j] < d) j++;
       const t = len[j] > len[j - 1] ? (d - len[j - 1]) / (len[j] - len[j - 1]) : 0;
       const p0 = pts[j - 1];
@@ -333,7 +338,7 @@ export class TrajectoryPreview {
       this.ring.position.set(hit.p[0], hit.p[1], hit.p[2]);
       if (hit.box) {
         // Contra un bloque: de cara a quien dispara, algo separado para no hundirse en la pared.
-        const prev = pts[Math.max(0, pts.length - 2)];
+        const prev = full[Math.max(0, full.length - 2)];
         const dir = new THREE.Vector3(prev[0] - hit.p[0], 0, prev[2] - hit.p[2]).normalize();
         this.ring.position.addScaledVector(dir, 0.08);
         this.ring.lookAt(this.ring.position.clone().add(dir));
@@ -347,5 +352,6 @@ export class TrajectoryPreview {
   hide() {
     this.mesh.visible = this.outline.visible = false;
     this.ring.visible = false;
+    this.hit = null;
   }
 }

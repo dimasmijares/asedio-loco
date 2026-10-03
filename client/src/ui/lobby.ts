@@ -179,7 +179,7 @@ export function showHowTo() {
       ),
       item(icon('target'), 'Cada ronda hay un objetivo secundario (una jaula de cristal, una pieza de hierro o bloques de torre de un rival). Quien lo cumple empieza la ronda siguiente con una carta rara o épica.'),
       item(icon('shield'), 'Escudo real: en las rondas 1 y 2 ningún rey puede caer. Si al final de la ronda un rey está fuera de su castillo, vuelve a su pedestal.'),
-      item(icon('wind'), 'La lava sube un poco en cada ronda y, desde la ronda 6, sopla el viento: su chip, arriba, dice hacia dónde y con qué fuerza.'),
+      item(icon('flame'), 'La lava sube un poco en cada ronda y destruye los bloques que alcanza.'),
       close,
     ),
   );

@@ -3,7 +3,7 @@
 import { drawAmmo, type AmmoId } from './ammo';
 import { BLOCKS_PER_CASTLE } from './castle';
 import { PITCH_DEFAULT, type Aim } from './ballistics';
-import { LAVA_FAST_STEPS, LAVA_LEVELS, WIND_FROM_ROUND, castleOrigin, launchPoint } from './map';
+import { LAVA_FAST_STEPS, LAVA_LEVELS, castleOrigin, launchPoint } from './map';
 import { hashString, rng, type Vec3 } from './math';
 import { BOT_NAMES } from './players';
 import type { Difficulty, RoomState } from './protocol';
@@ -165,14 +165,6 @@ export function lavaLevelForRound(round: number, fast = false) {
   return Math.min(LAVA_LEVELS.length - 1, (round - 1) * (fast ? LAVA_FAST_STEPS : 1));
 }
 
-export function windForRound(seed: number, round: number, fast = false): Vec3 {
-  if (round < (fast ? 3 : WIND_FROM_ROUND)) return [0, 0, 0];
-  const r = rng(seed ^ Math.imul(round, 2654435761));
-  const ang = r.range(0, Math.PI * 2);
-  const sp = r.range(2, 3.5 + Math.min(4, (round - WIND_FROM_ROUND) * 0.5));
-  return [Math.sin(ang) * sp, 0, Math.cos(ang) * sp];
-}
-
 export function ammoRng(seed: number, round: number, slot: number) {
   return rng((seed ^ hashString(`ammo:${round}:${slot}`)) >>> 0);
 }
@@ -204,14 +196,16 @@ export function kingGuarded(s: Pick<MatchState, 'round' | 'phase'>) {
   return s.round >= 1 && s.round <= KING_GUARD_ROUNDS && s.phase !== 'over' && s.phase !== 'intro';
 }
 
-// Empieza una ronda: lava, viento y 3 municiones distintas nuevas (las de la ronda anterior se pierden).
+// Empieza una ronda: lava y 3 municiones distintas nuevas (las de la ronda anterior se pierden).
+// Sin viento (decisión del usuario del 03-10-2026): `wind` queda a cero; la física y la parábola lo
+// siguen admitiendo (el campo de pruebas puede ponerlo a mano).
 export function startRound(s: MatchState): MatchState {
   s.round++;
   s.phase = 'aim';
   s.remaining = aimDuration(s);
   s.lavaLevel = lavaLevelForRound(s.round, s.fast);
   s.lavaY = LAVA_LEVELS[s.lavaLevel];
-  s.wind = windForRound(s.seed, s.round, s.fast);
+  s.wind = [0, 0, 0];
   s.results = null;
   // Quien cumplió el objetivo de la ronda anterior abre la mano con una carta rara o épica.
   s.bonus = (s.goalDone ?? []).filter((slot) => s.players.some((p) => p.slot === slot && p.alive));

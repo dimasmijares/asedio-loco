@@ -2,7 +2,7 @@
 // «Jugar solo», apuntando y resultados de la ronda. Para revisar el estilo en el lienzo (R-10).
 // Con «fase2», la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta,
 // cargando, disparo listo y resultados, y apuntando en modo zurdo. La partida se congela en el
-// apuntado de la ronda 1 con un viento puesto a mano, para que se vea su chip.
+// apuntado de la ronda 1.
 // Con «fase3», menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC, PC apuntando con la
 // descripción de una carta al pasar el ratón y con los controles abiertos, y resultados en móvil.
 // Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]
@@ -27,8 +27,7 @@ if (only === 'fase2') {
       const r = await p.locator(sel).boundingBox();
       return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
     };
-    // Ronda 1, congelada en el apuntado para las capturas: nadie ha disparado y sopla un viento
-    // puesto a mano (en la ronda 1 no hay), para que se vea su chip.
+    // Ronda 1, congelada en el apuntado para las capturas: nadie ha disparado.
     await p.goto(`${base}/?bots=3&seed=21&quality=high&tutorial=0&mobile=1#solo`);
     await p.waitForFunction(() => {
       const h = window.__asedio?.mode?.host;
@@ -37,7 +36,6 @@ if (only === 'fase2') {
       h.update = () => {};
       h.state.players.forEach((q) => (q.locked = false));
       h.state.remaining = 17;
-      h.state.wind = [1.4, 0, -1.6];
       return true;
     }, null, { timeout: 60_000, polling: 'raf' });
     // Después del rótulo «RONDA 1» (2,6 s).
@@ -80,18 +78,20 @@ if (only === 'fase2') {
   process.exit(0);
 }
 
-// Ronda 1 congelada en el apuntado, con un viento puesto a mano (como en «fase2»).
-const freezeAim = (p) =>
-  p.waitForFunction(() => {
+// Ronda 1 congelada en el apuntado. Con `wind`, un viento puesto a mano en la parábola y la física (el
+// juego ya no tiene viento; sirve para ver que la marca y la parábola siguen coincidiendo).
+const freezeAim = (p, wind = [0, 0, 0]) =>
+  p.waitForFunction((wind) => {
     const h = window.__asedio?.mode?.host;
     if (h?.state?.phase !== 'aim') return false;
     h._update = h.update;
     h.update = () => {};
     h.state.players.forEach((q) => (q.locked = false));
     h.state.remaining = 17;
-    h.state.wind = [1.4, 0, -1.6];
+    h.state.wind = wind;
+    if (window.__asedio.game.sim) window.__asedio.game.sim.wind = wind;
     return true;
-  }, null, { timeout: 60_000, polling: 'raf' });
+  }, wind, { timeout: 60_000, polling: 'raf' });
 
 if (only === 'fase3') {
   const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });

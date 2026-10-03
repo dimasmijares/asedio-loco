@@ -61,7 +61,7 @@ const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot ===
 export class MatchUI {
   hud: Hud;
   director: Director;
-  private last = { round: 0, phase: '', alive: new Map<number, boolean>(), lava: 0, wind: false };
+  private last = { round: 0, phase: '', alive: new Map<number, boolean>(), lava: 0 };
   private overPanel: HTMLElement | null = null;
   private resultsBox: HTMLElement;
   // Resultados en móvil vertical (R-10 U7): hoja crema abajo, con el objetivo cumplido, la tabla
@@ -312,7 +312,6 @@ export class MatchUI {
     } else this.lastTick = -1;
     this.hud.setTimer(s.phase === 'aim' ? rem : null, s.phase === 'aim' && rem < 4);
     // En móvil vertical el chip del viento solo está mientras se apunta (como en las maquetas).
-    this.hud.setWind(s.phase === 'aim' || !this.hud.trayMode ? s.wind : null, Math.atan2(g.rig.target.x - g.rig.pos.x, g.rig.target.z - g.rig.pos.z));
     this.hud.setPlayers(
       s.players.map((p) => ({ slot: p.slot, name: p.name, alive: p.alive, blocks: p.blocks, maxBlocks: BLOCKS_PER_CASTLE, locked: s.phase === 'aim' && p.locked, bot: p.bot || p.auto, you: p.slot === this.src.you, connected: p.bot ? true : (this.src.connected?.(p.id) ?? true) })),
     );
@@ -392,8 +391,7 @@ export class MatchUI {
     else if (s.phase !== 'countdown') this.hud.setCountdown(null);
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
-      const windNow = Math.hypot(s.wind[0], s.wind[2]) > 0.1;
-      const first = windNow && !this.last.wind ? 'Empieza a soplar el viento' : this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
+      const first = this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
       // Una línea por aviso, con iconos SVG en lugar de emoji (R-10).
       const sub = h('span', null, h('div', null, first));
       const line = (...parts: (Node | string)[]) => sub.append(h('div', null, ...parts));
@@ -403,7 +401,6 @@ export class MatchUI {
       else if (s.round === KING_GUARD_ROUNDS + 1) line('Se acaba el escudo real: los reyes ya pueden caer');
       if (s.goal) line(icon('target'), ` Objetivo: ${GOALS[s.goal].text}`);
       if (this.src.you !== null && (s.bonus ?? []).includes(this.src.you)) line(icon('gift'), ' Premio por el objetivo: tu primera carta es rara o épica');
-      this.last.wind = windNow;
       this.hud.showBanner(`RONDA ${s.round}`, sub, s.round <= KING_GUARD_ROUNDS + 1 ? 2600 : 1700);
       sfx.fanfare();
       this.director.reset();

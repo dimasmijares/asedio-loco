@@ -81,7 +81,7 @@ Hace falta un sitio donde probar cada munición sin partida, y escenas fijas par
 
 - La escena `ccd` pasa también sin CCD: Rapier 0.20 no deja atravesar el muro ni a 1000 m/s (D-047). La prueba confirma que no se atraviesa, no que sea gracias a la CCD.
 - El rendimiento solo se ha medido con una RTX 3080 y con SwiftShader, nunca en una gráfica integrada.
-- En el campo de pruebas no hay Q/E (solo hay una diana) ni viento.
+- En el campo de pruebas no hay Q/E (solo hay una diana) ni viento (el juego tampoco lo tiene, ADR-018); `game.sim.wind` se puede poner a mano para probar la parábola.
 
 ## Acceptance Criteria
 

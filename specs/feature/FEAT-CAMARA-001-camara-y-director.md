@@ -77,7 +77,6 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 | Output | Type | Notes |
 |---|---|---|
 | Posición y objetivo de la cámara | `THREE.PerspectiveCamera` | FOV 55° |
-| Ángulo de la cámara | número | El HUD lo usa para girar la flecha del viento |
 | Posición de escucha | `sfx.camera` | Volumen y panorámica del sonido |
 
 ### Known Limitations

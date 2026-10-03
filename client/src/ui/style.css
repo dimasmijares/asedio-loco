@@ -2677,11 +2677,6 @@ label.check:has(.check-hint) {
 .m-goal {
   border-color: var(--al-naranja);
 }
-.m-wind-arrow {
-  display: inline-flex;
-  font-size: 15px;
-  transition: transform 0.3s;
-}
 .hud.tray-mode .hud-stats {
   align-self: flex-end;
   font-size: 12px;
