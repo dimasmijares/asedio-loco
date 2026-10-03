@@ -151,7 +151,6 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     if (!spectator && h.round >= 2 && h.phase === 'aim') {
       spectator = await newPlayer(browser, errors, 'espectador');
       await spectator.goto(`/?render=1${hash}`);
-      await setName(spectator, 'Mirón');
       await spectator.click('#join');
       const [sv] = await waitAll([spectator], (s) => s.fulls > 0);
       expect(sv.spectator).toBe(true);
