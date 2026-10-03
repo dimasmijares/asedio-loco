@@ -122,11 +122,12 @@ test('control: cargar y disparar manteniendo el clic izquierdo', async ({ page }
   expect((await me()).locked).toBe(false);
 
   // Mantenido: carga y, al soltar, el disparo queda listo con esa fuerza.
+  // Se espera a la carga, no a un tiempo fijo: en CI (dibujo por software) los fotogramas van
+  // lentos y en 900 ms la fuerza podía quedarse en un 13 % (03-10-2026).
   await page.mouse.down();
-  await page.waitForTimeout(900);
+  await expect.poll(async () => (await me()).inputPower, { timeout: 15_000 }).toBeGreaterThan(0.2);
   const mid = await me();
   expect(mid.charging).toBe(true);
-  expect(mid.inputPower).toBeGreaterThan(0.2);
   await page.mouse.up();
   await page.waitForFunction(() => (window as any).__asedio.mode.host.state.players.find((q: any) => !q.bot).locked, null, { timeout: 5000 });
   expect((await me()).power).toBeGreaterThanOrEqual(mid.inputPower);
