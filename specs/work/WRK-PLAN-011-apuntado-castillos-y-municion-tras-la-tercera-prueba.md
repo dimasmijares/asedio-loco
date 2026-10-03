@@ -44,7 +44,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 14 | WRK-TASK-068 · Revancha en un paso | completed | 064 | 2026-10-03 |
 | 15 | WRK-TASK-069 · Invitar más fácil | completed | 064 | 2026-10-03 |
 | 16 | WRK-TASK-070 · Sala gestionada tocando las plazas y nombre editable | completed | 064 | 2026-10-03 |
-| 17 | WRK-TASK-071 · Llegar tarde con explicación | draft | 064 | — |
+| 17 | WRK-TASK-071 · Llegar tarde con explicación | completed | 064 | 2026-10-03 |
 | 18 | WRK-TASK-072 · Final y pausa en solitario | draft | 064 | — |
 | 19 | WRK-TASK-073 · Selector de castillos del espectador | draft | 061, R-05 | — |
 | 20 | WRK-TASK-074 · Estilo «Atardecer» en la interfaz (R-10 fase 1: E1-E3) | completed | 060 (R-10) | 2026-10-02 |

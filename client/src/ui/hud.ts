@@ -139,6 +139,10 @@ export class Hud {
   private cornerRow = h('div', { class: 'hud-corner-row' });
   private gear = h('button', { class: 'hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
   private playersKey = '';
+  // Por qué miras en vez de jugar (R-07 F7, R-13): «Partida en curso · juegas en la próxima» o
+  // «Eliminado · estás mirando». En móvil vertical, bajo el marcador; en PC, bajo la píldora de la ronda.
+  private spectText = h('span');
+  private spect = h('div', { class: 'm-spect', id: 'hud-spect', role: 'status', hidden: true }, icon('eye'), this.spectText);
   // Lo que añade la partida al engranaje: salir y, en solitario, la pausa (R-07 F1 y F9).
   settingsExtra: SettingsExtra = {};
   // Tras disparar en móvil vertical, la bandeja se recoge en esta barra fina (R-10 U6).
@@ -201,7 +205,7 @@ export class Hud {
       if (this.ammo.parentElement !== this.tray) this.tray.append(this.ammo);
       if (this.roundPill.parentElement !== this.mRow) {
         this.mRow.append(this.roundPill, this.gear);
-        this.mTop.append(this.players, this.flags, this.stats);
+        this.mTop.append(this.players, this.flags, this.spect, this.stats);
       }
     } else {
       if (this.confirmBtn.parentElement !== this.bottom) this.bottom.append(this.confirmBtn);
@@ -209,7 +213,7 @@ export class Hud {
       // En PC (U11): jugadores en columna arriba a la izquierda, la píldora arriba al centro, y el
       // viento, el objetivo y el engranaje arriba a la derecha.
       if (this.roundPill.parentElement !== this.top) {
-        this.top.append(this.roundPill);
+        this.top.append(this.roundPill, this.spect);
         this.cornerRow.append(this.flags, this.gear);
         this.left.append(this.players);
         this.corner.append(this.stats);
@@ -418,6 +422,12 @@ export class Hud {
         );
       }),
     );
+  }
+
+  setSpectTag(text: string | null) {
+    const t = text ?? '';
+    if (this.spectText.textContent !== t) this.spectText.textContent = t;
+    if (this.spect.hidden !== !t) this.spect.hidden = !t;
   }
 
   setHelp(rows: HelpRow[]) {

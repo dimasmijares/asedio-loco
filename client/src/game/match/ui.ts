@@ -144,6 +144,26 @@ export class MatchUI {
       };
   }
 
+  // Quien llega con la partida empezada (R-07 F7): una hoja que lo explica y, mientras mira, la
+  // píldora bajo el marcador. `seat`: hay plaza para él en la próxima (la sala no tiene 4 humanos).
+  private lateTag: string | null = null;
+  showLate(seat: boolean) {
+    this.lateTag = seat ? 'Partida en curso · juegas en la próxima' : 'Sala completa · estás mirando';
+    if (this.src.state.phase === 'over') return;
+    showSheet({
+      id: 'late-sheet',
+      title: 'Partida en curso',
+      badge: 'eye',
+      center: true,
+      text: seat ? 'Entrarás a jugar en la próxima partida. Mientras, puedes mirar esta: arriba tienes el marcador.' : 'La sala está completa: mirarás la partida y entrarás en cuanto quede una plaza libre.',
+      actions: [
+        { id: 'late-watch', label: 'Mirar la partida', kind: 'primary', icon: 'eye', onClick: () => {} },
+        ...(this.opts.onLeave ? [{ id: 'late-leave', label: 'Salir de la sala', onClick: () => this.opts.onLeave!() }] : []),
+      ],
+      dismiss: () => {},
+    });
+  }
+
   // «¿Salir de la partida?» (R-07 F1): SALIR en grana y QUEDARME; tocar fuera es quedarse.
   confirmLeave() {
     const stay = () => this.opts.pause?.(false);
@@ -366,6 +386,7 @@ export class MatchUI {
     this.hud.showTargetButtons(watch, watch);
     this.hud.setWatch(watch ? (this.watchSlot < 0 ? 'Plano general' : `Castillo de ${nameOf(s, this.watchSlot)}`) : null);
     this.hud.setStats(`${g.fps} fps`);
+    this.hud.setSpectTag(this.src.you === null && s.phase !== 'over' ? this.lateTag : null);
     // Objetivo secundario (WRK-TASK-043): chapa en la esquina y dianas en los rivales al apuntar.
     const goal = s.goal && s.phase === 'aim' ? GOALS[s.goal] : null;
     this.hud.setGoal(goal ? goal.short : null, goal ? `${goal.text}: premio, una carta rara o épica en la ronda siguiente` : '');
@@ -760,6 +781,7 @@ export class MatchUI {
     this.arcs.dispose();
     this.overPanel?.remove();
     document.getElementById('leave-game-wrap')?.remove();
+    document.getElementById('late-sheet-wrap')?.remove();
   }
 }
 

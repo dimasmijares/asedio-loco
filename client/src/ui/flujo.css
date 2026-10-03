@@ -756,3 +756,37 @@ button.seat-card.off {
   color: var(--al-vino);
   text-align: center;
 }
+
+/* ---------- Mirando la partida (R-07 F7, R-13): «Partida en curso · juegas en la próxima» o
+   «Eliminado · estás mirando». En móvil vertical, bajo el marcador; en PC, bajo la píldora. ---------- */
+.hud-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.m-spect {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  box-sizing: border-box;
+  padding: 0 10px 0 8px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-panel-hud);
+  border: 2px solid var(--al-crema-oscuro);
+  color: var(--al-crema);
+  font: 800 13px var(--font);
+  white-space: nowrap;
+  text-shadow: none;
+}
+.hud-top .m-spect {
+  align-self: center;
+}
+.m-spect .ico {
+  font-size: 15px;
+}
+.m-spect[hidden] {
+  display: none;
+}

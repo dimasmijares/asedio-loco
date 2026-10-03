@@ -1,7 +1,7 @@
 import type { MaterialId } from '../../../../shared/materials';
 import { createMatch, matchPlayersFromRoom, type MatchState } from '../../../../shared/match';
 import type { Quat, Vec3 } from '../../../../shared/math';
-import type { RoomState } from '../../../../shared/protocol';
+import { MAX_PLAYERS, type RoomState } from '../../../../shared/protocol';
 import type { Connection } from '../../net/connection';
 import { toast } from '../../ui/dom';
 import type { Game, Mode } from '../game';
@@ -61,6 +61,8 @@ export class OnlineMode implements Mode {
           ? 'Tu castillo seguirá en la partida: lo jugará un bot desde la ronda siguiente. Vuelves a la portada.'
           : 'Vuelves a la portada. Tu plaza queda libre para otro jugador.',
     });
+    // Llega con la partida empezada (R-07 F7): se le explica y juega en la próxima si hay plaza.
+    if (conn.you?.role === 'spectator') this.ui.showLate(room.players.length < MAX_PLAYERS);
     if (opts.autoplay) this.auto = new AutoPlayer(src, game.view);
     this.off.push(conn.on('room', (r) => this.onRoom(r)));
     const onVis = () => this.onVisibility();

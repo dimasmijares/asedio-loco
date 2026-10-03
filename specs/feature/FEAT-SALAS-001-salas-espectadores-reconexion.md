@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.6.0
+version: 1.7.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -65,6 +65,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - En la sala, un jugador desconectado cede su plaza a uno nuevo si la sala está llena.
 3. **Empezar:** se quitan los desconectados. Si el anfitrión es un móvil y hay un ordenador, el ordenador pasa a ser el anfitrión antes de la primera ronda (D-065).
 4. **Espectadores** (D-033): quien entra con la partida empezada o con la sala llena es espectador. Pide `hi` y recibe un `full`. El servidor rechaza sus `relay` («Los espectadores no pueden jugar»).
+   - **Llegar tarde** (R-07 F7, WRK-TASK-071): al entrar en una partida empezada, una hoja «Partida en curso» lo explica («Entrarás a jugar en la próxima partida…»; con cuatro humanos, «La sala está completa: mirarás la partida y entrarás en cuanto quede una plaza libre»), con MIRAR LA PARTIDA y SALIR DE LA SALA. Mientras mira, bajo el marcador (en PC, bajo la píldora de la ronda) va la píldora `#hud-spect` «Partida en curso · juegas en la próxima». El marcador de la partida está siempre a la vista. En la revancha o al volver a la sala pasa a jugar.
 5. **Reconexión:**
    - El cliente reintenta con espera `min(5 s, 0,4 s·2^n)` y manda `ping` cada 5 s.
    - Con el token recupera su hueco (y cierra otra pestaña suya) y pide el estado completo.
@@ -106,6 +107,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 - [x] Si el anfitrión se va a mitad de partida, otro la hereda y todos acaban con el mismo ganador y rondas.
 - [x] Con el anfitrión en segundo plano, otro jugador sigue llevando la partida.
 - [x] Un móvil que crea la sala cede el papel a un ordenador desde el principio, sin migración.
+- [x] Quien llega con la partida empezada ve «Partida en curso», la píldora y el marcador, y juega en la revancha (`tests/e2e/sala.spec.ts`).
 - [x] La revancha empieza otra partida en un paso con los mismos jugadores y bots, y solo el anfitrión ve REVANCHA y VOLVER A LA SALA; los demás esperan por su nombre (`tests/e2e/sala.spec.ts`, `multiplayer.spec.ts`).
 - [x] Los nombres se sanean a 16 caracteres y los códigos tienen 4 letras sin I ni O.
 - [x] Con dos dispositivos, añadir y quitar bots, cambiar la dificultad y cambiar el nombre se ve en los dos; el anfitrión quita a un jugador desconectado tocando su plaza (`tests/e2e/sala.spec.ts`).

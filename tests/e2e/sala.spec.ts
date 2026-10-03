@@ -209,6 +209,32 @@ for (const fmt of FORMATS) {
       for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
     });
 
+    test(`llegar tarde: se explica y juegas en la próxima (${name})`, async ({ browser }) => {
+      const a = await device(browser, fmt);
+      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
+      await a.click('#start');
+      const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
+      await expect.poll(() => phase(a), { timeout: 60_000 }).toBe('aim');
+      // Cata entra con la partida empezada: la hoja lo explica, con el marcador a la vista detrás.
+      const c = await device(browser, fmt);
+      await c.goto(`${q(fmt, '&render=4')}#${code}`);
+      await setName(c, 'Cata');
+      await c.click('#join');
+      await expect(c.locator('#late-sheet')).toContainText('Partida en curso');
+      await expect(c.locator('#late-sheet')).toContainText('Entrarás a jugar en la próxima partida');
+      await c.click('#late-watch');
+      await expect(c.locator('#late-sheet')).toHaveCount(0);
+      await expect(c.locator('#hud-spect')).toHaveText('Partida en curso · juegas en la próxima');
+      await expect(c.locator('#hud-players .hp')).toHaveCount(2);
+      await expect(c.locator('#confirm')).toBeHidden();
+      // En la revancha juega.
+      await a.evaluate(() => (window as any).__asedio.mode.netHost.host.endNow());
+      await a.click('#rematch');
+      await expect.poll(() => c.evaluate(() => (window as any).__asedio.mode?.you), { timeout: 60_000 }).not.toBeNull();
+      await expect(c.locator('#hud-spect')).toBeHidden();
+      for (const p of [a, c]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
+    });
+
     test(`salir de la sala libera la plaza y el anfitrión se hereda (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);
