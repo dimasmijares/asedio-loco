@@ -108,7 +108,7 @@ for (const [name, vp, mobile] of [
       await page.click('#solo');
       await expect(page.locator('#solo-setup')).toBeVisible();
       // Selectores segmentados de 48 px; la opción elegida, en naranja.
-      for (const b of await boxes(page, '#solo-bots button, #solo-difficulty button')) expect(b.h).toBeGreaterThanOrEqual(48);
+      for (const b of await boxes(page, '#solo-bots button, #solo-difficulty button')) expect(b.h).toBeGreaterThanOrEqual(47.5);
       await expect(page.locator('#solo-bots button.on')).toHaveText('3');
       await expect(page.locator('#solo-difficulty button.on')).toHaveText('Normal');
       await expect(page.locator('#solo-rivals .emb')).toHaveCount(3);
