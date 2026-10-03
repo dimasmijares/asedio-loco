@@ -18,9 +18,8 @@ test('crear sala, unirse por enlace y ver la lista de conectados', async ({ brow
   await a.goto('/');
   await setName(a, 'Ana');
   await a.click('#create');
-  await expect(a.locator('#lobby h2')).toHaveText(/Sala [A-Z]{4}/);
-  const link = await a.inputValue('#room-link');
-  expect(link).toMatch(/#[A-Z]{4}$/);
+  await expect(a.locator('#room-code')).toHaveAttribute('data-code', /^[A-Z]{4}$/);
+  const link = `/#${await a.locator('#room-code').getAttribute('data-code')}`;
 
   await b.goto(link);
   await setName(b, 'Beto<script>');

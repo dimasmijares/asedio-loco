@@ -261,20 +261,91 @@ export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number,
 // Píldora «Salir de la sala» (R-11 S4): noche con borde crema oscuro, arriba a la izquierda.
 const leavePill = (id: string) => h('button', { class: 'leave-pill', id, type: 'button' }, icon('logout'), h('span', null, 'Salir de la sala'));
 
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Sin permiso o sin contexto seguro: el viejo `execCommand` con un campo temporal.
+    const t = h('textarea', { value: text, readOnly: true, style: 'position:fixed;left:-9999px' });
+    document.body.append(t);
+    t.select();
+    const ok = document.execCommand('copy');
+    t.remove();
+    return ok;
+  }
+}
+
+// Sala (R-11, maquetas «Móvil · Sala» y «PC · Sala»). En vertical: «Salir de la sala» y el engranaje
+// arriba, la tarjeta del código y, debajo, la hoja crema con las plazas. En horizontal: una columna
+// noche a la izquierda (salir, «Sala de <anfitrión>», el código, ayuda y ajustes) y la tarjeta de las
+// plazas a la derecha. Es el mismo DOM: lo coloca el CSS.
 export class LobbyView {
   private el: HTMLElement;
+  private title = h('h1', { class: 'room-title', id: 'room-title' });
+  private code = h('div', { class: 'code-tiles', id: 'room-code' });
+  private codeKey = '';
 
   constructor(private root: HTMLElement, private conn: Connection) {
-    this.el = h('div', { class: 'panel', id: 'lobby' });
+    this.el = h('div', { class: 'room-sheet', id: 'lobby' });
     const leave = leavePill('leave-room');
     leave.onclick = () => this.confirmLeave();
+    const help = roundBtn('room-help', 'help', 'Cómo se juega');
+    help.onclick = () => showHowTo();
     const gear = roundBtn('room-settings', 'gear', 'Ajustes');
     gear.onclick = () => openSettings();
-    root.replaceChildren(h('div', { class: 'room-top' }, leave, gear), this.el);
+    root.replaceChildren(
+      h(
+        'div',
+        { class: 'room', id: 'room' },
+        h('div', { class: 'room-side' }, leave, this.title, this.codeCard(), h('div', { class: 'room-round' }, help, gear)),
+        this.el,
+      ),
+    );
     conn.on('room', () => this.render());
     conn.on('status', () => this.render());
     conn.on('error', (e) => toast(e.msg));
     this.render();
+  }
+
+  // Código grande y cómo invitar (R-11 S1): en móvil, COMPARTIR abre la hoja del sistema con el
+  // enlace (Web Share; sin ella, copia el enlace) y el botón redondo copia el código; en PC, COPIAR
+  // ENLACE y CÓDIGO.
+  private codeCard() {
+    const url = () => `${location.origin}/#${this.conn.code}`;
+    const copyCode = async () => toast((await copyText(this.conn.code)) ? `Código ${this.conn.code} copiado` : `El código es ${this.conn.code}`);
+    const copyLink = async () => toast((await copyText(url())) ? 'Enlace copiado. Compártelo con los demás jugadores.' : url());
+    let actions: HTMLElement[];
+    if (isMobileDevice()) {
+      const share = h('button', { class: 'big plank primary', id: 'share', type: 'button' }, icon('share'), h('span', null, 'Compartir'));
+      share.onclick = async () => {
+        const data = { title: 'Asedio Loco', text: `Únete a mi sala de Asedio Loco con el código ${this.conn.code}`, url: url() };
+        if (!navigator.share) return void copyLink();
+        try {
+          await navigator.share(data);
+        } catch (e) {
+          // Cerrar la hoja del sistema no es un error; si no se pudo abrir, se copia el enlace.
+          if ((e as Error).name !== 'AbortError') void copyLink();
+        }
+      };
+      const copy = roundBtn('copy-code', 'copy', 'Copiar código');
+      copy.onclick = () => void copyCode();
+      actions = [share, copy];
+    } else {
+      const link = h('button', { class: 'big plank primary', id: 'copy-link', type: 'button' }, icon('link'), h('span', null, 'Copiar enlace'));
+      link.onclick = () => void copyLink();
+      const copy = h('button', { class: 'big plank', id: 'copy-code', type: 'button' }, icon('copy'), h('span', null, 'Código'));
+      copy.onclick = () => void copyCode();
+      actions = [link, copy];
+    }
+    return h(
+      'div',
+      { class: 'code-card' },
+      h('span', { class: 'code-label' }, 'CÓDIGO DE LA SALA'),
+      this.code,
+      h('span', { class: 'code-hint' }, 'Tus amigos lo escriben en «Unirse con código»'),
+      h('div', { class: 'code-actions' }, ...actions),
+    );
   }
 
   // «¿Salir de la sala?» (R-11 S4): la plaza queda libre al momento; si eres el anfitrión, dice
@@ -314,23 +385,20 @@ export class LobbyView {
   render() {
     const room = this.conn.room;
     if (!this.root.contains(this.el)) return;
+    if (this.codeKey !== this.conn.code) {
+      this.codeKey = this.conn.code;
+      this.code.dataset.code = this.conn.code;
+      this.code.setAttribute('aria-label', `Código ${this.conn.code}`);
+      this.code.replaceChildren(...[...this.conn.code].map((c) => h('span', { class: 'code-tile' }, c)));
+    }
     if (!room || !this.conn.you) {
+      this.title.textContent = `Sala ${this.conn.code}`;
       this.el.replaceChildren(h('h2', null, 'Conectando…'), h('p', { class: 'muted' }, this.conn.status === 'closed' ? 'Reintentando la conexión…' : 'Entrando en la sala'));
       return;
     }
+    const host = room.players.find((p) => p.id === room.hostId);
+    this.title.replaceChildren(...(host ? ['Sala de', h('br'), host.name] : [`Sala ${room.code}`]));
     const isHost = this.conn.isHost;
-    const url = `${location.origin}/#${room.code}`;
-    const linkInput = h('input', { readOnly: true, value: url, id: 'room-link', 'aria-label': 'Enlace de la sala' });
-    const copy = h('button', { id: 'copy-link' }, 'Copiar enlace');
-    copy.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        linkInput.select();
-        document.execCommand('copy');
-      }
-      toast('Enlace copiado. Compártelo con los demás jugadores.');
-    };
 
     const list = h('ul', { class: 'players', id: 'player-list' });
     const bySlot = new Map(room.players.map((p) => [p.slot, p]));
@@ -359,10 +427,9 @@ export class LobbyView {
       }
     }
 
+    const n = room.players.length + room.config.bots;
     const parts: Node[] = [
-      h('h2', { id: 'room-code', 'data-code': room.code }, `Sala ${room.code}`),
-      h('div', { class: 'muted' }, 'Comparte este enlace para invitar a otros jugadores:'),
-      h('div', { class: 'link-box' }, linkInput, copy),
+      h('div', { class: 'room-head' }, h('h2', null, 'Jugadores ', h('span', { class: 'room-count' }, `· ${n} de ${MAX_PLAYERS}`))),
       list,
       h('div', { class: 'muted', id: 'spectators' }, room.spectators ? h('span', null, icon('eye'), ` ${room.spectators} espectador${room.spectators > 1 ? 'es' : ''}`) : ''),
     ];

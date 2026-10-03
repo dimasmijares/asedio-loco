@@ -42,8 +42,8 @@ async function createRoom(host: Page, extra = '') {
   await host.goto(`/?fast=1&autoplay=1${SLOW}${extra}`);
   await setName(host, 'Anfitrión');
   await host.click('#create');
-  await expect(host.locator('#room-link')).toBeVisible();
-  return new URL(await host.inputValue('#room-link')).hash;
+  await expect(host.locator('#room-code')).toHaveAttribute('data-code', /^[A-Z]{4}$/);
+  return `#${await host.locator('#room-code').getAttribute('data-code')}`;
 }
 
 async function join(p: Page, hash: string, name: string, extra = '') {
@@ -364,7 +364,7 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   for (const p of [host, g1]) {
     await expect(p.locator('#lobby')).toBeVisible();
     await expect(p.locator('#player-list li[data-player]')).toHaveCount(2);
-    await expect(p.locator('#lobby h2')).toHaveText(`Sala ${hash.slice(1)}`);
+    await expect(p.locator('#room-code')).toHaveAttribute('data-code', hash.slice(1));
   }
   await host.click('#start');
   const again = await waitAll([host, g1], (s) => s.round === 1 && s.phase === 'aim');

@@ -12,6 +12,12 @@ type Fmt = (typeof FORMATS)[number];
 
 async function device(browser: Browser, [, vp, mobile]: Fmt) {
   const ctx = await browser.newContext({ viewport: vp, hasTouch: mobile, isMobile: mobile });
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write']);
+  // La hoja de compartir del sistema no existe en el navegador de pruebas: se apunta lo que recibe.
+  await ctx.addInitScript(() => {
+    (window as any).__shared = [];
+    navigator.share = async (d?: ShareData) => void (window as any).__shared.push(d);
+  });
   const page = await ctx.newPage();
   (page as Page & { errs?: string[] }).errs = watchErrors(page);
   return page;
@@ -39,9 +45,58 @@ async function join(p: Page, fmt: Fmt, code: string, name: string, extra = '') {
 
 const humans = (p: Page) => p.locator('#player-list li[data-player]');
 
+type Box = { x: number; y: number; w: number; h: number; sel: string };
+const boxes = (p: Page, sel: string) =>
+  p.locator(sel).evaluateAll((els) =>
+    els
+      .filter((e) => (e as HTMLElement).offsetParent !== null || getComputedStyle(e).position === 'fixed')
+      .map((e) => {
+        const r = e.getBoundingClientRect();
+        return { x: r.x, y: r.y, w: r.width, h: r.height, sel: e.id ? `#${e.id}` : e.className };
+      }),
+  ) as Promise<Box[]>;
+const cross = (a: Box, b: Box) => a.x < b.x + b.w - 0.5 && b.x < a.x + a.w - 0.5 && a.y < b.y + b.h - 0.5 && b.y < a.y + a.h - 0.5;
+
+// Todo dentro de la pantalla, sin cruces entre `sel` y lo táctil de `touch` de 44 px o más.
+async function checkLayout(p: Page, vp: { width: number; height: number }, sel: string, touch: string) {
+  const all = await boxes(p, sel);
+  expect(all.length).toBeGreaterThan(1);
+  for (const b of all) expect(b.x >= -0.5 && b.y >= -0.5 && b.x + b.w <= vp.width + 0.5 && b.y + b.h <= vp.height + 0.5, `${b.sel} dentro de la pantalla`).toBe(true);
+  for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) expect(cross(all[i], all[j]), `${all[i].sel} se cruza con ${all[j].sel}`).toBe(false);
+  for (const b of await boxes(p, touch)) expect(Math.min(b.w, b.h), `${b.sel} de 44 px o más`).toBeGreaterThanOrEqual(44);
+}
+
 for (const fmt of FORMATS) {
-  const [name] = fmt;
+  const [name, vp, mobile] = fmt;
   test.describe(name, () => {
+    test(`código grande e invitar (${name})`, async ({ browser }) => {
+      const a = await device(browser, fmt);
+      const code = await createRoom(a, fmt, 'Ana');
+      // Cuatro letras grandes (R-11 S1).
+      await expect(a.locator('#room-code .code-tile')).toHaveText([...code]);
+      const tile = await a.locator('#room-code .code-tile').first().boundingBox();
+      expect(tile!.height).toBeGreaterThanOrEqual(56);
+      if (mobile) {
+        // COMPARTIR abre la hoja del sistema con el enlace; el redondo copia el código.
+        await expect(a.locator('#copy-link')).toHaveCount(0);
+        await a.click('#share');
+        const shared = await a.evaluate(() => (window as any).__shared);
+        expect(shared).toHaveLength(1);
+        expect(shared[0].url).toMatch(new RegExp(`/#${code}$`));
+        expect(shared[0].text).toContain(code);
+      } else {
+        await expect(a.locator('#share')).toHaveCount(0);
+        await a.click('#copy-link');
+        await expect(a.locator('.toast').last()).toContainText('Enlace copiado');
+        expect(await a.evaluate(() => navigator.clipboard.readText())).toMatch(new RegExp(`/#${code}$`));
+      }
+      await a.click('#copy-code');
+      await expect(a.locator('.toast').last()).toContainText(`Código ${code} copiado`);
+      expect(await a.evaluate(() => navigator.clipboard.readText())).toBe(code);
+      await checkLayout(a, vp, '#leave-room, #room-settings, .code-card, #lobby', '#leave-room, #room-settings, #room-help, #share, #copy-code, #copy-link');
+      expect((a as Page & { errs?: string[] }).errs).toEqual([]);
+    });
+
     test(`salir de la sala libera la plaza y el anfitrión se hereda (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);

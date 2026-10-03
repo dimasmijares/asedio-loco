@@ -54,7 +54,9 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 ### Behavior
 
 1. **Crear y entrar:** quien crea la sala es el anfitrión. Si al recargar hay token de esa sala, se entra directo sin pasar por la portada.
-2. **Lobby:** lista de 4 huecos con color y emblema, «Anfitrión», «Tú», «Desconectado» y huecos de bot. Botón «Copiar enlace».
+2. **Sala** (R-11, maquetas «Móvil · Sala» y «PC · Sala» del lienzo): en vertical, «Salir de la sala» y el engranaje arriba, la tarjeta del código y, debajo, la hoja crema con las plazas; en horizontal, una columna noche de 520 px a la izquierda («Salir de la sala», «Sala de <anfitrión>», el código, la ayuda y los ajustes) y la tarjeta de las plazas, de 600 px, a la derecha. Es el mismo DOM (`#room`); lo coloca `client/src/ui/flujo.css`.
+   - **Código e invitación** (R-11 S1, WRK-TASK-069): el código en cuatro letras grandes (`#room-code`, 56×68 en móvil y 64×76 en PC) con «Tus amigos lo escriben en «Unirse con código»». En móvil, COMPARTIR abre la hoja del sistema (`navigator.share`, con el enlace y un texto con el código; si no existe o falla, copia el enlace) y el botón redondo copia el código; en PC, COPIAR ENLACE y CÓDIGO. Cada copia lo confirma con un aviso.
+   - Lista de 4 huecos con color y emblema, «Anfitrión», «Tú», «Desconectado» y huecos de bot.
    - El anfitrión elige bots y dificultad. «Empezar partida» exige al menos 2 castillos (jugadores conectados + bots).
    - En el lobby, un jugador desconectado cede su hueco a uno nuevo si la sala está llena.
 3. **Empezar:** se quitan los desconectados. Si el anfitrión es un móvil y hay un ordenador, el ordenador pasa a ser el anfitrión antes de la primera ronda (D-065).

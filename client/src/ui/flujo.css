@@ -109,27 +109,35 @@
 
 /* ---------- Sala (R-11) ---------- */
 
-/* Arriba: «Salir de la sala» a la izquierda y el engranaje a la derecha (S4). */
-.room-top {
+/* Fondo: la escena de la portada con un velo noche (en vertical) o la columna noche (en horizontal). */
+body:has(.room) {
+  background: var(--al-crema);
+}
+.room {
   position: fixed;
-  top: max(14px, env(safe-area-inset-top));
-  left: 14px;
-  right: 14px;
-  z-index: 11;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  inset: 0;
+  color: var(--al-noche);
+}
+.room::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 2, 31, 0.5);
   pointer-events: none;
 }
-.room-top > * {
-  pointer-events: auto;
+
+/* En vertical (maqueta «Móvil · Sala»): salir arriba a la izquierda, el engranaje a la derecha, la
+   tarjeta del código y la hoja crema de las plazas desde 316 px hasta abajo. */
+.room-side {
+  display: contents;
 }
-.room-top .round-btn {
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
+.room-title {
+  display: none;
 }
 .leave-pill {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -147,4 +155,254 @@
 }
 .leave-pill:active:not(:disabled) {
   box-shadow: 0 1px 0 var(--al-noche-profunda);
+}
+.room-round {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: 14px;
+  display: flex;
+  gap: 14px;
+}
+.room-round #room-help {
+  display: none;
+}
+.room-round .round-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+/* Código de la sala (R-11 S1): cuatro letras grandes sobre una tarjeta noche. */
+.code-card {
+  position: absolute;
+  top: calc(max(14px, env(safe-area-inset-top)) + 58px);
+  left: 16px;
+  right: 16px;
+  max-width: 568px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 16px;
+  border-radius: var(--al-radius-lg);
+  background: var(--al-noche);
+  border: 3px solid var(--al-noche);
+  box-shadow: 0 5px 0 var(--al-noche-profunda);
+}
+.code-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: var(--al-crema-oscuro);
+}
+.code-tiles {
+  display: flex;
+  gap: 8px;
+}
+.code-tile {
+  width: 56px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--al-radius-md);
+  background: var(--al-ciruela);
+  border: 2px solid var(--al-vino);
+  font: 400 44px var(--display);
+  color: var(--al-crema);
+}
+.code-hint {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--al-crema-oscuro);
+  text-align: center;
+}
+.code-actions {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+.code-actions .plank {
+  --tilt: 0deg;
+  flex: 1;
+  margin: 0;
+  min-height: 54px;
+  height: 54px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 20px;
+}
+.code-actions .round-btn {
+  width: 54px;
+  height: 54px;
+  font-size: 22px;
+}
+
+/* Hoja de las plazas. */
+.room-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(max(14px, env(safe-area-inset-top)) + 302px);
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 16px max(30px, calc(env(safe-area-inset-bottom) + 12px));
+  overflow-y: auto;
+  background: var(--al-crema);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+}
+.room-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px;
+}
+.room-head h2 {
+  margin: 0;
+  font-size: 24px;
+  white-space: nowrap;
+}
+.room-count {
+  color: var(--al-vino);
+}
+.room-hint {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--al-vino);
+  text-align: right;
+}
+
+/* Vertical bajo (≤ 760 px): la tarjeta del código más pequeña. */
+@media (orientation: portrait) and (max-height: 760px) {
+  .code-card {
+    gap: 8px;
+    padding: 10px 12px 12px;
+  }
+  .code-tile {
+    width: 48px;
+    height: 56px;
+    font-size: 36px;
+  }
+  .code-hint {
+    display: none;
+  }
+  .room-sheet {
+    top: calc(max(14px, env(safe-area-inset-top)) + 236px);
+  }
+}
+
+/* En horizontal (maqueta «PC · Sala»): columna noche de 520 px a la izquierda y la tarjeta de las
+   plazas, de 600 px, centrada en lo que queda. */
+@media (orientation: landscape) {
+  .room::before {
+    display: none;
+  }
+  .room-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(520px, 46vw);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 40px 64px;
+    overflow-y: auto;
+    background: rgba(32, 4, 50, 0.88);
+    border-right: 3px solid var(--al-noche);
+  }
+  .room-side > .leave-pill {
+    position: static;
+    align-self: flex-start;
+    flex: none;
+  }
+  .room-title {
+    display: block;
+    margin: 0;
+    font: 400 46px/48px var(--display);
+    color: var(--al-crema);
+    overflow-wrap: anywhere;
+  }
+  .code-card {
+    position: static;
+    margin: 0;
+    flex: none;
+  }
+  .code-tile {
+    width: 64px;
+    height: 76px;
+    font-size: 50px;
+  }
+  .code-actions .plank {
+    padding: 0 16px;
+    font-size: 18px;
+    white-space: nowrap;
+  }
+  .code-actions #copy-code {
+    flex: 0 0 140px;
+  }
+  .room-round {
+    position: static;
+    margin-top: auto;
+  }
+  .room-round #room-help {
+    display: flex;
+  }
+  .room-round .round-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 26px;
+  }
+  .room-sheet {
+    top: 40px;
+    bottom: auto;
+    right: auto;
+    left: calc(min(520px, 46vw) + max(24px, (100vw - min(520px, 46vw) - 600px) / 2));
+    width: min(600px, calc(100vw - min(520px, 46vw) - 48px));
+    max-height: calc(100% - 80px);
+    gap: 10px;
+    padding: 22px 22px 24px;
+    border: 3px solid var(--al-noche);
+    border-radius: var(--al-radius-lg);
+    box-shadow: 0 6px 0 var(--al-noche);
+  }
+}
+
+/* Horizontal bajo (un móvil tumbado): todo más apretado y sin el título. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .room-side {
+    gap: 12px;
+    padding: 16px 24px;
+  }
+  .room-title {
+    display: none;
+  }
+  .code-card {
+    gap: 8px;
+    padding: 10px 12px 12px;
+  }
+  .code-tile {
+    width: 48px;
+    height: 56px;
+    font-size: 36px;
+  }
+  .code-hint {
+    display: none;
+  }
+  .room-sheet {
+    top: 16px;
+    max-height: calc(100% - 32px);
+    padding: 14px 16px 16px;
+  }
 }

@@ -42,7 +42,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 12 | WRK-TASK-066 · Física de los castillos altos en un anfitrión móvil | draft | 058 | — |
 | 13 | WRK-TASK-067 · Salir de la partida y de la sala | completed | 064 | 2026-10-03 |
 | 14 | WRK-TASK-068 · Revancha en un paso | draft | 064 | — |
-| 15 | WRK-TASK-069 · Invitar más fácil | draft | 064 | — |
+| 15 | WRK-TASK-069 · Invitar más fácil | completed | 064 | 2026-10-03 |
 | 16 | WRK-TASK-070 · Sala gestionada tocando las plazas y nombre editable | draft | 064 | — |
 | 17 | WRK-TASK-071 · Llegar tarde con explicación | draft | 064 | — |
 | 18 | WRK-TASK-072 · Final y pausa en solitario | draft | 064 | — |

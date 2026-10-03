@@ -14,8 +14,8 @@ const [host, ...guests] = pages;
 await host.goto(`${base}/?fast=1&bots=${nB}&autoplay=1`);
 await host.fill('#name', 'Anfitrión');
 await host.click('#create');
-await host.waitForSelector('#room-link');
-const link = await host.inputValue('#room-link');
+await host.waitForSelector('#room-code[data-code]');
+const link = `${base}/#${await host.getAttribute('#room-code', 'data-code')}`;
 const url = new URL(link);
 for (const [i, g] of guests.entries()) {
   await g.goto(`${base}/?autoplay=1${url.hash}`);
