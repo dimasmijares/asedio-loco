@@ -188,6 +188,7 @@ for (const fmt of FORMATS) {
       await a.evaluate(() => (window as any).__asedio.mode.netHost.host.endNow());
       await expect(a.locator('#rematch')).toBeVisible({ timeout: 30_000 });
       await expect(a.locator('#back-to-room')).toBeVisible();
+      await expect(a.locator('#over-wait')).toHaveCount(0);
       await expect(b.locator('#over-wait')).toHaveText('Esperando a que Ana pida la revancha', { timeout: 30_000 });
       await expect(b.locator('#rematch, #back-to-room')).toHaveCount(0);
       // REVANCHA: otra partida al momento, sin pasar por la sala, con los mismos jugadores y el bot.
@@ -339,6 +340,7 @@ for (const fmt of FORMATS) {
         await expect(page.locator('#rematch')).toHaveText('Otra partida', { timeout: 30_000 });
         await expect(page.locator('#change-rivals')).toBeVisible();
         await expect(page.locator('#exit')).toBeVisible();
+        await expect(page.locator('#over-actions > *')).toHaveText(['Otra partida', 'Cambiar rivales', 'Salir']);
         await page.click('#rematch');
         await expect.poll(async () => (await host()).round, { timeout: 30_000 }).toBeLessThanOrEqual(1);
         await expect(page.locator('#game-over')).toHaveCount(0);

@@ -837,8 +837,8 @@ export class MatchUI {
     };
     const out: Node[] = [];
     if (this.opts.onRematch && host) out.push(plank('rematch', this.opts.rematchLabel ?? 'Revancha', 'primary', () => this.opts.onRematch!()));
-    if (this.opts.onChangeRivals) out.push(plank('change-rivals', 'Cambiar rivales', '', () => this.opts.onChangeRivals!()));
     else if (this.opts.onRematch) out.push(h('p', { class: 'over-wait', id: 'over-wait' }, `Esperando a que ${this.opts.hostName?.() ?? 'el anfitrión'} pida la revancha`));
+    if (this.opts.onChangeRivals) out.push(plank('change-rivals', 'Cambiar rivales', '', () => this.opts.onChangeRivals!()));
     if (this.opts.onLobby && host) out.push(plank('back-to-room', 'Volver a la sala', '', () => this.opts.onLobby!()));
     if (this.opts.onExit) out.push(plank('exit', 'Salir', '', () => this.opts.onExit!()));
     this.overActions.replaceChildren(...out);
