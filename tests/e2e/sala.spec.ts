@@ -196,10 +196,22 @@ for (const fmt of FORMATS) {
       await expect(b.locator('#rematch, #back-to-room')).toHaveCount(0);
       // REVANCHA: otra partida al momento, sin pasar por la sala, con los mismos jugadores y el bot.
       await a.click('#rematch');
+      // Si no llega la revancha, qué ve cada uno (para diagnosticar).
+      const diag = (p: Page) =>
+        p.evaluate(() => {
+          const w = window as any;
+          const c = w.__asedio.conn;
+          return { you: c.you, host: c.room?.hostId, game: c.room?.game, inGame: c.room?.inGame, status: c.status, err: c.lastError, phase: w.__asedio.mode?.state?.phase, actions: document.getElementById('over-actions')?.textContent, vis: document.visibilityState };
+        });
       for (const p of [a, b]) {
         // Al llegar la revancha, cada página desmonta la partida y monta otra (física y 3D por software
         // en CI): mientras tanto no responde, así que se le da tiempo.
-        await expect.poll(() => game(p), { timeout: 60_000 }).toBe(first + 1);
+        try {
+          await expect.poll(() => game(p), { timeout: 60_000 }).toBe(first + 1);
+        } catch (e) {
+          console.log('revancha sin llegar', JSON.stringify({ a: await diag(a), b: await diag(b), errs: [(a as any).errs, (b as any).errs] }));
+          throw e;
+        }
         await expect.poll(() => phase(p), { timeout: 150_000 }).toBe('aim');
         await expect(p.locator('#lobby')).toHaveCount(0);
         expect(await p.evaluate(() => (window as any).__asedio.mode.state.players.map((q: any) => q.name).sort())).toEqual(['Ana', 'Beto', 'Sir Bot']);
