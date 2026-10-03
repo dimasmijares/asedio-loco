@@ -175,10 +175,11 @@ for (const [w, h] of [
     await page.keyboard.press('KeyH');
     await expect(page.locator('#help-list')).toBeHidden();
     // Al cargar, la barra se llena; al soltar, el disparo queda listo y la pista dice a quién se espera.
+    // Se suelta con la barra por encima de la mitad: con el renderizado por software (CI) los
+    // fotogramas van lentos y una carga corta se descarta por demasiado corta.
     await page.keyboard.down('Space');
-    await page.waitForTimeout(600);
     await expect(page.locator('#power-hint')).toHaveText('Suelta para disparar');
-    expect(await page.locator('.power-fill').evaluate((e) => e.getBoundingClientRect().width)).toBeGreaterThan(20);
+    await expect.poll(() => page.locator('.power-fill').evaluate((e) => e.getBoundingClientRect().width), { timeout: 15_000 }).toBeGreaterThan(150);
     await page.keyboard.up('Space');
     await expect(page.locator('#power-hint')).toContainText(/Disparo listo/);
   });
