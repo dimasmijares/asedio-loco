@@ -67,11 +67,14 @@ for (const [name, vp, mobile] of [
       await page.screenshot({ path: info.outputPath(`espectador-${mobile ? 'movil' : 'pc'}.png`) });
       // Y vuelve atrás hasta el plano general: en el móvil, deslizando sobre la escena hacia la derecha.
       if (mobile) {
-        const cdp = await page.context().newCDPSession(page);
-        const touch = (type: string, x: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 380 }] });
-        await touch('touchStart', 100);
-        await touch('touchMove', 280);
-        await touch('touchEnd', 280);
+        // El gesto entero en la página: con toques simulados por CDP, en CI pasaba más de 1 s entre el
+        // primero y el último y no contaba como deslizar.
+        await page.evaluate(() => {
+          const cv = document.getElementById('game-canvas')!;
+          const ev = (type: string, x: number) => new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: 380, bubbles: true });
+          cv.dispatchEvent(ev('pointerdown', 100));
+          cv.dispatchEvent(ev('pointerup', 280));
+        });
       } else await page.keyboard.press('q');
       await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBe(-1);
       // Si la partida acaba con el aviso de la caída abierto, el aviso se cierra: no tapa los botones.
