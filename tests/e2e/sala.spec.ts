@@ -205,9 +205,10 @@ for (const fmt of FORMATS) {
         });
       for (const p of [a, b]) {
         // Al llegar la revancha, cada página desmonta la partida y monta otra (física y 3D por software
-        // en CI): mientras tanto no responde, así que se le da tiempo.
+        // en CI): mientras tanto no responde. En CI, con los dos montando a la vez en móvil, pasó de
+        // 60 s (el volcado mostró la partida nueva ya en los dos): el mismo margen que el primer arranque.
         try {
-          await expect.poll(() => game(p), { timeout: 60_000 }).toBe(first + 1);
+          await expect.poll(() => game(p), { timeout: 150_000 }).toBe(first + 1);
         } catch (e) {
           console.log('revancha sin llegar', JSON.stringify({ a: await diag(a), b: await diag(b), errs: [(a as any).errs, (b as any).errs] }));
           throw e;
