@@ -177,7 +177,7 @@ export function showHowTo() {
           ? 'En cada ronda recibes 3 municiones distintas al azar: toca una carta para elegirla y mantén el dedo encima para ver qué hace.'
           : 'En cada ronda recibes 3 municiones distintas al azar: elige una con 1, 2 o 3 o con un clic en su carta; al pasar el ratón ves qué hace.',
       ),
-      item(icon('target'), 'Cada ronda hay un objetivo secundario (una jaula de cristal, una pieza de hierro o bloques de torre de un rival). Quien lo cumple empieza la ronda siguiente con una carta rara o épica.'),
+      item(icon('flag'), 'Cada ronda hay un objetivo secundario (una jaula de cristal, una pieza de hierro o bloques de torre de un rival). Quien lo cumple empieza la ronda siguiente con una carta rara o épica.'),
       item(icon('shield'), 'Escudo real: en las rondas 1 y 2 ningún rey puede caer. Si al final de la ronda un rey está fuera de su castillo, vuelve a su pedestal.'),
       item(icon('flame'), 'La lava sube un poco en cada ronda y destruye los bloques que alcanza.'),
       close,

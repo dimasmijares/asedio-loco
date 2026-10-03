@@ -131,7 +131,7 @@ export class Hud {
   private roundPill = h('div', { class: 'm-round', id: 'hud-round' }, this.roundText, this.roundSecs);
   private mRow = h('div', { class: 'm-row' });
   private goalText = h('span');
-  private goalChip = h('span', { class: 'm-chip m-goal', id: 'hud-goal-chip', hidden: true }, icon('target'), this.goalText);
+  private goalChip = h('span', { class: 'm-chip m-goal', id: 'hud-goal-chip', hidden: true }, icon('flag'), this.goalText);
   // Sin viento desde el 03-10-2026: arriba solo queda el chip del objetivo.
   private flags = h('div', { class: 'm-flags', id: 'hud-flags', hidden: true }, this.goalChip);
   private mTop = h('div', { class: 'm-top', id: 'm-top' }, this.mRow);

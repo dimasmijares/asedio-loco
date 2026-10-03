@@ -399,7 +399,7 @@ export class MatchUI {
       if (s.round === 1) line(icon('shield'), ` Escudo real: ningún rey cae en las rondas 1 y ${KING_GUARD_ROUNDS}`);
       else if (s.round === KING_GUARD_ROUNDS) line(icon('shield'), ' Última ronda con escudo real');
       else if (s.round === KING_GUARD_ROUNDS + 1) line('Se acaba el escudo real: los reyes ya pueden caer');
-      if (s.goal) line(icon('target'), ` Objetivo: ${GOALS[s.goal].text}`);
+      if (s.goal) line(icon('flag'), ` Objetivo: ${GOALS[s.goal].text}`);
       if (this.src.you !== null && (s.bonus ?? []).includes(this.src.you)) line(icon('gift'), ' Premio por el objetivo: tu primera carta es rara o épica');
       this.hud.showBanner(`RONDA ${s.round}`, sub, s.round <= KING_GUARD_ROUNDS + 1 ? 2600 : 1700);
       sfx.fanfare();
@@ -535,7 +535,7 @@ export class MatchUI {
         ),
       );
     const done = s.goalDone ?? [];
-    const goal = s.goal && done.length ? h('div', { class: 'res-goal', id: 'res-goal' }, icon('target'), ` ${done.map((slot) => nameOf(s, slot)).join(', ')} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: carta rara o épica en la ronda siguiente`) : '';
+    const goal = s.goal && done.length ? h('div', { class: 'res-goal', id: 'res-goal' }, icon('flag'), ` ${done.map((slot) => nameOf(s, slot)).join(', ')} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: carta rara o épica en la ronda siguiente`) : '';
     this.resultsBox.replaceChildren(h('div', { class: 'res-phrase' }, r.phrase), ...rows, goal);
     this.fillSheet(s);
     this.showDamage(s);
@@ -551,7 +551,7 @@ export class MatchUI {
     const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}` : names[0];
     const goal =
       s.goal && done.length
-        ? h('div', { class: 'sheet-goal', id: 'sheet-goal' }, icon('target'), h('span', null, ends ? `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo` : `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: ${done.length > 1 ? 'empiezan' : 'empieza'} la ronda ${s.round + 1} con una carta rara o épica`))
+        ? h('div', { class: 'sheet-goal', id: 'sheet-goal' }, icon('flag'), h('span', null, ends ? `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo` : `${list} ${done.length > 1 ? 'cumplen' : 'cumple'} el objetivo: ${done.length > 1 ? 'empiezan' : 'empieza'} la ronda ${s.round + 1} con una carta rara o épica`))
         : '';
     const played = s.players.filter((p) => p.alive || p.eliminatedRound === s.round).sort((a, b) => (r.lost[b.slot] ?? 0) - (r.lost[a.slot] ?? 0));
     const rows = played.map((p) => {

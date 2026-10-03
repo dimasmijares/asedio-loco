@@ -11,8 +11,10 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   await canvasNotBlack(page);
   // Escudo real en la ronda 1 (WRK-TASK-041): los 4 reyes lo llevan a la vista.
   expect(await page.evaluate(() => (window as any).__asedio.game.view.guardedKings)).toBe(4);
-  // Objetivo secundario de la ronda (WRK-TASK-043): chapa en la esquina y dianas en los rivales.
+  // Objetivo secundario de la ronda (WRK-TASK-043): chip arriba y chinchetas en los rivales.
   await expect(page.locator('#hud-goal-chip')).toBeVisible();
+  // R-14: el chip y la chincheta comparten la bandera; la diana es de la puntería.
+  await expect(page.locator('#hud-goal-chip .ico-flag')).toHaveCount(1);
   expect(await page.evaluate(() => (window as any).__asedio.game.view.goalMarkCount)).toBeGreaterThan(0);
   await page.screenshot({ path: info.outputPath('apuntado.png') });
   // La fase de impacto (o cualquier momento posterior si ha ido muy deprisa).

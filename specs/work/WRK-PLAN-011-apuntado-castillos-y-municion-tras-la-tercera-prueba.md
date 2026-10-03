@@ -61,6 +61,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 31 | WRK-TASK-085 · La parábola no coincidía con la marca de apuntado (fallo; sin viento, ADR-018) | completed | 084 | 2026-10-03 |
 | 32 | WRK-TASK-086 · Bandeja: pad más grande y botón más pequeño (R-12) | completed | 085 | 2026-10-03 |
 | 33 | WRK-TASK-087 · Los rivales de «Jugar solo» son los de la partida (R-10) | completed | 086 | 2026-10-03 |
+| 34 | WRK-TASK-088 · Chincheta del objetivo con bandera (R-14) | completed | 085 | 2026-10-03 |
 
 ## Risk Assessment
 

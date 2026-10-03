@@ -399,11 +399,10 @@ export class WorldView {
     }
   }
 
-  // Objetivo secundario sobre los castillos rivales (WRK-TASK-043): una chincheta con la diana del
-  // chip del objetivo (noche, borde naranja, diana crema) clavada encima del bloque, que se ve a
-  // través de los muros. Antes era una diana plana sobre el muro y se confundía con la marca de
-  // puntería (03-10-2026); la marca de impacto es el anillo del color del jugador. Se puede llamar
-  // en cada fotograma.
+  // Objetivo secundario sobre los castillos rivales (WRK-TASK-043): una chincheta con la bandera del
+  // chip del objetivo (R-14, componente Marcador: cuerpo noche, borde crema y bandera naranja) clavada
+  // encima del bloque, que se ve a través de los muros. Sin anillos ni dianas: los anillos son de la
+  // puntería (el anillo de impacto, del color del jugador). Se puede llamar en cada fotograma.
   private goalMarks: THREE.Sprite[] = [];
   private goalKey = '';
   private goalTex: THREE.CanvasTexture | null = null;
@@ -614,39 +613,49 @@ export { kingId };
 // Chincheta del objetivo secundario: círculo noche con borde naranja y la diana en crema, como el
 // chip del objetivo del HUD, con una punta larga hacia el bloque, así la cabeza flota sobre la torre.
 // Se dibuja una vez y la comparten todas. Medida en metros (ancho, alto) de la textura de 128×224.
+// Chincheta del objetivo (R-14): una gota con la punta abajo, cuerpo noche y borde crema (2 px a su
+// tamaño habitual en pantalla, unos 40 px de ancho: 6 px en la textura de 128), y dentro la bandera
+// del chip del objetivo (icono `flag`) en naranja.
 const GOAL_PIN = [3, 5.25];
 function goalPinTexture() {
   const c = document.createElement('canvas');
   c.width = 128;
   c.height = 224;
   const g = c.getContext('2d')!;
-  const disc = (r: number, color: string) => {
-    g.beginPath();
-    g.arc(64, 62, r, 0, Math.PI * 2);
-    g.fillStyle = color;
-    g.fill();
-  };
+  const [cx, cy, r, tipY] = [64, 62, 56, 216];
+  // Puntos de tangencia de la punta con la cabeza.
+  const b = Math.acos(r / (tipY - cy));
   g.beginPath();
-  g.moveTo(46, 100);
-  g.lineTo(82, 100);
-  g.lineTo(64, 220);
+  g.moveTo(cx, tipY);
+  g.arc(cx, cy, r, Math.PI / 2 + b, Math.PI / 2 - b + Math.PI * 2);
+  g.closePath();
+  g.fillStyle = '#200432';
+  g.fill();
+  g.lineJoin = 'round';
+  g.lineWidth = 6;
+  g.strokeStyle = '#FEE7B5';
+  g.stroke();
+  // Bandera: el mástil y el paño con la muesca, en la retícula del icono (12 × 9 con muesca de 2,5).
+  const u = 4.3;
+  const [x0, y0] = [cx - 5.3 * u, cy - 6.2 * u];
+  g.lineCap = 'round';
+  g.lineWidth = 2.5 * u;
+  g.strokeStyle = '#FE8932';
+  g.beginPath();
+  g.moveTo(x0, y0 + 16 * u);
+  g.lineTo(x0, y0);
+  g.stroke();
+  g.beginPath();
+  g.moveTo(x0, y0 + u);
+  g.lineTo(x0 + 12 * u, y0 + u);
+  g.lineTo(x0 + 9.5 * u, y0 + 5.5 * u);
+  g.lineTo(x0 + 12 * u, y0 + 10 * u);
+  g.lineTo(x0, y0 + 10 * u);
   g.closePath();
   g.fillStyle = '#FE8932';
   g.fill();
-  g.lineWidth = 5;
-  g.strokeStyle = '#200432';
+  g.lineWidth = u;
   g.stroke();
-  disc(60, '#200432');
-  disc(55, '#FE8932');
-  disc(46, '#200432');
-  g.strokeStyle = '#FEE7B5';
-  g.lineWidth = 7;
-  for (const r of [32, 17]) {
-    g.beginPath();
-    g.arc(64, 62, r, 0, Math.PI * 2);
-    g.stroke();
-  }
-  disc(6, '#FEE7B5');
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
