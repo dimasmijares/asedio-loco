@@ -164,6 +164,10 @@ for (const fmt of FORMATS) {
       for (const p of [a, b]) await expect(humans(p)).toHaveCount(2);
 
       await a.click('#seat-add-3');
+      // Medir cuando los dos ya han redibujado la sala (en CI, contra producción, una medida tomada
+      // justo tras el clic salió vacía).
+      await expect(a.locator('#bot-difficulty')).toBeVisible();
+      await expect(b.locator('#bot-difficulty-text')).toBeVisible();
       await checkLayout(a, vp, '.seat-card, #bot-difficulty, #start', '#player-list button, #bot-difficulty button, #start, #leave-room');
       await checkLayout(b, vp, '.seat-card, #bot-difficulty-text, #waiting', '#player-list button, #leave-room');
       for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
@@ -215,7 +219,7 @@ for (const fmt of FORMATS) {
       await join(b, fmt, code, 'Beto', '&render=4');
       await expect(humans(a)).toHaveCount(2);
       await a.click('#start');
-      for (const p of [a, b]) await p.waitForFunction(() => (window as any).__asedio.mode?.state?.phase === 'aim', null, { timeout: 30_000 });
+      for (const p of [a, b]) await p.waitForFunction(() => (window as any).__asedio.mode?.state?.phase === 'aim', null, { timeout: 60_000 });
 
       await b.click('#hud-settings');
       await b.click('#settings-exit');
@@ -236,7 +240,8 @@ for (const fmt of FORMATS) {
       test(`salir de una partida en solitario (${name})`, async ({ page }) => {
         const errors = watchErrors(page);
         await page.goto(`${q(fmt, '&bots=2&seed=5&tutorial=0')}#solo`);
-        await page.waitForFunction(() => (window as any).__asedio.mode?.host?.state.phase === 'aim', null, { timeout: 30_000 });
+        // La primera partida de la página carga Rapier y el 3D: en CI llega a pasar de 30 s.
+        await page.waitForFunction(() => (window as any).__asedio.mode?.host?.state.phase === 'aim', null, { timeout: 60_000 });
         await page.click('#hud-settings');
         await page.click('#settings-exit');
         await expect(page.locator('#leave-game')).toContainText('vuelves a la portada');
