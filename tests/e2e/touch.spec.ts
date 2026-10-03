@@ -176,6 +176,15 @@ test('tras disparar: barra «Disparo listo» y hoja de resultados', async ({ pag
   await expect.poll(() => page.evaluate(() => (window as any).__asedio.game.stage.viewShift), { message: 'la escena ocupa toda la pantalla' }).toBe(0);
   const wb = await box(page, '#hud-wait');
   expect(wb.height, 'barra fina').toBeLessThan(90);
+  // La marca de listo va a la derecha del nombre, dentro del chip (R-10 fase 3).
+  const mark = await page.evaluate(() => {
+    const chip = document.querySelector('#hud-players .hp.mark')!;
+    const r = (s: string) => chip.querySelector(s)!.getBoundingClientRect();
+    return { name: r('.hp-short'), state: r('.hp-state'), emb: r('.hp-emb'), chip: chip.getBoundingClientRect() };
+  });
+  expect(mark.state.left, 'a la derecha del nombre').toBeGreaterThanOrEqual(mark.name.right - 0.5);
+  expect(mark.state.left, 'fuera del emblema').toBeGreaterThan(mark.emb.right);
+  expect(mark.state.right, 'dentro del chip').toBeLessThanOrEqual(mark.chip.right);
   await page.screenshot({ path: test.info().outputPath('disparo-listo.png') });
 
   // Resultados: hoja crema con la tabla (tú resaltado) y la cuenta atrás.
@@ -188,6 +197,9 @@ test('tras disparar: barra «Disparo listo» y hoja de resultados', async ({ pag
   await expect(sheet).toBeVisible();
   await expect(page.locator('#results-box')).toBeHidden();
   await expect(sheet.locator('.sheet-title')).toHaveText('Fin de la ronda 1');
+  // En la píldora, «Ronda 1 · resultados» y sin el círculo de los segundos (R-10 fase 3).
+  await expect(page.locator('#hud-round .m-round-text')).toHaveText('Ronda 1 · resultados');
+  await expect(page.locator('#hud-round-secs')).toBeHidden();
   await expect(sheet.locator('.sheet-row')).toHaveCount(3);
   await expect(sheet.locator('.sheet-row.you')).toHaveCount(1);
   await expect(sheet.locator('.sheet-next')).toHaveText(/^La ronda 2 empieza en \d s$/);

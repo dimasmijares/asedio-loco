@@ -57,6 +57,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 27 | WRK-TASK-081 · Portada «Atardecer» (R-10 fase 3: U9) | completed | 080 | 2026-10-03 |
 | 28 | WRK-TASK-082 · Jugar solo con selectores grandes (R-10 fase 3: U10) | completed | 081 | 2026-10-03 |
 | 29 | WRK-TASK-083 · HUD de PC con las piezas del móvil (R-10 fase 3: U11) | completed | 082 | 2026-10-03 |
+| 30 | WRK-TASK-084 · Retoques de la fase 2 (R-10 fase 3) | completed | 083 | 2026-10-03 |
 
 ## Risk Assessment
 

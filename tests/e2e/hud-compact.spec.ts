@@ -76,7 +76,7 @@ for (const [w, h] of [
       expect(tip.b, 'por encima de las cartas').toBeLessThan(card.y);
       // En una sola evaluación: el marcador se rehace a menudo y un localizador puede quedarse con filas ya sueltas.
       const shorts = await page.evaluate(() =>
-        [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1 })),
+        [...document.querySelectorAll('.hp-short')].map((e) => ({ text: e.textContent, w: e.getBoundingClientRect().width, cut: e.scrollWidth > e.clientWidth + 1, mark: !!e.closest('.hp.mark') })),
       );
       await page.screenshot({ path: info.outputPath(`hud-${w}x${h}.png`) });
       const r = await rects(page, portrait ? PORTRAIT : PARTS);
@@ -116,7 +116,8 @@ for (const [w, h] of [
       expect(shorts.length).toBe(4);
       for (const s of shorts) {
         expect(s.w, `nombre corto «${s.text}» visible`).toBeGreaterThan(4);
-        expect(s.cut, `nombre corto «${s.text}» sin recortar`).toBe(false);
+        // Con la marca de listo a la derecha (R-10 fase 3), un nombre largo puede abreviarse.
+        if (!s.mark) expect(s.cut, `nombre corto «${s.text}» sin recortar`).toBe(false);
       }
       expect(new Set(shorts.map((s) => s.text)).size, 'nombres cortos distintos').toBe(4);
       expect(shorts.some((s) => s.text === 'Tú')).toBe(true);

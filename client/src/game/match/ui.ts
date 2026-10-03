@@ -419,7 +419,8 @@ export class MatchUI {
     else if (s.phase === 'countdown') this.hud.setPhase(`Ronda ${s.round}`, 'Cuenta atrás');
     else if (s.phase === 'intro') this.hud.setPhase('Preparados', 'La partida está a punto de empezar');
     else if (s.phase === 'results') {
-      this.hud.setPhase(`Ronda ${s.round}`, 'Resultados');
+      // En la píldora, «Ronda N · resultados» y sin el círculo de los segundos (R-10 fase 3).
+      this.hud.setPhase(`Ronda ${s.round}`, 'Resultados', `Ronda ${s.round} · resultados`);
       this.showResults(s);
     } else if (s.phase === 'over') {
       this.hud.setPhase('Fin de la partida', '');

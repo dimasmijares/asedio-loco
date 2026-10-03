@@ -2629,31 +2629,25 @@ label.check:has(.check-hint) {
   display: flex;
   width: auto;
 }
+/* La marca de listo, la cruz o la desconexión van a la derecha del nombre, como en PC (decisión del
+   usuario del 03-10-2026, R-10 fase 3); a 11 px, para dejarle sitio al nombre. Con la marca, un
+   nombre largo se abrevia con «…». */
 .hud.tray-mode .hp {
   flex: 1 1 0;
   max-width: 86px;
   gap: 4px;
-  padding: 5px 5px 5px 4px;
+  padding: 5px 4px 5px 4px;
 }
 .hud.tray-mode .hp-emb {
   width: 22px;
   height: 22px;
   font-size: 13px;
 }
-/* Listo, eliminado o desconectado: una insignia en la esquina del emblema, sin taparlo, así el
-   nombre usa todo el ancho del chip (decisión del usuario del 03-10-2026). */
+.hud.tray-mode .hp-top {
+  gap: 2px;
+}
 .hud.tray-mode .hp-state {
-  position: absolute;
-  left: 17px;
-  top: 18px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--al-noche);
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  line-height: 1;
+  font-size: 11px;
 }
 .m-flags {
   display: flex;
