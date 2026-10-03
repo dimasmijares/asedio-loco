@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.3.0
+version: 1.4.0
 created: 2026-09-26
-updated: 2026-09-28
+updated: 2026-10-03
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -48,6 +48,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 | Token | `localStorage asedio.token.<código>` | No | Se guarda al recibir `welcome` |
 | `config {bots, difficulty, fast}` | Mensaje | Solo anfitrión, en lobby | Bots de relleno 0 a huecos libres; `fast` solo por `?fast=1` |
 | `start`, `lobby`, `yield` | Mensajes | Solo anfitrión | Empezar, revancha, ceder |
+| `leave` | Mensaje | Cualquiera | Salir de la sala o de la partida: la plaza queda libre al momento (R-07 F1 y F3, WRK-TASK-067) |
 | `mobile` en `hello` | booleano | No | `pointer: coarse` sin puntero fino; `?mobile=1/0` lo fuerza |
 
 ### Behavior
@@ -66,6 +67,11 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - Si se estaba resolviendo un impacto, se da por terminado. Si se apuntaba, los bots vuelven a decidir y quedan al menos 3 s.
    - En el lobby, el anfitrión tiene 8 s de gracia para recargar sin perder el papel.
 6b. **Desconectado → bot** (WRK-TASK-010): al empezar cada ronda, el anfitrión marca `auto` en los humanos vivos que no están conectados. Su castillo lo lleva un bot con la dificultad de la sala (`decideBots`), su puntería se reenvía a todos como la de un bot y el marcador enseña 🤖 junto a 📡. Si vuelve con su token, sus entradas se ignoran hasta el siguiente apuntado, en el que recupera el control. El resto de la ronda en que se fue hace de margen para reconectar.
+6c. **Salir** (R-07 F1 y F3, R-11 S4, WRK-TASK-067): en la sala, la píldora «Salir de la sala» (arriba a la izquierda) y, en partida, «Salir de la partida» al final del menú del engranaje, las dos con una hoja de confirmación (SALIR en grana y QUEDARME; tocar fuera es quedarse).
+   - El cliente manda `leave`, olvida el token de la sala (recargar ya no vuelve a meterle) y vuelve a la portada. El servidor lo quita de la sala al momento: su plaza queda libre y nadie lo ve como «Desconectado».
+   - Si era el anfitrión, hereda otro jugador conectado: en la sala, el siguiente por orden de plaza, y la confirmación dice quién («Como eres el anfitrión, Beto pasará a serlo»); en partida, como en la migración (primero los ordenadores).
+   - En partida, su castillo sigue: al no estar conectado, desde la ronda siguiente lo lleva un bot (punto 6b). La confirmación lo explica; si ya había caído o es espectador, solo dice que vuelve a la portada. En solitario, la partida se acaba y se vuelve a la portada.
+   - «Salir» en la pantalla final también manda `leave` (antes recargaba sin avisar y el jugador quedaba como «Desconectado»).
 7. **Cesión en segundo plano** (D-065): a los 2 s con la pestaña oculta, el anfitrión manda `yield` y pasa a cliente sin desconectarse. Al volver pide un `full`. Si no hay otro humano conectado, la partida espera. No se cede en `over`.
 8. **Revancha:** solo el anfitrión ve «Revancha». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
 9. **Sala vacía:** se borra a los 60 s sin conexiones.
@@ -94,23 +100,28 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 - [x] Un móvil que crea la sala cede el papel a un ordenador desde el principio, sin migración.
 - [x] La revancha vuelve al lobby con la misma sala y los mismos jugadores, y solo el anfitrión ve el botón.
 - [x] Los nombres se sanean a 16 caracteres y los códigos tienen 4 letras sin I ni O.
+- [x] Quien sale de la sala deja su plaza libre al momento en los demás dispositivos; si era el anfitrión, lo hereda otro, y la confirmación dice quién (`tests/e2e/sala.spec.ts`, PC y móvil vertical).
+- [x] Quien sale de una partida en red vuelve a la portada y su castillo lo lleva un bot desde la ronda siguiente; en solitario, se vuelve a la portada (`tests/e2e/sala.spec.ts`).
 
 ## Evidence
 
 | Type | Reference | Date | Confidence impact |
 |------|-----------|------|-------------------|
 | Testing | `tests/e2e/lobby.spec.ts`, `tests/e2e/multiplayer.spec.ts` en CI contra producción | 2026-09-26 | low → medium |
+| Testing | `tests/e2e/sala.spec.ts`: salir de la sala y de la partida con dos y tres dispositivos, en PC y móvil vertical | 2026-10-03 | — |
 
 ## Traceability
 
 | Relation | Target | Description |
 |----------|--------|-------------|
-| Implemented in | `server/index.ts` | `Room`: hello, config, start, lobby, yield, relay, `pickNewHost`, alarmas |
+| Implemented in | `server/index.ts` | `Room`: hello, config, start, lobby, yield, leave, relay, `pickNewHost`, alarmas |
+| Implemented in | `client/src/ui/sheet.ts` | Hoja de confirmación y aviso (salir, eliminado) |
 | Implemented in | `client/src/net/connection.ts` | Reconexión, token, ping, `isMobileDevice` |
 | Implemented in | `client/src/ui/lobby.ts` | Portada, lobby y configuración |
 | Implemented in | `client/src/game/modes/online.ts` | `migrate`, `demote`, `onVisibility` |
 | Implemented in | `client/src/main.ts` | Entrada directa con token, montaje del juego |
 | Tested by | `tests/e2e/lobby.spec.ts` | Crear sala y unirse |
+| Tested by | `tests/e2e/sala.spec.ts` | Sala con varios dispositivos y salidas |
 | Tested by | `tests/e2e/multiplayer.spec.ts` | 4 jugadores, espectador, reconexión, migración, segundo plano, móvil, revancha |
 | Tested by | `tests/unit/protocol.test.ts` | `sanitizeName`, `parseClientMsg`, `randomRoomCode` |
 | Decided in | D-031, D-033, D-065 | Migración, espectadores y reconexión, cesión en segundo plano |

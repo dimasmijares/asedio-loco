@@ -6,6 +6,7 @@ import { ammoArt } from './ammoArt';
 import { h, toast } from './dom';
 import { icon, type IconName } from './icons';
 import { openSettings } from './settings';
+import { showSheet } from './sheet';
 
 const NAME_KEY = 'asedio.name';
 const DIFF_LABEL: Record<Difficulty, string> = { facil: 'Fácil', normal: 'Normal', dificil: 'Difícil' };
@@ -257,16 +258,57 @@ export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number,
   );
 }
 
+// Píldora «Salir de la sala» (R-11 S4): noche con borde crema oscuro, arriba a la izquierda.
+const leavePill = (id: string) => h('button', { class: 'leave-pill', id, type: 'button' }, icon('logout'), h('span', null, 'Salir de la sala'));
+
 export class LobbyView {
   private el: HTMLElement;
 
   constructor(private root: HTMLElement, private conn: Connection) {
     this.el = h('div', { class: 'panel', id: 'lobby' });
-    root.replaceChildren(this.el);
+    const leave = leavePill('leave-room');
+    leave.onclick = () => this.confirmLeave();
+    const gear = roundBtn('room-settings', 'gear', 'Ajustes');
+    gear.onclick = () => openSettings();
+    root.replaceChildren(h('div', { class: 'room-top' }, leave, gear), this.el);
     conn.on('room', () => this.render());
     conn.on('status', () => this.render());
     conn.on('error', (e) => toast(e.msg));
     this.render();
+  }
+
+  // «¿Salir de la sala?» (R-11 S4): la plaza queda libre al momento; si eres el anfitrión, dice
+  // quién hereda (el siguiente jugador conectado por orden de plaza, como hace el servidor).
+  confirmLeave() {
+    const room = this.conn.room;
+    const you = this.conn.you;
+    let text: Node | string = 'Tu plaza quedará libre al momento.';
+    if (!room || !you || you.role === 'spectator') text = 'Dejarás de mirar esta sala.';
+    else if (this.conn.isHost) {
+      const heir = room.players.filter((p) => p.id !== you.id && p.connected).sort((a, b) => a.slot - b.slot)[0];
+      text = heir
+        ? h('span', null, 'Tu plaza quedará libre al momento. Como eres el anfitrión, ', h('b', null, heir.name), ' pasará a serlo y podrá empezar la partida.')
+        : 'Tu plaza quedará libre al momento. No queda nadie más: la sala se cerrará.';
+    }
+    showSheet({
+      id: 'leave-room-sheet',
+      title: '¿Salir de la sala?',
+      text,
+      actions: [
+        {
+          id: 'leave-room-ok',
+          label: 'Salir',
+          kind: 'danger',
+          onClick: () => {
+            this.conn.leave();
+            location.hash = '';
+            location.reload();
+          },
+        },
+        { id: 'leave-room-stay', label: 'Quedarme', onClick: () => {} },
+      ],
+      dismiss: () => {},
+    });
   }
 
   render() {
@@ -318,7 +360,7 @@ export class LobbyView {
     }
 
     const parts: Node[] = [
-      h('h2', null, `Sala ${room.code}`),
+      h('h2', { id: 'room-code', 'data-code': room.code }, `Sala ${room.code}`),
       h('div', { class: 'muted' }, 'Comparte este enlace para invitar a otros jugadores:'),
       h('div', { class: 'link-box' }, linkInput, copy),
       list,

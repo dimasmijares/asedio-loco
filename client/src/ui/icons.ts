@@ -26,6 +26,8 @@ const ICONS = {
   dice: `<g ${STROKE}><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01"/></g>`,
   pencil: `<g ${STROKE}><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></g>`,
   back: `<g ${STROKE}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></g>`,
+  // Sala (R-11): salir, compartir, copiar, enlace.
+  logout: `<g ${STROKE}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></g>`,
   keyboard: `<g ${STROKE}><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></g>`,
   prev: `<path d="m15 18-6-6 6-6" ${STROKE}/>`,
   next: `<path d="m9 18 6-6-6-6" ${STROKE}/>`,

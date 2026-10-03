@@ -1,5 +1,6 @@
 import { enterFullscreen, isMobileDevice } from './device';
 import './ui/style.css';
+import './ui/flujo.css';
 import { DIFFICULTIES, ROOM_CODE_RE, type Difficulty } from '../../shared/protocol';
 import { Connection } from './net/connection';
 import { h } from './ui/dom';

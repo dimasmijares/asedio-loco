@@ -42,14 +42,21 @@ export class OnlineMode implements Mode {
     };
     if (conn.isHost) this.startHost(room);
     else this.startClient(room);
+    // Salir avisa al servidor (R-07 F1 y F3): la plaza queda libre y tu castillo lo lleva un bot.
+    const leave = () => {
+      conn.leave();
+      location.hash = '';
+      location.reload();
+    };
     this.ui = new MatchUI(game, src, parent, {
       onRematch: () => conn.send({ t: 'lobby' }),
       canRematch: () => conn.isHost,
-      onExit: () => {
-        conn.close();
-        location.hash = '';
-        location.reload();
-      },
+      onExit: leave,
+      onLeave: leave,
+      leaveText: () =>
+        this.ui.me()?.alive && this.state.phase !== 'over'
+          ? 'Tu castillo seguirá en la partida: lo jugará un bot desde la ronda siguiente. Vuelves a la portada.'
+          : 'Vuelves a la portada. Tu plaza queda libre para otro jugador.',
     });
     if (opts.autoplay) this.auto = new AutoPlayer(src, game.view);
     this.off.push(conn.on('room', (r) => this.onRoom(r)));

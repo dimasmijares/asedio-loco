@@ -152,10 +152,12 @@ export class Room extends DurableObject<Env> {
   }
 
   // Nuevo anfitrión entre los jugadores conectados (sin contar `notId`): primero los ordenadores,
-  // luego por hueco. Devuelve false si no hay a quién pasárselo.
-  private pickNewHost(except?: WebSocket, notId?: string) {
+  // luego por hueco. Devuelve false si no hay a quién pasárselo. En la sala (`bySlot`) solo cuenta el
+  // hueco: así la confirmación de «Salir de la sala» puede decir quién hereda (al empezar, si el
+  // anfitrión es un móvil, la física pasa igualmente a un ordenador).
+  private pickNewHost(except?: WebSocket, notId?: string, bySlot = false) {
     const s = this.s!;
-    const mobile = (id: string) => this.sockets(except).some((w) => this.attach(w).pid === id && this.attach(w).mobile);
+    const mobile = (id: string) => !bySlot && this.sockets(except).some((w) => this.attach(w).pid === id && this.attach(w).mobile);
     const candidates = s.players
       .filter((p) => p.id !== notId && this.isConnected(p.id, except))
       .sort((a, b) => Number(mobile(a.id)) - Number(mobile(b.id)) || a.slot - b.slot);
@@ -267,6 +269,24 @@ export class Room extends DurableObject<Env> {
         }
         this.save();
         return this.broadcastRoom();
+      }
+      case 'leave': {
+        // Salir de verdad (R-07 F1 y F3): la plaza queda libre al momento. En partida, el castillo
+        // lo lleva un bot desde la ronda siguiente (el anfitrión lo ve como desconectado). Si se va
+        // el anfitrión, hereda otro jugador conectado.
+        const wasHost = isHost;
+        s.players = s.players.filter((p) => p.id !== a.pid);
+        ws.serializeAttachment({ ...a, pid: null, role: null } satisfies Attach);
+        if (wasHost && !this.pickNewHost(ws, a.pid!, !s.inGame)) s.hostId = null;
+        this.save();
+        this.broadcastRoom(undefined, ws);
+        try {
+          ws.close(1000, 'salida');
+        } catch {
+          /* ya cerrado */
+        }
+        if (this.sockets(ws).length === 0) this.scheduleAlarm(Date.now() + EMPTY_ROOM_TTL_MS);
+        return;
       }
       case 'yield':
         // El anfitrión se va a segundo plano: otro jugador conectado hereda la partida.

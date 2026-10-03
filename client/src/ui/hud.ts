@@ -8,7 +8,7 @@ import { sfx } from '../game/audio';
 import { ammoArt } from './ammoArt';
 import { h } from './dom';
 import { icon } from './icons';
-import { openSettings, settings } from './settings';
+import { openSettings, settings, type SettingsExtra } from './settings';
 
 // Una fila de la ayuda de controles: teclas (cada una en su tecla dibujada) y qué hacen.
 export type HelpRow = [keys: string[], what: string];
@@ -139,6 +139,8 @@ export class Hud {
   private cornerRow = h('div', { class: 'hud-corner-row' });
   private gear = h('button', { class: 'hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
   private playersKey = '';
+  // Lo que añade la partida al engranaje: salir y, en solitario, la pausa (R-07 F1 y F9).
+  settingsExtra: SettingsExtra = {};
   // Tras disparar en móvil vertical, la bandeja se recoge en esta barra fina (R-10 U6).
   private wait = h('div', { class: 'm-wait', id: 'hud-wait', role: 'status', hidden: true });
   private waitKey = '';
@@ -171,7 +173,7 @@ export class Hud {
       if (e.code === 'KeyH') this.toggleHelp();
     };
     window.addEventListener('keydown', this.keyHandler);
-    this.gear.onclick = () => openSettings();
+    this.gear.onclick = () => openSettings(this.settingsExtra);
     this.gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(this.cornerRow, this.stats);
     this.mTop.append(this.mRow);

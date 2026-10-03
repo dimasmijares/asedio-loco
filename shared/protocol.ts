@@ -2,7 +2,7 @@
 // mensajes de control (hello, config, start…). Todo lo relativo a la partida
 // viaja dentro de `relay` y el servidor lo retransmite sin interpretarlo.
 
-export const PROTOCOL_VERSION = 12;
+export const PROTOCOL_VERSION = 13;
 export const MAX_PLAYERS = 4;
 export const MAX_NAME_LEN = 16;
 export const MAX_MSG_BYTES = 64 * 1024;
@@ -43,6 +43,7 @@ export type ClientMsg =
   | { t: 'start' }
   | { t: 'lobby' } // revancha: vuelve al lobby con los mismos jugadores
   | { t: 'yield' } // el anfitrión cede el papel (p. ej. al pasar a segundo plano)
+  | { t: 'leave' } // salir de la sala o de la partida: la plaza queda libre al momento (R-07 F1 y F3)
   | { t: 'relay'; to: string; d: RelayData }
   | { t: 'ping'; n: number };
 
@@ -118,6 +119,7 @@ export function parseClientMsg(raw: unknown): ClientMsg | null {
     case 'start':
     case 'lobby':
     case 'yield':
+    case 'leave':
       return { t: m.t };
     case 'relay':
       if (typeof m.to !== 'string' || m.to.length > 40) return null;

@@ -11,6 +11,7 @@ import { PLAYER_STYLES, shortName } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
 import { icon } from '../../ui/icons';
+import { showSheet } from '../../ui/sheet';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
 import { Director } from '../director';
@@ -36,6 +37,11 @@ export interface MatchUIOptions {
   onRematch?: () => void;
   onExit?: () => void;
   canRematch?: () => boolean;
+  // Salir a mitad de partida desde el engranaje, con confirmación (R-07 F1). `leaveText` explica qué
+  // pasa con tu castillo; `pause` para la partida mientras el menú está abierto (solitario, F9).
+  onLeave?: () => void;
+  leaveText?: () => string;
+  pause?: (on: boolean) => void;
 }
 
 export const AIM_HELP: HelpRow[] = [
@@ -126,6 +132,28 @@ export class MatchUI {
     for (const p of src.state.players) this.last.alive.set(p.slot, p.alive);
     if (src.you !== null && tutorialPending()) this.tutorial = new Tutorial(this.hud.root);
     game.rig.orbit(new THREE.Vector3(0, 2, 0), 66, 36, 0.08);
+    if (opts.onLeave)
+      this.hud.settingsExtra = {
+        exit: { label: 'Salir de la partida', onClick: () => this.confirmLeave() },
+        onOpen: () => opts.pause?.(true),
+        onClose: () => opts.pause?.(false),
+      };
+  }
+
+  // «¿Salir de la partida?» (R-07 F1): SALIR en grana y QUEDARME; tocar fuera es quedarse.
+  confirmLeave() {
+    const stay = () => this.opts.pause?.(false);
+    this.opts.pause?.(true);
+    showSheet({
+      id: 'leave-game',
+      title: '¿Salir de la partida?',
+      text: this.opts.leaveText?.() ?? '',
+      actions: [
+        { id: 'leave-game-ok', label: 'Salir', kind: 'danger', onClick: () => this.opts.onLeave?.() },
+        { id: 'leave-game-stay', label: 'Quedarme', onClick: stay },
+      ],
+      dismiss: stay,
+    });
   }
 
   me(): PlayerState | undefined {
@@ -716,6 +744,7 @@ export class MatchUI {
     this.hud.dispose();
     this.arcs.dispose();
     this.overPanel?.remove();
+    document.getElementById('leave-game-wrap')?.remove();
   }
 }
 

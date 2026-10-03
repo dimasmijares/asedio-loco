@@ -52,7 +52,15 @@ export function setQualityTarget(fn: ((q: Quality) => void) | null) {
   onQuality = fn;
 }
 
-export function openSettings() {
+// En partida, el engranaje añade «Salir de la partida» (R-07 F1) y avisa al abrirse y al cerrarse
+// (en solitario, la partida se pausa mientras tanto, F9).
+export interface SettingsExtra {
+  exit?: { label: string; onClick: () => void };
+  onOpen?: () => void;
+  onClose?: () => void;
+}
+
+export function openSettings(extra: SettingsExtra = {}) {
   document.getElementById('settings')?.remove();
   const qualities: [Quality, string, string][] = [
     ['low', 'Baja', 'Sin sombras y con menos partículas: para equipos con menos potencia'],
@@ -107,6 +115,7 @@ applyHand();
     save();
   };
   const close = h('button', { class: 'primary big', id: 'settings-close' }, 'Listo');
+  const exit = extra.exit ? h('button', { class: 'big danger', id: 'settings-exit', type: 'button' }, extra.exit.label) : null;
   const modal = h(
     'div',
     { class: 'overlay modal', id: 'settings', role: 'dialog', 'aria-label': 'Ajustes' },
@@ -124,16 +133,28 @@ applyHand();
       h('label', { htmlFor: 'set-sens' }, 'Sensibilidad al apuntar ', sensVal),
       sens,
       close,
+      exit,
     ),
   );
-  const shut = () => modal.remove();
+  const shut = () => {
+    if (!modal.isConnected) return;
+    modal.remove();
+    extra.onClose?.();
+  };
   close.onclick = shut;
+  if (exit)
+    exit.onclick = () => {
+      // La confirmación se encarga de volver a pausar o reanudar.
+      modal.remove();
+      extra.exit!.onClick();
+    };
   // Con llaves: un manejador «onclick» que devuelve false cancela el clic, y las casillas no cambiaban.
   modal.onclick = (e) => {
     if (e.target === modal) shut();
   };
   modal.onpointerdown = (e) => e.stopPropagation();
   document.body.append(modal);
+  extra.onOpen?.();
   close.focus();
 }
 

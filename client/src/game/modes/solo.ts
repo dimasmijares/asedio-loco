@@ -46,12 +46,15 @@ export class SoloMode implements Mode {
       send: (input) => host.setInput(you, input),
       remaining: () => host.state.remaining,
     };
+    const exit = () => {
+      location.hash = '';
+      location.reload();
+    };
     this.ui = new MatchUI(this.game, src, this.parent, {
       onRematch: () => this.rematch(),
-      onExit: () => {
-        location.hash = '';
-        location.reload();
-      },
+      onExit: exit,
+      onLeave: exit,
+      leaveText: () => 'La partida se acaba y vuelves a la portada.',
     });
     this.game.mode = this;
   }

@@ -1,0 +1,150 @@
+/* Flujo de partidas (R-07), sala (R-11) y espectador (R-13), con las maquetas de «Nueva versión» del
+   lienzo y los componentes del design system «Asedio Loco · estilo». Va después de style.css. */
+
+/* ---------- Hoja de confirmación y aviso (maquetas «Sala, confirmar salida» y «Te han eliminado») ----------
+   Abajo y a todo el ancho en vertical; una tarjeta centrada de 460 px en horizontal. */
+.sheet-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--al-velo);
+}
+.al-sheet {
+  width: 100%;
+  max-width: 600px;
+  max-height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 20px max(40px, calc(env(safe-area-inset-bottom) + 16px));
+  background: var(--al-crema);
+  color: var(--al-noche);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  animation: sheet-up 0.25s ease-out;
+}
+.al-sheet.center {
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding-top: 26px;
+}
+.sheet-h {
+  margin: 0;
+  font: 400 28px/1.1 var(--display);
+}
+.al-sheet.center .sheet-h {
+  margin-top: 4px;
+  font-size: 32px;
+}
+.sheet-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 21px;
+  color: var(--al-vino);
+}
+.sheet-text b {
+  color: var(--al-noche);
+}
+.sheet-badge {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: var(--al-grana);
+  border: 3px solid var(--al-noche);
+  box-shadow: var(--al-sombra-dura);
+  color: var(--al-crema);
+  font-size: 38px;
+  transform: rotate(-8deg);
+}
+.sheet-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+.sheet-actions .plank {
+  margin: 0;
+  min-height: 56px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.sheet-actions .plank:first-child {
+  min-height: 60px;
+  font-size: 24px;
+}
+.sheet-hint {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+@media (orientation: landscape) {
+  .sheet-wrap {
+    align-items: center;
+  }
+  .al-sheet {
+    width: 460px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100% - 24px);
+    padding: 24px 26px 26px;
+    border: 3px solid var(--al-noche);
+    border-radius: var(--al-radius-lg);
+    box-shadow: var(--al-sombra-tablon);
+  }
+}
+
+/* ---------- Sala (R-11) ---------- */
+
+/* Arriba: «Salir de la sala» a la izquierda y el engranaje a la derecha (S4). */
+.room-top {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 14px;
+  right: 14px;
+  z-index: 11;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+.room-top > * {
+  pointer-events: auto;
+}
+.room-top .round-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+.leave-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px 0 10px;
+  border-radius: var(--al-radius-full);
+  border: 2px solid var(--al-crema-oscuro);
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font: 900 15px var(--font);
+  box-shadow: 0 3px 0 var(--al-noche-profunda);
+}
+.leave-pill .ico {
+  font-size: 20px;
+}
+.leave-pill:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--al-noche-profunda);
+}

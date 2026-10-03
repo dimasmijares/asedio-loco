@@ -169,5 +169,18 @@ export class Connection {
     this.stopped = true;
     this.ws?.close();
   }
+
+  // Salir de la sala o de la partida (R-07 F1 y F3): el servidor libera la plaza al momento y se
+  // olvida el token, así que recargar ya no vuelve a meterte en la sala.
+  leave() {
+    this.rawSend({ t: 'leave' });
+    try {
+      localStorage.removeItem(tokenKey(this.code));
+    } catch {
+      /* sin almacenamiento */
+    }
+    this.stopped = true;
+    this.ws?.close();
+  }
 }
 

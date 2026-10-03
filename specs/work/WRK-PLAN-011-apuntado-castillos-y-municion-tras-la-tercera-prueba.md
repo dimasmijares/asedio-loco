@@ -40,7 +40,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 10 | WRK-TASK-064 · Revisión del flujo de partidas | completed | — | R-07 aprobado entero (28-09) → 067-072 |
 | 11 | WRK-TASK-065 · Munición a la medida de los castillos de 236 bloques | draft | 058 | — |
 | 12 | WRK-TASK-066 · Física de los castillos altos en un anfitrión móvil | draft | 058 | — |
-| 13 | WRK-TASK-067 · Salir de la partida y de la sala | draft | 064 | — |
+| 13 | WRK-TASK-067 · Salir de la partida y de la sala | completed | 064 | 2026-10-03 |
 | 14 | WRK-TASK-068 · Revancha en un paso | draft | 064 | — |
 | 15 | WRK-TASK-069 · Invitar más fácil | draft | 064 | — |
 | 16 | WRK-TASK-070 · Sala gestionada tocando las plazas y nombre editable | draft | 064 | — |
