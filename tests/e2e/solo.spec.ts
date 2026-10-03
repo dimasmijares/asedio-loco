@@ -55,6 +55,10 @@ test('partida local contra bots hasta que hay ganador', async ({ page }, info) =
   expect(st.rounds, 'con el escudo real nadie cae antes de la ronda 3').toBeGreaterThanOrEqual(3);
   expect(st.alive).toBeLessThanOrEqual(1);
   await expect(page.locator('#game-over')).toHaveAttribute('data-rounds', String(st.rounds));
+  // Estilo «Atardecer»: estadísticas con iconos SVG y sin emoji (los emblemas ☀ ☾ ★ ϟ son texto).
+  expect(await page.locator('#over-stats .over-ico svg').count()).toBeGreaterThanOrEqual(3);
+  const emoji = await page.locator('#game-over').evaluate((el) => [...(el as HTMLElement).innerText.matchAll(/\p{Extended_Pictographic}/gu)].map((m) => m[0]).filter((c) => !'☀☾★'.includes(c)));
+  expect(emoji).toEqual([]);
   await page.screenshot({ path: info.outputPath('final.png') });
   expect(errors).toEqual([]);
 });

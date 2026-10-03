@@ -10,7 +10,7 @@ import type { Vec3 } from '../../../../shared/math';
 import { PLAYER_STYLES, shortName } from '../../../../shared/players';
 import { h } from '../../ui/dom';
 import { Hud, type HelpRow } from '../../ui/hud';
-import { icon } from '../../ui/icons';
+import { icon, type IconName } from '../../ui/icons';
 import { showSheet } from '../../ui/sheet';
 import { Tutorial, tutorialPending } from '../../ui/tutorial';
 import { sfx } from '../audio';
@@ -723,28 +723,42 @@ export class MatchUI {
     const tank = best((p) => p.blocks);
     const selfie = best((p) => p.stats.selfHits);
     const goaler = best((p) => p.stats.goals ?? 0);
-    const stat = (icon: string, label: string, p: PlayerState | undefined, value: string) =>
-      p ? h('div', { class: 'stat' }, h('span', { class: 'stat-icon' }, icon), h('div', null, h('div', { class: 'muted' }, label), h('b', null, p.name), ` · ${value}`)) : '';
+    // Chip de jugador (componente Marcador): emblema con su color y el nombre. En las estadísticas,
+    // el tuyo dice «Tú» (el nombre completo no cabe en las tarjetas del móvil).
+    const chip = (p: PlayerState, short = false) => {
+      const st = PLAYER_STYLES[p.slot];
+      const you = p.slot === this.src.you;
+      return h('span', { class: `over-chip${you ? ' you' : ''}`, title: p.name }, h('span', { class: 'over-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`), h('b', null, you ? (short ? 'Tú' : `${p.name} (tú)`) : p.name));
+    };
+    // Estadísticas con iconos SVG de trazo 2,5 (sección «Iconos» del design system), sin emoji.
+    const stat = (ico: IconName, label: string, p: PlayerState | undefined, value: string) =>
+      p ? h('li', { class: 'over-stat' }, h('span', { class: 'over-ico' }, icon(ico)), h('span', { class: 'over-stat-body' }, h('span', { class: 'over-label' }, label), h('span', { class: 'over-who' }, chip(p, true), h('span', { class: 'over-value' }, value)))) : '';
     this.renderOverActions();
     this.overPanel = h(
       'div',
-      { class: 'overlay over-overlay' },
+      { class: 'over-overlay' },
       h(
         'div',
-        { class: 'panel over-panel', id: 'game-over', 'data-winner': String(w), 'data-rounds': String(s.round) },
-        h('h2', { class: 'over-title' }, winner ? (youWin ? 'HAS GANADO' : `Gana ${winner.name}`) : 'Empate'),
-        h('p', { class: 'muted' }, `${s.round} rondas · ${winner ? `El rey de ${winner.name} es el último en pie` : 'No queda nadie en pie'}`),
+        { class: 'over-sheet', id: 'game-over', role: 'dialog', 'aria-labelledby': 'over-title', 'data-winner': String(w), 'data-rounds': String(s.round) },
         h(
           'div',
-          { class: 'stats' },
-          stat('💥', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
-          stat('🎯', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques en un disparo`),
+          { class: 'over-head' },
+          h('span', { class: `over-badge${youWin ? ' win' : ''}` }, icon(winner ? 'crown' : 'flag')),
+          h('h2', { class: 'over-title', id: 'over-title' }, winner ? (youWin ? '¡Has ganado!' : `Gana ${winner.name}`) : 'Empate'),
+          h('p', { class: 'over-sub' }, `${s.round} ${s.round === 1 ? 'ronda' : 'rondas'} · ${winner ? `El rey de ${winner.name} es el último en pie` : 'No queda nadie en pie'}`),
+          winner ? chip(winner) : '',
+        ),
+        h(
+          'ul',
+          { class: 'over-stats', id: 'over-stats' },
+          stat('burst', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
+          stat('target', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques en un disparo`),
           clown && clown.stats.whiffs > 0
-            ? stat('💨', 'Disparo más desviado', clown, clown.stats.worstMiss > 0 ? `a ${clown.stats.worstMiss} m del objetivo (${clown.stats.whiffs} sin impacto)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} sin impacto`)
+            ? stat('miss', 'Disparo más desviado', clown, clown.stats.worstMiss > 0 ? `a ${clown.stats.worstMiss} m del objetivo (${clown.stats.whiffs} sin impacto)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} sin impacto`)
             : '',
-          selfie && selfie.stats.selfHits > 0 ? stat('⚠️', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios destruidos`) : '',
-          stat('🏰', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
-          goaler && (goaler.stats.goals ?? 0) > 0 ? stat('🎯', 'Objetivos cumplidos', goaler, `${goaler.stats.goals} ${goaler.stats.goals === 1 ? 'objetivo' : 'objetivos'}`) : '',
+          selfie && selfie.stats.selfHits > 0 ? stat('alert', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios destruidos`) : '',
+          stat('castle', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
+          goaler && (goaler.stats.goals ?? 0) > 0 ? stat('flag', 'Objetivos cumplidos', goaler, `${goaler.stats.goals} ${goaler.stats.goals === 1 ? 'objetivo' : 'objetivos'}`) : '',
         ),
         this.overActions,
       ),

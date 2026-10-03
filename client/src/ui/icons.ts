@@ -39,6 +39,9 @@ const ICONS = {
   mouse: `<g ${STROKE}><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></g>`,
   crown: `<g ${STROKE}><path d="M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.3l4.27-3.67a.5.5 0 0 1 .8.52l-2.83 10.25a1 1 0 0 1-.96.73H5.81a1 1 0 0 1-.96-.73L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.67a1 1 0 0 0 1.52-.3z"/><path d="M5 21h14"/></g>`,
   castle: `<g ${STROKE}><path d="M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"/><path d="M18 11V4H6v7"/><path d="M15 22v-4a3 3 0 0 0-6 0v4"/><path d="M22 11V9M2 11V9M6 4V2M18 4V2M10 4V2M14 4V2"/></g>`,
+  // Pantalla final (sin emoji): mayor destrozo y disparo más desviado.
+  burst: `<path d="M12 2.5l2.1 5.2 5.2-2.3-2.1 5.1 4.8 1.5-4.8 1.6 2.1 5.1-5.2-2.3L12 21.5l-2.1-5.1-5.2 2.3 2.1-5.1L2 12l4.8-1.5-2.1-5.1 5.2 2.3z" ${STROKE}/>`,
+  miss: `<g ${STROKE}><path d="M3 18c3-7 8-11 16-10"/><path d="m15 4 4 4-4 4"/><path d="M14 20h.01M18 17h.01"/></g>`,
   bomb: `<g ${STROKE}><circle cx="11" cy="13" r="9"/><path d="M14.35 4.65 16.3 2.7a2.41 2.41 0 0 1 3.4 0l1.6 1.6a2.4 2.4 0 0 1 0 3.4l-1.95 1.95"/><path d="m22 2-1.5 1.5"/></g>`,
   alert: `<g ${STROKE}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></g>`,
 } as const;

@@ -744,17 +744,247 @@ button.seat-card.off {
   }
 }
 
-/* ---------- Final de la partida: botones (R-07 F2 y F8) ---------- */
+/* ---------- Pantalla final (estilo «Atardecer»): hoja crema, chips de jugador e iconos SVG ----------
+   Abajo y a todo el ancho en vertical, como la hoja de resultados; una tarjeta centrada en PC. */
+.over-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(18, 2, 31, 0.35);
+}
+.over-sheet {
+  width: 100%;
+  max-width: 600px;
+  max-height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 18px max(30px, calc(env(safe-area-inset-bottom) + 14px));
+  background: var(--al-crema);
+  color: var(--al-noche);
+  border-top: 3px solid var(--al-noche);
+  border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  animation: sheet-up 0.3s ease-out;
+}
+.over-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.over-badge {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 3px solid var(--al-noche);
+  background: var(--al-crema-oscuro);
+  box-shadow: var(--al-sombra-dura);
+  color: var(--al-noche);
+  font-size: 28px;
+  transform: rotate(-6deg);
+}
+.over-badge.win {
+  background: var(--al-naranja);
+}
+.over-title {
+  margin: 4px 0 0;
+  font: 400 32px/1.05 var(--display);
+}
+.over-sub {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--al-vino);
+}
+.over-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 10px 3px 3px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-panel-hud);
+  border: 2px solid var(--al-noche);
+  color: var(--al-crema);
+  font-size: 14px;
+}
+.over-chip.you {
+  border-color: var(--al-crema);
+  box-shadow: 0 0 0 2px var(--al-noche);
+}
+.over-chip b {
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.over-emb {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--al-noche);
+  font: 900 14px/1 var(--font);
+}
+.over-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.over-stat {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 8px 7px 6px;
+  border-radius: 14px;
+  border: 3px solid var(--al-noche);
+  background: var(--al-hueso);
+}
+.over-ico {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font-size: 18px;
+}
+.over-stat .over-chip {
+  padding: 2px 8px 2px 2px;
+  font-size: 13px;
+}
+.over-stat .over-emb {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+.over-stat-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.over-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--al-vino);
+}
+.over-who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  max-width: 100%;
+}
+.over-value {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--al-noche);
+}
 .over-actions {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+.over-actions .plank {
+  margin: 0;
+  min-height: 58px;
+  font-size: 22px;
+}
+.over-actions .plank:first-child {
+  min-height: 64px;
+  font-size: 26px;
+}
+.over-actions .plank:nth-child(odd) {
+  --tilt: -0.8deg;
+}
+.over-actions .plank:nth-child(even) {
+  --tilt: 0.6deg;
 }
 .over-wait {
-  margin: 14px 0 0;
+  margin: 0;
   font-size: 15px;
   font-weight: 800;
   color: var(--al-vino);
   text-align: center;
+}
+@media (orientation: landscape) {
+  .over-overlay {
+    align-items: center;
+  }
+  .over-sheet {
+    width: 760px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100% - 24px);
+    padding: 22px 24px 24px;
+    border: 3px solid var(--al-noche);
+    border-radius: var(--al-radius-lg);
+    box-shadow: var(--al-sombra-tablon);
+  }
+}
+/* Poca altura (un móvil tumbado): estadísticas en dos columnas, todo más apretado. */
+@media (orientation: landscape) and (min-height: 501px) {
+  .over-stats {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+@media (max-height: 500px) {
+  .over-sheet {
+    width: min(760px, calc(100vw - 20px));
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .over-badge {
+    display: none;
+  }
+  .over-title {
+    font-size: 26px;
+  }
+  .over-stats {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  .over-stat {
+    padding: 4px 8px 4px 4px;
+    gap: 8px;
+  }
+  .over-ico {
+    width: 30px;
+    height: 30px;
+    font-size: 17px;
+  }
+  .over-actions {
+    flex-direction: row;
+  }
+  .over-actions .plank,
+  .over-actions .plank:first-child {
+    min-height: 48px;
+    font-size: 19px;
+  }
 }
 
 /* ---------- Mirando la partida (R-07 F7, R-13): «Partida en curso · juegas en la próxima» o
