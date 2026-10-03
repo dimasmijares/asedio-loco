@@ -4,7 +4,7 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.1.4
+version: 1.1.5
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -80,7 +80,7 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 **5. Herramientas de captura y seguimiento** (`tests/tools/`, `<base>` es la URL del sitio)
 
 - `node tests/tools/review.mjs <base> <carpeta>`: portada, apuntado, carga, impacto y resultados, con GPU.
-- `node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]`: portada, «Jugar solo», apuntando y resultados en 1280×720 y en 390×844, con GPU (revisión de estilo, R-10). Con `fase2`, la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta, cargando, disparo listo y resultados, y apuntando en modo zurdo, con el apuntado de la ronda 1 congelado y un viento puesto a mano. Con `fase3`, menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC (con el nombre fijo «Duque Pepino»), PC apuntando con la descripción de una carta al pasar el ratón y con los controles abiertos (H), y los resultados en móvil.
+- `node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3|retoques]`: portada, «Jugar solo», apuntando y resultados en 1280×720 y en 390×844, con GPU (revisión de estilo, R-10). Con `fase2`, la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta, cargando, disparo listo y resultados, y apuntando en modo zurdo, con el apuntado de la ronda 1 congelado. Con `fase3`, menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC (con el nombre fijo «Duque Pepino»), PC apuntando con la descripción de una carta al pasar el ratón y con los controles abiertos (H), y los resultados en móvil. Con `retoques`, en móvil vertical: apuntando y cargando al 55 % con un viento de 4,6 m/s puesto a mano en la parábola y la física (el anillo cae en el mismo sitio; imprime sus coordenadas) y «Jugar solo».
 - `node tests/tools/impact-shots.mjs <base> <carpeta> [ronda]`: la cámara panorámica.
 - `node tests/tools/countdown-shots.mjs <base> <carpeta> [ronda]`: la cuenta atrás (3, 2, 1, ¡FUEGO!) y cómo se aleja la cámara hasta el plano general.
 - `node tests/tools/replay-shots.mjs <base> <carpeta>`: la repetición.

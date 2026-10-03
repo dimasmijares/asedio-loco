@@ -5,12 +5,15 @@
 // apuntado de la ronda 1.
 // Con «fase3», menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC, PC apuntando con la
 // descripción de una carta al pasar el ratón y con los controles abiertos, y resultados en móvil.
-// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]
+// Con «retoques» (03-10-2026), en móvil vertical: apuntando y cargando con un viento puesto a mano
+// (el anillo al apuntar y el de la parábola al cargar con la misma fuerza caen en el mismo sitio) y
+// «Jugar solo».
+// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3|retoques]
 import { chromium } from '@playwright/test';
 
 const [base, out, only] = process.argv.slice(2);
 if (!base || !out) {
-  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]');
+  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3|retoques]');
   process.exit(1);
 }
 
@@ -92,6 +95,42 @@ const freezeAim = (p, wind = [0, 0, 0]) =>
     if (window.__asedio.game.sim) window.__asedio.game.sim.wind = wind;
     return true;
   }, wind, { timeout: 60_000, polling: 'raf' });
+
+if (only === 'retoques') {
+  const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript(() => localStorage.setItem('asedio.name', 'Duque Pepino'));
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => console.log('pageerror', e.message));
+  await p.goto(`${base}/?bots=3&seed=21&quality=high&tutorial=0&mobile=1#solo`);
+  await freezeAim(p, [3, 0, -3.5]);
+  await p.waitForTimeout(3300);
+  const at = () => p.evaluate(() => window.__asedio.game.preview.hit);
+  console.log('anillo al apuntar', JSON.stringify(await at()));
+  await p.screenshot({ path: `${out}/movil-1-apuntando-con-viento.png` });
+  // Cargando hasta la fuerza de la guía (55 %) y ahí se queda para la captura.
+  const cdp = await ctx.newCDPSession(p);
+  const r = await p.locator('#confirm').boundingBox();
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: r.x + r.width / 2, y: r.y + r.height / 2, id: 0 }] });
+  await p.waitForFunction(() => window.__asedio.game.input.aim.power >= 0.55, null, { polling: 'raf' });
+  await p.evaluate(() => {
+    const input = window.__asedio.game.input;
+    input.chargeT = 0.55 * 1.5;
+    const tick = input.tick.bind(input);
+    input.tick = () => tick(0);
+  });
+  await p.waitForTimeout(400);
+  console.log('anillo al cargar', JSON.stringify(await at()));
+  await p.screenshot({ path: `${out}/movil-2-cargando-con-viento.png` });
+  await p.goto(`${base}/?backdrop=1`);
+  await p.waitForTimeout(2500);
+  await p.click('#solo');
+  await p.waitForSelector('#solo-setup');
+  await p.waitForTimeout(900);
+  await p.screenshot({ path: `${out}/movil-3-jugar-solo.png` });
+  await b.close();
+  process.exit(0);
+}
 
 if (only === 'fase3') {
   const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
