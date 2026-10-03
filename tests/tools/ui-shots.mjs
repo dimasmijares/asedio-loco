@@ -3,12 +3,14 @@
 // Con «fase2», la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta,
 // cargando, disparo listo y resultados, y apuntando en modo zurdo. La partida se congela en el
 // apuntado de la ronda 1 con un viento puesto a mano, para que se vea su chip.
-// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2]
+// Con «fase3», menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC, PC apuntando con la
+// descripción de una carta al pasar el ratón y con los controles abiertos, y resultados en móvil.
+// Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]
 import { chromium } from '@playwright/test';
 
 const [base, out, only] = process.argv.slice(2);
 if (!base || !out) {
-  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2]');
+  console.log('Uso: node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3]');
   process.exit(1);
 }
 
@@ -72,6 +74,67 @@ if (only === 'fase2') {
     await p.evaluate(() => (window.__asedio.mode.host.update = () => {}));
     await p.waitForTimeout(700);
     await p.screenshot({ path: `${out}/${hand}-5-resultados.png` });
+    await ctx.close();
+  }
+  await b.close();
+  process.exit(0);
+}
+
+// Ronda 1 congelada en el apuntado, con un viento puesto a mano (como en «fase2»).
+const freezeAim = (p) =>
+  p.waitForFunction(() => {
+    const h = window.__asedio?.mode?.host;
+    if (h?.state?.phase !== 'aim') return false;
+    h._update = h.update;
+    h.update = () => {};
+    h.state.players.forEach((q) => (q.locked = false));
+    h.state.remaining = 17;
+    h.state.wind = [1.4, 0, -1.6];
+    return true;
+  }, null, { timeout: 60_000, polling: 'raf' });
+
+if (only === 'fase3') {
+  const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] });
+  for (const [name, ctxOpts] of [
+    ['movil', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }],
+    ['pc', { viewport: { width: 1280, height: 720 } }],
+  ]) {
+    const ctx = await b.newContext(ctxOpts);
+    // Un nombre fijo, para que las capturas no cambien de una vez a otra.
+    await ctx.addInitScript(() => localStorage.setItem('asedio.name', 'Duque Pepino'));
+    const p = await ctx.newPage();
+    p.on('pageerror', (e) => console.log(name, 'pageerror', e.message));
+    await p.goto(`${base}/?backdrop=1`);
+    await p.waitForTimeout(3500);
+    await p.screenshot({ path: `${out}/${name}-1-portada.png` });
+    await p.click('#solo');
+    await p.waitForSelector('#solo-setup');
+    await p.waitForTimeout(900);
+    await p.screenshot({ path: `${out}/${name}-2-jugar-solo.png` });
+    await p.goto(`${base}/?bots=3&seed=21&quality=high&tutorial=0${name === 'movil' ? '&mobile=1' : ''}#solo`);
+    await freezeAim(p);
+    await p.waitForTimeout(3300);
+    if (name === 'pc') {
+      // El ratón sobre la primera carta: su descripción encima.
+      const c = await p.locator('#hud-ammo .ammo').first().boundingBox();
+      await p.mouse.move(c.x + c.width / 2, c.y + c.height / 2);
+      await p.waitForTimeout(500);
+      await p.screenshot({ path: `${out}/pc-3-apuntando-descripcion.png` });
+      await p.mouse.move(900, 300);
+      await p.keyboard.press('KeyH');
+      await p.waitForTimeout(400);
+      await p.screenshot({ path: `${out}/pc-4-apuntando-controles.png` });
+    } else {
+      // Resultados de la ronda: la partida sigue hasta la hoja.
+      await p.evaluate(() => {
+        const h = window.__asedio.mode.host;
+        h.update = h._update;
+      });
+      await p.waitForFunction(() => window.__asedio.mode.host.state.phase === 'results', null, { timeout: 90_000 });
+      await p.evaluate(() => (window.__asedio.mode.host.update = () => {}));
+      await p.waitForTimeout(900);
+      await p.screenshot({ path: `${out}/movil-3-resultados.png` });
+    }
     await ctx.close();
   }
   await b.close();
