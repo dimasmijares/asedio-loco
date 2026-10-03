@@ -1135,8 +1135,10 @@ button.seat-card.off {
   display: none;
 }
 .spect-pct {
+  flex: none;
   font: 400 15px var(--display);
   color: var(--al-vino);
+  white-space: nowrap;
 }
 .spect-bar {
   height: 6px;
