@@ -49,8 +49,11 @@ export class OnlineMode implements Mode {
       location.reload();
     };
     this.ui = new MatchUI(game, src, parent, {
-      onRematch: () => conn.send({ t: 'lobby' }),
+      // Revancha en un paso (R-07 F2): otra partida con los mismos; «Volver a la sala» para cambiarla.
+      onRematch: () => conn.send({ t: 'rematch' }),
+      onLobby: () => conn.send({ t: 'lobby' }),
       canRematch: () => conn.isHost,
+      hostName: () => conn.room?.players.find((p) => p.id === conn.room?.hostId)?.name ?? 'el anfitrión',
       onExit: leave,
       onLeave: leave,
       leaveText: () =>
@@ -110,6 +113,8 @@ export class OnlineMode implements Mode {
 
   private onRoom(r: RoomState) {
     if (!r.inGame) return;
+    // En la pantalla final, si cambia el anfitrión, cambian los botones (quién pide la revancha).
+    if (this.state.phase === 'over') this.ui.renderOverActions();
     // Hemos cedido el papel (o nos lo han quitado): pasamos a reproducir lo que mande el nuevo.
     if (this.role === 'host' && r.hostId && r.hostId !== this.conn.you?.id) return this.demote();
     // Nos toca ser anfitrión a mitad de partida: heredamos lo que vemos.

@@ -743,3 +743,16 @@ button.seat-card.off {
     font-size: 22px;
   }
 }
+
+/* ---------- Final de la partida: botones (R-07 F2 y F8) ---------- */
+.over-actions {
+  display: flex;
+  flex-direction: column;
+}
+.over-wait {
+  margin: 14px 0 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--al-vino);
+  text-align: center;
+}

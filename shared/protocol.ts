@@ -2,7 +2,7 @@
 // mensajes de control (hello, config, start…). Todo lo relativo a la partida
 // viaja dentro de `relay` y el servidor lo retransmite sin interpretarlo.
 
-export const PROTOCOL_VERSION = 14;
+export const PROTOCOL_VERSION = 15;
 export const MAX_PLAYERS = 4;
 export const MAX_NAME_LEN = 16;
 export const MAX_MSG_BYTES = 64 * 1024;
@@ -34,6 +34,7 @@ export interface RoomState {
   spectators: number;
   config: RoomConfig;
   inGame: boolean;
+  game: number; // partidas empezadas en la sala: si cambia en plena partida, es una revancha (R-07 F2)
 }
 
 export type Role = 'player' | 'spectator';
@@ -45,7 +46,8 @@ export type ClientMsg =
   // El anfitrión toca una plaza (R-11 S2): libre → bot; bot o desconectado → libre.
   | { t: 'seat'; slot: number; bot: boolean }
   | { t: 'start' }
-  | { t: 'lobby' } // revancha: vuelve al lobby con los mismos jugadores
+  | { t: 'rematch' } // revancha en un paso (R-07 F2): otra partida con los mismos jugadores y ajustes
+  | { t: 'lobby' } // volver a la sala con los mismos jugadores
   | { t: 'yield' } // el anfitrión cede el papel (p. ej. al pasar a segundo plano)
   | { t: 'leave' } // salir de la sala o de la partida: la plaza queda libre al momento (R-07 F1 y F3)
   | { t: 'relay'; to: string; d: RelayData }
@@ -124,6 +126,7 @@ export function parseClientMsg(raw: unknown): ClientMsg | null {
       if (!isSlot(m.slot) || typeof m.bot !== 'boolean') return null;
       return { t: 'seat', slot: m.slot, bot: m.bot };
     case 'start':
+    case 'rematch':
     case 'lobby':
     case 'yield':
     case 'leave':

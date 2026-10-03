@@ -345,6 +345,16 @@ export class MatchHost {
     this.emit();
   }
 
+  // Para las pruebas y las capturas: la partida acaba ya; gana quien tiene más bloques en pie.
+  endNow() {
+    const s = this.state;
+    s.winner = [...alivePlayers(s)].sort((a, b) => b.blocks - a.blocks)[0]?.slot ?? -1;
+    s.phase = 'over';
+    s.replay = null;
+    this.game.simPaused = false;
+    this.emit();
+  }
+
   private endResults() {
     const s = this.state;
     const w = checkWinner(s);

@@ -31,12 +31,18 @@ function enterRoom(code: string, name: string) {
   debug.conn = conn;
   new LobbyView(ui, conn);
   const app = document.getElementById('app')!;
-  let online: { game: { dispose(): void }; mode: { dispose(): void }; canvas: HTMLElement } | null = null;
+  let online: { game: { dispose(): void }; mode: { dispose(): void }; canvas: HTMLElement; id: number } | null = null;
   let starting = false;
-  // La sala manda: en partida se monta el juego; de vuelta al lobby (revancha) se desmonta.
+  // La sala manda: en partida se monta el juego; de vuelta a la sala se desmonta, y con una revancha
+  // (otra partida, `room.game`) se monta de nuevo sin pasar por la sala (R-07 F2).
   const sync = async () => {
     const room = conn.room;
     if (!room || !conn.you) return;
+    if (online && room.inGame && online.id !== room.game) {
+      online.game.dispose();
+      online.canvas.remove();
+      online = null;
+    }
     if (room.inGame && !online && !starting) {
       starting = true;
       ui.replaceChildren();
@@ -47,7 +53,7 @@ function enterRoom(code: string, name: string) {
       const { OnlineMode } = await import('./game/modes/online');
       const game = await Game.create(canvas, []);
       const mode = new OnlineMode(game, conn, app, { autoplay: new URLSearchParams(location.search).get('autoplay') === '1' });
-      online = { game, mode, canvas };
+      online = { game, mode, canvas, id: room.game };
       debug.game = game;
       debug.mode = mode;
       starting = false;

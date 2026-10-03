@@ -173,6 +173,42 @@ for (const fmt of FORMATS) {
       for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
     });
 
+    test(`revancha en un paso y volver a la sala (${name})`, async ({ browser }) => {
+      const a = await device(browser, fmt);
+      const b = await device(browser, fmt);
+      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
+      await join(b, fmt, code, 'Beto', '&render=4');
+      await a.click('#start');
+      const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
+      for (const p of [a, b]) await expect.poll(() => phase(p), { timeout: 60_000 }).toBe('aim');
+      const game = (p: Page) => p.evaluate(() => (window as any).__asedio.conn.room.game);
+      const first = await game(a);
+      // Fin de partida al momento (gancho de pruebas): el anfitrión ve REVANCHA y VOLVER A LA SALA; el
+      // invitado espera a que la pida, por su nombre.
+      await a.evaluate(() => (window as any).__asedio.mode.netHost.host.endNow());
+      await expect(a.locator('#rematch')).toBeVisible({ timeout: 30_000 });
+      await expect(a.locator('#back-to-room')).toBeVisible();
+      await expect(b.locator('#over-wait')).toHaveText('Esperando a que Ana pida la revancha', { timeout: 30_000 });
+      await expect(b.locator('#rematch, #back-to-room')).toHaveCount(0);
+      // REVANCHA: otra partida al momento, sin pasar por la sala, con los mismos jugadores y el bot.
+      await a.click('#rematch');
+      for (const p of [a, b]) {
+        await expect.poll(() => game(p)).toBe(first + 1);
+        await expect.poll(() => phase(p), { timeout: 60_000 }).toBe('aim');
+        await expect(p.locator('#lobby')).toHaveCount(0);
+        expect(await p.evaluate(() => (window as any).__asedio.mode.state.players.map((q: any) => q.name).sort())).toEqual(['Ana', 'Beto', 'Sir Bot']);
+      }
+      // VOLVER A LA SALA: los dos vuelven a la sala con las mismas plazas.
+      await a.evaluate(() => (window as any).__asedio.mode.netHost.host.endNow());
+      await a.click('#back-to-room');
+      for (const p of [a, b]) {
+        await expect(p.locator('#lobby')).toBeVisible();
+        await expect(humans(p)).toHaveCount(2);
+        await expect(p.locator('#player-list li[data-bot="3"]')).toHaveCount(1);
+      }
+      for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
+    });
+
     test(`salir de la sala libera la plaza y el anfitrión se hereda (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);

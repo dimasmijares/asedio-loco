@@ -344,7 +344,7 @@ test('un móvil que crea la sala cede el papel de anfitrión a un ordenador', as
   expect(errors).toEqual([]);
 });
 
-test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async ({ browser }) => {
+test('revancha: otra partida en un paso con la misma sala y los mismos jugadores', async ({ browser }) => {
   test.setTimeout(900_000);
   const errors: string[] = [];
   const host = await newPlayer(browser, errors, 'anfitrión');
@@ -360,13 +360,8 @@ test('revancha: vuelve al lobby con la misma sala y los mismos jugadores', async
   expect(r1[1].arcs, 'arcos del invitado').toEqual(r1[0].arcs);
   await waitAll([host, g1], (s) => s.phase === 'over', 720_000);
   await expect(g1.locator('#rematch')).toHaveCount(0);
+  // Revancha en un paso (R-07 F2): sin pasar por la sala.
   await host.click('#rematch');
-  for (const p of [host, g1]) {
-    await expect(p.locator('#lobby')).toBeVisible();
-    await expect(p.locator('#player-list li[data-player]')).toHaveCount(2);
-    await expect(p.locator('#room-code')).toHaveAttribute('data-code', hash.slice(1));
-  }
-  await host.click('#start');
   const again = await waitAll([host, g1], (s) => s.round === 1 && s.phase === 'aim');
   expect(again[0].role).toBe('host');
   for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));

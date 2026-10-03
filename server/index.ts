@@ -35,6 +35,7 @@ interface Stored {
   hostId: string | null;
   config: RoomConfig;
   inGame: boolean;
+  game?: number;
 }
 
 interface Attach {
@@ -82,6 +83,39 @@ export class Room extends DurableObject<Env> {
 
   // Plaza para un humano nuevo: la primera libre; si no hay, la del primer bot (los humanos van antes
   // que los bots). Null si la ocupan cuatro humanos.
+  // Empezar otra partida (EMPEZAR o la revancha): fuera los desconectados, al menos 2 castillos y,
+  // si el anfitrión es un móvil y hay un ordenador, la física la lleva el ordenador (D-065).
+  private begin(ws: WebSocket, a: Attach) {
+    const s = this.s!;
+    s.players = s.players.filter((p) => this.isConnected(p.id));
+    s.config.botSlots = this.bots();
+    if (s.players.length + s.config.botSlots.length < 2) return this.send(ws, { t: 'error', code: 'pocos', msg: 'Hacen falta al menos 2 castillos (añade bots)' });
+    if (a.mobile) {
+      const desktop = s.players.find((p) => this.sockets().some((w) => this.attach(w).pid === p.id && !this.attach(w).mobile));
+      if (desktop) s.hostId = desktop.id;
+    }
+    s.inGame = true;
+    s.game = (s.game ?? 0) + 1;
+    this.save();
+    this.broadcastRoom();
+  }
+
+  // Los espectadores pasan a jugar si hay plaza (la de un bot cuenta, R-07 F7). Se conserva el resto
+  // del adjunto: sobre todo `mobile`, que decide quién puede ser anfitrión.
+  private seatSpectators() {
+    const s = this.s!;
+    for (const w of this.sockets()) {
+      const wa = this.attach(w);
+      if (wa.role !== 'spectator') continue;
+      const slot = this.freeSlot();
+      if (slot === null) break;
+      const player = { id: hex(4), name: wa.name || `Jugador ${slot + 1}`, slot, token: hex(16) };
+      s.players.push(player);
+      w.serializeAttachment({ ...wa, pid: player.id, role: 'player', name: player.name } satisfies Attach);
+      this.send(w, { t: 'welcome', you: { id: player.id, token: player.token, role: 'player' }, room: this.view() });
+    }
+  }
+
   private freeSlot(): number | null {
     const s = this.s!;
     const used = new Set(s.players.map((p) => p.slot));
@@ -152,7 +186,7 @@ export class Room extends DurableObject<Env> {
       .map((p) => ({ id: p.id, name: p.name, slot: p.slot, connected: this.isConnected(p.id, except) }))
       .sort((a, b) => a.slot - b.slot);
     const spectators = this.sockets(except).filter((w) => this.attach(w).role === 'spectator').length;
-    return { code: s.code, hostId: s.hostId, players, spectators, config: { ...s.config, botSlots: this.bots() }, inGame: s.inGame };
+    return { code: s.code, hostId: s.hostId, players, spectators, config: { ...s.config, botSlots: this.bots() }, inGame: s.inGame, game: s.game ?? 0 };
   }
 
   // `skip`: no se le envía (ya recibió su welcome). `gone`: conexión que se está cerrando.
@@ -272,33 +306,20 @@ export class Room extends DurableObject<Env> {
       }
       case 'start':
         if (!isHost || s.inGame) return this.send(ws, { t: 'error', code: 'permiso', msg: 'Solo el anfitrión puede empezar' });
+        return this.begin(ws, a);
+      case 'rematch':
+        // Revancha en un paso (R-07 F2): otra partida con los mismos jugadores, bots y ajustes, sin
+        // pasar por la sala; quien llegó tarde entra a jugar si hay plaza.
+        if (!isHost || !s.inGame) return;
         s.players = s.players.filter((p) => this.isConnected(p.id));
-        s.config.botSlots = this.bots();
-        if (s.players.length + s.config.botSlots.length < 2) return this.send(ws, { t: 'error', code: 'pocos', msg: 'Hacen falta al menos 2 castillos (añade bots)' });
-        // Si el anfitrión es un móvil y hay un ordenador en la sala, la física la lleva el ordenador.
-        if (a.mobile) {
-          const desktop = s.players.find((p) => this.sockets().some((w) => this.attach(w).pid === p.id && !this.attach(w).mobile));
-          if (desktop) s.hostId = desktop.id;
-        }
-        s.inGame = true;
-        this.save();
-        return this.broadcastRoom();
+        this.seatSpectators();
+        return this.begin(ws, a);
       case 'lobby': {
+        // «Volver a la sala»: la misma sala, sin los desconectados y con los espectadores dentro.
         if (!isHost || !s.inGame) return;
         s.inGame = false;
         s.players = s.players.filter((p) => this.isConnected(p.id));
-        // Los espectadores pasan a jugar si hay hueco.
-        for (const w of this.sockets()) {
-          const wa = this.attach(w);
-          if (wa.role !== 'spectator') continue;
-          const slot = this.freeSlot();
-          if (slot === null) break;
-          const player = { id: hex(4), name: wa.name || `Jugador ${slot + 1}`, slot, token: hex(16) };
-          s.players.push(player);
-          // Se conserva el resto del adjunto: sobre todo `mobile`, que decide quién puede ser anfitrión.
-          w.serializeAttachment({ ...wa, pid: player.id, role: 'player', name: player.name } satisfies Attach);
-          this.send(w, { t: 'welcome', you: { id: player.id, token: player.token, role: 'player' }, room: this.view() });
-        }
+        this.seatSpectators();
         this.save();
         return this.broadcastRoom();
       }

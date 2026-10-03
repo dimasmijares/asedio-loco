@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.5.0
+version: 1.6.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -48,7 +48,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 | Token | `localStorage asedio.token.<código>` | No | Se guarda al recibir `welcome` |
 | `config {difficulty, fast}` | Mensaje | Solo anfitrión, en la sala | Dificultad de los bots; `fast` solo por `?fast=1` |
 | `seat {slot, bot}` | Mensaje | Solo anfitrión, en la sala | Tocar una plaza (R-11 S2, WRK-TASK-070): libre → bot; bot o desconectado → libre. Las plazas con bot van en `config.botSlots` |
-| `start`, `lobby`, `yield` | Mensajes | Solo anfitrión | Empezar, revancha, ceder |
+| `start`, `rematch`, `lobby`, `yield` | Mensajes | Solo anfitrión | Empezar, revancha en un paso, volver a la sala, ceder |
 | `leave` | Mensaje | Cualquiera | Salir de la sala o de la partida: la plaza queda libre al momento (R-07 F1 y F3, WRK-TASK-067) |
 | `mobile` en `hello` | booleano | No | `pointer: coarse` sin puntero fino; `?mobile=1/0` lo fuerza |
 
@@ -79,7 +79,9 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
    - En partida, su castillo sigue: al no estar conectado, desde la ronda siguiente lo lleva un bot (punto 6b). La confirmación lo explica; si ya había caído o es espectador, solo dice que vuelve a la portada. En solitario, la partida se acaba y se vuelve a la portada.
    - «Salir» en la pantalla final también manda `leave` (antes recargaba sin avisar y el jugador quedaba como «Desconectado»).
 7. **Cesión en segundo plano** (D-065): a los 2 s con la pestaña oculta, el anfitrión manda `yield` y pasa a cliente sin desconectarse. Al volver pide un `full`. Si no hay otro humano conectado, la partida espera. No se cede en `over`.
-8. **Revancha:** solo el anfitrión ve «Revancha». Vuelve al lobby con la misma sala, quita a los desconectados y convierte espectadores en jugadores si hay hueco, conservando si son móvil (WRK-TASK-019).
+8. **Revancha en un paso** (R-07 F2, WRK-TASK-068): en la pantalla final, el anfitrión ve REVANCHA y VOLVER A LA SALA; los demás, «Esperando a que <anfitrión> pida la revancha» (si el anfitrión cambia, cambian los botones).
+   - REVANCHA (`rematch`) empieza otra partida al momento con los mismos jugadores, bots y ajustes, sin pasar por la sala: quita a los desconectados, convierte espectadores en jugadores si hay plaza (la de un bot cuenta), conservando si son móvil (WRK-TASK-019), y sube `RoomState.game`. Cada cliente, al ver otra partida en `game`, desmonta la anterior y monta la nueva (`main.ts`).
+   - VOLVER A LA SALA (`lobby`) lleva a todos a la sala con las mismas plazas, para cambiar bots o dificultad o esperar a más gente; también quita a los desconectados y sienta a los espectadores.
 9. **Sala vacía:** se borra a los 60 s sin conexiones.
 
 ### Outputs
@@ -104,7 +106,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 - [x] Si el anfitrión se va a mitad de partida, otro la hereda y todos acaban con el mismo ganador y rondas.
 - [x] Con el anfitrión en segundo plano, otro jugador sigue llevando la partida.
 - [x] Un móvil que crea la sala cede el papel a un ordenador desde el principio, sin migración.
-- [x] La revancha vuelve al lobby con la misma sala y los mismos jugadores, y solo el anfitrión ve el botón.
+- [x] La revancha empieza otra partida en un paso con los mismos jugadores y bots, y solo el anfitrión ve REVANCHA y VOLVER A LA SALA; los demás esperan por su nombre (`tests/e2e/sala.spec.ts`, `multiplayer.spec.ts`).
 - [x] Los nombres se sanean a 16 caracteres y los códigos tienen 4 letras sin I ni O.
 - [x] Con dos dispositivos, añadir y quitar bots, cambiar la dificultad y cambiar el nombre se ve en los dos; el anfitrión quita a un jugador desconectado tocando su plaza (`tests/e2e/sala.spec.ts`).
 - [x] Quien sale de la sala deja su plaza libre al momento en los demás dispositivos; si era el anfitrión, lo hereda otro, y la confirmación dice quién (`tests/e2e/sala.spec.ts`, PC y móvil vertical).
@@ -121,7 +123,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 
 | Relation | Target | Description |
 |----------|--------|-------------|
-| Implemented in | `server/index.ts` | `Room`: hello, config, seat, start, lobby, yield, leave, relay, `pickNewHost`, `freeSlot`, alarmas |
+| Implemented in | `server/index.ts` | `Room`: hello, config, seat, start, rematch, lobby, yield, leave, relay, `begin`, `seatSpectators`, `pickNewHost`, `freeSlot`, alarmas |
 | Implemented in | `client/src/ui/sheet.ts` | Hoja de confirmación y aviso (salir, eliminado) |
 | Implemented in | `client/src/net/connection.ts` | Reconexión, token, ping, `isMobileDevice` |
 | Implemented in | `client/src/ui/lobby.ts` | Portada, lobby y configuración |
