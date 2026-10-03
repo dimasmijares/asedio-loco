@@ -5,7 +5,7 @@ layer: product
 domain: juego
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
 updated: 2026-09-26
 owner: dimas
@@ -51,7 +51,8 @@ Que un grupo de hasta 4 amigos pueda jugar una partida de unos 5 minutos en el n
 7. **Partida:** rondas simultáneas (DOM-JUEGO-001) con munición (DOM-JUEGO-003). En la primera partida sale un tutorial de 3 pasos que avanza haciendo y se puede saltar; en solitario da 10 s más en la ronda 1. Se apunta con el clic derecho y se carga con Espacio (FEAT-CONTROL-001).
 8. **Caída de un rey:** repetición a cámara lenta antes de los resultados (FEAT-REPLAY-001).
 9. **Final:** ganador y estadísticas: mayor destrozo, mejor disparo, disparo más desviado, daño propio y castillo más entero (FEAT-SENSACION-001).
-10. **Revancha:** en red, solo el anfitrión ve «Revancha»; los demás, «Esperando a que el anfitrión pida la revancha…». Todos vuelven al lobby con la misma sala y los mismos jugadores. En solitario empieza otra partida. «Salir» recarga la página.
+10. **Revancha** (R-07 F2 y F8): en red, solo el anfitrión ve REVANCHA, que empieza otra partida al momento con los mismos jugadores y bots, y VOLVER A LA SALA; los demás, «Esperando a que <anfitrión> pida la revancha». En solitario, OTRA PARTIDA (mismos rivales y dificultad), CAMBIAR RIVALES (vuelve a «Jugar solo» con lo elegido) y SALIR. SALIR, en red, libera la plaza (FEAT-SALAS-001).
+11. **Salir y pausar** (R-07 F1 y F9): el engranaje de la partida termina con «Salir de la partida», con confirmación. En solitario, mientras el engranaje o la confirmación están abiertos, la partida se para (ni reloj ni física) y el panel lo dice («Partida en pausa»).
 11. **Espectador que entra tarde:** recibe el estado completo al llegar, ve la partida en directo y no puede disparar. No ve la repetición de reyes que cayeron antes de su llegada.
 12. **Recargar a mitad de partida:** se vuelve al mismo hueco con el token y se pide el estado completo.
 13. **Móvil:** se juega por defecto en vertical (también en horizontal). Se apunta arrastrando el dedo y se dispara manteniendo el botón redondo (WRK-TASK-006). Al entrar se pide pantalla completa (Android), sin forzar la orientación. Si el creador de la sala es un móvil y hay un ordenador, el ordenador es el anfitrión. Si el anfitrión pasa a segundo plano 2 s, cede la partida a otro jugador. El plan está en `docs/MOVILES.md` (M2-M5 pendientes).

@@ -14,12 +14,16 @@ export interface SoloOptions {
   fast?: boolean;
   seed?: number;
   autoplay?: boolean; // el jugador humano también lo controla un bot (pruebas)
+  onChangeRivals?: () => void; // «Cambiar rivales» al final (R-07 F8)
 }
 
 // Partida local contra bots: el propio navegador es el anfitrión.
 export class SoloMode implements Mode {
   host!: MatchHost;
   ui!: MatchUI;
+  // Con el engranaje abierto la partida se para (R-07 F9): ni reloj ni física.
+  paused = false;
+  private simWasPaused = false;
 
   constructor(readonly game: Game, readonly parent: HTMLElement, readonly opts: SoloOptions) {
     this.start();
@@ -52,14 +56,26 @@ export class SoloMode implements Mode {
     };
     this.ui = new MatchUI(this.game, src, this.parent, {
       onRematch: () => this.rematch(),
+      rematchLabel: 'Otra partida',
+      onChangeRivals: o.onChangeRivals,
       onExit: exit,
       onLeave: exit,
       leaveText: () => 'La partida se acaba y vuelves a la portada.',
+      pause: (on) => this.pause(on),
+      pauseNote: 'Partida en pausa',
     });
     this.game.mode = this;
   }
 
+  pause(on: boolean) {
+    if (on === this.paused) return;
+    this.paused = on;
+    if (on) this.simWasPaused = this.game.simPaused;
+    this.game.simPaused = on || this.simWasPaused;
+  }
+
   rematch() {
+    this.pause(false);
     this.ui.dispose();
     this.opts.seed = undefined;
     this.start();
@@ -71,7 +87,7 @@ export class SoloMode implements Mode {
   }
 
   update(dt: number) {
-    this.host.update(dt);
+    if (!this.paused) this.host.update(dt);
     this.ui.update(dt);
   }
 

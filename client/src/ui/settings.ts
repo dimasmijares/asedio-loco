@@ -56,6 +56,7 @@ export function setQualityTarget(fn: ((q: Quality) => void) | null) {
 // (en solitario, la partida se pausa mientras tanto, F9).
 export interface SettingsExtra {
   exit?: { label: string; onClick: () => void };
+  note?: string; // «Partida en pausa» (solitario)
   onOpen?: () => void;
   onClose?: () => void;
 }
@@ -123,6 +124,7 @@ applyHand();
       'div',
       { class: 'panel' },
       h('h2', null, 'Ajustes'),
+      extra.note ? h('p', { class: 'settings-note', id: 'settings-paused' }, extra.note) : null,
       h('label', null, 'Calidad gráfica'),
       qRow,
       h('label', { class: 'check' }, sound, ' Sonido (tecla M)'),

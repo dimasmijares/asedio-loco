@@ -212,9 +212,10 @@ function segmented<T extends string | number>(id: string, label: string, options
 // Jugar solo (R-10 U10, maqueta «Móvil · Jugar solo»): hoja crema abajo en móvil y tarjeta centrada
 // en PC, con volver, rivales y dificultad en selectores segmentados, los rivales que tocan con su
 // emblema y su nombre, EMPEZAR y el campo de pruebas como enlace.
-export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty) => void; onSandbox: () => void; onBack: () => void }) {
-  let bots = 3;
-  let diff: Difficulty = 'normal';
+// `bots` y `difficulty`: lo elegido la última vez («Cambiar rivales» al final de una partida, R-07 F8).
+export function showSoloSetup(root: HTMLElement, opts: { onStart: (bots: number, d: Difficulty) => void; onSandbox: () => void; onBack: () => void; bots?: number; difficulty?: Difficulty }) {
+  let bots = opts.bots ?? 3;
+  let diff: Difficulty = opts.difficulty ?? 'normal';
   const rivals = h('div', { class: 'solo-rivals', id: 'solo-rivals' });
   const renderRivals = () => {
     // Huecos y nombres de shared/players (soloSlots, botName): los mismos que usa la partida.

@@ -96,6 +96,26 @@ async function startSandbox() {
   canvas.focus();
 }
 
+// «Jugar solo»: rivales y dificultad (por defecto, los últimos elegidos), y a jugar.
+function openSoloSetup(last?: { bots: number; difficulty: Difficulty }) {
+  history.replaceState(null, '', location.pathname + location.search);
+  void showBackdrop(document.getElementById('app')!);
+  showSoloSetup(ui, {
+    ...last,
+    onStart: (bots, difficulty) => {
+      enterFullscreen();
+      history.replaceState(null, '', '#solo');
+      void startSolo({ name: savedName(), bots, difficulty });
+    },
+    onSandbox: () => {
+      enterFullscreen();
+      history.replaceState(null, '', '#sandbox');
+      void startSandbox();
+    },
+    onBack: () => boot(),
+  });
+}
+
 // Partida contra bots. Parámetros opcionales en la URL (útiles para las pruebas):
 // ?bots=3&dif=normal&fast=1&autoplay=1&seed=42#solo
 async function startSolo(opts: { name: string; bots: number; difficulty: Difficulty }) {
@@ -112,6 +132,13 @@ async function startSolo(opts: { name: string; bots: number; difficulty: Difficu
     fast: q.get('fast') === '1',
     autoplay: q.get('autoplay') === '1',
     seed: q.get('seed') ? Number(q.get('seed')) : undefined,
+    // «Cambiar rivales» (R-07 F8): de vuelta a «Jugar solo» con lo elegido, sin pasar por la portada.
+    onChangeRivals: () => {
+      game.dispose();
+      canvas.remove();
+      debug.game = debug.mode = undefined;
+      openSoloSetup({ bots: opts.bots, difficulty: opts.difficulty });
+    },
   });
   debug.game = game;
   debug.mode = mode;
@@ -183,20 +210,7 @@ function boot() {
         home.error((e as Error).message);
       }
     },
-    onSolo: () =>
-      showSoloSetup(ui, {
-        onStart: (bots, difficulty) => {
-          enterFullscreen();
-          history.replaceState(null, '', '#solo');
-          void startSolo({ name: savedName(), bots, difficulty });
-        },
-        onSandbox: () => {
-          enterFullscreen();
-          history.replaceState(null, '', '#sandbox');
-          void startSandbox();
-        },
-        onBack: () => boot(),
-      }),
+    onSolo: () => openSoloSetup(),
   });
 }
 

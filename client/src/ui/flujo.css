@@ -790,3 +790,16 @@ button.seat-card.off {
 .m-spect[hidden] {
   display: none;
 }
+
+/* Pausa en solitario (R-07 F9): el engranaje lo dice arriba del panel. */
+.settings-note {
+  display: inline-block;
+  margin: -4px 0 6px;
+  padding: 3px 10px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}

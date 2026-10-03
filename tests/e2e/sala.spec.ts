@@ -316,6 +316,43 @@ for (const fmt of FORMATS) {
         await expect(page.locator('#home')).toBeVisible();
         expect(errors).toEqual([]);
       });
+
+      test(`pausa y final en solitario (${name})`, async ({ page }) => {
+        const errors = watchErrors(page);
+        await page.goto(`${q(fmt, '&bots=2&seed=5&tutorial=0&dif=dificil')}#solo`);
+        const host = () =>
+          page.evaluate(() => {
+            const s = (window as any).__asedio.mode?.host?.state;
+            return { phase: s?.phase, rem: s?.remaining ?? 0, round: s?.round ?? -1 };
+          });
+        await expect.poll(async () => (await host()).phase, { timeout: 60_000 }).toBe('aim');
+        // Con el engranaje abierto, la partida se para (F9).
+        await page.click('#hud-settings');
+        await expect(page.locator('#settings-paused')).toHaveText('Partida en pausa');
+        const t0 = (await host()).rem;
+        await page.waitForTimeout(1500);
+        expect((await host()).rem).toBe(t0);
+        await page.click('#settings-close');
+        await expect.poll(async () => (await host()).rem).toBeLessThan(t0);
+        // Final (F8): OTRA PARTIDA, CAMBIAR RIVALES y SALIR.
+        await page.evaluate(() => (window as any).__asedio.mode.host.endNow());
+        await expect(page.locator('#rematch')).toHaveText('Otra partida', { timeout: 30_000 });
+        await expect(page.locator('#change-rivals')).toBeVisible();
+        await expect(page.locator('#exit')).toBeVisible();
+        await page.click('#rematch');
+        await expect.poll(async () => (await host()).round, { timeout: 30_000 }).toBeLessThanOrEqual(1);
+        await expect(page.locator('#game-over')).toHaveCount(0);
+        // CAMBIAR RIVALES vuelve a «Jugar solo» con lo elegido (2 rivales, difícil).
+        await page.evaluate(() => (window as any).__asedio.mode.host.endNow());
+        await page.click('#change-rivals');
+        await expect(page.locator('#solo-setup')).toBeVisible();
+        await expect(page.locator('#solo-bots [aria-checked="true"]')).toHaveText('2');
+        await expect(page.locator('#solo-difficulty [aria-checked="true"]')).toHaveText('Difícil');
+        await page.click('#solo-bots [data-v="1"]');
+        await page.click('#solo-start');
+        await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode?.host?.state.players.length), { timeout: 60_000 }).toBe(2);
+        expect(errors).toEqual([]);
+      });
     });
   });
 }
