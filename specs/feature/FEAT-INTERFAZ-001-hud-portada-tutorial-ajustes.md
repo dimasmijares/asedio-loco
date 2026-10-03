@@ -59,7 +59,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
    - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio; en PC resalta la barra de potencia, R-10 U11).
    - Se puede saltar. Al terminar se guarda y no vuelve. En solitario da 10 s más de apuntado en la ronda 1.
-   - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano (un ratón en PC), en SVG, se desliza sobre la escena. En el 2, un anillo noche con pulso naranja resalta las tarjetas y las flechas ◀ ▶. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
+   - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano (un ratón en PC), en SVG, se desliza sobre la escena. En el 2, un anillo noche con pulso naranja resalta las tarjetas. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
 4. **HUD de partida** (en PC, R-10 U11, WRK-TASK-083, maqueta «PC · Apuntando»; en móvil vertical, el punto 9):
    - Arriba al centro, la píldora `#hud-round` con «Ronda N» y los segundos del apuntado en un círculo naranja (grana con pulso por debajo de 4 s); sin «Fase de apuntado», que queda en el `title`. En los resultados dice «Ronda N · resultados», sin los segundos (WRK-TASK-084).
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
@@ -106,7 +106,6 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 
 - **Táctil** (WRK-TASK-006, clase `body.touch`):
   - el botón de disparo es redondo (96 px), abajo a la derecha, y se llena como un reloj con la fuerza;
-  - flechas de castillo objetivo (iconos SVG);
   - la ayuda empieza plegada (chip «Controles» de 44 px) y tiene sus propias filas; sin barra de potencia ni elevación;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
   - **se puede instalar** (PWA, WRK-TASK-009): manifiesto con `display: fullscreen` y `orientation: any`, iconos dibujados por código (`tests/tools/make-icons.mjs`) y metas de Apple para «Añadir a pantalla de inicio». Sin service worker: el juego necesita la red. La instalación en un teléfono real está pendiente del usuario (A7 y A8 de WRK-TASK-040);

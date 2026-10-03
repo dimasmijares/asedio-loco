@@ -4,9 +4,9 @@ import { AMMO } from '../../shared/ammo';
 // HUD compacto: en tres móviles en horizontal (menos de 500 px de alto) y tres en vertical ningún
 // elemento del HUD se cruza con otro ni se sale de la pantalla. En un ordenador no cambia. En vertical,
 // el botón de disparo, el pad y las cartas van dentro de la bandeja del pulgar (R-10 U1).
-const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm'];
+const PARTS = ['.hud-top', '#hud-players', '#help-toggle', '.hud-corner', '#hud-aim', '#hud-ammo', '#confirm'];
 // En vertical, arriba: píldora de la ronda, engranaje, fila de chips y viento y objetivo (R-10 U4, U5).
-const PORTRAIT = ['#hud-round', '#hud-settings', '#hud-players', '#hud-flags', '#hud-aim', '#target-prev', '#target-next', '#tray'];
+const PORTRAIT = ['#hud-round', '#hud-settings', '#hud-players', '#hud-flags', '#hud-aim', '#tray'];
 const IN_TRAY = ['#confirm', '#aim-pad', '#hud-ammo'];
 
 type Box = { x: number; y: number; w: number; h: number };

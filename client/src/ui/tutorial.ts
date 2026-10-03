@@ -20,7 +20,7 @@ type Step = 'aim' | 'adjust' | 'fire';
 // o, con la bandeja del móvil vertical (R-10 U1), el pad de puntería.
 const FOCUS: Record<Step, string[]> = {
   aim: [],
-  adjust: ['#hud-ammo', '#target-prev', '#target-next'],
+  adjust: ['#hud-ammo'],
   fire: ['#confirm'],
 };
 const TRAY_FOCUS: Record<Step, string[]> = { ...FOCUS, aim: ['#aim-pad'] };

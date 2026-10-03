@@ -59,8 +59,8 @@ test('táctil: apuntar arrastrando, tarjetas, pellizco, pad y botón de la bande
   expect(s1.pitch, 'sube').toBeGreaterThan(s0.pitch + 0.1);
   expect(s1.locked, 'apuntar no dispara').toBe(false);
 
-  // Jugando no hay flechas: el castillo objetivo sale de hacia dónde apuntas (WRK-TASK-061).
-  await expect(page.locator('#target-next')).toBeHidden();
+  // No hay flechas (R-13): el castillo objetivo sale de hacia dónde apuntas (WRK-TASK-061).
+  await expect(page.locator('#target-next')).toHaveCount(0);
   const t0 = s1.target;
   for (let i = 0; i < 12 && (await state(page)).target === t0; i++) await drag(cdp, { x: 120, y: 420 }, { x: 250, y: 420 });
   expect((await state(page)).target, 'al girar hacia otro castillo cambia el objetivo').not.toBe(t0);

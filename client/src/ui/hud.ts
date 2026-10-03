@@ -30,6 +30,14 @@ export interface HudPlayer {
   connected?: boolean;
 }
 
+// Selector del espectador (R-13): «Todos» (slot -1, plano general) y un castillo en pie por tarjeta.
+export interface SpectCard {
+  slot: number;
+  name: string;
+  short: string;
+  pct: number; // lo que le queda, 0-100
+}
+
 // Barra «Disparo listo» (R-10 U6): munición disparada, quién falta y cuántos están listos.
 export interface HudWait {
   ammo: AmmoId | null;
@@ -75,17 +83,29 @@ export class Hud {
   private elev = h('div', { class: 'hud-elev', id: 'hud-elev', hidden: true }, this.elevDeg, h('span', { class: 'elev-label' }, 'elevación'));
   // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
   confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
-  // En táctil no hay Q/E: dos flechas a los lados de la munición cambian de castillo objetivo.
   readonly touchUi = isMobileDevice();
-  onTarget: (dir: number) => void = () => {};
-  private targetBtns = [-1, 1].map((dir) => {
-    const b = h('button', { class: 'target-btn', id: dir < 0 ? 'target-prev' : 'target-next', 'aria-label': dir < 0 ? 'Castillo anterior' : 'Castillo siguiente', hidden: true }, icon(dir < 0 ? 'prev' : 'next'));
-    b.onpointerdown = (e) => {
-      e.stopPropagation();
-      this.onTarget(dir);
-    };
-    return b;
-  });
+  // Selector del espectador (R-13, sustituye a las flechas ◀ ▶): en móvil vertical, abajo, en la
+  // franja de la bandeja, con «Mirando: …» encima; en PC, una columna de tarjetas a la derecha y la
+  // píldora «Mirando a …» abajo con Q y E.
+  onWatch: (slot: number) => void = () => {};
+  private spectWho = h('span', { class: 'spect-who', id: 'spect-watching' });
+  private spectCards = h('div', { class: 'spect-cards', id: 'spect-cards', role: 'group', 'aria-label': 'Qué castillo miras' });
+  private spectPanel = h(
+    'div',
+    { class: 'spect-panel', id: 'spect', hidden: true },
+    h('div', { class: 'spect-head' }, h('span', { class: 'spect-k' }, 'MIRANDO'), this.spectWho, h('span', { class: 'spect-hint' }, icon('swipe'), 'o desliza en la escena')),
+    h('span', { class: 'spect-k spect-col-k' }, 'MIRAR'),
+    this.spectCards,
+  );
+  private spectPillText = h('span', { class: 'spect-pill-text' });
+  private spectPill = h(
+    'div',
+    { class: 'spect-pill', id: 'spect-pill', hidden: true },
+    icon('eye'),
+    this.spectPillText,
+    h('span', { class: 'spect-keys' }, h('kbd', null, 'Q'), h('kbd', null, 'E'), 'cambiar · clic en una tarjeta'),
+  );
+  private spectKey = '';
   private bannerTimer = 0;
   // Cuenta atrás antes de disparar (3-2-1 y «¡FUEGO!»), en el centro de la pantalla.
   private countdown = h('div', { class: 'hud-countdown', id: 'hud-countdown', 'aria-live': 'assertive' });
@@ -150,7 +170,7 @@ export class Hud {
   private waitKey = '';
 
   constructor(parent: HTMLElement) {
-    this.row.append(this.targetBtns[0], this.ammo, this.targetBtns[1]);
+    this.row.append(this.ammo);
     this.bottom.append(this.aimInfo, this.row, this.power, this.confirmBtn);
     const bottom = this.bottom;
     // Sin botón de silencio: el sonido está en Ajustes y la tecla M sigue valiendo.
@@ -181,7 +201,7 @@ export class Hud {
     this.gear.onpointerdown = (e) => e.stopPropagation();
     this.corner.append(this.cornerRow, this.stats);
     this.mTop.append(this.mRow);
-    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.help, this.elev, this.tray, this.wait, this.tip, this.banner, this.countdown);
+    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.help, this.elev, this.tray, this.wait, this.spectPanel, this.spectPill, this.tip, this.banner, this.countdown);
     // Al levantar el dedo, en cualquier sitio, la tarjeta desaparece (la carta ya quedó elegida).
     window.addEventListener('pointerup', this.endHold);
     window.addEventListener('pointercancel', this.endHold);
@@ -209,7 +229,7 @@ export class Hud {
       }
     } else {
       if (this.confirmBtn.parentElement !== this.bottom) this.bottom.append(this.confirmBtn);
-      if (this.ammo.parentElement !== this.row) this.row.insertBefore(this.ammo, this.targetBtns[1]);
+      if (this.ammo.parentElement !== this.row) this.row.append(this.ammo);
       // En PC (U11): jugadores en columna arriba a la izquierda, la píldora arriba al centro, y el
       // viento, el objetivo y el engranaje arriba a la derecha.
       if (this.roundPill.parentElement !== this.top) {
@@ -253,9 +273,47 @@ export class Hud {
     );
   }
 
-  // Alto de pantalla que tapa la bandeja, para centrar la escena en lo que queda libre (0 sin ella).
+  // Alto de pantalla que tapa la bandeja (o el selector del espectador), para centrar la escena en lo
+  // que queda libre (0 sin ella).
   sceneInset() {
-    return this.trayMode && this.root.classList.contains('tray-on') ? this.trayH : 0;
+    if (!this.trayMode) return 0;
+    if (this.root.classList.contains('tray-on')) return this.trayH;
+    return this.spectPanel.hidden ? 0 : this.spectPanel.offsetHeight;
+  }
+
+  // Selector del espectador (R-13): null lo quita. `watch`: la tarjeta elegida (-1, «Todos»).
+  setSpectator(cards: SpectCard[] | null, watch = -1) {
+    const key = cards ? `${watch}|${cards.map((c) => `${c.slot}:${c.name}:${c.pct}`).join(',')}` : '';
+    if (key === this.spectKey) return;
+    this.spectKey = key;
+    this.spectPanel.hidden = this.spectPill.hidden = !cards;
+    this.root.classList.toggle('spect-on', !!cards);
+    if (!cards) return;
+    const cur = cards.find((c) => c.slot === watch);
+    this.spectWho.textContent = watch < 0 || !cur ? 'Todos los castillos' : cur.name;
+    this.spectPillText.textContent = watch < 0 || !cur ? 'Mirando todos los castillos' : `Mirando a ${cur.name}`;
+    const all: SpectCard = { slot: -1, name: 'Todos', short: 'Todos', pct: -1 };
+    this.spectCards.replaceChildren(
+      ...[all, ...cards].map((c) => {
+        const on = c.slot === watch;
+        const st = c.slot >= 0 ? PLAYER_STYLES[c.slot] : null;
+        const b = h(
+          'button',
+          { class: `spect-card${on ? ' on' : ''}${st ? '' : ' all'}`, type: 'button', 'data-slot': String(c.slot), 'aria-pressed': String(on), 'aria-label': `Mirar ${c.slot < 0 ? 'todos los castillos' : c.name}` },
+          // U+FE0E: emblemas como texto, nunca como emoji; «Todos» lleva el ojo.
+          h('span', { class: 'spect-emb', style: st ? `background:${st.color};color:${st.ink}` : '' }, st ? `${st.glyph}\uFE0E` : icon('eye')),
+          h(
+            'span',
+            { class: 'spect-body' },
+            h('span', { class: 'spect-line' }, h('span', { class: 'spect-name' }, h('span', { class: 'spect-full' }, c.name), h('span', { class: 'spect-short' }, c.short)), h('span', { class: 'spect-pct' }, st ? `${c.pct} %` : '')),
+            st ? h('span', { class: 'spect-bar' }, h('span', { style: `width:${c.pct}%;background:${st.color}` })) : h('span', { class: 'spect-sub' }, h('span', { class: 'spect-full' }, 'Plano general'), h('span', { class: 'spect-short' }, 'General')),
+          ),
+        );
+        b.onpointerdown = (e) => e.stopPropagation();
+        b.onclick = () => this.onWatch(c.slot);
+        return b;
+      }),
+    );
   }
 
   private keyHandler: (e: KeyboardEvent) => void;
@@ -361,8 +419,7 @@ export class Hud {
 
   setAimInfo(aim: Aim | null, ammo?: AmmoId) {
     if (!aim) {
-      // La línea del espectador (setWatch) se queda; la borra setWatch(null).
-      if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
+      if (this.aimInfo.textContent) this.aimInfo.textContent = '';
       if (!this.elev.hidden) this.elev.hidden = true;
       return;
     }
@@ -373,7 +430,7 @@ export class Hud {
     if (this.padElev.textContent !== deg) this.padElev.textContent = deg;
     if (this.elevDeg.textContent !== deg) this.elevDeg.textContent = deg;
     if (this.elev.hidden) this.elev.hidden = false;
-    if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
+    if (this.aimInfo.textContent) this.aimInfo.textContent = '';
   }
 
   // La fila de viento y objetivo solo ocupa sitio si tiene algo.
@@ -637,24 +694,6 @@ export class Hud {
     if (round) b.replaceChildren(icon(locked ? 'check' : 'flame', 'fire-ico'), locked ? '' : h('span', { class: 'fire-label' }, 'MANTÉN'));
     else b.textContent = locked ? 'Disparo listo' : 'Mantén Espacio o clic izquierdo';
     b.setAttribute('aria-label', locked ? 'Disparo listo' : 'Mantén pulsado para cargar y suelta para disparar');
-  }
-
-  // Flechas de castillo objetivo: solo en táctil y mientras se puede apuntar.
-  // `always`: también con ratón (el espectador cambia de castillo con ellos, WRK-TASK-042).
-  showTargetButtons(show: boolean, always = false) {
-    for (const b of this.targetBtns) b.hidden = !(show && (this.touchUi || always));
-  }
-
-  // Qué castillo sigue la cámara del espectador, en la línea de la puntería (que entonces no se usa).
-  // Se llama en cada fotograma: solo toca el DOM si cambia lo que hay que enseñar.
-  setWatch(text: string | null) {
-    const cur = (this.aimInfo.firstElementChild as HTMLElement | null)?.dataset.watch;
-    if (!text) {
-      if (cur) this.aimInfo.textContent = '';
-      return;
-    }
-    if (cur === text) return;
-    this.aimInfo.replaceChildren(h('span', { id: 'hud-watch', 'data-watch': text }, icon('eye'), ' ', h('b', null, text), h('span', { class: 'muted' }, this.touchUi ? '  ·  ◀ ▶ para cambiar' : '  ·  Q/E o ◀ ▶ para cambiar')));
   }
 
   dispose() {

@@ -130,8 +130,12 @@ export class MatchUI {
     input.onFire = (a) => this.fire(a);
     input.onTooShort = () => this.hud.showBanner('Mantén pulsado', this.hud.touchUi ? 'el botón de disparo: la fuerza aumenta mientras lo mantienes' : 'Espacio o el clic izquierdo: la fuerza aumenta mientras lo mantienes', 1300);
     input.onCycleTarget = (d) => this.cycleTarget(d);
-    this.hud.onTarget = (d) => (this.watching() ? this.cycleWatch(d) : this.cycleTarget(d));
+    this.hud.onWatch = (slot) => (this.watchSlot = slot);
     addEventListener('keydown', this.watchKeys);
+    // Deslizar a los lados sobre la escena pasa al castillo siguiente (R-13 V4, móvil vertical).
+    const cv = game.stage.renderer.domElement;
+    cv.addEventListener('pointerdown', this.swipeStart);
+    cv.addEventListener('pointerup', this.swipeEnd);
     input.onSelectSlot = (i) => this.selectAmmo(i);
     this.hud.bindCharge(input);
     this.hud.setHelp(this.hud.touchUi ? TOUCH_HELP : AIM_HELP);
@@ -201,6 +205,49 @@ export class MatchUI {
     const order = [-1, ...this.src.state.players.filter((p) => p.alive).map((p) => p.slot)];
     const i = Math.max(0, order.indexOf(this.watchSlot));
     this.watchSlot = order[(i + dir + order.length) % order.length];
+  }
+
+  // Deslizar: un gesto rápido (menos de 0,6 s), sobre todo horizontal y de más de 60 px.
+  private swipe: { x: number; y: number; t: number; id: number } | null = null;
+  private swipeStart = (e: PointerEvent) => {
+    this.swipe = this.watching() && this.hud.trayMode ? { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId } : null;
+  };
+  private swipeEnd = (e: PointerEvent) => {
+    const s = this.swipe;
+    this.swipe = null;
+    if (!s || s.id !== e.pointerId || performance.now() - s.t > 600 || !this.watching()) return;
+    const dx = e.clientX - s.x;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) this.cycleWatch(dx < 0 ? 1 : -1);
+  };
+
+  // «¡Tu rey ha caído!» (R-13 V5): la causa, la ronda y el puesto; MIRAR LA PARTIDA o SALIR DE LA
+  // PARTIDA. Sale al empezar el apuntado siguiente, cuando ya se ha visto la caída y la repetición.
+  private fallShown = false;
+  private showFall(s: MatchState) {
+    const me = this.me();
+    if (!me || me.alive || this.fallShown) return;
+    this.fallShown = true;
+    const cause: Record<string, string> = {
+      crushed: 'Tu rey quedó aplastado bajo los bloques',
+      fell: 'Tu rey cayó fuera de la isla',
+      lava: 'La lava alcanzó a tu rey',
+      outside: 'Tu rey tocó el suelo fuera de su castillo',
+    };
+    const place = 1 + s.players.filter((p) => p.slot !== me.slot && (p.alive || (p.eliminatedRound ?? 0) > (me.eliminatedRound ?? 0))).length;
+    const text = `${cause[me.cause ?? ''] ?? 'Tu rey ha caído'} en la ronda ${me.eliminatedRound ?? s.round}. Quedas en ${place}.º lugar.`;
+    showSheet({
+      id: 'fall-sheet',
+      title: '¡Tu rey ha caído!',
+      badge: 'crown',
+      center: true,
+      text,
+      actions: [
+        { id: 'fall-watch', label: 'Mirar la partida', kind: 'primary', icon: 'eye', onClick: () => {} },
+        ...(this.opts.onLeave ? [{ id: 'fall-leave', label: 'Salir de la partida', onClick: () => this.opts.onLeave!() }] : []),
+      ],
+      hint: this.opts.onLobby ? 'Si te quedas, entras en la revancha con los demás' : undefined,
+      dismiss: () => {},
+    });
   }
 
   private sentTarget = -1;
@@ -386,12 +433,18 @@ export class MatchUI {
       });
     } else this.hud.setWait(null);
     this.updateSheet(s);
+    // Selector del espectador (R-13), durante el apuntado: «Todos» y los castillos en pie (D1: los
+    // eliminados no salen; se ven apagados en el marcador). Si cae el que mirabas, al plano general.
     const watch = this.watching() && s.phase === 'aim';
-    // Las flechas solo para el espectador (jugando, el objetivo sale del rumbo; WRK-TASK-061).
-    this.hud.showTargetButtons(watch, watch);
-    this.hud.setWatch(watch ? (this.watchSlot < 0 ? 'Plano general' : `Castillo de ${nameOf(s, this.watchSlot)}`) : null);
+    const standing = s.players.filter((p) => p.alive);
+    if (this.watchSlot >= 0 && !standing.some((p) => p.slot === this.watchSlot)) this.watchSlot = -1;
+    this.hud.setSpectator(
+      watch ? standing.map((p) => ({ slot: p.slot, name: p.name, short: shortName({ name: p.name, bot: p.bot }), pct: Math.min(100, Math.round((p.blocks / BLOCKS_PER_CASTLE) * 100)) })) : null,
+      this.watchSlot,
+    );
     this.hud.setStats(`${g.fps} fps`);
-    this.hud.setSpectTag(this.src.you === null && s.phase !== 'over' ? this.lateTag : null);
+    // En móvil vertical, bajo el marcador, por qué miras (en PC lo dice la píldora de abajo).
+    this.hud.setSpectTag(s.phase === 'over' ? null : this.src.you === null ? this.lateTag : this.watching() && this.hud.trayMode ? 'Eliminado · estás mirando' : null);
     // Objetivo secundario (WRK-TASK-043): chapa en la esquina y dianas en los rivales al apuntar.
     const goal = s.goal && s.phase === 'aim' ? GOALS[s.goal] : null;
     this.hud.setGoal(goal ? goal.short : null, goal ? `${goal.text}: premio, una carta rara o épica en la ronda siguiente` : '');
@@ -449,7 +502,7 @@ export class MatchUI {
     else if (s.phase !== 'countdown') this.hud.setCountdown(null);
     if (s.phase === 'aim' && s.round !== this.last.round) {
       this.last.round = s.round;
-      const first = this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Eres espectador · ◀ ▶ para elegir qué castillo ves' : 'Eres espectador · Q/E o ◀ ▶ para elegir qué castillo ves';
+      const first = this.me()?.alive ? this.hud.trayMode ? 'Arrastra en el pad para apuntar · mantén el botón rojo para disparar' : this.hud.touchUi ? 'Arrastra para apuntar · mantén el botón rojo para disparar' : 'Clic derecho para apuntar · mantén Espacio o el clic izquierdo para disparar' : this.hud.touchUi ? 'Estás mirando · toca una tarjeta o desliza para cambiar de castillo' : 'Estás mirando · Q y E o un clic en una tarjeta para cambiar de castillo';
       // Una línea por aviso, con iconos SVG en lugar de emoji (R-10).
       const sub = h('span', null, h('div', null, first));
       const line = (...parts: (Node | string)[]) => sub.append(h('div', null, ...parts));
@@ -467,6 +520,7 @@ export class MatchUI {
       this.clearDamage();
       const me = this.me();
       if (me) this.game.input.setAim(me.aim);
+      this.showFall(s);
     }
     if (s.phase === 'impact') this.hud.setPhase(`Ronda ${s.round}`, 'Impacto');
     else if (s.phase === 'replay') this.hud.setPhase(`Ronda ${s.round}`, 'Repetición');
@@ -792,6 +846,10 @@ export class MatchUI {
 
   dispose() {
     removeEventListener('keydown', this.watchKeys);
+    const cv = this.game.stage.renderer.domElement;
+    cv.removeEventListener('pointerdown', this.swipeStart);
+    cv.removeEventListener('pointerup', this.swipeEnd);
+    document.getElementById('fall-sheet-wrap')?.remove();
     if (this.final) {
       this.final.off();
       this.final.skip.remove();

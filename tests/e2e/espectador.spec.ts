@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-// Espectador activo (WRK-TASK-042): un jugador eliminado elige qué castillo sigue la cámara durante
-// el apuntado, con Q/E o las flechas en PC y con ◀ ▶ en el móvil.
+// Espectador (WRK-TASK-042, R-13): al caer tu rey, la hoja «¡Tu rey ha caído!» y, durante el
+// apuntado, el selector con «Todos» y una tarjeta por castillo en pie (abajo en el móvil vertical, a
+// la derecha en PC). Tocar una tarjeta, Q/E o deslizar sobre la escena cambian el castillo que se mira.
+// Sin flechas ◀ ▶.
 for (const [name, vp, mobile] of [
   ['PC', { width: 1280, height: 720 }, false],
   ['móvil vertical', { width: 390, height: 844 }, true],
@@ -25,12 +27,35 @@ for (const [name, vp, mobile] of [
         if (ok) (window as any).__asedio.mode.host.update = () => {};
         return ok;
       }, null, { timeout: 200_000, polling: 'raf' });
-      await expect(page.locator('#hud-watch')).toContainText('Plano general');
-      if (mobile) await page.locator('#target-next').tap();
-      else await page.keyboard.press('e');
+      // Aviso al caer: causa, ronda y puesto; MIRAR LA PARTIDA.
+      await expect(page.locator('#fall-sheet')).toContainText('¡Tu rey ha caído!');
+      await expect(page.locator('#fall-sheet')).toContainText('Tu rey cayó fuera de la isla en la ronda 1');
+      await expect(page.locator('#fall-sheet')).toContainText(/Quedas en [234]\.º lugar/);
+      await page.click('#fall-watch');
+      await expect(page.locator('#target-prev, #target-next, #hud-watch')).toHaveCount(0);
+      // Solo castillos en pie, más «Todos» (D1).
+      const standing = await page.evaluate(() => (window as any).__asedio.mode.host.state.players.filter((p: any) => p.alive).map((p: any) => String(p.slot)));
+      await expect(page.locator('#spect-cards .spect-card')).toHaveCount(standing.length + 1);
+      await expect(page.locator('#spect-cards .spect-card[aria-pressed="true"]')).toHaveAttribute('data-slot', '-1');
+      if (mobile) {
+        await expect(page.locator('#spect-watching')).toHaveText('Todos los castillos');
+        await expect(page.locator('#hud-spect')).toHaveText('Eliminado · estás mirando');
+        // El selector ocupa la franja de la bandeja: abajo, unos 190 px.
+        const box = (await page.locator('#spect').boundingBox())!;
+        expect(Math.abs(box.y + box.height - vp.height)).toBeLessThan(1);
+        expect(box.height).toBeGreaterThan(170);
+        expect(box.height).toBeLessThan(210);
+        for (const c of await page.locator('#spect-cards .spect-card').all()) expect(Math.min(...Object.values((await c.boundingBox())!).slice(2))).toBeGreaterThanOrEqual(44);
+        await page.locator(`#spect-cards .spect-card[data-slot="${standing[0]}"]`).tap();
+      } else {
+        await expect(page.locator('#spect-pill')).toContainText('Mirando todos los castillos');
+        await page.keyboard.press('e');
+      }
       const slot = await page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot);
       expect(slot).toBeGreaterThanOrEqual(0);
-      await expect(page.locator('#hud-watch')).toContainText('Castillo de');
+      await expect(page.locator('#spect-cards .spect-card[aria-pressed="true"]')).toHaveAttribute('data-slot', String(slot));
+      const name = await page.evaluate((slot) => (window as any).__asedio.mode.host.state.players.find((p: any) => p.slot === slot).name, slot);
+      await expect(page.locator(mobile ? '#spect-watching' : '#spect-pill')).toContainText(name);
       await page.waitForTimeout(1200);
       // La cámara gira alrededor de ese castillo.
       const d = await page.evaluate((slot) => {
@@ -40,10 +65,15 @@ for (const [name, vp, mobile] of [
       }, slot);
       expect(d).toBeLessThan(3);
       await page.screenshot({ path: info.outputPath(`espectador-${mobile ? 'movil' : 'pc'}.png`) });
-      // Y vuelve atrás hasta el plano general.
-      if (mobile) await page.locator('#target-prev').tap();
-      else await page.keyboard.press('q');
-      expect(await page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBe(-1);
+      // Y vuelve atrás hasta el plano general: en el móvil, deslizando sobre la escena hacia la derecha.
+      if (mobile) {
+        const cdp = await page.context().newCDPSession(page);
+        const touch = (type: string, x: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 380 }] });
+        await touch('touchStart', 100);
+        for (const x of [160, 220, 280]) await touch('touchMove', x);
+        await touch('touchEnd', 280);
+      } else await page.keyboard.press('q');
+      await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBe(-1);
     });
   });
 }

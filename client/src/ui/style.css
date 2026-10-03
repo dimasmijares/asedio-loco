@@ -431,18 +431,7 @@ button.big.danger {
   gap: 10px;
 }
 
-.target-btn {
-  pointer-events: auto;
-  touch-action: manipulation;
-  min-width: 52px;
-  min-height: 52px;
-  font-size: 22px;
-  padding: 0;
-}
 
-.target-btn[hidden] {
-  display: none;
-}
 
 .hud-ammo {
   display: flex;
@@ -1766,11 +1755,6 @@ html.big-text .ammo-name {
   .ammo-name {
     font-size: 10px;
   }
-  .target-btn {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 18px;
-  }
   body.touch .hud-confirm {
     width: 84px;
     height: 84px;
@@ -1860,11 +1844,6 @@ html.big-text .ammo-name {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .target-btn {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 18px;
   }
   body.touch .hud-confirm {
     width: 88px;
