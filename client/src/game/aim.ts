@@ -15,6 +15,10 @@ const NO_LOCK = new URLSearchParams(location.search).has('nolock');
 const MIN_CHARGE = 0.12;
 // Con el dedo se recorre menos distancia que con el ratón (pantallas pequeñas): más ganancia.
 const TOUCH_GAIN = 1.6;
+// Pad de la bandeja (R-12): un arrastre de lado a lado del pad gira 0,78 rad (44,5°) y uno de arriba
+// abajo eleva 0,31 rad (18°), lo mismo que recorría el pad de 222×112 de la fase 2. Repartido en todo
+// el pad: cuanto más grande, más precisión por milímetro de dedo.
+export const PAD_SPAN = { yaw: 0.0035 * 222, pitch: 0.0028 * 112 };
 
 // Control de la catapulta:
 //  - Clic derecho mantenido + ratón: horizontal = rumbo, vertical = elevación (Mayús: precisión).
@@ -170,13 +174,14 @@ export class AimInput {
     this.onChange(this.aim);
   }
 
-  // Pad de puntería de la bandeja del pulgar (R-10 U1): arrastre relativo, como un trackpad. Con la
-  // ganancia del ratón, no la del dedo en la escena: el pad es para afinar; los giros grandes, en la escena.
+  // Pad de puntería de la bandeja del pulgar (R-10 U1, R-12): arrastre relativo, como un trackpad,
+  // con el recorrido de PAD_SPAN repartido en el ancho y el alto del pad (`w`, `h` en px). El pad es
+  // para afinar; los giros grandes, en la escena.
   padActive = false;
-  padMove(dx: number, dy: number) {
-    if (!this.enabled) return;
+  padMove(dx: number, dy: number, w: number, h: number) {
+    if (!this.enabled || w <= 0 || h <= 0) return;
     const k = settings.sensitivity;
-    this.aim = clampAim({ ...this.aim, yaw: this.aim.yaw - dx * 0.0035 * k, pitch: this.aim.pitch - dy * 0.0028 * k });
+    this.aim = clampAim({ ...this.aim, yaw: this.aim.yaw - (dx / w) * PAD_SPAN.yaw * k, pitch: this.aim.pitch - (dy / h) * PAD_SPAN.pitch * k });
     this.onChange(this.aim);
   }
 

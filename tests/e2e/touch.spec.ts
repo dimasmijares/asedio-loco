@@ -17,6 +17,19 @@ async function drag(cdp: CDPSession, from: Pt, to: Pt, steps = 10) {
   await touch(cdp, 'touchEnd', []);
 }
 
+// Recorrido del pad de un borde al otro (R-12): el de PAD_SPAN en client/src/game/aim.ts.
+const PAD_YAW = 0.0035 * 222;
+
+// Un arrastre de lado a lado del pad gira PAD_YAW, sea cual sea su tamaño.
+async function padSweep(page: Page, cdp: CDPSession) {
+  const pad = (await page.locator('#aim-pad').boundingBox())!;
+  const y = pad.y + pad.height / 2;
+  const a = (await state(page)).yaw;
+  await drag(cdp, { x: pad.x + 4, y }, { x: pad.x + pad.width - 4, y }, 20);
+  const b = (await state(page)).yaw;
+  return (a - b) / ((pad.width - 8) / pad.width);
+}
+
 const state = (page: Page) =>
   page.evaluate(() => {
     const a = (window as any).__asedio;
@@ -110,6 +123,12 @@ test('táctil: apuntar arrastrando, tarjetas, pellizco, pad y botón de la bande
   expect(p1.pitch, 'el pad eleva').toBeGreaterThan(p0.pitch + 0.03);
   expect(p1.locked, 'el pad no dispara').toBe(false);
   await expect(page.locator('#pad-elev')).toHaveText(/^\d+°$/);
+  // R-12: pad de 252×128 y botón de 82 px (96 con el anillo); el recorrido se reparte en todo el pad.
+  expect(pad.width).toBeCloseTo(252, 0);
+  expect(pad.height).toBeCloseTo(128, 0);
+  expect(btn.width).toBeCloseTo(82, 0);
+  expect((await box(page, '.fire-wrap')).width).toBeCloseTo(96, 0);
+  expect(await padSweep(page, cdp), 'de lado a lado del pad, todo el recorrido').toBeCloseTo(PAD_YAW, 1);
 
   // Botón de disparo: mantenerlo carga (el anillo se llena; dentro, el porcentaje y «SUELTA») y al
   // soltar el disparo queda listo y la bandeja se recoge (R-10 U3).
@@ -139,10 +158,17 @@ test('modo zurdo: pad a la izquierda y disparo a la derecha', async ({ page }) =
   expect(btn.x + btn.width / 2, 'disparo a la derecha').toBeGreaterThan(W / 2);
   expect(pad.x + pad.width / 2, 'pad a la izquierda').toBeLessThan(W / 2);
   expect(pad.x, 'mismo margen que en diestro').toBeCloseTo(14, 0);
-  // Se cambia desde Ajustes y se aplica al momento.
-  await page.locator('#hud-settings').tap();
+  // Mismas medidas y mismo recorrido que en diestro (R-12).
+  expect(pad.width).toBeCloseTo(252, 0);
+  expect(btn.width).toBeCloseTo(82, 0);
+  const cdp = await page.context().newCDPSession(page);
+  expect(await padSweep(page, cdp), 'de lado a lado del pad, todo el recorrido').toBeCloseTo(PAD_YAW, 1);
+  await cdp.detach();
+  // Se cambia desde Ajustes y se aplica al momento. Con clic: tras los toques por CDP del arrastre,
+  // el `tap()` de Playwright deja de generar el clic (es cosa de la prueba, no del juego).
+  await page.locator('#hud-settings').click();
   await page.locator('#set-left').uncheck();
-  await page.locator('#settings-close').tap();
+  await page.locator('#settings-close').click();
   expect((await box(page, '#confirm')).x, 'otra vez a la izquierda').toBeLessThan(W / 2);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('asedio.settings')!).leftHanded)).toBe(false);
 });

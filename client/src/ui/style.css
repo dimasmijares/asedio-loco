@@ -2145,8 +2145,8 @@ html.big-text .ammo-name {
   right: 0;
   bottom: 0;
   flex-direction: column;
-  gap: calc(14px * var(--k, 1));
-  padding: calc(14px * var(--k, 1)) 14px max(calc(37px * var(--k, 1)), calc(env(safe-area-inset-bottom) + 6px));
+  gap: calc(10px * var(--k, 1));
+  padding: calc(12px * var(--k, 1)) 14px max(calc(34px * var(--k, 1)), calc(env(safe-area-inset-bottom) + 6px));
   background: var(--al-ciruela);
   border-top: 3px solid var(--al-noche);
   border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
@@ -2167,11 +2167,12 @@ html.zurdo .tray-row {
   flex-direction: row-reverse;
 }
 
-/* Botón de disparo: grana, 100 px, con anillo crema oscuro. Al mantenerlo, el anillo se llena de naranja. */
+/* Botón de disparo (R-12): grana, 82 px, y 96 px con el anillo crema oscuro. Al mantenerlo, el anillo
+   se llena de naranja. */
 .fire-wrap {
   flex-shrink: 0;
-  width: calc(118px * var(--k, 1));
-  height: calc(118px * var(--k, 1));
+  width: calc(96px * var(--k, 1));
+  height: calc(96px * var(--k, 1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2183,8 +2184,8 @@ html.zurdo .tray-row {
 }
 .hud.tray-mode button.hud-confirm {
   position: static;
-  width: calc(100px * var(--k, 1));
-  height: calc(100px * var(--k, 1));
+  width: calc(82px * var(--k, 1));
+  height: calc(82px * var(--k, 1));
   min-width: 0;
   padding: 0;
   border-radius: 50%;
@@ -2195,25 +2196,28 @@ html.zurdo .tray-row {
   line-height: 1;
   background: var(--al-grana);
   color: var(--al-crema);
-  box-shadow: inset 0 -7px 0 var(--al-grana-oscuro), 0 0 0 6px var(--al-crema-oscuro), 0 0 0 9px var(--al-noche);
+  box-shadow: inset 0 -6px 0 var(--al-grana-oscuro), 0 0 0 4px var(--al-crema-oscuro), 0 0 0 7px var(--al-noche);
   transform: none;
 }
 .hud.tray-mode button.hud-confirm.charging {
   background: var(--al-grana);
   color: var(--al-crema);
-  box-shadow: inset 0 -7px 0 var(--al-grana-oscuro), 0 0 0 3px var(--al-noche);
+  box-shadow: inset 0 -6px 0 var(--al-grana-oscuro), 0 0 0 3px var(--al-noche);
   transform: scale(0.95);
 }
 .hud.tray-mode .hud-confirm .fire-ico svg {
-  width: calc(40px * var(--k, 1));
-  height: calc(40px * var(--k, 1));
+  width: calc(30px * var(--k, 1));
+  height: calc(30px * var(--k, 1));
 }
 .hud.tray-mode .fire-label {
-  font-size: calc(15px * var(--k, 1));
+  font-size: calc(13px * var(--k, 1));
 }
 .hud.tray-mode .fire-pct {
-  font-size: calc(32px * var(--k, 1));
-  line-height: calc(30px * var(--k, 1));
+  font-size: calc(26px * var(--k, 1));
+  line-height: calc(26px * var(--k, 1));
+}
+.hud.tray-mode .fire-sub {
+  font-size: calc(11px * var(--k, 1));
 }
 
 /* Pad de puntería: arrastre relativo tipo trackpad (horizontal gira, vertical eleva). La bola
@@ -2221,8 +2225,8 @@ html.zurdo .tray-row {
 .aim-pad {
   position: relative;
   flex-shrink: 0;
-  width: calc(222px * var(--k, 1));
-  height: calc(112px * var(--k, 1));
+  width: calc(252px * var(--k, 1));
+  height: calc(128px * var(--k, 1));
   border-radius: 16px;
   border: 2px dashed rgba(254, 231, 181, 0.4);
   background: var(--al-noche);

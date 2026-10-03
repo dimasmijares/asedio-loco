@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.5.0
+version: 1.6.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -71,8 +71,8 @@ Traducir ratón y teclado a una puntería `Aim {yaw, pitch, power}` y a un dispa
 7. **Red:** la puntería se manda como mucho a ~10 Hz. Los demás ven la catapulta girar y tensarse (D-032).
 8. **Tiempo agotado sin soltar:** el anfitrión dispara con la última puntería recibida.
 9. **Móvil vertical: bandeja del pulgar** (R-10 U1, U3 y U8, WRK-TASK-077):
-   - **Pad de puntería** (222×112): arrastre relativo, como un trackpad. Horizontal gira y vertical eleva, con la ganancia del ratón (0,0035 rad/px y 0,0028 rad/px, por la sensibilidad), para afinar (`AimInput.padMove`). El dedo puede salir del pad sin perder el arrastre. Arrastrar en la escena sigue apuntando con la ganancia del dedo (×1,6), para los giros grandes. `AimInput.steering` cuenta los dos para el tutorial.
-   - **Botón de disparo** redondo de 100 px: mantener carga igual que Espacio. La potencia se ve en el botón: el anillo exterior se llena de naranja y dentro van el porcentaje y «SUELTA» (sin la línea «Potencia N %»). La elevación va en una esquina del pad.
+   - **Pad de puntería** (252×128 a 390 px de ancho, R-12, WRK-TASK-086): arrastre relativo, como un trackpad. Horizontal gira y vertical eleva. El recorrido se reparte en todo el pad (`PAD_SPAN`): de un borde al otro gira 0,78 rad (44,5°) y de arriba abajo eleva 0,31 rad (18°), por la sensibilidad, lo mismo que el pad de 222×112 de antes; con el pad más grande, más precisión por milímetro (`AimInput.padMove` recibe el tamaño del pad). El dedo puede salir del pad sin perder el arrastre. Arrastrar en la escena sigue apuntando con la ganancia del dedo (×1,6), para los giros grandes. `AimInput.steering` cuenta los dos para el tutorial.
+   - **Botón de disparo** redondo de 82 px (96 con el anillo, R-12): mantener carga igual que Espacio. La potencia se ve en el botón: el anillo exterior se llena de naranja y dentro van el porcentaje y «SUELTA» (sin la línea «Potencia N %»). La elevación va en una esquina del pad.
    - **Modo zurdo** en Ajustes: espeja botón y pad.
 
 ### Outputs

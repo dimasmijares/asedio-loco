@@ -213,9 +213,10 @@ export class Hud {
         this.corner.append(this.stats);
       }
     }
-    // Escala de la bandeja: como mucho el 30 % del alto (252 px a 844: 7 fijos y 245 que escalan) y
-    // que quepan a lo ancho el botón (118 px con su anillo) y el pad (222 px).
-    const k = Math.floor(Math.min(1, (innerHeight * 0.3 - 7) / 245, (innerWidth - 40) / 340) * 1000) / 1000;
+    // Escala de la bandeja (R-12): como mucho el 30 % del alto (253 px a 844: 7 fijos y 246 que
+    // escalan) y que quepan a lo ancho, con 14 px a cada lado y entre ellos, el botón (96 px con su
+    // anillo) y el pad (252 px).
+    const k = Math.floor(Math.min(1, (innerHeight * 0.3 - 7) / 246, (innerWidth - 42) / 348) * 1000) / 1000;
     this.root.style.setProperty('--k', String(k));
     this.refreshConfirm();
   }
@@ -525,8 +526,8 @@ export class Hud {
       const dy = e.clientY - ly;
       lx = e.clientX;
       ly = e.clientY;
-      input.padMove(dx, dy);
       const r = pad.getBoundingClientRect();
+      input.padMove(dx, dy, r.width, r.height);
       const kr = this.padKnob.offsetWidth / 2 + 4;
       ox = clamp(ox + dx, -r.width / 2 + kr, r.width / 2 - kr);
       oy = clamp(oy + dy, -r.height / 2 + kr, r.height / 2 - kr);
