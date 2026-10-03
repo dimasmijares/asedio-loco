@@ -38,7 +38,8 @@ if (only === 'fase2') {
       h.state.wind = [1.4, 0, -1.6];
       return true;
     }, null, { timeout: 60_000, polling: 'raf' });
-    await p.waitForTimeout(2500);
+    // Después del rótulo «RONDA 1» (2,6 s).
+    await p.waitForTimeout(3300);
     await p.screenshot({ path: `${out}/${hand}-1-apuntando.png` });
     if (hand === 'zurdo') {
       await ctx.close();

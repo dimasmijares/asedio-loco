@@ -70,6 +70,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
 6. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
 6. La cámara nunca baja de y = 0,8 m.
 7. **Centro desplazado con la bandeja del móvil** (R-10 U1, WRK-TASK-077): en móvil vertical, mientras la bandeja del pulgar ocupa la parte de abajo, el centro de la imagen sube la mitad de su alto (`Stage.setViewShift`, con `setViewOffset`: mismo campo de visión y mismo encuadre). Lo que mira la cámara queda en el centro de la parte libre, por encima de la bandeja. El cambio se suaviza (`1 − e^(−6·dt)`); sin bandeja vuelve a 0 y la escena ocupa toda la pantalla.
+8. **Resultados en móvil vertical** (R-10 U7, WRK-TASK-080): con la hoja de resultados abajo, en vez del plano cerrado del director, una órbita general de la isla (radio 70 m, altura 88 m, suavizado 6). El centro de la imagen va al de la franja libre entre la parte superior y la hoja, así que los cuatro castillos se ven con su cifra de daño.
 
 ### Outputs
 

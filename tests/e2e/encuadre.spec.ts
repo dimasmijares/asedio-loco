@@ -32,6 +32,8 @@ for (const [name, vp, mobile] of [
       // Se espera a las etiquetas y no a la fase: en CI (SwiftShader) los resultados tardan más y
       // las etiquetas solo duran 2,8 s, así que se miden en cuanto aparecen.
       await page.waitForFunction(() => document.querySelectorAll('#dmg-labels .dmg-label').length >= 4, null, { timeout: 90_000 });
+      // La hoja de resultados del móvil sube con una animación de 0,25 s.
+      if (mobile) await page.waitForTimeout(350);
       const labels = await page.locator('#dmg-labels .dmg-label').evaluateAll((els) =>
         els.map((e) => {
           const r = e.getBoundingClientRect();

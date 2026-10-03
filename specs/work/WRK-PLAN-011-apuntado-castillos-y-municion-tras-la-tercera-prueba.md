@@ -53,6 +53,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 23 | WRK-TASK-077 · Bandeja del pulgar en móvil vertical (R-10 fase 2: U1, U3, U8) | completed | 076 | 2026-10-02 |
 | 24 | WRK-TASK-078 · Descripción de la munición al mantener la carta (R-10 fase 2: U2) | completed | 077 | 2026-10-02 |
 | 25 | WRK-TASK-079 · Parte superior de la partida en móvil vertical (R-10 fase 2: U4, U5) | completed | 078 | 2026-10-03 |
+| 26 | WRK-TASK-080 · Después de disparar en móvil vertical (R-10 fase 2: U6, U7) | completed | 079 | 2026-10-03 |
 
 ## Risk Assessment
 

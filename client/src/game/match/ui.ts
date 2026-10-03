@@ -54,7 +54,7 @@ export const TOUCH_HELP: HelpRow[] = [
 ];
 
 // Órbita (radio y altura) del plano general sobre la hoja de resultados en móvil vertical.
-const SHEET_ORBIT = [50, 46] as const;
+const SHEET_ORBIT = [70, 88] as const;
 
 const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot === slot)?.name ?? '¿?';
 
@@ -279,7 +279,11 @@ export class MatchUI {
     const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || (s.phase === 'results' && !sheetView) ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
       if (sheetView) {
-        if (g.rig.mode !== 'orbit' || g.rig.radius !== SHEET_ORBIT[0]) g.rig.orbit(new THREE.Vector3(0, 2, 0), SHEET_ORBIT[0], SHEET_ORBIT[1], 0.04);
+        if (g.rig.mode !== 'orbit' || g.rig.radius !== SHEET_ORBIT[0]) {
+          g.rig.orbit(new THREE.Vector3(0, 2, 0), SHEET_ORBIT[0], SHEET_ORBIT[1], 0.04);
+          // Los resultados duran 3,5 s: el plano llega en menos de uno.
+          g.rig.sharpness = 6;
+        }
       } else if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
       else if (s.phase === 'aim' && this.watchSlot >= 0) {
         const o = castleOrigin(this.watchSlot);
@@ -630,7 +634,8 @@ export class MatchUI {
       let y = Math.min(hgt - my, Math.max(my, ((1 - v.y) / 2) * hgt));
       let xx = x;
       if (sheet) {
-        y = Math.max(top + my, Math.min(y, rb.top - my));
+        // Contra la posición final de la hoja, no la de su animación de entrada.
+        y = Math.max(top + my, Math.min(y, hgt - this.sheetH - my));
         el.style.transform = `translate(${xx}px, ${y}px) translate(-50%, -50%)`;
         continue;
       }

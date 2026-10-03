@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.15.0
+version: 1.16.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -67,7 +67,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - **Quién ataca a quién** (WRK-TASK-045): durante la cuenta atrás, un arco de guiones del color de cada jugador vivo va de su catapulta al castillo al que apunta (`AttackArcs`, `render/arcs.ts`). Los guiones avanzan hacia el objetivo y el arco acaba en una punta. Se curva hacia la derecha de la marcha, así que dos jugadores que se atacan entre sí no se tapan. Aparece en 0,35 s y se desvanece en 0,3 s al empezar el impacto. Sale del `MatchState` (`target`), así que un invitado ve los mismos arcos que el anfitrión sin mensajes nuevos. Dos InstancedMesh: dos llamadas de dibujo.
    - Al empezar la cuenta atrás se retira el rótulo que hubiera en pantalla (WRK-TASK-038). Los bloques `@media` de pantallas pequeñas van al final de `style.css` para prevalecer sobre las reglas base.
    - Rótulos: «RONDA N», «LA LAVA SUBE», «REY ELIMINADO» / «TU REY HA CAÍDO», «REPETICIÓN».
-   - Resultados: frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
+   - Resultados (en PC y en horizontal; en vertical, la hoja del punto 9): frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
    - **Registro de los textos** (27-09-2026, a petición del usuario): claro, preciso y neutro. Sin coloquialismos ni chistes en rótulos, resultados, estadísticas, avisos y descripciones; los nombres propios (municiones, bots) y la cuenta atrás «3, 2, 1, ¡FUEGO!» se mantienen. Las descripciones de munición caben en dos líneas del HUD en vertical (la prueba `hud-compact` usa la más larga).
 5. **Ajustes** (en portada y HUD):
    - Calidad baja / media / alta, que se aplica al momento, también a los topes de fragmentos y partículas (D-046, WRK-TASK-013).
@@ -87,6 +87,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - **Bandeja del pulgar** (U1, U3 y U8, WRK-TASK-077): franja ciruela abajo, como mucho el 30 % del alto (252 px a 844), con `radius-lg` arriba y la zona segura del sistema. Botón de disparo a la izquierda (grana, 100 px) y pad de puntería a la derecha (222×112), espejados en modo zurdo; debajo, las cartas en fila (108×62, tecla en la esquina; con más de tres, la fila se desliza). La variable `--k` la reduce en pantallas más bajas o estrechas. Solo se ve mientras se puede apuntar. El tutorial resalta el pad en el paso 1, sin la mano.
    - **Descripción al mantener la carta** (U2, WRK-TASK-078, también en PC): un toque elige la carta; mantener el dedo 350 ms enseña encima la tarjeta `#ammo-tip` (crema, nombre en Lilita 18 con la chapa de rareza, descripción en Nunito 13 vino en dos líneas como mucho y una flecha hacia la carta). Al soltar desaparece y la carta queda elegida. En la bandeja va a todo el ancho, 10 px por encima; en PC sale al pasar el ratón, centrada sobre la carta y por encima de la fila. Las cartas no llevan `title`; nombre, rareza y descripción van en `aria-label`.
    - **Parte superior** (U4 y U5, WRK-TASK-079): solo lectura salvo el engranaje (44 px, crema). La píldora `#hud-round` junta «Ronda N» y los segundos en un círculo naranja (grana con pulso en los últimos 4 s); sin «Fase de apuntado». Debajo, `#hud-players` en una fila de chips de hasta 86 px: emblema, nombre corto y barra; el tuyo con borde crema; eliminado al 50 %; la marca de listo, la cruz o la desconexión, en una insignia en la esquina del emblema (decisión del 03-10-2026: junto al nombre no cabían). Después, el chip de viento (icono, flecha relativa a la cámara y fuerza redondeada, «→ 2»; sin viento no está) y el del objetivo (borde naranja). El silencio no está arriba: el sonido va en Ajustes.
+   - **Después de disparar** (U6 y U7, WRK-TASK-080): la bandeja se recoge en la barra `#hud-wait` («Disparo listo · Esperando a … · N de M listos», con la carta disparada y los emblemas; un hueco por cada uno que falta) y la escena ocupa toda la pantalla. Los resultados van en la hoja crema `#results-sheet`: «Fin de la ronda N», el objetivo cumplido destacado, la tabla jugador / pierde / derriba (tú resaltado) y una barra que se vacía hasta la ronda siguiente; sin la frase de la ronda. Las cifras de daño siguen sobre los castillos, por encima de la hoja, con un plano general de la isla (FEAT-CAMARA-001).
 
 ### Outputs
 
@@ -154,7 +155,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Tested by | `tests/e2e/smoke.spec.ts` | Portada sin errores |
 | Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |
 | Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
-| Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, sin solapes y 30 % del alto en vertical |
+| Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, descripción al mantener, parte superior, barra «Disparo listo» y hoja de resultados en vertical |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |
 

@@ -174,8 +174,8 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
     if (spectator && !reconnected && h.round >= 2 && h.phase === 'aim') {
       const g = guests[1];
       const before = (await summary(g))!;
-      // Mientras está fuera, los demás lo ven desconectado en el marcador: 📡 si su rey sigue
-      // vivo (si ya cayó, la celda enseña 💀) y, en cualquier caso, el aviso «Desconectado».
+      // Mientras está fuera, los demás lo ven desconectado en el marcador: el icono de desconexión si
+      // su rey sigue vivo (si ya cayó, la cruz) y, en cualquier caso, el aviso «Desconectado».
       const url = g.url();
       await g.goto('about:blank');
       await host.waitForFunction((slot) => document.querySelector(`#hud-players .hp[data-slot="${slot}"] .hp-state`)?.getAttribute('title') === 'Desconectado', before.you, { timeout: 20_000 });
@@ -398,7 +398,8 @@ test('un jugador desconectado pasa a ser un bot y recupera el control al volver'
     slot,
   );
   expect(p2.auto, `ronda ${p2.round}: lo lleva un bot`).toBe(true);
-  await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name`)).toContainText('🤖');
+  // El icono de bot junto al nombre (SVG desde R-10; antes, el emoji 🤖).
+  await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name .hp-bot`)).toHaveCount(1);
   // Fija su disparo contra un rival (en la cuenta atrás ya está fijado).
   await expect.poll(async () => { const q = await player(); return q.locked && q.target !== slot; }, { timeout: 30_000 }).toBe(true);
   // Vuelve con su token: desde el siguiente apuntado es otra vez suyo.
@@ -410,7 +411,7 @@ test('un jugador desconectado pasa a ser un bot y recupera el control al volver'
   const p3 = await player();
   if (p3.alive) {
     expect(p3.auto, 'de vuelta, ya no lo lleva un bot').toBe(false);
-    await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name`)).not.toContainText('🤖');
+    await expect(host.locator(`#hud-players .hp[data-slot="${slot}"] .hp-name .hp-bot`)).toHaveCount(0);
   }
   for (const p of [host, g1]) errors.push(...((p as Page & { errs?: string[] }).errs ?? []));
   expect(errors).toEqual([]);
