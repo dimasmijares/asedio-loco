@@ -23,6 +23,8 @@ async function device(browser: Browser, [, vp, mobile]: Fmt) {
   return page;
 }
 
+// Las partidas en red dibujan 1 fotograma por segundo (`render=1`, ADR-011): con dos o tres
+// navegadores por prueba, el dibujo por software dejaba sin CPU al resto en CI.
 const q = (fmt: Fmt, extra = '') => `/?${fmt[2] ? 'mobile=1&' : ''}fast=1${extra}`;
 
 // Código de la sala: las cuatro letras grandes de la sala (R-11 S1).
@@ -179,8 +181,8 @@ for (const fmt of FORMATS) {
     test(`revancha en un paso y volver a la sala (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);
-      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
-      await join(b, fmt, code, 'Beto', '&render=4');
+      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=1');
+      await join(b, fmt, code, 'Beto', '&render=1');
       await a.click('#start');
       const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
       for (const p of [a, b]) await expect.poll(() => phase(p), { timeout: 150_000 }).toBe('aim');
@@ -230,17 +232,17 @@ for (const fmt of FORMATS) {
 
     test(`llegar tarde: se explica y juegas en la próxima (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
-      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
+      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=1');
       await a.click('#start');
       const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
       await expect.poll(() => phase(a), { timeout: 150_000 }).toBe('aim');
       // Cata entra con la partida empezada: la hoja lo explica, con el marcador a la vista detrás.
       const c = await device(browser, fmt);
-      await c.goto(`${q(fmt, '&render=4')}#${code}`);
+      await c.goto(`${q(fmt, '&render=1')}#${code}`);
       await setName(c, 'Cata');
       await c.click('#join');
       // La hoja sale con la partida ya montada (carga la física y el 3D): con tres navegadores, tarda.
-      await expect(c.locator('#late-sheet')).toContainText('Partida en curso', { timeout: 90_000 });
+      await expect(c.locator('#late-sheet')).toContainText('Partida en curso', { timeout: 150_000 });
       await expect(c.locator('#late-sheet')).toContainText('Entrarás a jugar en la próxima partida');
       await c.click('#late-watch');
       await expect(c.locator('#late-sheet')).toHaveCount(0);
@@ -297,8 +299,8 @@ for (const fmt of FORMATS) {
     test(`salir de una partida en red desde el engranaje (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const b = await device(browser, fmt);
-      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
-      await join(b, fmt, code, 'Beto', '&render=4');
+      const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=1');
+      await join(b, fmt, code, 'Beto', '&render=1');
       await expect(humans(a)).toHaveCount(2);
       await a.click('#start');
       for (const p of [a, b]) await p.waitForFunction(() => (window as any).__asedio.mode?.state?.phase === 'aim', null, { timeout: 150_000 });
