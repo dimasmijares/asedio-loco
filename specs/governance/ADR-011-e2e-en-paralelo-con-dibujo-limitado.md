@@ -38,7 +38,7 @@ Las pruebas E2E se ejecutan contra producción tras cada despliegue. Con toda la
 **Positive:**
 
 - Una ejecución completa, con despliegue, tarda unos 4 minutos. Esperar a CI entre etapas sale barato (RULE-003).
-- Actualización del 03-10-2026: con más pruebas, `basicas` llegó a 14 minutos; se partió en `basicas`, `hud`, `espectador-repeticion` y `menus-y-marca` (11 trabajos) y `npm run e2e:grupos` impide que una prueba nueva se quede fuera de todos.
+- Actualización del 03-10-2026: con más pruebas, `basicas` llegó a 14 minutos; se partió en `basicas`, `hud`, `espectador-repeticion` y `menus-y-marca` (11 trabajos) y `npm run e2e:grupos` impide que una prueba nueva se quede fuera de todos. Ese mismo día, `sala.spec` (partidas con dos y tres navegadores) pasó a su propio grupo, `sala` (12 trabajos): dentro de `menus-y-marca` lo llevaba a 11 minutos.
 - Menos falsos fallos por lentitud del runner.
 
 **Negative:**

@@ -53,7 +53,9 @@ jobs:
           - grupo: espectador-repeticion
             args: espectador repeticion-lava
           - grupo: menus-y-marca
-            args: portada marca sala
+            args: portada marca
+          - grupo: sala
+            args: sala
           - grupo: fisica
             args: physics
           - grupo: solitario

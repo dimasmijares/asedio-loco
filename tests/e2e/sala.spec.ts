@@ -69,6 +69,9 @@ async function checkLayout(p: Page, vp: { width: number; height: number }, sel: 
 for (const fmt of FORMATS) {
   const [name, vp, mobile] = fmt;
   test.describe(name, () => {
+    // Las que juegan partidas, con dos o tres navegadores a la vez: en CI una ronda tarda bastante
+    // más que en local (salieron como «flaky» por tiempo el 03-10-2026).
+    test.describe.configure({ timeout: 300_000 });
     test(`código grande e invitar (${name})`, async ({ browser }) => {
       const a = await device(browser, fmt);
       const code = await createRoom(a, fmt, 'Ana');
@@ -180,7 +183,7 @@ for (const fmt of FORMATS) {
       await join(b, fmt, code, 'Beto', '&render=4');
       await a.click('#start');
       const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
-      for (const p of [a, b]) await expect.poll(() => phase(p), { timeout: 60_000 }).toBe('aim');
+      for (const p of [a, b]) await expect.poll(() => phase(p), { timeout: 150_000 }).toBe('aim');
       const game = (p: Page) => p.evaluate(() => (window as any).__asedio.conn.room.game);
       const first = await game(a);
       // Fin de partida al momento (gancho de pruebas): el anfitrión ve REVANCHA y VOLVER A LA SALA; el
@@ -195,7 +198,7 @@ for (const fmt of FORMATS) {
       await a.click('#rematch');
       for (const p of [a, b]) {
         await expect.poll(() => game(p)).toBe(first + 1);
-        await expect.poll(() => phase(p), { timeout: 60_000 }).toBe('aim');
+        await expect.poll(() => phase(p), { timeout: 150_000 }).toBe('aim');
         await expect(p.locator('#lobby')).toHaveCount(0);
         expect(await p.evaluate(() => (window as any).__asedio.mode.state.players.map((q: any) => q.name).sort())).toEqual(['Ana', 'Beto', 'Sir Bot']);
       }
@@ -215,13 +218,14 @@ for (const fmt of FORMATS) {
       const code = await createRoom(a, fmt, 'Ana', '&bots=1&render=4');
       await a.click('#start');
       const phase = (p: Page) => p.evaluate(() => (window as any).__asedio.mode?.state?.phase);
-      await expect.poll(() => phase(a), { timeout: 60_000 }).toBe('aim');
+      await expect.poll(() => phase(a), { timeout: 150_000 }).toBe('aim');
       // Cata entra con la partida empezada: la hoja lo explica, con el marcador a la vista detrás.
       const c = await device(browser, fmt);
       await c.goto(`${q(fmt, '&render=4')}#${code}`);
       await setName(c, 'Cata');
       await c.click('#join');
-      await expect(c.locator('#late-sheet')).toContainText('Partida en curso');
+      // La hoja sale con la partida ya montada (carga la física y el 3D): con tres navegadores, tarda.
+      await expect(c.locator('#late-sheet')).toContainText('Partida en curso', { timeout: 90_000 });
       await expect(c.locator('#late-sheet')).toContainText('Entrarás a jugar en la próxima partida');
       await c.click('#late-watch');
       await expect(c.locator('#late-sheet')).toHaveCount(0);
@@ -231,7 +235,7 @@ for (const fmt of FORMATS) {
       // En la revancha juega.
       await a.evaluate(() => (window as any).__asedio.mode.netHost.host.endNow());
       await a.click('#rematch');
-      await expect.poll(() => c.evaluate(() => (window as any).__asedio.mode?.you), { timeout: 60_000 }).not.toBeNull();
+      await expect.poll(() => c.evaluate(() => (window as any).__asedio.mode?.you), { timeout: 150_000 }).not.toBeNull();
       await expect(c.locator('#hud-spect')).toBeHidden();
       for (const p of [a, c]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
     });
@@ -282,7 +286,7 @@ for (const fmt of FORMATS) {
       await join(b, fmt, code, 'Beto', '&render=4');
       await expect(humans(a)).toHaveCount(2);
       await a.click('#start');
-      for (const p of [a, b]) await p.waitForFunction(() => (window as any).__asedio.mode?.state?.phase === 'aim', null, { timeout: 60_000 });
+      for (const p of [a, b]) await p.waitForFunction(() => (window as any).__asedio.mode?.state?.phase === 'aim', null, { timeout: 150_000 });
 
       await b.click('#hud-settings');
       await b.click('#settings-exit');
@@ -294,7 +298,7 @@ for (const fmt of FORMATS) {
       await a.waitForFunction(() => {
         const s = (window as any).__asedio.mode.state;
         return s.round >= 2 && s.players.some((p: any) => p.name === 'Beto' && (p.auto || !p.alive));
-      }, null, { timeout: 60_000 });
+      }, null, { timeout: 150_000 });
       for (const p of [a, b]) expect((p as Page & { errs?: string[] }).errs).toEqual([]);
     });
 
@@ -304,7 +308,7 @@ for (const fmt of FORMATS) {
         const errors = watchErrors(page);
         await page.goto(`${q(fmt, '&bots=2&seed=5&tutorial=0')}#solo`);
         // La primera partida de la página carga Rapier y el 3D: en CI llega a pasar de 30 s.
-        await page.waitForFunction(() => (window as any).__asedio.mode?.host?.state.phase === 'aim', null, { timeout: 60_000 });
+        await page.waitForFunction(() => (window as any).__asedio.mode?.host?.state.phase === 'aim', null, { timeout: 150_000 });
         await page.click('#hud-settings');
         await page.click('#settings-exit');
         await expect(page.locator('#leave-game')).toContainText('vuelves a la portada');
@@ -326,7 +330,7 @@ for (const fmt of FORMATS) {
             const s = (window as any).__asedio.mode?.host?.state;
             return { phase: s?.phase, rem: s?.remaining ?? 0, round: s?.round ?? -1 };
           });
-        await expect.poll(async () => (await host()).phase, { timeout: 60_000 }).toBe('aim');
+        await expect.poll(async () => (await host()).phase, { timeout: 150_000 }).toBe('aim');
         // Con el engranaje abierto, la partida se para (F9).
         await page.click('#hud-settings');
         await expect(page.locator('#settings-paused')).toHaveText('Partida en pausa');
@@ -352,7 +356,7 @@ for (const fmt of FORMATS) {
         await expect(page.locator('#solo-difficulty [aria-checked="true"]')).toHaveText('Difícil');
         await page.click('#solo-bots [data-v="1"]');
         await page.click('#solo-start');
-        await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode?.host?.state.players.length), { timeout: 60_000 }).toBe(2);
+        await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode?.host?.state.players.length), { timeout: 150_000 }).toBe(2);
         expect(errors).toEqual([]);
       });
     });

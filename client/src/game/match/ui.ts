@@ -207,7 +207,7 @@ export class MatchUI {
     this.watchSlot = order[(i + dir + order.length) % order.length];
   }
 
-  // Deslizar: un gesto rápido (menos de 0,6 s), sobre todo horizontal y de más de 60 px.
+  // Deslizar: un gesto de menos de 1 s, sobre todo horizontal y de más de 60 px.
   private swipe: { x: number; y: number; t: number; id: number } | null = null;
   private swipeStart = (e: PointerEvent) => {
     this.swipe = this.watching() && this.hud.trayMode ? { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId } : null;
@@ -215,7 +215,7 @@ export class MatchUI {
   private swipeEnd = (e: PointerEvent) => {
     const s = this.swipe;
     this.swipe = null;
-    if (!s || s.id !== e.pointerId || performance.now() - s.t > 600 || !this.watching()) return;
+    if (!s || s.id !== e.pointerId || performance.now() - s.t > 1000 || !this.watching()) return;
     const dx = e.clientX - s.x;
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) this.cycleWatch(dx < 0 ? 1 : -1);
   };
@@ -533,6 +533,9 @@ export class MatchUI {
       this.showResults(s);
     } else if (s.phase === 'over') {
       this.hud.setPhase('Fin de la partida', '');
+      // Las hojas de mirar (al caer tu rey o al llegar tarde) taparían los botones del final; si
+      // seguían abiertas, se cierran (en CI, la de «¡Tu rey ha caído!» tapó REVANCHA, 03-10-2026).
+      for (const id of ['fall-sheet-wrap', 'late-sheet-wrap']) document.getElementById(id)?.remove();
       if (prev !== 'over') {
         if (!this.startFinal(s)) this.showOver(s);
       }

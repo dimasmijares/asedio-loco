@@ -35,7 +35,7 @@ Todo cambio que se sube a `main`, porque `main` se despliega solo. Los cambios q
 
 ## Rationale
 
-El usuario juega en la URL pública con amigos: producción tiene que estar siempre jugable. CI tarda unos 10-15 minutos con los 11 trabajos en paralelo (ADR-011), así que esperar sale barato. Las capturas existen porque varios fallos solo se ven a ojo (cámara, HUD, repetición).
+El usuario juega en la URL pública con amigos: producción tiene que estar siempre jugable. CI tarda unos 10-15 minutos con los 12 trabajos en paralelo (ADR-011), así que esperar sale barato. Las capturas existen porque varios fallos solo se ven a ojo (cámara, HUD, repetición).
 
 ## Enforcement
 
@@ -43,7 +43,7 @@ El usuario juega en la URL pública con amigos: producción tiene que estar siem
 |-----------|-------|----------|
 | `npm run kdd:check`, typecheck, `npm test` y build antes de `wrangler deploy` | `.github/workflows/deploy.yml`, trabajo `deploy` | yes |
 | `npm run e2e:grupos`: cada prueba E2E está en algún grupo | `deploy.yml`, trabajo `deploy`, antes de desplegar | yes |
-| E2E contra producción en 11 grupos, con un reintento por prueba | mismo workflow, trabajos `e2e (<grupo>)` | no para el despliegue ya hecho; sí para la etapa siguiente. Una prueba «flaky» no bloquea, pero se apunta como tarea |
+| E2E contra producción en 12 grupos, con un reintento por prueba | mismo workflow, trabajos `e2e (<grupo>)` | no para el despliegue ya hecho; sí para la etapa siguiente. Una prueba «flaky» no bloquea, pero se apunta como tarea |
 | `npm run ci:estado -- --wait --breve` | local, al cerrar la tarea | yes, por proceso |
 | Revisión de capturas | artefactos `capturas-e2e-<grupo>` y `review.mjs` | no |
 

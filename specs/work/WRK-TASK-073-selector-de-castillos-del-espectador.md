@@ -45,3 +45,5 @@ Decisión del usuario (28-09-2026, WRK-TASK-061): cuando te eliminan, a la derec
 ## Evidence
 
 2026-10-03. `espectador`, `hud-compact`, `tutorial` y `touch` en verde en local (16 pruebas).
+
+2026-10-03. En CI, la revancha de `multiplayer.spec` se quedó esperando 15 min: el anfitrión había caído y la hoja «¡Tu rey ha caído!» seguía abierta encima de la pantalla final, tapando REVANCHA. Al pasar a `over` se cierran las hojas de mirar; `espectador.spec` lo comprueba. El gesto de deslizar admite hasta 1 s (en CI los toques simulados llegan despacio) y `sala.spec` pasa a su propio grupo de CI con más margen de tiempo (cuatro pruebas «flaky» por tiempo).

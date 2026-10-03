@@ -70,10 +70,25 @@ for (const [name, vp, mobile] of [
         const cdp = await page.context().newCDPSession(page);
         const touch = (type: string, x: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 380 }] });
         await touch('touchStart', 100);
-        for (const x of [160, 220, 280]) await touch('touchMove', x);
+        await touch('touchMove', 280);
         await touch('touchEnd', 280);
       } else await page.keyboard.press('q');
       await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBe(-1);
+      // Si la partida acaba con el aviso de la caída abierto, el aviso se cierra: no tapa los botones.
+      await page.evaluate(() => {
+        const m = (window as any).__asedio.mode;
+        m.ui.fallShown = false;
+        m.ui.showFall(m.host.state);
+      });
+      await expect(page.locator('#fall-sheet')).toBeVisible();
+      await page.evaluate(() => {
+        const h = (window as any).__asedio.mode.host;
+        h.update = Object.getPrototypeOf(h).update;
+        h.endNow();
+      });
+      await expect(page.locator('#game-over')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.sheet-wrap')).toHaveCount(0);
+      await page.locator('#rematch').click();
     });
   });
 }

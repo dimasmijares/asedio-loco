@@ -46,7 +46,7 @@ El juego necesita un sitio público y gratuito donde servir la página y coordin
   - Cualquier otra `/api/*` → 404. `run_worker_first` solo para `/api/*` y `/ws/*`.
 - **Una Durable Object `Room` por sala** (`idFromName(code)`, clase SQLite, migración `v1`). Usa WebSocket con hibernación (`acceptWebSocket`) y guarda el estado del lobby en `storage` (clave `s`).
 - **Ciclo de vida de la sala:** una sala vacía se borra con una alarma a los 60 s. En el lobby, el anfitrión que se cae tiene 8 s de gracia para recargar antes de perder el papel.
-- **Despliegue continuo** (`.github/workflows/deploy.yml`): cada push a `main` ejecuta `npm ci`, `npm run kdd:check`, `npm run e2e:grupos`, `typecheck`, `npm test`, `build` y `npx wrangler deploy`. Después, las E2E contra producción en 11 trabajos paralelos (DOC-OPS-001). Cada uno sube sus capturas como `capturas-e2e-<grupo>`.
+- **Despliegue continuo** (`.github/workflows/deploy.yml`): cada push a `main` ejecuta `npm ci`, `npm run kdd:check`, `npm run e2e:grupos`, `typecheck`, `npm test`, `build` y `npx wrangler deploy`. Después, las E2E contra producción en 12 trabajos paralelos (DOC-OPS-001). Cada uno sube sus capturas como `capturas-e2e-<grupo>`.
 - Secretos: `CLOUDFLARE_API_TOKEN` (solo Workers Scripts:Edit) como secret y `CLOUDFLARE_ACCOUNT_ID` como variable.
 
 ### Rationale
