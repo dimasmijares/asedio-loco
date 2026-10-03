@@ -319,8 +319,9 @@ export class MatchUI {
     if (me && me.alive && s.phase === 'aim') this.hud.setAmmo(me.ammo, me.selected, (i) => this.selectAmmo(i));
     else this.hud.setAmmo([], 0, () => {});
     this.hud.showConfirm(!!me?.alive && s.phase === 'aim', !!me?.locked);
-    // Tras disparar (móvil vertical): barra fina con quién falta (R-10 U6).
-    if (this.hud.trayMode && me?.alive && me.locked && s.phase === 'aim') {
+    // Tras disparar, quién falta: en móvil vertical, una barra fina (R-10 U6); en PC, la pista bajo la
+    // barra de potencia (U11).
+    if (me?.alive && me.locked && s.phase === 'aim') {
       const alive = s.players.filter((p) => p.alive);
       this.hud.setWait({
         ammo: me.ammo[me.selected] ?? null,

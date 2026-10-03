@@ -13,7 +13,8 @@ import { openSettings, settings } from './settings';
 // Una fila de la ayuda de controles: teclas (cada una en su tecla dibujada) y qué hacen.
 export type HelpRow = [keys: string[], what: string];
 
-const HELP_KEY = 'asedio.help';
+// Panel de controles (R-10 U11): plegado por defecto en el chip «Controles · H»; recuerda si se abrió.
+const HELP_KEY = 'asedio.controles';
 // Tecla de cada tarjeta de munición (el campo de pruebas tiene 12: 1-9, 0, − y =).
 const AMMO_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '−', '='];
 
@@ -39,10 +40,7 @@ export interface HudWait {
 export class Hud {
   root = h('div', { class: 'hud', id: 'hud' });
   private top = h('div', { class: 'hud-top' });
-  private timer = h('div', { class: 'hud-timer', id: 'hud-timer' });
-  private phase = h('div', { class: 'hud-phase', id: 'hud-phase' });
   private players = h('div', { class: 'hud-players', id: 'hud-players' });
-  private wind = h('div', { class: 'hud-wind', id: 'hud-wind' });
   private ammo = h('div', { class: 'hud-ammo', id: 'hud-ammo' });
   private aimInfo = h('div', { class: 'hud-aim', id: 'hud-aim' });
   // Tarjeta de descripción de una carta (R-10 U2, componente CartaMunicion): sin etiqueta fija; sale
@@ -58,22 +56,30 @@ export class Hud {
     this.hideTip();
   };
   private help = h('div', { class: 'hud-help', id: 'hud-help' });
-  private helpList = h('div', { class: 'help-list' });
-  private helpOpen = true;
+  private helpList = h('div', { class: 'help-list', id: 'help-list' });
+  private helpBtn: HTMLButtonElement;
+  private helpOpen = false;
   // El modo de pruebas enseña siempre sus estadísticas; en partida, solo si se activan en Ajustes.
   alwaysStats = false;
   private banner = h('div', { class: 'hud-banner', id: 'hud-banner' });
   private corner = h('div', { class: 'hud-corner' });
-  // Objetivo secundario de la ronda (WRK-TASK-043).
-  private goal = h('div', { class: 'hud-goal', id: 'hud-goal', hidden: true });
   private stats = h('div', { class: 'hud-stats', id: 'hud-stats' });
+  // HUD de PC (R-10 U11, maqueta «PC · Apuntando»): bajo las cartas, la barra de potencia de 300 px
+  // y la pista para cargar (con el disparo listo, a quién se espera); abajo a la derecha, la elevación.
+  private powerFill = h('span', { class: 'power-fill' });
+  private powerHint = h('span', { class: 'power-hint', id: 'power-hint' });
+  private power = h('div', { class: 'hud-power', id: 'hud-power', hidden: true }, h('span', { class: 'power-bar' }, this.powerFill), this.powerHint);
+  private powerKey = '';
+  private waitText = '';
+  private elevDeg = h('b', { class: 'elev-deg' });
+  private elev = h('div', { class: 'hud-elev', id: 'hud-elev', hidden: true }, this.elevDeg, h('span', { class: 'elev-label' }, 'elevación'));
   // Botón de disparo: se mantiene pulsado para cargar, igual que Espacio.
   confirmBtn = h('button', { class: 'primary hud-confirm', id: 'confirm' }, '');
   // En táctil no hay Q/E: dos flechas a los lados de la munición cambian de castillo objetivo.
   readonly touchUi = isMobileDevice();
   onTarget: (dir: number) => void = () => {};
   private targetBtns = [-1, 1].map((dir) => {
-    const b = h('button', { class: 'target-btn', id: dir < 0 ? 'target-prev' : 'target-next', 'aria-label': dir < 0 ? 'Castillo anterior' : 'Castillo siguiente', hidden: true }, dir < 0 ? '◀' : '▶');
+    const b = h('button', { class: 'target-btn', id: dir < 0 ? 'target-prev' : 'target-next', 'aria-label': dir < 0 ? 'Castillo anterior' : 'Castillo siguiente', hidden: true }, icon(dir < 0 ? 'prev' : 'next'));
     b.onpointerdown = (e) => {
       e.stopPropagation();
       this.onTarget(dir);
@@ -116,12 +122,14 @@ export class Hud {
   private confirmState = { show: false, locked: false };
   private confirmKey = '';
   private firePct: HTMLElement | null = null;
-  // Parte superior en móvil vertical (R-10 U4 y U5, componente Marcador), de solo lectura salvo el
-  // engranaje: ronda y segundos en una píldora, los jugadores en una fila de chips (el mismo
-  // #hud-players, cambiado de sitio) y los chips de viento y objetivo.
+  // Parte superior (componente Marcador): ronda y segundos en una píldora, los jugadores en chips (en
+  // fila en móvil vertical, R-10 U4; en columna en PC, U11) y los chips de viento y objetivo. En
+  // móvil vertical, lo único que se toca arriba es el engranaje. Son los mismos elementos en los dos
+  // formatos, cambiados de sitio.
   private roundText = h('span', { class: 'm-round-text' });
   private roundSecs = h('span', { class: 'm-round-secs', id: 'hud-round-secs' }, '–');
-  private mRow = h('div', { class: 'm-row' }, h('div', { class: 'm-round', id: 'hud-round' }, this.roundText, this.roundSecs));
+  private roundPill = h('div', { class: 'm-round', id: 'hud-round' }, this.roundText, this.roundSecs);
+  private mRow = h('div', { class: 'm-row' });
   private windArrow = h('span', { class: 'm-wind-arrow' }, icon('arrow'));
   private windVal = h('b');
   private windChip = h('span', { class: 'm-chip', id: 'hud-wind-chip', hidden: true }, icon('wind'), this.windArrow, this.windVal);
@@ -130,8 +138,8 @@ export class Hud {
   private flags = h('div', { class: 'm-flags', id: 'hud-flags', hidden: true }, this.windChip, this.goalChip);
   private mTop = h('div', { class: 'm-top', id: 'm-top' }, this.mRow);
   private left = h('div', { class: 'hud-left' });
-  private cornerRow = h('div', { class: 'row', style: 'gap:6px' });
-  private gear = h('button', { class: 'hud-mute hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
+  private cornerRow = h('div', { class: 'hud-corner-row' });
+  private gear = h('button', { class: 'hud-gear', id: 'hud-settings', title: 'Ajustes', 'aria-label': 'Ajustes' }, icon('gear'));
   private windKey = '';
   private playersKey = '';
   // Tras disparar en móvil vertical, la bandeja se recoge en esta barra fina (R-10 U6).
@@ -139,43 +147,38 @@ export class Hud {
   private waitKey = '';
 
   constructor(parent: HTMLElement) {
-    this.top.append(this.phase, this.timer);
     this.row.append(this.targetBtns[0], this.ammo, this.targetBtns[1]);
-    this.bottom.append(this.aimInfo, this.row, this.confirmBtn);
+    this.bottom.append(this.aimInfo, this.row, this.power, this.confirmBtn);
     const bottom = this.bottom;
-    // Silencio (en PC; en el móvil vertical, el sonido está en Ajustes).
-    const mute = h('button', { class: 'hud-mute', id: 'mute', title: 'Silenciar (M)', 'aria-label': 'Silenciar' }, icon(sfx.muted ? 'mute' : 'sound'));
-    const toggle = () => {
-      mute.replaceChildren(icon(sfx.toggleMute() ? 'mute' : 'sound'));
-    };
-    mute.onclick = toggle;
-    mute.onpointerdown = (e) => e.stopPropagation();
+    // Sin botón de silencio: el sonido está en Ajustes y la tecla M sigue valiendo.
     try {
-      this.helpOpen = localStorage.getItem(HELP_KEY) !== 'closed';
+      this.helpOpen = localStorage.getItem(HELP_KEY) === 'open';
     } catch {
       /* sin almacenamiento */
     }
-    // En táctil o con poca altura la ayuda empieza plegada: el tutorial ya lo explica.
-    if (this.touchUi || matchMedia('(max-height: 500px)').matches) this.helpOpen = false;
-    const helpBtn = this.touchUi
-      ? h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles' }, '❔ Controles')
-      : h('button', { class: 'help-toggle', id: 'help-toggle', title: 'Mostrar u ocultar los controles (H)' }, '⌨️ Controles ', h('kbd', null, 'H'));
-    helpBtn.onclick = () => this.toggleHelp();
-    helpBtn.onpointerdown = (e) => e.stopPropagation();
-    this.help.append(helpBtn, this.helpList);
-    this.help.classList.toggle('closed', !this.helpOpen);
+    // En táctil la ayuda empieza siempre plegada: el tutorial ya lo explica.
+    if (this.touchUi) this.helpOpen = false;
+    this.helpBtn = h(
+      'button',
+      { class: 'hud-chip help-toggle', id: 'help-toggle', 'aria-controls': 'help-list', title: this.touchUi ? 'Mostrar u ocultar los controles' : 'Mostrar u ocultar los controles (H)' },
+      icon('keyboard'),
+      this.touchUi ? 'Controles' : 'Controles · H',
+    );
+    this.helpBtn.onclick = () => this.toggleHelp();
+    this.helpBtn.onpointerdown = (e) => e.stopPropagation();
+    this.help.append(this.helpList, this.helpBtn);
+    this.setHelpOpen(this.helpOpen);
     this.keyHandler = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
-      if (e.code === 'KeyM') toggle();
+      if (e.code === 'KeyM') sfx.toggleMute();
       if (e.code === 'KeyH') this.toggleHelp();
     };
     window.addEventListener('keydown', this.keyHandler);
     this.gear.onclick = () => openSettings();
     this.gear.onpointerdown = (e) => e.stopPropagation();
-    this.cornerRow.append(this.wind, mute, this.gear);
-    this.corner.append(this.cornerRow, this.goal, this.stats);
-    this.left.append(this.players, this.help);
-    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.tray, this.wait, this.tip, this.banner, this.countdown);
+    this.corner.append(this.cornerRow, this.stats);
+    this.mTop.append(this.mRow);
+    this.root.append(this.top, this.left, this.corner, this.mTop, bottom, this.help, this.elev, this.tray, this.wait, this.tip, this.banner, this.countdown);
     // Al levantar el dedo, en cualquier sitio, la tarjeta desaparece (la carta ya quedó elegida).
     window.addEventListener('pointerup', this.endHold);
     window.addEventListener('pointercancel', this.endHold);
@@ -197,16 +200,19 @@ export class Hud {
     if (on) {
       if (this.confirmBtn.parentElement !== this.fireWrap) this.fireWrap.append(this.confirmBtn);
       if (this.ammo.parentElement !== this.tray) this.tray.append(this.ammo);
-      if (this.gear.parentElement !== this.mRow) {
-        this.mRow.append(this.gear);
+      if (this.roundPill.parentElement !== this.mRow) {
+        this.mRow.append(this.roundPill, this.gear);
         this.mTop.append(this.players, this.flags, this.stats);
       }
     } else {
       if (this.confirmBtn.parentElement !== this.bottom) this.bottom.append(this.confirmBtn);
       if (this.ammo.parentElement !== this.row) this.row.insertBefore(this.ammo, this.targetBtns[1]);
-      if (this.gear.parentElement !== this.cornerRow) {
-        this.cornerRow.append(this.gear);
-        this.left.prepend(this.players);
+      // En PC (U11): jugadores en columna arriba a la izquierda, la píldora arriba al centro, y el
+      // viento, el objetivo y el engranaje arriba a la derecha.
+      if (this.roundPill.parentElement !== this.top) {
+        this.top.append(this.roundPill);
+        this.cornerRow.append(this.flags, this.gear);
+        this.left.append(this.players);
         this.corner.append(this.stats);
       }
     }
@@ -224,10 +230,14 @@ export class Hud {
     if (key === this.waitKey) return;
     this.waitKey = key;
     this.wait.hidden = !w;
-    if (!w) return;
+    this.waitText = '';
+    if (!w) return this.refreshPower();
     const total = w.ready.length + w.pending.length;
     const names = w.pending.map((p) => p.name);
     const who = names.length ? `Esperando a ${names.length > 1 ? `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}` : names[0]}` : 'Todos listos';
+    // En PC, la misma información en la pista bajo la barra de potencia.
+    this.waitText = `${who} · ${w.ready.length} de ${total} listos`;
+    this.refreshPower();
     const emblem = (slot: number) => {
       const st = PLAYER_STYLES[slot];
       return h('span', { class: 'wait-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`);
@@ -246,17 +256,17 @@ export class Hud {
 
   private keyHandler: (e: KeyboardEvent) => void;
 
-  // En móvil vertical, solo la píldora «Ronda N» con los segundos: sin «Fase de apuntado» (U4).
-  setPhase(text: string, sub = '') {
-    this.phase.replaceChildren(h('b', null, text), sub ? h('span', null, sub) : '');
-    this.roundText.textContent = text;
+  // La píldora de la ronda (componente Marcador): «Ronda N» y los segundos, sin «Fase de apuntado»
+  // (U4, U11). `sub` queda como descripción. Con `pill`, la píldora dice eso y va sin segundos.
+  setPhase(text: string, sub = '', pill = '') {
+    const t = pill || text;
+    if (this.roundText.textContent !== t) this.roundText.textContent = t;
+    this.roundPill.classList.toggle('no-secs', !!pill);
+    this.roundPill.title = sub;
   }
 
   setTimer(sec: number | null, urgent = false) {
     const t = sec === null ? '' : String(Math.max(0, Math.ceil(sec)));
-    if (this.timer.textContent !== t) this.timer.textContent = t;
-    this.timer.classList.toggle('urgent', urgent);
-    this.timer.style.display = sec === null ? 'none' : '';
     const m = t || '–';
     if (this.roundSecs.textContent !== m) this.roundSecs.textContent = m;
     this.roundSecs.classList.toggle('urgent', urgent);
@@ -349,40 +359,35 @@ export class Hud {
     if (!aim) {
       // La línea del espectador (setWatch) se queda; la borra setWatch(null).
       if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
+      if (!this.elev.hidden) this.elev.hidden = true;
       return;
     }
-    // Sin potencia ni elevación en texto (WRK-TASK-061): la parábola ya lo dice. En la bandeja del
-    // móvil, la elevación va en una esquina del pad (R-10 U3).
+    // La elevación va en una esquina del pad en la bandeja del móvil (R-10 U3) y en grande abajo a la
+    // derecha en PC (U11); la potencia, en el anillo del botón o en la barra bajo las cartas.
     void ammo;
     const deg = `${Math.round(aim.pitch / DEG)}°`;
     if (this.padElev.textContent !== deg) this.padElev.textContent = deg;
+    if (this.elevDeg.textContent !== deg) this.elevDeg.textContent = deg;
+    if (this.elev.hidden) this.elev.hidden = false;
     if (!this.aimInfo.querySelector('#hud-watch')) this.aimInfo.textContent = '';
   }
 
-  // Viento: en PC, flecha relativa a la cámara y m/s; en móvil vertical, un chip con flecha y fuerza
-  // («→ 2») que desaparece sin viento (U5). Solo se toca el DOM si cambia algo.
+  // Viento (componente Marcador, U5 y U11): un chip con flecha relativa a la cámara y fuerza
+  // redondeada («→ 2») que desaparece sin viento; los m/s, en su `title`. Solo toca el DOM si cambia.
   setWind(w: Vec3 | null, cameraYaw = 0) {
     const sp = w ? Math.hypot(w[0], w[2]) : 0;
     // Ángulo de la flecha relativo a la cámara (arriba = hacia donde mira), a grados enteros.
     const deg = w && sp >= 0.05 ? Math.round((-(Math.atan2(w[0], w[2]) - cameraYaw) * 180) / Math.PI) : 0;
     const key = sp < 0.05 ? 'none' : `${sp.toFixed(1)}|${deg}`;
     if (key === this.windKey) return;
-    const was = this.windKey.split('|')[0];
     this.windKey = key;
     this.windChip.hidden = sp < 0.05;
     this.refreshFlags();
-    if (sp < 0.05) {
-      this.wind.replaceChildren(h('span', { class: 'muted' }, icon('wind'), ' Sin viento'));
-      return;
-    }
-    const rot = `rotate(${deg}deg)`;
-    if (was !== sp.toFixed(1) || !this.wind.querySelector('.wind-arrow')) {
-      this.wind.replaceChildren(h('span', null, icon('wind'), ' Viento '), h('span', { class: 'wind-arrow' }, icon('arrow')), h('b', null, ` ${sp.toFixed(1)}`), h('span', { class: 'muted' }, ' m/s'));
-      this.windVal.textContent = String(Math.max(1, Math.round(sp)));
-      this.windChip.setAttribute('aria-label', `Viento de ${sp.toFixed(1)} m/s`);
-    }
-    (this.wind.querySelector('.wind-arrow') as HTMLElement).style.transform = rot;
-    this.windArrow.style.transform = rot;
+    if (sp < 0.05) return;
+    this.windVal.textContent = String(Math.max(1, Math.round(sp)));
+    this.windChip.setAttribute('aria-label', `Viento de ${sp.toFixed(1)} m/s`);
+    this.windChip.title = `Viento de ${sp.toFixed(1)} m/s`;
+    this.windArrow.style.transform = `rotate(${deg}deg)`;
   }
 
   // La fila de viento y objetivo solo ocupa sitio si tiene algo.
@@ -391,9 +396,10 @@ export class Hud {
     if (this.flags.hidden !== empty) this.flags.hidden = empty;
   }
 
-  // Marcador: en PC, una columna con nombre, porcentaje y barra; en móvil vertical, la misma lista
-  // en una fila de chips (emblema, nombre corto, barra; el tuyo con borde crema). Estado con iconos:
-  // listo, eliminado o desconectado. Se rehace solo si cambia algo (se llama en cada fotograma).
+  // Marcador (componente Marcador): un chip por jugador con emblema, nombre corto y barra de lo que le
+  // queda; el tuyo con borde crema. En PC, en columna; en móvil vertical, en fila. Estado con iconos:
+  // listo, eliminado o desconectado. El nombre completo, en `title` y `aria-label`. Se rehace solo si
+  // cambia algo (se llama en cada fotograma).
   setPlayers(list: HudPlayer[]) {
     const key = list.map((p) => `${p.slot}|${p.name}|${p.alive}|${p.blocks}|${p.maxBlocks}|${p.locked}|${p.bot}|${p.you}|${p.connected}`).join(';');
     if (key === this.playersKey) return;
@@ -404,18 +410,29 @@ export class Hud {
         const pct = Math.min(100, Math.round((p.blocks / Math.max(1, p.maxBlocks)) * 100));
         // Desconectado: su catapulta dispara con la última puntería al acabar el tiempo.
         const state = !p.alive ? icon('cross') : p.connected === false ? icon('offline') : p.locked ? icon('check') : '';
+        const said = !p.alive ? 'Eliminado' : p.connected === false ? 'Desconectado' : p.locked ? 'Listo' : '';
         return h(
           'div',
-          { class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}${state ? ' mark' : ''}`, 'data-slot': String(p.slot), title: p.name },
+          {
+            class: `hp${p.alive ? '' : ' out'}${p.you ? ' you' : ''}${state ? ' mark' : ''}`,
+            'data-slot': String(p.slot),
+            title: p.name,
+            'aria-label': `${p.name}${p.you ? ' (tú)' : ''}${p.bot ? ', bot' : ''}: ${pct} % en pie${said ? `, ${said.toLowerCase()}` : ''}`,
+          },
           // U+FE0E: el emblema como texto, nunca como emoji.
-          h('div', { class: 'banner', style: `background:${st.color};color:${st.ink};text-shadow:none` }, `${st.glyph}\uFE0E`),
+          h('span', { class: 'hp-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`),
           h(
             'div',
             { class: 'hp-body' },
-            h('div', { class: 'hp-top' }, h('div', { class: 'hp-name' }, p.name, p.bot ? icon('bot', 'hp-bot') : '', p.you ? ' (tú)' : ''), h('div', { class: 'hp-short' }, shortName(p)), p.alive ? h('span', { class: 'hp-pct' }, `${pct}%`) : ''),
+            h(
+              'div',
+              { class: 'hp-top' },
+              h('div', { class: 'hp-name' }, p.name, p.bot ? icon('bot', 'hp-bot') : '', p.you ? ' (tú)' : ''),
+              h('div', { class: 'hp-short' }, shortName(p)),
+              h('span', { class: 'hp-state', title: p.connected === false ? 'Desconectado' : '' }, state),
+            ),
             h('div', { class: 'hp-bar' }, h('div', { style: `width:${pct}%;background:${st.color}` })),
           ),
-          h('div', { class: 'hp-state', title: p.connected === false ? 'Desconectado' : '', 'aria-label': !p.alive ? 'Eliminado' : p.connected === false ? 'Desconectado' : p.locked ? 'Listo' : '' }, state),
         );
       }),
     );
@@ -427,9 +444,14 @@ export class Hud {
     );
   }
 
+  private setHelpOpen(open: boolean) {
+    this.helpOpen = open;
+    this.help.classList.toggle('closed', !open);
+    this.helpBtn.setAttribute('aria-expanded', String(open));
+  }
+
   private toggleHelp() {
-    this.helpOpen = !this.helpOpen;
-    this.help.classList.toggle('closed', !this.helpOpen);
+    this.setHelpOpen(!this.helpOpen);
     try {
       localStorage.setItem(HELP_KEY, this.helpOpen ? 'open' : 'closed');
     } catch {
@@ -441,14 +463,11 @@ export class Hud {
     this.help.style.display = show ? '' : 'none';
   }
 
-  // Objetivo de la ronda: chapa en PC y chip con borde naranja en móvil vertical (U5).
+  // Objetivo de la ronda: chip con borde naranja (U5, U11), con el texto completo en el `title`.
   setGoal(text: string | null, title = '') {
     const t = text ?? '';
-    if (this.goal.dataset.t === t) return;
-    this.goal.dataset.t = t;
-    this.goal.hidden = !t;
-    this.goal.title = title;
-    this.goal.replaceChildren(t ? h('span', null, icon('target'), ' ', h('b', null, t)) : '');
+    if (this.goalChip.dataset.t === t) return;
+    this.goalChip.dataset.t = t;
     this.goalText.textContent = t;
     this.goalChip.hidden = !t;
     this.goalChip.title = title;
@@ -565,12 +584,16 @@ export class Hud {
       if (was) {
         this.confirmKey = '';
         this.refreshConfirm();
+        this.powerFill.style.width = '0%';
+        this.refreshPower();
       }
       return;
     }
     const pct = `${Math.round(p * 100)}%`;
     b.style.setProperty('--p', pct);
     this.fireWrap.style.setProperty('--p', pct);
+    this.powerFill.style.width = pct;
+    if (!was) this.refreshPower();
     if (!this.roundFire) {
       b.textContent = `Fuerza ${Math.round(p * 100)} %`;
       return;
@@ -590,7 +613,23 @@ export class Hud {
     b.disabled = locked;
     // La bandeja solo está mientras se puede apuntar: tras disparar se recoge (U6).
     this.root.classList.toggle('tray-on', show && !locked);
+    if (this.power.hidden !== !show) this.power.hidden = !show;
     this.refreshConfirm();
+    this.refreshPower();
+  }
+
+  // Pista bajo la barra de potencia (PC, U11): cómo cargar; cargando, que se suelte; con el disparo
+  // listo, a quién se espera. Solo se rehace si cambia.
+  private refreshPower() {
+    const charging = this.confirmBtn.classList.contains('charging');
+    const { locked } = this.confirmState;
+    const key = `${charging}|${locked}|${this.waitText}`;
+    if (key === this.powerKey) return;
+    this.powerKey = key;
+    this.power.classList.toggle('locked', locked);
+    if (locked) this.powerHint.replaceChildren(icon('check'), h('span', null, this.waitText ? `Disparo listo · ${this.waitText}` : 'Disparo listo'));
+    else if (charging) this.powerHint.replaceChildren('Suelta para disparar');
+    else this.powerHint.replaceChildren('Mantén ', h('kbd', null, 'Espacio'), ' o clic para cargar');
   }
 
   // Contenido del botón de disparo; solo se rehace si cambia (se llama en cada fotograma).
@@ -604,7 +643,7 @@ export class Hud {
     this.confirmKey = key;
     // Redondo: la llama y «MANTÉN» (componente BandejaMovil); con el disparo listo, una marca.
     if (round) b.replaceChildren(icon(locked ? 'check' : 'flame', 'fire-ico'), locked ? '' : h('span', { class: 'fire-label' }, 'MANTÉN'));
-    else b.textContent = locked ? '✔ Disparo listo · esperando al resto de jugadores' : 'Mantén Espacio o clic izquierdo';
+    else b.textContent = locked ? 'Disparo listo' : 'Mantén Espacio o clic izquierdo';
     b.setAttribute('aria-label', locked ? 'Disparo listo' : 'Mantén pulsado para cargar y suelta para disparar');
   }
 

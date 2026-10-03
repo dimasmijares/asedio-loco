@@ -24,6 +24,8 @@ const FOCUS: Record<Step, string[]> = {
   fire: ['#confirm'],
 };
 const TRAY_FOCUS: Record<Step, string[]> = { ...FOCUS, aim: ['#aim-pad'] };
+// En PC no hay botón de disparo: el paso 3 resalta la barra de potencia y su pista (R-10 U11).
+const PC_FOCUS: Record<Step, string[]> = { ...FOCUS, fire: ['#hud-power'] };
 
 const STEPS: { id: Step; title: string; text: string }[] = [
   { id: 'aim', title: '1 · Apunta', text: 'Mantén el clic derecho y mueve el ratón: a los lados giras la catapulta, arriba y abajo cambias la elevación.' },
@@ -50,7 +52,7 @@ export class Tutorial {
   private i = 0;
   private tray = trayLayout();
   private steps = this.tray ? TRAY_STEPS : isMobileDevice() ? TOUCH_STEPS : STEPS;
-  private focusOf = this.tray ? TRAY_FOCUS : FOCUS;
+  private focusOf = this.tray ? TRAY_FOCUS : isMobileDevice() ? FOCUS : PC_FOCUS;
   private el: HTMLElement;
   // Mano (táctil) o ratón que se desliza sobre la escena en el paso de apuntar.
   private swipe = h('div', { class: 'coach-swipe', 'aria-hidden': 'true' }, icon(isMobileDevice() ? 'hand' : 'mouse'));

@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // Tutorial de la primera partida (WRK-TASK-048): en PC y en móvil vertical, los 3 pasos se leen
 // sin tapar ningún control y cada uno resalta el que toca.
-const CONTROLS = ['.hud-top', '#m-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm', '#tray'];
+const CONTROLS = ['.hud-top', '#m-top', '#hud-players', '.hud-corner', '#hud-aim', '#hud-ammo', '#target-prev', '#target-next', '#confirm', '#tray', '#hud-power', '#hud-help', '#hud-elev'];
 
 async function overlaps(page: Page) {
   return page.evaluate((sel) => {
@@ -58,9 +58,9 @@ for (const [name, vp, mobile] of [
       // Tocar una tarjeta avanza el paso.
       await page.locator('#hud-ammo .ammo').nth(1).click();
 
-      // 3 · ¡Fuego!: resalta el botón de disparo.
+      // 3 · ¡Fuego!: resalta el botón de disparo (en PC, la barra de potencia, R-10 U11).
       await expect(page.locator('#tutorial')).toHaveAttribute('data-step', 'fire');
-      expect(await focused(page)).toEqual(['#confirm']);
+      expect(await focused(page)).toEqual([mobile ? '#confirm' : '#hud-power']);
       expect(await overlaps(page), 'el paso 3 no tapa controles').toEqual([]);
       await page.evaluate(() => (window as any).__asedio.mode.ui.tutorial.event('fire'));
 

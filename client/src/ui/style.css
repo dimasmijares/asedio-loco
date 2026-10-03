@@ -416,56 +416,12 @@ button.big.danger {
 
 .hud-top {
   position: absolute;
-  top: 12px;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 14px;
 }
 
-.hud-phase {
-  background: var(--al-panel-hud);
-  border: 3px solid var(--al-crema-oscuro);
-  border-radius: var(--al-radius-md);
-  padding: 6px 16px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.hud-phase b {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: 22px;
-  display: block;
-}
-
-.hud-phase span {
-  font-size: 15px;
-  opacity: 0.9;
-}
-
-.hud-timer {
-  font-family: var(--display);
-  font-size: 40px;
-  min-width: 64px;
-  height: 64px;
-  line-height: 58px;
-  text-align: center;
-  border-radius: 50%;
-  background: var(--al-naranja);
-  color: var(--ink);
-  text-shadow: none;
-  border: 4px solid var(--ink);
-}
-
-/* Últimos segundos: peligro. */
-.hud-timer.urgent {
-  background: var(--al-grana);
-  color: var(--al-crema);
-  animation: pulse 0.5s infinite alternate;
-}
-
+/* Últimos segundos: peligro (círculo de la píldora de la ronda). */
 @keyframes pulse {
   to {
     transform: scale(1.12);
@@ -474,129 +430,24 @@ button.big.danger {
 
 .hud-left {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  display: grid;
-  gap: 12px;
-  width: 225px;
-  justify-items: start;
-}
-
-.hud-players {
-  display: grid;
-  gap: 6px;
-  width: 225px;
-}
-
-.hp {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--al-panel-hud);
-  border-radius: 10px;
-  padding: 5px 8px;
-  border: 2px solid var(--al-noche);
-}
-
-.hp.you {
-  border-color: var(--al-crema);
-}
-
-.hp.out {
-  opacity: 0.55;
-  filter: grayscale(0.7);
-}
-
-.hp .banner {
-  width: 24px;
-  height: 30px;
-  font-size: 14px;
-}
-
-.hp-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.hp-top {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.hp-pct {
-  margin-left: auto;
-  font-size: 12px;
-  font-weight: 800;
-  opacity: 0.8;
-  font-variant-numeric: tabular-nums;
-}
-
-.hp-name {
-  min-width: 0;
-  font-weight: 800;
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hp-short {
-  display: none;
-}
-
-.hp-bar {
-  height: 7px;
-  background: rgba(254, 231, 181, 0.22);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 3px;
-}
-
-.hp-bar > div {
-  height: 100%;
-  transition: width 0.4s;
-}
-
-.hp-state {
-  font-size: 18px;
-  width: 22px;
-  text-align: center;
+  top: 20px;
+  left: 20px;
 }
 
 .hud-corner {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  text-align: right;
+  top: 20px;
+  right: 20px;
   display: grid;
   gap: 6px;
   justify-items: end;
+  text-align: right;
 }
 
-.hud-wind {
-  white-space: nowrap;
-  background: var(--al-panel-hud);
-  border: 2px solid var(--al-noche);
-  border-radius: 10px;
-  padding: 6px 12px;
-  font-size: 16px;
-}
-
-.hud-goal {
-  white-space: nowrap;
-  background: var(--al-panel-hud);
-  border: 2px solid var(--al-naranja);
-  border-radius: 10px;
-  padding: 4px 10px;
-  font-size: 14px;
-}
-
-.wind-arrow {
-  display: inline-block;
-  font-size: 22px;
-  color: var(--al-crema);
-  transition: transform 0.3s;
+.hud-corner-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .hud-stats {
@@ -754,34 +605,16 @@ body.touch .hud-confirm.charging {
   font: 900 12px var(--font);
 }
 
+/* Controles (R-10 U11): plegados en el chip «Controles · H» abajo a la izquierda; H o un clic los
+   abre encima. Solo se ven mientras se puede apuntar. */
 .hud-help {
-  width: max-content;
-  background: var(--al-panel-hud);
-  border-radius: 12px;
-  padding: 6px 10px 8px;
-  font-size: 13px;
-  backdrop-filter: blur(3px);
-}
-
-.help-toggle {
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: inherit;
-  padding: 2px 0 4px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.help-toggle {
-  pointer-events: auto;
-}
-
-.help-toggle:hover,
-.help-toggle:active:not(:disabled) {
-  transform: none;
-  box-shadow: none;
-  color: var(--al-naranja);
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .hud-help.closed .help-list {
@@ -790,7 +623,46 @@ body.touch .hud-confirm.charging {
 
 .help-list {
   display: grid;
-  gap: 4px;
+  gap: 5px;
+  width: 236px;
+  padding: 8px 10px;
+  border-radius: var(--al-radius-md);
+  border: 2px solid var(--al-noche);
+  background: var(--al-panel-hud);
+  font-size: 13px;
+}
+
+/* Chip del HUD (componente Marcador): 30 px, noche al 86 %, icono y texto crema. */
+.hud-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--al-radius-full);
+  border: 2px solid var(--al-noche);
+  background: var(--al-panel-hud);
+  box-shadow: none;
+  color: var(--al-crema);
+  text-shadow: none;
+  font: 800 13px var(--font);
+  white-space: nowrap;
+}
+.hud-chip > .ico {
+  font-size: 16px;
+}
+.hud-chip:hover,
+.hud-chip[aria-expanded='true'] {
+  border-color: var(--al-naranja);
+}
+.hud-chip:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+/* Con el dedo, 44 px. */
+body.touch .hud-chip {
+  height: 44px;
+  padding: 0 14px 0 12px;
 }
 
 .help-row {
@@ -864,9 +736,6 @@ kbd {
 }
 
 @media (max-width: 700px) {
-  .hud-players {
-    width: 160px;
-  }
   .hud-help {
     display: none;
   }
@@ -1019,13 +888,6 @@ kbd {
 .setup-note {
   font-size: 14px;
   margin-top: 10px;
-}
-
-.hud-mute {
-  font-size: 18px;
-  padding: 4px 10px;
-  box-shadow: 0 3px 0 var(--ink);
-  background: var(--al-crema);
 }
 
 /* Fondo animado de la portada y el lobby */
@@ -1710,16 +1572,16 @@ html.big-text body {
 }
 
 html.big-text .hud-players {
-  width: 260px;
+  width: 230px;
 }
 
-html.big-text .hp-name,
+html.big-text .hp-short,
 html.big-text .hud-aim,
 html.big-text .res-row {
   font-size: 19px;
 }
 
-html.big-text .hud-help {
+html.big-text .help-list {
   font-size: 16px;
 }
 
@@ -1968,92 +1830,6 @@ html.big-text .ammo-name {
    El marcador se queda en estandarte, porcentaje y calavera; todo se encoge para que se vea
    la isla. Por encima de 500 px de alto no cambia nada. */
 @media (max-height: 500px) {
-  .hud-top {
-    top: 6px;
-    gap: 8px;
-  }
-  .hud-phase {
-    padding: 2px 10px;
-    border-width: 2px;
-    border-radius: 9px;
-  }
-  .hud-phase b {
-    font-size: 15px;
-  }
-  .hud-phase span {
-    font-size: 11px;
-  }
-  .hud-timer {
-    font-size: 24px;
-    min-width: 42px;
-    height: 42px;
-    line-height: 36px;
-    border-width: 3px;
-  }
-  .hud-left {
-    top: 6px;
-    left: max(6px, env(safe-area-inset-left));
-    gap: 6px;
-    width: auto;
-  }
-  .hud-players {
-    width: auto;
-    gap: 3px;
-  }
-  .hp {
-    padding: 2px 6px;
-    gap: 5px;
-    border-radius: 8px;
-  }
-  .hp .banner {
-    width: 18px;
-    height: 22px;
-    font-size: 11px;
-    padding-top: 1px;
-  }
-  /* Dos líneas: nombre corto arriba; barra y porcentaje debajo (WRK-TASK-046). */
-  .hp-body {
-    flex: none;
-    width: 52px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    column-gap: 3px;
-    line-height: 11px;
-  }
-  .hp-top {
-    display: contents;
-  }
-  .hp-name {
-    display: none;
-  }
-  .hp-short {
-    display: block;
-    grid-column: 1 / -1;
-    min-width: 0;
-    font-size: 10px;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .hp-pct {
-    grid-row: 2;
-    grid-column: 2;
-    margin-left: 0;
-    font-size: 9px;
-    opacity: 1;
-  }
-  .hp-bar {
-    grid-row: 2;
-    grid-column: 1;
-    height: 4px;
-    margin-top: 0;
-  }
-  .hp-state {
-    font-size: 13px;
-    width: 14px;
-  }
   .coach {
     top: 58px;
     width: min(440px, calc(100vw - 300px));
@@ -2062,15 +1838,6 @@ html.big-text .ammo-name {
   }
   .coach b {
     font-size: 16px;
-  }
-  .hud-corner {
-    top: 6px;
-    right: max(6px, env(safe-area-inset-right));
-    gap: 4px;
-  }
-  .hud-wind {
-    font-size: 12px;
-    padding: 3px 8px;
   }
   .hud-bottom {
     bottom: 6px;
@@ -2098,15 +1865,6 @@ html.big-text .ammo-name {
     min-width: 44px;
     min-height: 44px;
     font-size: 18px;
-  }
-  /* Con ratón (ventana baja), el botón largo baja a la esquina derecha. */
-  .hud-confirm {
-    position: fixed;
-    right: 10px;
-    bottom: 8px;
-    min-width: 0;
-    font-size: 14px;
-    padding: 8px 14px;
   }
   body.touch .hud-confirm {
     width: 84px;
@@ -2190,133 +1948,12 @@ html.big-text .ammo-name {
    Arriba: marcador compacto a la izquierda, reloj y fase en el centro, botones y viento a la
    derecha. Abajo: flechas y tarjetas en una fila y, encima a la derecha, el botón de disparo. */
 @media (orientation: portrait) and (max-width: 600px) {
-  .hud-top {
-    top: 6px;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .hud-phase {
-    padding: 2px 8px;
-    border-width: 2px;
-    border-radius: 9px;
-  }
-  .hud-phase b {
-    font-size: 14px;
-  }
-  .hud-phase span {
-    font-size: 11px;
-    white-space: nowrap;
-  }
-  .hud-timer {
-    font-size: 24px;
-    min-width: 42px;
-    height: 42px;
-    line-height: 36px;
-    border-width: 3px;
-  }
-  .hud-left {
-    top: 6px;
-    left: 6px;
-    gap: 6px;
-    width: auto;
-  }
-  .hud-players {
-    width: auto;
-    gap: 3px;
-  }
-  .hp {
-    padding: 2px 6px;
-    gap: 5px;
-    border-radius: 8px;
-  }
-  .hp .banner {
-    width: 18px;
-    height: 22px;
-    font-size: 11px;
-    padding-top: 1px;
-  }
-  /* Dos líneas: nombre corto arriba; barra y porcentaje debajo (WRK-TASK-046). */
-  .hp-body {
-    flex: none;
-    width: 52px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    column-gap: 3px;
-    line-height: 11px;
-  }
-  .hp-top {
-    display: contents;
-  }
-  .hp-name {
-    display: none;
-  }
-  .hp-short {
-    display: block;
-    grid-column: 1 / -1;
-    min-width: 0;
-    font-size: 10px;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .hp-pct {
-    grid-row: 2;
-    grid-column: 2;
-    margin-left: 0;
-    font-size: 9px;
-    opacity: 1;
-  }
-  .hp-bar {
-    grid-row: 2;
-    grid-column: 1;
-    height: 4px;
-    margin-top: 0;
-  }
-  .hp-state {
-    font-size: 13px;
-    width: 14px;
-  }
-  /* Objetivo de la ronda: estrecho, bajo el viento, sin invadir el panel de la ronda. */
-  .hud-goal {
-    font-size: 11px;
-    white-space: normal;
-    max-width: 96px;
-    padding: 3px 7px;
-    text-align: right;
-  }
   /* En vertical, bajo el marcador: ocupa el cielo, no el castillo ni el botón de disparo. */
   .coach {
     top: 148px;
     width: calc(100vw - 24px);
     font-size: 15px;
     padding: 10px 14px 8px;
-  }
-  .hud-corner {
-    top: 6px;
-    right: 6px;
-    gap: 4px;
-  }
-  .hud-mute {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    font-size: 18px;
-  }
-  /* El viento baja debajo de los botones para no montarse sobre la fase. */
-  .hud-corner > .row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    justify-items: end;
-  }
-  .hud-corner > .row > .hud-wind {
-    grid-row: 2;
-    grid-column: 1 / -1;
-  }
-  .hud-wind {
-    font-size: 12px;
-    padding: 3px 8px;
   }
   .hud-bottom {
     bottom: 8px;
@@ -2376,14 +2013,14 @@ html.big-text .ammo-name {
 /* ---------- Barra de munición sin textos (WRK-TASK-061, aprobada en R-03) ---------- */
 
 
-/* Cartas: grandes, con el color de su rareza muy visible; la elegida crece, sube y brilla. */
+/* Cartas (componente CartaMunicion): 92×92 en PC, con el color de su rareza muy visible. */
 .hud-ammo {
   align-items: flex-end;
   gap: 12px;
 }
 .ammo {
-  width: 84px;
-  height: 84px;
+  width: 92px;
+  height: 92px;
   min-width: 0;
   padding: 0;
   justify-content: space-between;
@@ -2394,10 +2031,8 @@ html.big-text .ammo-name {
   box-shadow: var(--al-sombra-dura);
   transition: transform 0.12s ease, width 0.12s ease, height 0.12s ease;
 }
-/* La elegida sube y lleva anillo naranja (componente CartaMunicion). */
+/* La elegida sube 6 px y lleva anillo naranja, sin cambiar de tamaño (componente CartaMunicion). */
 .ammo.sel {
-  width: 100px;
-  height: 100px;
   background: var(--al-crema);
   transform: translateY(-6px);
   box-shadow: 0 0 0 3px var(--al-noche), 0 0 0 7px var(--al-naranja), 0 6px 0 7px var(--al-noche);
@@ -2407,9 +2042,6 @@ html.big-text .ammo-name {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 34px;
-}
-.ammo.sel .ammo-icon {
   font-size: 42px;
 }
 /* Ilustración de la munición (R-10 E4): 1,2 em, así sigue los tamaños de cada formato. */
@@ -2452,15 +2084,8 @@ html.big-text .ammo-name {
     width: 64px;
     height: 64px;
   }
-  .ammo.sel {
-    width: 76px;
-    height: 76px;
-  }
   .ammo-icon {
-    font-size: 26px;
-  }
-  .ammo.sel .ammo-icon {
-    font-size: 32px;
+    font-size: 28px;
   }
   .ammo-rar {
     font-size: 9px;
@@ -2493,15 +2118,7 @@ html.big-text .ammo-name {
 .hud-row {
   margin-top: 10px;
 }
-/* Panel de controles del mismo ancho que el marcador: teclas a la izquierda, texto corto al lado. */
-.hud-help {
-  width: 100%;
-  box-sizing: border-box;
-  justify-self: stretch;
-}
-.help-list {
-  gap: 5px;
-}
+/* Panel de controles: teclas a la izquierda, texto corto al lado. */
 .help-row {
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
@@ -2805,10 +2422,6 @@ label.check:has(.check-hint) {
   width: 1em;
   height: 1em;
 }
-.wind-arrow {
-  font-size: 20px;
-  vertical-align: -0.1em;
-}
 .hp-bot {
   margin-left: 4px;
   font-size: 0.9em;
@@ -2821,11 +2434,159 @@ label.check:has(.check-hint) {
   color: var(--al-crema-oscuro);
 }
 
+/* ---------- Marcador: píldora de la ronda y chips de jugador (componente Marcador) ----------
+   Solo se leen. La píldora junta «Ronda N» y los segundos (sin «Fase de apuntado»); cada jugador es
+   un chip con emblema, nombre corto y barra de lo que le queda (el tuyo con borde crema; eliminado al
+   50 %), con la marca de listo, la cruz o la desconexión a la derecha del nombre. En PC (U11) los
+   chips van en columna arriba a la izquierda; en móvil vertical (U4), en fila. */
+.m-round {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 6px 0 18px;
+  border-radius: var(--al-radius-full);
+  background: var(--al-noche);
+  border: 2px solid var(--al-crema-oscuro);
+  text-shadow: none;
+}
+.m-round-text {
+  font: 400 22px var(--display);
+  color: var(--al-crema);
+  white-space: nowrap;
+}
+.m-round-secs {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--al-naranja);
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 400 22px var(--display);
+  color: var(--al-noche);
+}
+/* Últimos segundos: peligro. */
+.m-round-secs.urgent {
+  background: var(--al-grana);
+  color: var(--al-crema);
+  animation: pulse 0.5s infinite alternate;
+}
+/* Sin segundos (campo de pruebas): solo el texto. */
+.m-round.no-secs {
+  padding-right: 18px;
+}
+.m-round.no-secs .m-round-secs {
+  display: none;
+}
+/* Engranaje: botón redondo crema de 44 px (componente Botones). */
+.hud-gear {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--al-noche);
+  background: var(--al-crema);
+  color: var(--al-noche);
+  box-shadow: inset 0 -4px 0 rgba(32, 4, 50, 0.2), 0 4px 0 var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  text-shadow: none;
+}
+.hud-players {
+  display: grid;
+  gap: 6px;
+  width: 190px;
+  text-shadow: none;
+}
+.hp {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 6px 4px 4px;
+  border-radius: 10px;
+  border: 2px solid var(--al-noche);
+  background: var(--al-panel-hud);
+}
+.hp.you {
+  border-color: var(--al-crema);
+}
+.hp.out {
+  opacity: 0.5;
+}
+.hp-emb {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+.hp-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  min-width: 0;
+}
+/* El nombre completo va en el `title` y el `aria-label` del chip; se ve el corto. */
+.hp-name {
+  display: none;
+}
+.hp-short {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 16px;
+  color: var(--al-crema);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hp-state {
+  flex: none;
+  display: flex;
+  font-size: 13px;
+  color: var(--al-crema);
+}
+.hp-state:empty {
+  display: none;
+}
+/* Trazo más grueso a este tamaño (los atributos del SVG ceden ante el CSS). */
+.hp-state .ico svg * {
+  stroke-width: 3.5;
+}
+.hp-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(254, 231, 181, 0.22);
+  overflow: hidden;
+}
+.hp-bar > div {
+  height: 100%;
+  transition: width 0.4s;
+}
+
 /* ---------- Parte superior en móvil vertical (R-10 U4 y U5) ----------
-   Componente Marcador: arriba solo se lee; lo único que se toca es el engranaje. La píldora junta
-   «Ronda N» y los segundos; los cuatro jugadores van en una fila de chips (emblema, nombre corto y
-   barra; el tuyo con borde crema; «listo» con una marca verde; eliminado al 50 % con una cruz);
-   debajo, el viento (flecha y fuerza) y el objetivo (borde naranja), cada uno solo si hay. */
+   Lo único que se toca arriba es el engranaje; debajo de la píldora, la fila de chips y, después, el
+   viento (flecha y fuerza) y el objetivo (borde naranja), cada uno solo si hay. */
 .m-top {
   display: none;
 }
@@ -2848,122 +2609,36 @@ label.check:has(.check-hint) {
   align-items: center;
   justify-content: space-between;
 }
-.m-round {
-  display: flex;
-  align-items: center;
+.hud.tray-mode .m-round {
   gap: 8px;
   height: 44px;
   padding: 0 5px 0 14px;
-  border-radius: var(--al-radius-full);
-  background: var(--al-noche);
-  border: 2px solid var(--al-crema-oscuro);
 }
-.m-round-text {
-  font: 400 18px var(--display);
-  color: var(--al-crema);
-  white-space: nowrap;
+.hud.tray-mode .m-round.no-secs {
+  padding-right: 14px;
 }
-.m-round-secs {
+.hud.tray-mode .m-round-text {
+  font-size: 18px;
+}
+.hud.tray-mode .m-round-secs {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
-  background: var(--al-naranja);
-  border: 2px solid var(--al-noche);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font: 400 18px var(--display);
-  color: var(--al-noche);
-}
-/* Últimos segundos: peligro. */
-.m-round-secs.urgent {
-  background: var(--al-grana);
-  color: var(--al-crema);
-  animation: pulse 0.5s infinite alternate;
-}
-.hud.tray-mode .hud-gear {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border-radius: 50%;
-  border: 3px solid var(--al-noche);
-  background: var(--al-crema);
-  color: var(--al-noche);
-  box-shadow: inset 0 -4px 0 rgba(32, 4, 50, 0.2), 0 4px 0 var(--al-noche);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  font-size: 18px;
 }
 .hud.tray-mode .hud-players {
   display: flex;
-  gap: 6px;
   width: auto;
 }
 .hud.tray-mode .hp {
-  position: relative;
   flex: 1 1 0;
-  min-width: 0;
   max-width: 86px;
   gap: 4px;
   padding: 5px 5px 5px 4px;
-  border-radius: 10px;
-  border: 2px solid var(--al-noche);
-  background: var(--al-panel-hud);
 }
-.hud.tray-mode .hp.you {
-  border-color: var(--al-crema);
-}
-.hud.tray-mode .hp.out {
-  opacity: 0.5;
-  filter: none;
-}
-.hud.tray-mode .hp .banner {
+.hud.tray-mode .hp-emb {
   width: 22px;
   height: 22px;
-  padding: 0;
-  clip-path: none;
-  align-items: center;
-  border-radius: 7px;
-  border: 2px solid var(--al-noche);
   font-size: 13px;
-  font-weight: 900;
-  line-height: 1;
-}
-.hud.tray-mode .hp-body {
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 3px;
-  line-height: normal;
-}
-.hud.tray-mode .hp-top {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.hud.tray-mode .hp-name,
-.hud.tray-mode .hp-pct {
-  display: none;
-}
-.hud.tray-mode .hp-short {
-  display: block;
-  min-width: 0;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 16px;
-  color: var(--al-crema);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hud.tray-mode .hp-bar {
-  height: 5px;
-  margin-top: 0;
-  border-radius: 3px;
 }
 /* Listo, eliminado o desconectado: una insignia en la esquina del emblema, sin taparlo, así el
    nombre usa todo el ancho del chip (decisión del usuario del 03-10-2026). */
@@ -2975,19 +2650,10 @@ label.check:has(.check-hint) {
   height: 14px;
   border-radius: 50%;
   background: var(--al-noche);
-  color: var(--al-crema);
-  display: none;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   line-height: 1;
-}
-.hud.tray-mode .hp.mark .hp-state {
-  display: flex;
-}
-/* Trazo más grueso a este tamaño (los atributos del SVG ceden ante el CSS). */
-.hud.tray-mode .hp-state .ico svg * {
-  stroke-width: 3.5;
 }
 .m-flags {
   display: flex;
@@ -3257,4 +2923,168 @@ label.check:has(.check-hint) {
   font-weight: 800;
   color: var(--al-vino);
   text-align: center;
+}
+
+/* ---------- HUD de PC (R-10 U11, maqueta «PC · Apuntando») ----------
+   Abajo al centro: las cartas de 92×92 (la descripción sale al pasar el ratón), la barra de potencia
+   de 300 px y la pista para cargar; abajo a la izquierda, el chip de controles; abajo a la derecha,
+   la elevación en grande. Con el dedo (en horizontal) siguen el botón redondo y las flechas. */
+.hud-bottom {
+  bottom: 18px;
+  gap: 14px;
+}
+.hud-power {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 300px;
+  text-shadow: none;
+}
+.hud-power[hidden],
+body.touch .hud-power,
+.hud.tray-mode .hud-power {
+  display: none;
+}
+.power-bar {
+  display: block;
+  width: 300px;
+  height: 18px;
+  border-radius: var(--al-radius-full);
+  border: 3px solid var(--al-noche);
+  background: var(--al-ciruela);
+  overflow: hidden;
+}
+.power-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--al-naranja);
+}
+.power-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--al-crema);
+  text-shadow: 0 2px 0 var(--al-noche);
+  white-space: nowrap;
+}
+.power-hint kbd {
+  min-width: 0;
+  padding: 1px 7px;
+  border: 2px solid var(--al-noche);
+  border-radius: 6px;
+  box-shadow: none;
+  font: 900 14px/18px var(--font);
+}
+.power-hint .ico-check {
+  font-size: 16px;
+  color: var(--al-listo);
+}
+/* Con el disparo listo, la barra sobra: queda la pista con quién falta. */
+.hud-power.locked .power-bar {
+  display: none;
+}
+/* Con ratón no hay botón de disparo: se carga con Espacio o el clic izquierdo. */
+body:not(.touch) .hud:not(.tray-mode) .hud-confirm {
+  display: none;
+}
+.hud-elev {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-shadow: none;
+  pointer-events: none;
+}
+.hud-elev[hidden],
+body.touch .hud-elev,
+.hud.tray-mode .hud-elev,
+.hud.tray-mode .hud-help {
+  display: none;
+}
+.elev-deg {
+  font: 400 30px var(--display);
+  color: var(--al-crema);
+  -webkit-text-stroke: 4px var(--al-noche);
+  paint-order: stroke fill;
+}
+.elev-label {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(32, 4, 50, 0.8);
+  color: var(--al-crema);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* HUD compacto (≤ 500 px de alto, un móvil tumbado): lo mismo, más pequeño y más pegado al borde. */
+@media (max-height: 500px) {
+  .hud-top,
+  .hud-left,
+  .hud-corner {
+    top: 6px;
+  }
+  .hud-left {
+    left: max(6px, env(safe-area-inset-left));
+  }
+  .hud-corner {
+    right: max(6px, env(safe-area-inset-right));
+  }
+  .m-round {
+    gap: 8px;
+    height: 40px;
+    padding: 0 4px 0 12px;
+  }
+  .m-round-text {
+    font-size: 16px;
+  }
+  .m-round-secs {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  .hud-players {
+    width: 124px;
+    gap: 3px;
+  }
+  .hp {
+    gap: 4px;
+    padding: 2px 5px 2px 3px;
+  }
+  .hp-emb {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+  .hp-body {
+    gap: 2px;
+  }
+  .hp-short {
+    font-size: 11px;
+    line-height: 14px;
+  }
+  .hp-bar {
+    height: 4px;
+  }
+  .hud-bottom {
+    bottom: 6px;
+    gap: 6px;
+  }
+  .hud-help {
+    left: max(6px, env(safe-area-inset-left));
+    bottom: 6px;
+  }
+  .hud-elev {
+    right: 10px;
+    bottom: 8px;
+  }
+  .elev-deg {
+    font-size: 24px;
+  }
 }

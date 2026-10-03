@@ -96,13 +96,13 @@ for (const [w, h] of [
         for (const [k, a] of Object.entries(inner)) expect(a.x >= tray.x && a.x + a.w <= tray.x + tray.w + 0.5 && a.y >= tray.y && a.y + a.h <= tray.y + tray.h + 0.5, `${k} dentro de la bandeja`).toBe(true);
         noCross(inner);
       }
-      // Marcador compacto: nombre corto en vez del completo (WRK-TASK-046); en horizontal, con
-      // porcentaje; en vertical, una fila de cuatro chips sin porcentaje y sin «Fase de apuntado» (U4).
+      // Marcador: chips con el nombre corto (WRK-TASK-046, componente Marcador), sin porcentaje y sin
+      // «Fase de apuntado»; en vertical, en una fila de cuatro (U4).
       expect(await page.locator('.hp-name').first().isVisible()).toBe(false);
+      await expect(page.locator('.hp-pct')).toHaveCount(0);
+      await expect(page.locator('#hud-phase')).toHaveCount(0);
+      await expect(page.locator('#mute')).toHaveCount(0);
       if (portrait) {
-        expect(await page.locator('.hp-pct').first().isVisible()).toBe(false);
-        await expect(page.locator('#hud-phase')).toBeHidden();
-        await expect(page.locator('#mute')).toBeHidden();
         const chips = await page.locator('#hud-players .hp').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
         expect(chips.length).toBe(4);
         for (const c of chips) {
@@ -112,7 +112,7 @@ for (const [w, h] of [
         const gear = r['#hud-settings'];
         expect(Math.min(gear.w, gear.h), 'engranaje ≥ 44 px').toBeGreaterThanOrEqual(44);
         await expect(page.locator('#hud-round')).toContainText(/Ronda 1\s*\d+/);
-      } else await expect(page.locator('.hp-pct').first()).toBeVisible();
+      }
       expect(shorts.length).toBe(4);
       for (const s of shorts) {
         expect(s.w, `nombre corto «${s.text}» visible`).toBeGreaterThan(4);
@@ -124,11 +124,61 @@ for (const [w, h] of [
   });
 }
 
-test('con más de 500 px de alto el marcador sigue enseñando los nombres', async ({ page }) => {
-  test.setTimeout(90_000);
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto('/?bots=3&seed=5#solo');
-  await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
-  await expect(page.locator('.hp-name').first()).toBeVisible();
-  expect(await page.locator('.hp-short').first().isVisible()).toBe(false);
-});
+// HUD de PC (R-10 U11, maqueta «PC · Apuntando»): jugadores en columna arriba a la izquierda, la
+// píldora de la ronda arriba al centro, viento, objetivo y engranaje arriba a la derecha; abajo, las
+// cartas de 92×92, la barra de potencia de 300 px con su pista, el chip «Controles · H» y la elevación.
+for (const [w, h] of [
+  [1280, 720],
+  [1024, 600],
+]) {
+  test(`HUD de PC en ${w}×${h}`, async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/?bots=3&seed=5#solo');
+    await page.waitForFunction(() => (window as any).__asedio?.mode?.host?.state?.phase === 'aim', null, { timeout: 60_000 });
+    await page.evaluate(() => {
+      const hud = (window as any).__asedio.mode.ui.hud;
+      hud.setWind([1.6, 0, 1.9], 0);
+      hud.setWind = () => {};
+    });
+    const PC = ['#hud-round', '#hud-players', '.hud-corner', '#hud-ammo', '#hud-power', '#help-toggle', '#hud-elev'];
+    const r = await rects(page, PC);
+    expect(Object.keys(r).sort()).toEqual([...PC].sort());
+    for (const [k, a] of Object.entries(r)) expect(a.x >= 0 && a.y >= 0 && a.x + a.w <= w + 0.5 && a.y + a.h <= h + 0.5, `${k} dentro de la pantalla`).toBe(true);
+    noCross(r);
+    // Arriba: la píldora al centro, sin «Fase de apuntado»; los jugadores en columna a la izquierda.
+    expect(Math.abs(r['#hud-round'].x + r['#hud-round'].w / 2 - w / 2)).toBeLessThan(2);
+    await expect(page.locator('#hud-round')).toContainText(/Ronda 1\s*\d+/);
+    const chips = await page.locator('#hud-players .hp').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
+    expect(chips.length).toBe(4);
+    for (const c of chips) expect(Math.abs(c.x - chips[0].x), 'en columna').toBeLessThan(1);
+    await expect(page.locator('.hp-short').first()).toBeVisible();
+    await expect(page.locator('#hud-wind-chip b')).toHaveText('2');
+    await expect(page.locator('#hud-goal-chip')).toBeVisible();
+    // Abajo: cartas de 92×92, barra de 300 px y la pista; sin el botón largo de disparo.
+    for (const c of await page.locator('#hud-ammo .ammo').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()))) {
+      expect(c.width).toBeCloseTo(92, 0);
+      expect(c.height).toBeCloseTo(92, 0);
+    }
+    expect((await page.locator('.power-bar').boundingBox())!.width).toBeCloseTo(300, 0);
+    await expect(page.locator('#power-hint')).toHaveText('Mantén Espacio o clic para cargar');
+    await expect(page.locator('#confirm')).toBeHidden();
+    await expect(page.locator('#hud-elev .elev-deg')).toHaveText(/^\d+°$/);
+    // Controles plegados en el chip; H los abre y los cierra.
+    await expect(page.locator('#help-list')).toBeHidden();
+    await page.keyboard.press('KeyH');
+    await expect(page.locator('#help-list')).toBeVisible();
+    await expect(page.locator('#help-toggle')).toHaveAttribute('aria-expanded', 'true');
+    const open = await rects(page, ['#help-list', '#hud-players', '#hud-ammo', '#hud-power']);
+    noCross(open);
+    await page.keyboard.press('KeyH');
+    await expect(page.locator('#help-list')).toBeHidden();
+    // Al cargar, la barra se llena; al soltar, el disparo queda listo y la pista dice a quién se espera.
+    await page.keyboard.down('Space');
+    await page.waitForTimeout(600);
+    await expect(page.locator('#power-hint')).toHaveText('Suelta para disparar');
+    expect(await page.locator('.power-fill').evaluate((e) => e.getBoundingClientRect().width)).toBeGreaterThan(20);
+    await page.keyboard.up('Space');
+    await expect(page.locator('#power-hint')).toContainText(/Disparo listo/);
+  });
+}

@@ -38,7 +38,7 @@ export class SandboxMode implements Mode {
     this.hud.showConfirm(true);
     game.rig.lookEnabled = false;
     this.onAim(input.aim);
-    this.hud.setPhase('Campo de pruebas', 'Munición ilimitada contra un castillo de prueba');
+    this.hud.setPhase('Campo de pruebas', 'Munición ilimitada contra un castillo de prueba', 'Campo de pruebas');
     this.hud.setTimer(null);
     this.hud.setWind(null);
     this.renderAmmo();

@@ -4,7 +4,7 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.18.0
+version: 1.19.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -44,7 +44,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 |---|---|---|---|
 | `MatchState` | Estado | Sí | Fase, tiempo, jugadores, viento, resultados |
 | Teclas H y M | Teclado | No | Ayuda de controles y silencio |
-| `localStorage` | `asedio.settings`, `asedio.quality`, `asedio.help`, `asedio.tutorial`, `asedio.name`, `asedio.mute` | No | Si falla, valores por defecto |
+| `localStorage` | `asedio.settings`, `asedio.quality`, `asedio.controles`, `asedio.tutorial`, `asedio.name`, `asedio.mute` | No | Si falla, valores por defecto |
 | `?tutorial=1`, `?backdrop=1`, `?quality=` | URL | No | Fuerzan tutorial, fondo o calidad (pruebas) |
 
 ### Behavior
@@ -57,16 +57,17 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - **Jugar solo** (R-10 U10, WRK-TASK-082; maqueta «Móvil · Jugar solo»): hoja crema abajo en móvil y tarjeta centrada de 420 px en PC (en un móvil tumbado, en dos columnas). Volver, «Rivales» (1/2/3) y «Dificultad» (Fácil/Normal/Difícil) en selectores segmentados de 48 px; bajo los rivales, sus emblemas y sus nombres, que son los de la partida (`SoloOptions.names`); EMPEZAR como tablón naranja y «Campo de pruebas · munición sin límite» como enlace.
 2. **Cómo se juega:** una ventana con 6 puntos, cada uno con su icono SVG y sin emoji (rey, apuntado de 20 s según el formato, 3 municiones, objetivo, escudo real, lava y viento).
 3. **Tutorial** (D-044), en la primera partida y solo mientras se puede apuntar:
-   - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio).
+   - Pasos: «Apunta» (avanza al apuntar con el clic derecho), «Elige munición» (con 1/2/3 o Q/E; avanza solo a los 7 s) y «¡Fuego!» (al soltar Espacio; en PC resalta la barra de potencia, R-10 U11).
    - Se puede saltar. Al terminar se guarda y no vuelve. En solitario da 10 s más de apuntado en la ronda 1.
    - **Dónde está y qué señala** (WRK-TASK-048): arriba, sobre el cielo, para no tapar el castillo ni los controles. En PC va bajo la fase (92 px); en vertical, bajo el marcador (148 px) y a todo el ancho; en horizontal compacto, a 58 px y más estrecho. En el paso 1, una mano (un ratón en PC), en SVG, se desliza sobre la escena. En el 2, un anillo noche con pulso naranja resalta las tarjetas y las flechas ◀ ▶. En el 3, resalta el botón de disparo. Sin animación con `prefers-reduced-motion`.
-4. **HUD de partida:**
-   - Arriba, la fase y el tiempo del apuntado, en rojo por debajo de 4 s.
+4. **HUD de partida** (en PC, R-10 U11, WRK-TASK-083, maqueta «PC · Apuntando»; en móvil vertical, el punto 9):
+   - Arriba al centro, la píldora `#hud-round` con «Ronda N» y los segundos del apuntado en un círculo naranja (grana con pulso por debajo de 4 s); sin «Fase de apuntado», que queda en el `title`.
    - **Cuenta atrás** (fase `countdown`): 3-2-1 enorme en el centro, cada número con una animación de entrada y un pitido (más agudo en el 1), y un cuarto tiempo, «¡FUEGO!», de 1 s y con su propio sonido (`sfx.fuego`), que coincide con la salida de los disparos (`Hud.setCountdown`). Son 3, 2, 1, ¡FUEGO!: cuatro tiempos, aunque los disparos salgan a los 3 s. Sin animación con `prefers-reduced-motion`.
-   - A la izquierda, el marcador: estandarte, nombre, icono de bot, «(tú)», % de castillo en pie y, con iconos SVG (R-10), una marca si está listo, el icono de desconexión (en red) o una cruz si ha caído. Solo se rehace si cambia algo. Debajo, el panel de controles con teclas dibujadas (D-054), que se pliega con H y recuerda el estado. Solo se ve mientras se puede apuntar.
-   - Abajo, 3 tarjetas de munición con color de rareza y tecla, y el botón de disparo. Las tarjetas solo se rehacen cuando cambia la mano (al elegir solo se mueve la marca) y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo). Sin tarjeta fija con la descripción: sale al pedirla (punto 9, U2).
-   - En la esquina, el viento (flecha relativa a la cámara y m/s), silencio, ajustes y fps, con iconos SVG en lugar de emoji (R-10).
-   - **Objetivo secundario** (WRK-TASK-043, ADR-015): el rótulo de la ronda lo anuncia (icono de diana y «Objetivo: …») y, a quien tiene premio, se lo dice (icono de regalo). Durante el apuntado, una chapa con borde naranja bajo el viento (diana y «Jaula de cristal», con el texto completo en el `title`; en vertical, un chip, U5) y una diana blanca y roja sobre cada castillo rival, que mira a la cámara y se ve a través de los muros (`WorldView.setGoalMarks`). En los resultados, «🎯 … cumple el objetivo», y en la pantalla final, la estadística «Objetivos cumplidos». «Cómo se juega» lo explica.
+   - Arriba a la izquierda, el marcador (componente Marcador): una columna de chips de 190 px con emblema, nombre corto, barra de castillo en pie y, con iconos SVG, la marca de listo, el icono de desconexión (en red) o la cruz si ha caído, a la derecha del nombre; el tuyo con borde crema. El nombre completo (con «(tú)» y «bot») va en `title` y `aria-label`. Solo se rehace si cambia algo.
+   - Abajo al centro, 3 cartas de munición de 92×92 con color de rareza y tecla (la elegida sube 6 px con anillo naranja). Se rehacen solo cuando cambia la mano (al elegir solo se mueve la marca) y se eligen en `pointerdown` (WRK-TASK-024: antes se rehacían en cada fotograma y el clic se perdía a menudo). Sin tarjeta fija con la descripción: sale al pasar el ratón (punto 9, U2). Debajo, la barra de potencia `#hud-power` de 300 px, que se llena de naranja al cargar, y la pista «Mantén Espacio o clic para cargar» («Suelta para disparar»; con el disparo listo, a quién se espera). Con ratón no hay botón de disparo; con el dedo, el botón redondo.
+   - Abajo a la izquierda, el chip «Controles · H»: H o un clic abren encima el panel con las teclas dibujadas (D-054). Plegado por defecto; recuerda si se abrió (`asedio.controles`). Solo se ve mientras se puede apuntar. Abajo a la derecha, la elevación en grande.
+   - Arriba a la derecha, el chip del viento (flecha relativa a la cámara y fuerza redondeada, «→ 2»; sin viento no está), el del objetivo (borde naranja), el engranaje y, si se activan, los fps. Sin botón de silencio: el sonido va en Ajustes y la tecla M sigue valiendo.
+   - **Objetivo secundario** (WRK-TASK-043, ADR-015): el rótulo de la ronda lo anuncia (icono de diana y «Objetivo: …») y, a quien tiene premio, se lo dice (icono de regalo). Durante el apuntado, un chip con borde naranja junto al viento (diana y «Jaula de cristal», con el texto completo en el `title`; U5 y U11) y una diana blanca y roja sobre cada castillo rival, que mira a la cámara y se ve a través de los muros (`WorldView.setGoalMarks`). En los resultados, «🎯 … cumple el objetivo», y en la pantalla final, la estadística «Objetivos cumplidos». «Cómo se juega» lo explica.
    - **Escudo real** (WRK-TASK-041, ADR-014): en las rondas 1 y 2 cada rey vivo lleva un halo dorado que gira sobre la cabeza y una columna de luz blanca dorada translúcida (8 m) que late (`WorldView.setKingGuard`). La columna no se dibuja si el rey está a menos de 16 m de la cámara, para que la de tu propio rey no tape la vista al apuntar (WRK-TASK-050). El rótulo de la ronda 1 lo anuncia; el de la 2 avisa de que es la última con escudo, y el de la 3, de que se acaba (el subtítulo admite varias líneas y dura 2,6 s). Cuando el escudo salva a un rey, chispas doradas y el rótulo «ESCUDO REAL». Al volver al pedestal, polvo y chispas. «Cómo se juega» lo explica.
    - **Quién ataca a quién** (WRK-TASK-045): durante la cuenta atrás, un arco de guiones del color de cada jugador vivo va de su catapulta al castillo al que apunta (`AttackArcs`, `render/arcs.ts`). Los guiones avanzan hacia el objetivo y el arco acaba en una punta. Se curva hacia la derecha de la marcha, así que dos jugadores que se atacan entre sí no se tapan. Aparece en 0,35 s y se desvanece en 0,3 s al empezar el impacto. Sale del `MatchState` (`target`), así que un invitado ve los mismos arcos que el anfitrión sin mensajes nuevos. Dos InstancedMesh: dos llamadas de dibujo.
    - Al empezar la cuenta atrás se retira el rótulo que hubiera en pantalla (WRK-TASK-038). Los bloques `@media` de pantallas pequeñas van al final de `style.css` para prevalecer sobre las reglas base.
@@ -80,7 +81,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - Modo zurdo (R-10 U8, WRK-TASK-077): en la bandeja del móvil vertical, pad a la izquierda y disparo a la derecha. Se guarda en `asedio.settings`.
    - El panel cierra al tocar fuera; un clic dentro ya no se cancela (antes ninguna casilla cambiaba, WRK-TASK-077).
 6. **Accesibilidad** (D-045): colores Okabe-Ito más un emblema por jugador (☀ ☾ ★ ϟ), con tinta oscura sobre amarillo y rosa. Hay texto grande y silencio.
-7. **Pantallas estrechas** (≤ 700 px): marcador de 160 px y ayuda de controles oculta.
+7. **Pantallas estrechas** (≤ 700 px): el chip de controles no se ve.
 8. **Estilo «Atardecer»** (R-10, WRK-TASK-074): la fuente de verdad es el design system «Asedio Loco · estilo» (https://claude.ai/artifact/D3UZsBmqS3PPWLsKYptLj3).
    - Colores solo de sus tokens, como variables `--al-<token>` en `style.css`: noche, ciruela, vino, grana, naranja, crema y derivados. Grana solo para disparo, daño y peligro; naranja solo para lo que se toca o está elegido. Los jugadores mantienen los Okabe-Ito (D1).
    - Letra: Lilita One en títulos, botones y cifras; Nunito 600-900 en el texto. Las dos en woff2 desde `client/src/ui/fonts/`.
@@ -104,17 +105,16 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 
 - **Táctil** (WRK-TASK-006, clase `body.touch`):
   - el botón de disparo es redondo (96 px), abajo a la derecha, y se llena como un reloj con la fuerza;
-  - flechas ◀ ▶ de castillo objetivo;
-  - la ayuda empieza plegada («❔ Controles») y tiene sus propias filas;
+  - flechas de castillo objetivo (iconos SVG);
+  - la ayuda empieza plegada (chip «Controles» de 44 px) y tiene sus propias filas; sin barra de potencia ni elevación;
   - tutorial, «Cómo se juega» y rótulos con textos táctiles;
   - **se puede instalar** (PWA, WRK-TASK-009): manifiesto con `display: fullscreen` y `orientation: any`, iconos dibujados por código (`tests/tools/make-icons.mjs`) y metas de Apple para «Añadir a pantalla de inicio». Sin service worker: el juego necesita la red. La instalación en un teléfono real está pendiente del usuario (A7 y A8 de WRK-TASK-040);
   - pantalla completa al entrar (Android), sin bloquear la orientación. **El vertical es la forma de jugar por defecto en móvil** (se diseña y se prueba primero en vertical); el horizontal funciona pero es secundario. En vertical, la partida tiene su propia disposición (punto 9 de Behavior) y la cámara abre el campo de visión para no bajar de 40° de ancho.
 - La portada carga Rapier (1,1 MB comprimido) solo para el fondo animado.
 - **HUD compacto** (altura ≤ 500 px, WRK-TASK-007):
-  - el marcador se queda en estandarte, nombre corto, porcentaje, barra y la marca de listo o la cruz (tu fila, con borde crema). El nombre corto (`shortName`, WRK-TASK-046) es «Tú» en tu fila, la última palabra en los bots («Lady Pixel» → «Pixel») y la primera en los humanos; el nombre completo queda en el `title` de la fila. El cuerpo de la fila va en dos líneas (nombre arriba; barra y porcentaje debajo) y mide 52 px, en vertical y en horizontal (antes 40-44 px sin nombre);
-  - la fase, el reloj, el viento, la potencia y las tarjetas se encogen;
-  - la ayuda empieza plegada;
-  - el botón de disparo baja a la esquina inferior derecha: redondo de 84 px en táctil, más pequeño con ratón;
+  - los chips del marcador miden 124 px. El nombre corto (`shortName`, WRK-TASK-046) es «Tú» en tu fila, la última palabra en los bots («Lady Pixel» → «Pixel») y en los nombres con título («Duque Pepino» → «Pepino»), y la primera en los demás humanos; el nombre completo queda en el `title`;
+  - la píldora de la ronda (40 px), los chips, la elevación y las cartas (64 px) se encogen;
+  - el botón de disparo táctil es redondo de 84 px, en la esquina inferior derecha;
   - la cuenta atrás y los rótulos se miden en `vh`;
   - la pantalla final pone las estadísticas en dos columnas y se desplaza si no cabe.
 
@@ -125,7 +125,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 - [x] La portada carga sin errores y enseña el título y el panel `#home`.
 - [x] En partida, el botón de disparo no aparece para un espectador.
 - [x] Al final aparece `#game-over` con el ganador y el número de rondas.
-- [ ] El panel de controles se pliega con H y sigue plegado tras recargar (sin prueba).
+- [x] El panel de controles se abre y se pliega con H (`tests/e2e/hud-compact.spec.ts`, «HUD de PC»); que recuerde el estado tras recargar no tiene prueba.
 - [ ] Con texto grande, el marcador y la ayuda crecen (sin prueba).
 - [ ] El tutorial no vuelve tras terminarlo (sin prueba automática; se fuerza con `?tutorial=1`). Que avanza con cada paso, resalta el control que toca y no tapa ningún control lo comprueba `tests/e2e/tutorial.spec.ts` (WRK-TASK-048).
 
@@ -160,7 +160,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
 | Tested by | `tests/e2e/portada.spec.ts` | Portada y «Jugar solo» en PC y en vertical: nombre al azar, unirse con código, invitación, tamaños y solapes |
 | Tested by | `tests/e2e/pwa.spec.ts` | Manifiesto válido e instalable |
 | Tested by | `tests/e2e/tutorial.spec.ts` | Tutorial en PC y en vertical: pasos, resaltado, sin solapes |
-| Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, descripción al mantener, parte superior, barra «Disparo listo» y hoja de resultados en vertical |
+| Tested by | `tests/e2e/touch.spec.ts`, `tests/e2e/hud-compact.spec.ts` | Bandeja del pulgar, modo zurdo, descripción al mantener, parte superior, barra «Disparo listo» y hoja de resultados en vertical; HUD de PC (posiciones, cartas, potencia, controles con H) |
 | Tested by | `tests/tools/review.mjs` | Capturas para revisión a ojo |
 | Decided in | D-043, D-044, D-045, D-046, D-054, D-055 | Portada, tutorial, accesibilidad, calidad, ayuda, fps |
 
