@@ -25,7 +25,7 @@ Cada etapa o tarea debe cerrarse así, en este orden:
 2. Las E2E locales proporcionales al cambio (`npm run e2e -- <archivo> [-g "<prueba>"]`). Si toca la red, las de `multiplayer`.
 3. Si cambia algo visible, capturas con `node tests/tools/review.mjs` (o la herramienta de captura que corresponda), revisadas a ojo.
 4. Push a `main`. CI compila, despliega y ejecuta las E2E contra producción.
-5. CI en verde (`npm run ci:estado -- --wait`) antes de empezar la siguiente etapa.
+5. CI en verde (`npm run ci:estado -- --wait --breve`) antes de empezar la siguiente etapa.
 
 Una etapa a medias no debe quedarse en producción: si CI falla y no se arregla enseguida, se revierte.
 
@@ -44,7 +44,7 @@ El usuario juega en la URL pública con amigos: producción tiene que estar siem
 | `npm run kdd:check`, typecheck, `npm test` y build antes de `wrangler deploy` | `.github/workflows/deploy.yml`, trabajo `deploy` | yes |
 | `npm run e2e:grupos`: cada prueba E2E está en algún grupo | `deploy.yml`, trabajo `deploy`, antes de desplegar | yes |
 | E2E contra producción en 11 grupos, con un reintento por prueba | mismo workflow, trabajos `e2e (<grupo>)` | no para el despliegue ya hecho; sí para la etapa siguiente. Una prueba «flaky» no bloquea, pero se apunta como tarea |
-| `npm run ci:estado -- --wait` | local, al cerrar la tarea | yes, por proceso |
+| `npm run ci:estado -- --wait --breve` | local, al cerrar la tarea | yes, por proceso |
 | Revisión de capturas | artefactos `capturas-e2e-<grupo>` y `review.mjs` | no |
 
 ## Exceptions

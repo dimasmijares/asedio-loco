@@ -44,7 +44,7 @@ npm run budget               # ¿hay presupuesto para otra tarea? (acepta los da
 npm test                     # unitarios (Vitest), menos de un segundo
 npm run e2e                  # Playwright en local (wrangler dev en el 8787)
 npm run e2e:prod -- multiplayer -g "revancha"   # una parte contra producción
-npm run ci:estado -- --wait  # espera a que acabe CI y resume el resultado
+npm run ci:estado -- --wait --breve  # espera al CI de este commit; solo fallos y «flaky»
 ```
 
 El resto (equilibrio, destrozo, banco de rendimiento, herramientas de captura, parámetros de URL) está en `DOC-OPS-001`.

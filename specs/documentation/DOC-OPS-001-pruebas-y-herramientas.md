@@ -4,7 +4,7 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.2.0
+version: 1.3.0
 created: 2026-09-26
 updated: 2026-10-03
 owner: dimas
@@ -75,7 +75,8 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 - `npm run e2e:prod`: contra `https://asedio-loco.dimasmijares.workers.dev`. Solo una parte: `npm run e2e:prod -- multiplayer -g "revancha"`.
 - CI la ejecuta tras cada despliegue en 11 trabajos: `basicas` (`lobby smoke perf controls calidad pwa`), `hud` (`touch hud-compact tutorial encuadre`), `espectador-repeticion`, `menus-y-marca` (`portada marca`), `fisica`, `solitario`, `cuatro-jugadores`, `migracion` (`-g "anfitrión"`), `revancha`, `red-mala` y `desconexion`. Las capturas quedan como artefactos `capturas-e2e-<grupo>` durante 7 días. En CI cada prueba tiene un reintento: si solo pasa a la segunda sale como «flaky» y se apunta como tarea (RULE-003).
 - `npm run e2e:grupos` (CI lo ejecuta antes de desplegar): comprueba que cada prueba E2E está en algún grupo de `deploy.yml`. Un archivo nuevo hay que añadirlo a un grupo; si no, CI se para (el 03-10-2026 `portada.spec` y `marca.spec` llevaban horas sin pasar por CI).
-- `npm run ci:estado` resume la ejecución del commit actual (trabajos, ✓/✘, «flaky» y errores); si aún no existe, la última. `-- <id>` para otra y `-- --wait` para esperar a que aparezca y termine. Necesita `gh` con sesión.
+- `npm run ci:estado` resume la ejecución del commit actual (trabajos, ✓/✘, «flaky» y errores); si aún no existe, la última. `-- <id>` para otra y `-- --wait` para esperar a que aparezca y termine. Con `-- --breve`, solo el estado y los trabajos que fallan o tienen pruebas «flaky», con sus errores (unas pocas líneas en vez de más de cien; es el modo para el agente: `npm run ci:estado -- --wait --breve`). Necesita `gh` con sesión.
+- En CI, el Chromium de Playwright se guarda en caché por versión (`actions/cache`): con la caché, cada trabajo solo instala las dependencias del sistema.
 - Chromium sin interfaz necesita estos flags para WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` (ya están en `playwright.config.ts`).
 
 **5. Herramientas de captura y seguimiento** (`tests/tools/`, `<base>` es la URL del sitio)
