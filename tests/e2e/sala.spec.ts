@@ -196,6 +196,25 @@ for (const fmt of FORMATS) {
       await expect(a.locator('#over-wait')).toHaveCount(0);
       await expect(b.locator('#over-wait')).toHaveText('Esperando a que Ana pida la revancha', { timeout: 30_000 });
       await expect(b.locator('#rematch, #back-to-room')).toHaveCount(0);
+      // R-15 F1 y F2: la misma hoja a la misma altura para los dos (solo cambian los botones, en una
+      // zona del mismo alto), sin tapar la píldora «Fin de la partida» (sin segundos) ni los chips.
+      const sheet = (p: Page) =>
+        p.evaluate(() => {
+          const r = (id: string) => document.getElementById(id)!.getBoundingClientRect();
+          const s = document.getElementById('game-over')!;
+          const top = document.getElementById(document.querySelector('.hud.tray-mode') ? 'm-top' : 'hud-round')!.getBoundingClientRect().bottom;
+          return { top: s.offsetTop, left: s.offsetLeft, w: s.offsetWidth, h: s.offsetHeight, acts: Math.round(r('over-actions').height), free: s.offsetTop >= top, pill: (document.getElementById('hud-round') as HTMLElement).innerText.trim(), secs: getComputedStyle(document.getElementById('hud-round-secs')!).display };
+        });
+      await a.waitForTimeout(600);
+      const [sa, sb] = [await sheet(a), await sheet(b)];
+      expect(sb).toEqual(sa);
+      expect(sa.free).toBe(true);
+      expect(sa.pill).toBe('Fin de la partida');
+      expect(sa.secs).toBe('none');
+      // F4: cada uno lo ve desde su punto de vista: uno ha ganado y el otro ve quién gana y su puesto.
+      const [ta, tb] = [await a.locator('#over-title').textContent(), await b.locator('#over-title').textContent()];
+      expect(ta === '¡Has ganado!' ? tb : ta).toMatch(/^Gana /);
+      await expect((ta === '¡Has ganado!' ? b : a).locator('#over-sub')).toContainText(/^Quedas \d\.º · /);
       // REVANCHA: otra partida al momento, sin pasar por la sala, con los mismos jugadores y el bot.
       await a.click('#rematch');
       // Si no llega la revancha, qué ve cada uno (para diagnosticar).

@@ -7,7 +7,7 @@ status: active
 confidence: low
 version: 0.1.0
 created: 2026-09-28
-updated: 2026-10-03
+updated: 2026-10-05
 owner: dimas
 parent: WRK-SPEC-011
 activates: [FEAT-CONTROL-001, DOM-JUEGO-003, DOM-JUEGO-004, RULE-001, RULE-004]
@@ -63,6 +63,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 33 | WRK-TASK-087 · Los rivales de «Jugar solo» son los de la partida (R-10) | completed | 086 | 2026-10-03 |
 | 34 | WRK-TASK-088 · Chincheta del objetivo con bandera (R-14) | completed | 085 | 2026-10-03 |
 | 35 | WRK-TASK-089 · Pantalla final en estilo «Atardecer» | completed | 072 | 2026-10-03 |
+| 36 | WRK-TASK-090 · Pantalla final según R-15 | completed | 089, R-15 | 2026-10-05 |
 
 ## Risk Assessment
 

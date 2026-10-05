@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.7.0
+version: 1.8.0
 created: 2026-09-26
-updated: 2026-10-02
+updated: 2026-10-05
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -71,7 +71,7 @@ Elegir en cada fotograma dónde está la cámara y hacia dónde mira, con transi
    - **PC:** una columna de tarjetas de 220 px a la derecha («MIRAR»; emblema, nombre, % y barra; «Todos», «Plano general»), la elegida desplazada con anillo naranja, y abajo al centro la píldora «Mirando a <nombre>» con Q y E. Q/E, Tab y las flechas del teclado también cambian.
    - Sin botones ◀ ▶ en ningún caso. El rótulo de la ronda lo explica («Estás mirando · …»).
    - **Al caer tu rey** (R-13 V5): al empezar el apuntado siguiente, la hoja «¡Tu rey ha caído!» con la causa, la ronda y el puesto («Tu rey cayó fuera de la isla en la ronda 3. Quedas en 4.º lugar.»), MIRAR LA PARTIDA y SALIR DE LA PARTIDA; en red, «Si te quedas, entras en la revancha con los demás». Si la partida acaba con esta hoja (o la de llegar tarde) abierta, se cierra: no tapa los botones del final.
-6. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, órbita cerrada sobre el castillo ganador (radio 18 m, altura 11 m).
+6. **Resto de fases:** órbita general alrededor del centro (radio 57 m, altura 34 m, 0,06 rad/s). En `over`, con la pantalla final a la vista, órbita lenta sobre el castillo ganador (R-15 F3, `MatchUI.frameWinner`): a la distancia en que el castillo ocupa algo menos de la mitad del hueco libre (en móvil vertical, entre los chips y la hoja; en PC, a la izquierda del panel) y con el desplazamiento de la imagen (`setViewShift`, vertical y horizontal) que lo lleva al centro de ese hueco. Encima, la corona (`placeCrown`), que nunca sube por encima de los chips.
 6. La cámara nunca baja de y = 0,8 m.
 7. **Centro desplazado con la bandeja del móvil** (R-10 U1, WRK-TASK-077): en móvil vertical, mientras la bandeja del pulgar ocupa la parte de abajo, el centro de la imagen sube la mitad de su alto (`Stage.setViewShift`, con `setViewOffset`: mismo campo de visión y mismo encuadre). Lo que mira la cámara queda en el centro de la parte libre, por encima de la bandeja. El cambio se suaviza (`1 − e^(−6·dt)`); sin bandeja vuelve a 0 y la escena ocupa toda la pantalla.
 8. **Resultados en móvil vertical** (R-10 U7, WRK-TASK-080): con la hoja de resultados abajo, en vez del plano cerrado del director, una órbita general de la isla (radio 70 m, altura 88 m, suavizado 6). El centro de la imagen va al de la franja libre entre la parte superior y la hoja, así que los cuatro castillos se ven con su cifra de daño.

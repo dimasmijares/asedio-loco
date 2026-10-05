@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { AMMO } from '../../../../shared/ammo';
 import type { Aim } from '../../../../shared/ballistics';
-import { BLOCKS_PER_CASTLE } from '../../../../shared/castle';
+import { BLOCKS_PER_CASTLE, buildCastle } from '../../../../shared/castle';
 import { castleOrigin, launchPoint } from '../../../../shared/map';
 import { GOALS, KING_GUARD_ROUNDS, checkWinner, kingGuarded, replayDuration, resultsDuration, type MatchState, type PlayerState } from '../../../../shared/match';
 import { aimedAt, goalPoint } from '../../../../shared/bot';
@@ -68,6 +68,10 @@ export const TOUCH_HELP: HelpRow[] = [
 
 // Órbita (radio y altura) del plano general sobre la hoja de resultados en móvil vertical.
 const SHEET_ORBIT = [70, 88] as const;
+
+// Alto del castillo sobre su origen (hasta lo más alto de las torres), para encuadrar al ganador y
+// poner la corona encima (R-15 F3).
+const CASTLE_TOP = Math.max(...buildCastle(0).blocks.map((b) => b.p[1] + b.size[1] / 2)) - castleOrigin(0)[1];
 
 const nameOf = (s: MatchState, slot: number) => s.players.find((p) => p.slot === slot)?.name ?? '¿?';
 
@@ -380,6 +384,7 @@ export class MatchUI {
     // cerrado del director, un plano general de la isla en la parte libre, con las cifras de daño
     // sobre los castillos (R-10 U7).
     const sheetView = s.phase === 'results' && this.hud.trayMode;
+    let overShift: [number, number] | null = null;
     const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || (s.phase === 'results' && !sheetView) ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
       if (sheetView) {
@@ -392,18 +397,17 @@ export class MatchUI {
       else if (s.phase === 'aim' && this.watchSlot >= 0) {
         const o = castleOrigin(this.watchSlot);
         if (g.rig.mode !== 'orbit' || g.rig.radius !== 21 || Math.hypot(g.rig.center.x - o[0], g.rig.center.z - o[2]) > 0.1) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 21, 13, 0.05);
-      } else if (s.phase === 'over' && s.winner !== null && s.winner >= 0) {
-        const o = castleOrigin(s.winner);
-        if (g.rig.mode !== 'orbit' || g.rig.radius !== 18) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 18, 11, 0.25);
-      } else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
+      } else if (s.phase === 'over' && this.overPanel && s.winner !== null && s.winner >= 0) overShift = this.frameWinner(s.winner);
+      else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
     }
     // Con la bandeja del pulgar o la hoja de resultados abajo (móvil vertical), lo que mira la cámara
     // sube al centro de la parte de la escena que queda libre por encima (R-10 U1 y U7).
     if (s.phase === 'results' && this.hud.trayMode && !this.sheet.hidden) {
       // Centro de la isla en el centro de la franja libre, entre la parte superior y la hoja.
       const top = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
-      g.stage.setViewShift(innerHeight / 2 - (top + innerHeight - this.sheetH) / 2);
-    } else g.stage.setViewShift(this.hud.sceneInset() / 2);
+      g.stage.setViewShift(innerHeight / 2 - (top + innerHeight - this.sheetH) / 2, 0);
+    } else if (overShift) g.stage.setViewShift(overShift[0], overShift[1]);
+    else g.stage.setViewShift(this.hud.sceneInset() / 2, 0);
 
     // HUD.
     const rem = this.src.remaining();
@@ -532,7 +536,8 @@ export class MatchUI {
       this.hud.setPhase(`Ronda ${s.round}`, 'Resultados', `Ronda ${s.round} · resultados`);
       this.showResults(s);
     } else if (s.phase === 'over') {
-      this.hud.setPhase('Fin de la partida', '');
+      // En la píldora, «Fin de la partida» sin el círculo de los segundos (R-15 F2).
+      this.hud.setPhase('Fin de la partida', '', 'Fin de la partida');
       // Las hojas de mirar (al caer tu rey o al llegar tarde) taparían los botones del final; si
       // seguían abiertas, se cierran (en CI, la de «¡Tu rey ha caído!» tapó REVANCHA, 03-10-2026).
       for (const id of ['fall-sheet-wrap', 'late-sheet-wrap']) document.getElementById(id)?.remove();
@@ -768,11 +773,19 @@ export class MatchUI {
     this.dmgLayer.replaceChildren();
   }
 
+  // Pantalla final (R-15): la misma hoja para todos, a la misma altura; solo cambia la zona de
+  // botones, que mide siempre lo mismo (F1, F6). En móvil vertical, abajo desde y = 300 sin tapar la
+  // píldora ni los chips; en PC, un panel de 560 px a la derecha (F2). El castillo ganador se encuadra
+  // en el hueco libre, con la corona encima y confeti (F3, `frameWinner`).
   private showOver(s: MatchState) {
     this.overPanel?.remove();
+    clearTimeout(this.confettiTimer);
+    this.resultsBox.replaceChildren();
+    this.clearDamage();
     const w = s.winner ?? -1;
     const winner = s.players.find((p) => p.slot === w);
-    const youWin = w === this.src.you;
+    const me = this.me();
+    const youWin = !!me && w === me.slot;
     const best = (f: (p: PlayerState) => number) => [...s.players].sort((a, b) => f(b) - f(a))[0];
     const destroyer = best((p) => p.stats.dealt);
     const sniper = best((p) => p.stats.bestShot);
@@ -780,20 +793,52 @@ export class MatchUI {
     const tank = best((p) => p.blocks);
     const selfie = best((p) => p.stats.selfHits);
     const goaler = best((p) => p.stats.goals ?? 0);
-    // Chip de jugador (componente Marcador): emblema con su color y el nombre. En las estadísticas,
-    // el tuyo dice «Tú» (el nombre completo no cabe en las tarjetas del móvil).
-    const chip = (p: PlayerState, short = false) => {
+    // F5: una fila por estadística, con icono, título, valor y quién (nombre completo, sin recortar,
+    // con «(tú)») y su emblema. Iconos SVG de trazo 2,5, sin emoji.
+    const stat = (ico: IconName, label: string, p: PlayerState | undefined, value: string) => {
+      if (!p) return '';
       const st = PLAYER_STYLES[p.slot];
-      const you = p.slot === this.src.you;
-      return h('span', { class: `over-chip${you ? ' you' : ''}`, title: p.name }, h('span', { class: 'over-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}\uFE0E`), h('b', null, you ? (short ? 'Tú' : `${p.name} (tú)`) : p.name));
+      return h(
+        'li',
+        { class: 'over-stat' },
+        h('span', { class: 'over-ico' }, icon(ico)),
+        h('span', { class: 'over-stat-body' }, h('span', { class: 'over-label' }, label), h('span', { class: 'over-value' }, value)),
+        // U+FE0E: emblemas como texto, nunca como emoji.
+        h('span', { class: 'over-who' }, h('b', null, p.slot === this.src.you ? `${p.name} (tú)` : p.name), h('span', { class: 'over-emb', style: `background:${st.color};color:${st.ink}` }, `${st.glyph}︎`)),
+      );
     };
-    // Estadísticas con iconos SVG de trazo 2,5 (sección «Iconos» del design system), sin emoji.
-    const stat = (ico: IconName, label: string, p: PlayerState | undefined, value: string) =>
-      p ? h('li', { class: 'over-stat' }, h('span', { class: 'over-ico' }, icon(ico)), h('span', { class: 'over-stat-body' }, h('span', { class: 'over-label' }, label), h('span', { class: 'over-who' }, chip(p, true), h('span', { class: 'over-value' }, value)))) : '';
+    // F4: el titular desde tu punto de vista: si ganas, «¡Has ganado!»; si no, quién gana, tu puesto
+    // y cuándo cayó tu rey. Corona naranja si ganas, crema si no.
+    const rounds = `${s.round} ${s.round === 1 ? 'ronda' : 'rondas'}`;
+    let title = 'Empate';
+    let sub = `No queda ningún rey en pie · ${rounds}`;
+    if (winner) {
+      title = youWin ? '¡Has ganado!' : `Gana ${winner.name}`;
+      sub = youWin ? `Tu rey es el último en pie · ${rounds}` : `El rey de ${winner.name} es el último en pie · ${rounds}`;
+    }
+    if (me && !youWin) {
+      // Por delante, el ganador y los que cayeron después que tú (o, si tu rey sigue en pie porque la
+      // partida acabó antes, los que siguen en pie con más bloques).
+      const ahead = (p: PlayerState) => p.slot === w || (me.alive ? p.alive && p.blocks > me.blocks : p.alive || (p.eliminatedRound ?? 0) > (me.eliminatedRound ?? 0));
+      const place = 1 + s.players.filter((p) => p.slot !== me.slot && ahead(p)).length;
+      sub = me.alive ? `Quedas ${place}.º · ${rounds}` : `Quedas ${place}.º · tu rey cayó en la ronda ${me.eliminatedRound ?? s.round}`;
+    }
+    const stats = [
+      stat('burst', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
+      stat('target', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques en un disparo`),
+      clown && clown.stats.whiffs > 0
+        ? stat('miss', 'Disparo más desviado', clown, clown.stats.worstMiss > 0 ? `A ${clown.stats.worstMiss} m del objetivo · ${clown.stats.whiffs} sin impacto` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} sin impacto`)
+        : '',
+      selfie && selfie.stats.selfHits > 0 ? stat('alert', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios`) : '',
+      stat('castle', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
+      goaler && (goaler.stats.goals ?? 0) > 0 ? stat('flag', 'Objetivos cumplidos', goaler, `${goaler.stats.goals} ${goaler.stats.goals === 1 ? 'objetivo' : 'objetivos'}`) : '',
+    ].filter((x) => x);
     this.renderOverActions();
+    this.crown = winner ? h('div', { class: 'over-crown', id: 'over-crown', 'aria-hidden': 'true' }, h('span', { class: 'over-crown-box' }, icon('crown'))) : null;
     this.overPanel = h(
       'div',
       { class: 'over-overlay' },
+      this.crown,
       h(
         'div',
         { class: 'over-sheet', id: 'game-over', role: 'dialog', 'aria-labelledby': 'over-title', 'data-winner': String(w), 'data-rounds': String(s.round) },
@@ -801,32 +846,82 @@ export class MatchUI {
           'div',
           { class: 'over-head' },
           h('span', { class: `over-badge${youWin ? ' win' : ''}` }, icon(winner ? 'crown' : 'flag')),
-          h('h2', { class: 'over-title', id: 'over-title' }, winner ? (youWin ? '¡Has ganado!' : `Gana ${winner.name}`) : 'Empate'),
-          h('p', { class: 'over-sub' }, `${s.round} ${s.round === 1 ? 'ronda' : 'rondas'} · ${winner ? `El rey de ${winner.name} es el último en pie` : 'No queda nadie en pie'}`),
-          winner ? chip(winner) : '',
+          h('span', { class: 'over-head-text' }, h('h2', { class: 'over-title', id: 'over-title' }, title), h('p', { class: 'over-sub', id: 'over-sub' }, sub)),
         ),
-        h(
-          'ul',
-          { class: 'over-stats', id: 'over-stats' },
-          stat('burst', 'Mayor destrozo', destroyer, `${destroyer?.stats.dealt ?? 0} bloques`),
-          stat('target', 'Mejor disparo', sniper, `${sniper?.stats.bestShot ?? 0} bloques en un disparo`),
-          clown && clown.stats.whiffs > 0
-            ? stat('miss', 'Disparo más desviado', clown, clown.stats.worstMiss > 0 ? `a ${clown.stats.worstMiss} m del objetivo (${clown.stats.whiffs} sin impacto)` : `${clown.stats.whiffs} ${clown.stats.whiffs === 1 ? 'disparo' : 'disparos'} sin impacto`)
-            : '',
-          selfie && selfie.stats.selfHits > 0 ? stat('alert', 'Daño propio', selfie, `${selfie.stats.selfHits} bloques propios destruidos`) : '',
-          stat('castle', 'Castillo más entero', tank, `${tank?.blocks ?? 0} bloques en pie`),
-          goaler && (goaler.stats.goals ?? 0) > 0 ? stat('flag', 'Objetivos cumplidos', goaler, `${goaler.stats.goals} ${goaler.stats.goals === 1 ? 'objetivo' : 'objetivos'}`) : '',
-        ),
+        h('ul', { class: `over-stats${stats.length > 5 ? ' many' : ''}`, id: 'over-stats' }, ...stats),
         this.overActions,
       ),
     );
     this.parent.append(this.overPanel);
+    // En pantallas bajas la hoja sube, pero nunca por encima de los chips del marcador.
+    const top = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
+    if (this.hud.trayMode) this.overPanel.style.setProperty('--over-min-top', `${Math.round(top + 8)}px`);
     sfx.fanfare(true);
-    if (winner) this.game.view.fx.confetti([...castleOrigin(winner.slot).slice(0, 1), 8, castleOrigin(winner.slot)[2]] as [number, number, number], ['#ffd23f', PLAYER_STYLES[winner.slot].color, '#ffffff']);
+    if (winner) {
+      // Confeti sobre el castillo ganador cuando la cámara ya ha llegado, y otra vez un poco después.
+      const o = castleOrigin(winner.slot);
+      const burst = (n: number) => {
+        if (!this.overPanel?.isConnected) return;
+        this.game.view.fx.confetti([o[0], o[1] + CASTLE_TOP + 1, o[2]], ['#fe8932', PLAYER_STYLES[winner.slot].color, '#fee7b5', '#f0e442']);
+        if (n > 1) this.confettiTimer = window.setTimeout(() => burst(n - 1), 1800);
+      };
+      this.confettiTimer = window.setTimeout(() => burst(2), 700);
+    }
   }
 
-  // Botones del final (R-07 F2): el anfitrión, REVANCHA (otra partida al momento, sin pasar por la
-  // sala) y VOLVER A LA SALA; los demás esperan a que la pida. Se rehacen si cambia el anfitrión.
+  private crown: HTMLElement | null = null;
+  private confettiTimer = 0;
+
+  // F3: el castillo ganador en el centro del hueco libre (móvil vertical: entre los chips y la hoja;
+  // PC: a la izquierda del panel), con la corona encima. Devuelve el desplazamiento de la imagen
+  // (vertical y horizontal, en píxeles) que lo lleva ahí.
+  private frameWinner(slot: number): [number, number] {
+    const g = this.game;
+    const sheet = this.overPanel?.querySelector<HTMLElement>('.over-sheet');
+    const W = innerWidth;
+    const H = innerHeight;
+    let x1 = W;
+    let y0: number;
+    let y1 = H;
+    if (this.hud.trayMode) {
+      y0 = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
+      // La posición final de la hoja, no la de su animación de entrada.
+      if (sheet) y1 = sheet.offsetTop;
+    } else {
+      y0 = document.getElementById('hud-round')?.getBoundingClientRect().bottom ?? 0;
+      if (sheet) x1 = sheet.offsetLeft;
+    }
+    const gapH = Math.max(80, y1 - y0);
+    const o = castleOrigin(slot);
+    // Distancia a la que el castillo ocupa algo menos de la mitad del hueco (encima va la corona). En
+    // PC el hueco es alto y la cámara quedaría cerca: con la perspectiva, el castillo crece; menos.
+    const want = gapH * (this.hud.trayMode ? 0.42 : 0.3);
+    const tanV = Math.tan(THREE.MathUtils.degToRad(g.stage.camera.fov / 2));
+    const d = (CASTLE_TOP * H) / (2 * tanV * want);
+    const e = THREE.MathUtils.degToRad(26);
+    const center = new THREE.Vector3(o[0], o[1] + CASTLE_TOP / 2, o[2]);
+    if (g.rig.mode !== 'orbit' || Math.abs(g.rig.radius - d * Math.cos(e)) > 0.5 || g.rig.center.distanceTo(center) > 0.1) g.rig.orbit(center, d * Math.cos(e), d * Math.sin(e), 0.12);
+    this.placeCrown(new THREE.Vector3(o[0], o[1] + CASTLE_TOP + 1.2, o[2]), y0);
+    // El centro del castillo, algo por debajo del centro del hueco.
+    return [H / 2 - ((y0 + y1) / 2 + gapH * 0.08), x1 / 2 - W / 2];
+  }
+
+  // La corona sobre el castillo ganador (chapa noche con borde crema y la corona naranja, con un
+  // piquito hacia abajo, como en las maquetas), sin subir por encima de los chips.
+  private placeCrown(p: THREE.Vector3, top: number) {
+    const el = this.crown;
+    if (!el) return;
+    const v = p.project(this.game.stage.camera);
+    el.style.visibility = v.z > 1 ? 'hidden' : '';
+    const x = ((v.x + 1) / 2) * innerWidth;
+    const y = Math.max(top + 6 + el.offsetHeight, ((1 - v.y) / 2) * innerHeight);
+    el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
+  }
+
+  // Botones del final (R-07 F2, R-15 F6), en una zona que mide lo mismo para todos. Anfitrión:
+  // REVANCHA y, debajo, VOLVER A LA SALA y SALIR; los demás, «Esperando a que … pida la revancha» y
+  // SALIR; en solitario, OTRA PARTIDA, CAMBIAR RIVALES y SALIR. En PC, todo en una fila. Se rehacen si
+  // cambia el anfitrión.
   private overKey = '';
   renderOverActions() {
     const host = this.opts.canRematch?.() ?? true;
@@ -840,11 +935,13 @@ export class MatchUI {
     };
     const out: Node[] = [];
     if (this.opts.onRematch && host) out.push(plank('rematch', this.opts.rematchLabel ?? 'Revancha', 'primary', () => this.opts.onRematch!()));
-    else if (this.opts.onRematch) out.push(h('p', { class: 'over-wait', id: 'over-wait' }, `Esperando a que ${this.opts.hostName?.() ?? 'el anfitrión'} pida la revancha`));
+    else if (this.opts.onRematch)
+      out.push(h('p', { class: 'over-wait', id: 'over-wait' }, h('span', { class: 'over-dots', 'aria-hidden': 'true' }, h('span'), h('span'), h('span')), `Esperando a que ${this.opts.hostName?.() ?? 'el anfitrión'} pida la revancha`));
     if (this.opts.onChangeRivals) out.push(plank('change-rivals', 'Cambiar rivales', '', () => this.opts.onChangeRivals!()));
     if (this.opts.onLobby && host) out.push(plank('back-to-room', 'Volver a la sala', '', () => this.opts.onLobby!()));
     if (this.opts.onExit) out.push(plank('exit', 'Salir', '', () => this.opts.onExit!()));
     this.overActions.replaceChildren(...out);
+    this.overActions.dataset.n = String(out.length);
   }
 
   dispose() {
@@ -858,6 +955,8 @@ export class MatchUI {
       this.final.skip.remove();
       this.final = null;
     }
+    clearTimeout(this.confettiTimer);
+    this.game.stage.setViewShift(0, 0);
     this.hud.dispose();
     this.arcs.dispose();
     this.overPanel?.remove();

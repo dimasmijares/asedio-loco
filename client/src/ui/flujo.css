@@ -744,50 +744,54 @@ button.seat-card.off {
   }
 }
 
-/* ---------- Pantalla final (estilo «Atardecer»): hoja crema, chips de jugador e iconos SVG ----------
-   Abajo y a todo el ancho en vertical, como la hoja de resultados; una tarjeta centrada en PC. */
+/* ---------- Pantalla final (R-15, maquetas «Final en red» y «Final en solitario») ----------
+   La misma hoja para todos y a la misma altura; solo cambian los botones, en una zona que mide
+   siempre lo mismo. Móvil vertical: hoja crema abajo, desde y = 300 en 390×844, sin tapar la píldora
+   ni los chips. PC: panel de 560 px a la derecha, bajo la píldora. Sin velo: arriba se ve el castillo
+   ganador con su corona. */
 .over-overlay {
   position: fixed;
   inset: 0;
   z-index: 20;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: rgba(18, 2, 31, 0.35);
+  pointer-events: none;
 }
 .over-sheet {
-  width: 100%;
-  max-width: 600px;
-  max-height: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: calc(100% - 300px);
+  max-height: calc(100% - var(--over-min-top, 110px));
   overflow-y: auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 22px 18px max(30px, calc(env(safe-area-inset-bottom) + 14px));
+  gap: 12px;
+  padding: 18px 16px max(30px, calc(env(safe-area-inset-bottom) + 14px));
   background: var(--al-crema);
   color: var(--al-noche);
   border-top: 3px solid var(--al-noche);
   border-radius: var(--al-radius-lg) var(--al-radius-lg) 0 0;
+  pointer-events: auto;
   animation: sheet-up 0.3s ease-out;
 }
 .over-head {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  text-align: center;
+  gap: 12px;
 }
 .over-badge {
+  flex: none;
+  box-sizing: border-box;
   width: 52px;
   height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
+  border-radius: 14px;
   border: 3px solid var(--al-noche);
   background: var(--al-crema-oscuro);
-  box-shadow: var(--al-sombra-dura);
+  box-shadow: 0 3px 0 var(--al-noche);
   color: var(--al-noche);
   font-size: 28px;
   transform: rotate(-6deg);
@@ -795,166 +799,286 @@ button.seat-card.off {
 .over-badge.win {
   background: var(--al-naranja);
 }
+.over-head-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .over-title {
-  margin: 4px 0 0;
-  font: 400 32px/1.05 var(--display);
+  margin: 0;
+  font: 400 30px/32px var(--display);
+  overflow-wrap: anywhere;
 }
 .over-sub {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
+  line-height: 17px;
   color: var(--al-vino);
 }
-.over-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  max-width: 100%;
-  padding: 3px 10px 3px 3px;
-  border-radius: var(--al-radius-full);
-  background: var(--al-panel-hud);
-  border: 2px solid var(--al-noche);
-  color: var(--al-crema);
-  font-size: 14px;
-}
-.over-chip.you {
-  border-color: var(--al-crema);
-  box-shadow: 0 0 0 2px var(--al-noche);
-}
-.over-chip b {
-  font-weight: 900;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.over-emb {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 2px solid var(--al-noche);
-  font: 900 14px/1 var(--font);
-}
+/* F5: una fila por estadística. */
 .over-stats {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .over-stat {
-  min-width: 0;
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 7px 8px 7px 6px;
-  border-radius: 14px;
-  border: 3px solid var(--al-noche);
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 12px;
   background: var(--al-hueso);
+  border: 2px solid var(--al-crema-oscuro);
+}
+.over-stats.many .over-stat {
+  padding-block: 4px;
 }
 .over-ico {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 9px;
   background: var(--al-noche);
   color: var(--al-crema);
-  font-size: 18px;
-}
-.over-stat .over-chip {
-  padding: 2px 8px 2px 2px;
-  font-size: 13px;
-}
-.over-stat .over-emb {
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
+  font-size: 17px;
 }
 .over-stat-body {
+  flex-grow: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 1px;
 }
 .over-label {
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--al-vino);
 }
-.over-who {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  min-width: 0;
-  max-width: 100%;
-}
 .over-value {
   font-size: 13px;
-  line-height: 1.2;
   font-weight: 800;
+  line-height: 16px;
   color: var(--al-noche);
 }
-.over-actions {
+.over-who {
+  flex: none;
+  width: 124px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.over-who b {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 15px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.over-emb {
+  flex: none;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  border: 2px solid var(--al-noche);
+  font: 900 12px/1 var(--font);
+}
+/* F6: la zona de botones mide lo mismo para todos (60 + 12 + 52 en móvil; 58 en PC). */
+.over-actions {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-rows: 60px 52px;
+  gap: 12px 10px;
+}
+.over-actions > :first-child,
+.over-actions[data-n='2'] > :last-child {
+  grid-column: 1 / -1;
 }
 .over-actions .plank {
+  --tilt: 0deg;
   margin: 0;
-  min-height: 58px;
-  font-size: 22px;
+  min-height: 0;
+  height: 52px;
+  padding: 0 10px;
+  font-size: 19px;
 }
 .over-actions .plank:first-child {
-  min-height: 64px;
-  font-size: 26px;
+  height: 60px;
+  font-size: 24px;
 }
-.over-actions .plank:nth-child(odd) {
-  --tilt: -0.8deg;
-}
-.over-actions .plank:nth-child(even) {
-  --tilt: 0.6deg;
+#back-to-room,
+#change-rivals {
+  font-size: 17px;
 }
 .over-wait {
   margin: 0;
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--al-vino);
+  height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--al-noche);
+  color: var(--al-crema);
+  font: 400 16px/19px var(--display);
   text-align: center;
+  overflow: hidden;
 }
-@media (orientation: landscape) {
-  .over-overlay {
-    align-items: center;
+.over-dots {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+.over-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--al-naranja);
+  animation: over-dot 1.2s infinite ease-in-out;
+}
+.over-dots span:nth-child(2) {
+  background: var(--al-crema-oscuro);
+  animation-delay: 0.2s;
+}
+.over-dots span:nth-child(3) {
+  background: var(--al-vino);
+  animation-delay: 0.4s;
+}
+@keyframes over-dot {
+  0%,
+  60%,
+  100% {
+    transform: none;
   }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+/* F3: la corona sobre el castillo ganador (la coloca `MatchUI.placeCrown`). */
+.over-crown {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.over-crown-box {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--al-noche);
+  border: 2px solid var(--al-crema);
+  color: var(--al-naranja);
+  font-size: 22px;
+  animation: over-crown 1.6s infinite ease-in-out;
+}
+.over-crown::after {
+  content: '';
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--al-noche);
+}
+@keyframes over-crown {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .over-crown-box,
+  .over-dots span {
+    animation: none;
+  }
+}
+/* PC (y cualquier pantalla en horizontal): panel de 560 px a la derecha, bajo la píldora, y los
+   tres botones en una fila. */
+@media (orientation: landscape) {
   .over-sheet {
-    width: 760px;
-    max-width: calc(100vw - 32px);
-    max-height: calc(100% - 24px);
-    padding: 22px 24px 24px;
+    left: auto;
+    right: 32px;
+    top: 96px;
+    bottom: auto;
+    width: min(560px, calc(100vw - 64px));
+    min-height: 0;
+    max-height: calc(100% - 112px);
+    gap: 14px;
+    padding: 22px 22px 24px;
     border: 3px solid var(--al-noche);
     border-radius: var(--al-radius-lg);
-    box-shadow: var(--al-sombra-tablon);
+    box-shadow: 0 6px 0 var(--al-noche);
+  }
+  .over-who {
+    width: 170px;
+  }
+  .over-actions {
+    margin-top: 4px;
+    grid-template-columns: 1.15fr 1.15fr 0.7fr;
+    grid-template-rows: 58px;
+    gap: 10px;
+  }
+  .over-actions > :first-child,
+  .over-actions[data-n='2'] > :last-child {
+    grid-column: auto;
+  }
+  .over-actions[data-n='2'] > :first-child {
+    grid-column: span 2;
+  }
+  .over-actions .plank,
+  .over-actions .plank:first-child {
+    height: 58px;
+    font-size: 18px;
+  }
+  .over-actions .plank.primary {
+    font-size: 20px;
+  }
+  #back-to-room,
+  #change-rivals {
+    font-size: 16px;
+  }
+  .over-wait {
+    height: 58px;
+  }
+  .over-crown-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 26px;
+  }
+  .over-crown::after {
+    border-left-width: 8px;
+    border-right-width: 8px;
+    border-top-width: 10px;
   }
 }
-/* Poca altura (un móvil tumbado): estadísticas en dos columnas, todo más apretado. */
-@media (orientation: landscape) and (min-height: 501px) {
-  .over-stats {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-@media (max-height: 500px) {
+/* Poca altura (un móvil tumbado): todo más apretado. */
+@media (orientation: landscape) and (max-height: 500px) {
   .over-sheet {
-    width: min(760px, calc(100vw - 20px));
+    top: 12px;
+    right: 12px;
+    width: min(520px, calc(100vw - 24px));
+    max-height: calc(100% - 24px);
     gap: 8px;
     padding: 10px 14px;
   }
@@ -962,28 +1086,19 @@ button.seat-card.off {
     display: none;
   }
   .over-title {
-    font-size: 26px;
-  }
-  .over-stats {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
+    font-size: 24px;
+    line-height: 26px;
   }
   .over-stat {
-    padding: 4px 8px 4px 4px;
-    gap: 8px;
-  }
-  .over-ico {
-    width: 30px;
-    height: 30px;
-    font-size: 17px;
+    padding-block: 3px;
   }
   .over-actions {
-    flex-direction: row;
+    grid-template-rows: 46px;
   }
   .over-actions .plank,
-  .over-actions .plank:first-child {
-    min-height: 48px;
-    font-size: 19px;
+  .over-actions .plank:first-child,
+  .over-wait {
+    height: 46px;
   }
 }
 

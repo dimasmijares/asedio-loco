@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.24.0
+version: 1.25.0
 created: 2026-09-26
-updated: 2026-10-03
+updated: 2026-10-05
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -72,7 +72,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
    - **Quién ataca a quién** (WRK-TASK-045): durante la cuenta atrás, un arco de guiones del color de cada jugador vivo va de su catapulta al castillo al que apunta (`AttackArcs`, `render/arcs.ts`). Los guiones avanzan hacia el objetivo y el arco acaba en una punta. Se curva hacia la derecha de la marcha, así que dos jugadores que se atacan entre sí no se tapan. Aparece en 0,35 s y se desvanece en 0,3 s al empezar el impacto. Sale del `MatchState` (`target`), así que un invitado ve los mismos arcos que el anfitrión sin mensajes nuevos. Dos InstancedMesh: dos llamadas de dibujo.
    - Al empezar la cuenta atrás se retira el rótulo que hubiera en pantalla (WRK-TASK-038). Los bloques `@media` de pantallas pequeñas van al final de `style.css` para prevalecer sobre las reglas base.
    - Rótulos: «RONDA N», «LA LAVA SUBE», «REY ELIMINADO» / «TU REY HA CAÍDO», «REPETICIÓN».
-   - **Pantalla final** (`#game-over`, WRK-TASK-089): hoja crema abajo en vertical y tarjeta de 760 px en horizontal. Chapa con la corona, «¡Has ganado!» / «Gana <nombre>» / «Empate», «N rondas · …» y el chip del ganador. Estadísticas en tarjetas con iconos SVG (sin emoji): mayor destrozo, mejor disparo, disparo más desviado, daño propio, castillo más entero y objetivos cumplidos, cada una con el chip del jugador; dos columnas en móvil y tres en PC. Debajo, los tablones: en red, REVANCHA y VOLVER A LA SALA para el anfitrión (los demás, «Esperando a que <anfitrión> pida la revancha») y SALIR; en solitario, OTRA PARTIDA, CAMBIAR RIVALES y SALIR (FEAT-SALAS-001, PROD-JUGAR-001).
+   - **Pantalla final** (`#game-over`, WRK-TASK-089; R-15, WRK-TASK-090): la misma hoja para todos y a la misma altura; solo cambian los botones, en una zona que mide siempre lo mismo. En móvil vertical, hoja crema desde y = 300 (en 390×844) hasta abajo, sin velo y nunca por encima de los chips; en PC, panel de 560 px a la derecha, bajo la píldora, que dice «Fin de la partida» sin el círculo de segundos. Arriba, el castillo ganador en el hueco libre con una corona encima y confeti (FEAT-CAMARA-001). Chapa con la corona (naranja si ganas, crema si no) y el titular desde tu punto de vista: «¡Has ganado!» con «Tu rey es el último en pie · N rondas», o «Gana <nombre>» con «Quedas N.º · tu rey cayó en la ronda R» («Empate» si no queda nadie). Estadísticas en filas con iconos SVG (sin emoji): mayor destrozo, mejor disparo, disparo más desviado, daño propio, castillo más entero y objetivos cumplidos, cada una con el valor y quién (nombre completo con «(tú)» y su emblema). Botones: en red, el anfitrión REVANCHA y debajo VOLVER A LA SALA | SALIR, y los demás «Esperando a que <anfitrión> pida la revancha» y SALIR; en solitario, OTRA PARTIDA y CAMBIAR RIVALES | SALIR. En PC, en una fila (FEAT-SALAS-001, PROD-JUGAR-001).
    - Resultados (en PC y en horizontal; en vertical, la hoja del punto 9): frase de la ronda y bloques perdidos y rotos por jugador. Sobre cada castillo, «−N» en el color del jugador o «Sin daños», ancladas al borde si el castillo queda fuera de pantalla y sin tapar la lista (WRK-TASK-036). Un castillo sin daños pone «sin daños» (D-055).
    - **Registro de los textos** (27-09-2026, a petición del usuario): claro, preciso y neutro. Sin coloquialismos ni chistes en rótulos, resultados, estadísticas, avisos y descripciones; los nombres propios (municiones, bots) y la cuenta atrás «3, 2, 1, ¡FUEGO!» se mantienen. Las descripciones de munición caben en dos líneas del HUD en vertical (la prueba `hud-compact` usa la más larga).
 5. **Ajustes** (en portada y HUD):
@@ -116,7 +116,7 @@ Portada, «Cómo se juega», tutorial de la primera partida, HUD de la partida y
   - la píldora de la ronda (40 px), los chips, la elevación y las cartas (64 px) se encogen;
   - el botón de disparo táctil es redondo de 84 px, en la esquina inferior derecha;
   - la cuenta atrás y los rótulos se miden en `vh`;
-  - la pantalla final pone las estadísticas en tres columnas, sin la chapa, y se desplaza si no cabe.
+  - la pantalla final va sin la chapa, más apretada, y se desplaza si no cabe.
 
   Por encima de 500 px no cambia nada. En vertical hay una disposición propia (`@media (orientation: portrait) and (max-width: 600px)`).
 
