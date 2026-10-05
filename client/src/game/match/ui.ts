@@ -384,7 +384,7 @@ export class MatchUI {
     // cerrado del director, un plano general de la isla en la parte libre, con las cifras de daño
     // sobre los castillos (R-10 U7).
     const sheetView = s.phase === 'results' && this.hud.trayMode;
-    let overShift: [number, number] | null = null;
+    let shift: [number, number] | null = null;
     const directing = s.phase === 'countdown' ? this.director.countdown(dt) : s.phase === 'impact' || (s.phase === 'results' && !sheetView) ? this.director.update(dt) : false;
     if (!directing && !g.view.replaying) {
       if (sheetView) {
@@ -394,11 +394,12 @@ export class MatchUI {
           g.rig.sharpness = 6;
         }
       } else if (s.phase === 'aim' && me?.alive) g.rig.aim(new THREE.Vector3(...launchPoint(me.slot)), input.aim.yaw);
-      else if (s.phase === 'aim' && this.watchSlot >= 0) {
-        const o = castleOrigin(this.watchSlot);
-        if (g.rig.mode !== 'orbit' || g.rig.radius !== 21 || Math.hypot(g.rig.center.x - o[0], g.rig.center.z - o[2]) > 0.1) g.rig.orbit(new THREE.Vector3(o[0], 2, o[2]), 21, 13, 0.05);
-      } else if (s.phase === 'over' && this.overPanel && s.winner !== null && s.winner >= 0) overShift = this.frameWinner(s.winner);
-      else if (g.rig.mode !== 'orbit') g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
+      // Mirando un castillo (R-13): en el hueco entre el marcador y el selector, con margen arriba
+      // para la chincheta del objetivo.
+      else if (s.phase === 'aim' && this.watchSlot >= 0) shift = this.frameCastle(this.watchSlot, this.watchGap(), 0.32, 0.05);
+      else if (s.phase === 'over' && this.overPanel && s.winner !== null && s.winner >= 0) shift = this.frameWinner(s.winner);
+      // Plano general (también al volver a «Todos» después de mirar un castillo).
+      else if (g.rig.mode !== 'orbit' || (this.watching() && g.rig.radius !== 57)) g.rig.orbit(new THREE.Vector3(0, 2, 0), 57, 34, 0.06);
     }
     // Con la bandeja del pulgar o la hoja de resultados abajo (móvil vertical), lo que mira la cámara
     // sube al centro de la parte de la escena que queda libre por encima (R-10 U1 y U7).
@@ -406,7 +407,7 @@ export class MatchUI {
       // Centro de la isla en el centro de la franja libre, entre la parte superior y la hoja.
       const top = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
       g.stage.setViewShift(innerHeight / 2 - (top + innerHeight - this.sheetH) / 2, 0);
-    } else if (overShift) g.stage.setViewShift(overShift[0], overShift[1]);
+    } else if (shift) g.stage.setViewShift(shift[0], shift[1]);
     else g.stage.setViewShift(this.hud.sceneInset() / 2, 0);
 
     // HUD.
@@ -873,37 +874,48 @@ export class MatchUI {
   private confettiTimer = 0;
 
   // F3: el castillo ganador en el centro del hueco libre (móvil vertical: entre los chips y la hoja;
-  // PC: a la izquierda del panel), con la corona encima. Devuelve el desplazamiento de la imagen
-  // (vertical y horizontal, en píxeles) que lo lleva ahí.
+  // PC: a la izquierda del panel), con la corona encima.
   private frameWinner(slot: number): [number, number] {
-    const g = this.game;
     const sheet = this.overPanel?.querySelector<HTMLElement>('.over-sheet');
-    const W = innerWidth;
-    const H = innerHeight;
-    let x1 = W;
-    let y0: number;
-    let y1 = H;
-    if (this.hud.trayMode) {
-      y0 = document.getElementById('m-top')?.getBoundingClientRect().bottom ?? 0;
-      // La posición final de la hoja, no la de su animación de entrada.
-      if (sheet) y1 = sheet.offsetTop;
-    } else {
-      y0 = document.getElementById('hud-round')?.getBoundingClientRect().bottom ?? 0;
-      if (sheet) x1 = sheet.offsetLeft;
-    }
-    const gapH = Math.max(80, y1 - y0);
+    const tray = this.hud.trayMode;
+    // La posición final de la hoja (`offsetTop`), no la de su animación de entrada.
+    const gap = { y0: this.bottomOf(tray ? 'm-top' : 'hud-round'), y1: tray && sheet ? sheet.offsetTop : innerHeight, x1: !tray && sheet ? sheet.offsetLeft : innerWidth };
+    // En PC el hueco es alto y la cámara quedaría cerca: con la perspectiva, el castillo crece; menos.
+    const shift = this.frameCastle(slot, gap, tray ? 0.42 : 0.3, 0.12);
     const o = castleOrigin(slot);
-    // Distancia a la que el castillo ocupa algo menos de la mitad del hueco (encima va la corona). En
-    // PC el hueco es alto y la cámara quedaría cerca: con la perspectiva, el castillo crece; menos.
-    const want = gapH * (this.hud.trayMode ? 0.42 : 0.3);
+    this.placeCrown(new THREE.Vector3(o[0], o[1] + CASTLE_TOP + 1.2, o[2]), gap.y0);
+    return shift;
+  }
+
+  // Hueco libre para mirar un castillo como espectador: en móvil vertical, entre el marcador (con la
+  // píldora «Eliminado · estás mirando») y el selector; en PC, entre la píldora de la ronda y la de
+  // «Mirando a …», a la izquierda de la columna de tarjetas.
+  private watchGap() {
+    const panel = document.getElementById('spect');
+    if (this.hud.trayMode) return { y0: this.bottomOf('m-top'), y1: panel?.getBoundingClientRect().top ?? innerHeight, x1: innerWidth };
+    return { y0: Math.max(this.bottomOf('hud-round'), this.bottomOf('hud-spect')), y1: document.getElementById('spect-pill')?.getBoundingClientRect().top ?? innerHeight, x1: panel?.getBoundingClientRect().left ?? innerWidth };
+  }
+
+  private bottomOf(id: string) {
+    const el = document.getElementById(id);
+    return el && !el.hidden ? el.getBoundingClientRect().bottom : 0;
+  }
+
+  // Encuadra el castillo `slot` en un hueco de la pantalla (de y0 a y1 y de 0 a x1): la cámara lo
+  // orbita a la distancia en que ocupa la fracción `k` del alto del hueco, y el desplazamiento de la
+  // imagen que devuelve (vertical y horizontal, en píxeles) pone su centro algo por debajo del centro
+  // del hueco, para que encima quepan la corona o la chincheta del objetivo.
+  private frameCastle(slot: number, gap: { y0: number; y1: number; x1: number }, k: number, speed: number): [number, number] {
+    const g = this.game;
+    const H = innerHeight;
+    const gapH = Math.max(80, gap.y1 - gap.y0);
+    const o = castleOrigin(slot);
     const tanV = Math.tan(THREE.MathUtils.degToRad(g.stage.camera.fov / 2));
-    const d = (CASTLE_TOP * H) / (2 * tanV * want);
+    const d = (CASTLE_TOP * H) / (2 * tanV * gapH * k);
     const e = THREE.MathUtils.degToRad(26);
     const center = new THREE.Vector3(o[0], o[1] + CASTLE_TOP / 2, o[2]);
-    if (g.rig.mode !== 'orbit' || Math.abs(g.rig.radius - d * Math.cos(e)) > 0.5 || g.rig.center.distanceTo(center) > 0.1) g.rig.orbit(center, d * Math.cos(e), d * Math.sin(e), 0.12);
-    this.placeCrown(new THREE.Vector3(o[0], o[1] + CASTLE_TOP + 1.2, o[2]), y0);
-    // El centro del castillo, algo por debajo del centro del hueco.
-    return [H / 2 - ((y0 + y1) / 2 + gapH * 0.08), x1 / 2 - W / 2];
+    if (g.rig.mode !== 'orbit' || Math.abs(g.rig.radius - d * Math.cos(e)) > 0.5 || g.rig.center.distanceTo(center) > 0.1) g.rig.orbit(center, d * Math.cos(e), d * Math.sin(e), speed);
+    return [H / 2 - ((gap.y0 + gap.y1) / 2 + gapH * 0.08), gap.x1 / 2 - innerWidth / 2];
   }
 
   // La corona sobre el castillo ganador (chapa noche con borde crema y la corona naranja, con un

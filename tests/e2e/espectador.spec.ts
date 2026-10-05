@@ -38,7 +38,12 @@ for (const [name, vp, mobile] of [
       await expect(page.locator('#spect-cards .spect-card')).toHaveCount(standing.length + 1);
       await expect(page.locator('#spect-cards .spect-card[aria-pressed="true"]')).toHaveAttribute('data-slot', '-1');
       if (mobile) {
-        await expect(page.locator('#spect-watching')).toHaveText('Todos los castillos');
+        await expect(page.locator('#spect-watching')).toHaveText('Todos');
+        // El titular no se recorta, y las tarjetas van juntas a la izquierda, a 8 px.
+        expect(await page.locator('#spect-watching').evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
+        const xs = await page.locator('#spect-cards .spect-card').evaluateAll((cs) => cs.map((c) => [c.getBoundingClientRect().left, c.getBoundingClientRect().right]));
+        expect(xs[0][0]).toBeLessThan(20);
+        for (let i = 1; i < xs.length; i++) expect(Math.round(xs[i][0] - xs[i - 1][1])).toBe(8);
         await expect(page.locator('#hud-spect')).toHaveText('Eliminado · estás mirando');
         // El selector ocupa la franja de la bandeja: abajo, unos 190 px.
         const box = (await page.locator('#spect').boundingBox())!;
@@ -77,6 +82,8 @@ for (const [name, vp, mobile] of [
         });
       } else await page.keyboard.press('q');
       await expect.poll(() => page.evaluate(() => (window as any).__asedio.mode.ui.watchSlot)).toBe(-1);
+      // La cámara vuelve al plano general.
+      await expect.poll(() => page.evaluate(() => (window as any).__asedio.game.rig.radius)).toBe(57);
       // Si la partida acaba con el aviso de la caída abierto, el aviso se cierra: no tapa los botones.
       await page.evaluate(() => {
         const m = (window as any).__asedio.mode;

@@ -89,11 +89,12 @@ export class Hud {
   // píldora «Mirando a …» abajo con Q y E.
   onWatch: (slot: number) => void = () => {};
   private spectWho = h('span', { class: 'spect-who', id: 'spect-watching' });
+  private spectHead = h('div', { class: 'spect-head' }, h('span', { class: 'spect-k' }, 'MIRANDO'), this.spectWho, h('span', { class: 'spect-hint' }, icon('swipe'), 'o desliza en la escena'));
   private spectCards = h('div', { class: 'spect-cards', id: 'spect-cards', role: 'group', 'aria-label': 'Qué castillo miras' });
   private spectPanel = h(
     'div',
     { class: 'spect-panel', id: 'spect', hidden: true },
-    h('div', { class: 'spect-head' }, h('span', { class: 'spect-k' }, 'MIRANDO'), this.spectWho, h('span', { class: 'spect-hint' }, icon('swipe'), 'o desliza en la escena')),
+    this.spectHead,
     h('span', { class: 'spect-k spect-col-k' }, 'MIRAR'),
     this.spectCards,
   );
@@ -290,7 +291,11 @@ export class Hud {
     this.root.classList.toggle('spect-on', !!cards);
     if (!cards) return;
     const cur = cards.find((c) => c.slot === watch);
-    this.spectWho.textContent = watch < 0 || !cur ? 'Todos los castillos' : cur.name;
+    // En móvil, «MIRANDO Todos» (como la tarjeta) o el nombre; si con la pista no cabe entero, la
+    // pista «o desliza en la escena» se quita antes que recortar el nombre.
+    this.spectWho.textContent = watch < 0 || !cur ? 'Todos' : cur.name;
+    this.spectHead.classList.remove('tight');
+    if (this.trayMode && this.spectWho.scrollWidth > this.spectWho.clientWidth + 1) this.spectHead.classList.add('tight');
     this.spectPillText.textContent = watch < 0 || !cur ? 'Mirando todos los castillos' : `Mirando a ${cur.name}`;
     const all: SpectCard = { slot: -1, name: 'Todos', short: 'Todos', pct: -1 };
     this.spectCards.replaceChildren(

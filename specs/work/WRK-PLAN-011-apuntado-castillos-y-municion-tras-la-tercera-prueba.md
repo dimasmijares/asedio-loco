@@ -65,6 +65,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 35 | WRK-TASK-089 · Pantalla final en estilo «Atardecer» | completed | 072 | 2026-10-03 |
 | 36 | WRK-TASK-090 · Pantalla final según R-15 | completed | 089, R-15 | 2026-10-05 |
 | 37 | WRK-TASK-091 · Nombres de hasta 20 letras | completed | 070 | 2026-10-05 |
+| 38 | WRK-TASK-092 · Espectador: titular, encuadre y tarjetas | completed | 073 | 2026-10-05 |
 
 ## Risk Assessment
 

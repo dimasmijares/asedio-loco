@@ -1157,7 +1157,7 @@ button.seat-card.off {
 
 /* ---------- Selector del espectador (R-13) ----------
    Móvil vertical: abajo, en la franja de la bandeja (188 px, ciruela), «Mirando: …» y una tarjeta de
-   82×92 por castillo en pie más «Todos». PC: columna de tarjetas de 220 px a la derecha y la píldora
+   82×92 por castillo en pie más «Todos», juntas a la izquierda con 8 px entre ellas. PC: columna de tarjetas de 220 px a la derecha y la píldora
    «Mirando a …» abajo con Q y E. La elegida, con anillo naranja. */
 .spect-panel[hidden],
 .spect-pill[hidden] {
@@ -1361,14 +1361,17 @@ button.seat-card.off {
 .spect-hint .ico {
   font-size: 14px;
 }
+.spect-head.tight .spect-hint {
+  display: none;
+}
 .hud.tray-mode .spect-col-k {
   display: none;
 }
 .hud.tray-mode .spect-cards {
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 .hud.tray-mode .spect-card {
   width: 82px;
