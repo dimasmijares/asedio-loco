@@ -6,6 +6,7 @@ import { canvasNotBlack, setName, watchErrors } from './helpers';
 
 type Summary = {
   role: string;
+  replaying?: boolean; // la vista reproduce algo grabado (en `over`, el mejor disparo de la partida)
   you: number | null;
   spectator: boolean;
   round: number;
@@ -193,9 +194,11 @@ test('4 jugadores hasta el final: consistencia, espectador y reconexión', async
       expect(after.you).toBe(before.you);
       expect(after.spectator).toBe(false);
       // Se compara con el anfitrión en un momento quieto (apuntado o resultados de la misma
-      // ronda): en plena fase de impacto los bloques siguen cayendo y las cuentas bailan.
+      // ronda): en plena fase de impacto los bloques siguen cayendo y las cuentas bailan. En `over`,
+      // no mientras cada uno repite su mejor disparo: la vista vuelve a la foto de aquel impacto
+      // (salió como «flaky» en CI el 06-10-2026: «bloques del hueco 2 (fase over)»).
       const slot = String(after.you);
-      const still = (s: Summary) => s.phase === 'aim' || s.phase === 'results' || s.phase === 'over';
+      const still = (s: Summary) => (s.phase === 'aim' || s.phase === 'results' || s.phase === 'over') && !s.replaying;
       let pair: Summary[] = [];
       for (const t1 = Date.now(); Date.now() - t1 < 120_000; await host.waitForTimeout(300)) {
         pair = (await Promise.all([host, g].map(summary))) as Summary[];
