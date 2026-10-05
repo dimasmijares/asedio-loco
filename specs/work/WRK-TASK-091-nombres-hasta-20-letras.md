@@ -25,7 +25,7 @@ Corrección del usuario (05-10-2026): el nombre guardado se cortaba en 16 letras
 
 ## File Scope
 
-- `shared/protocol.ts` (`MAX_NAME_LEN`), `shared/players.ts`, `client/src/ui/lobby.ts` (título de la sala), `client/src/ui/flujo.css`
+- `shared/protocol.ts` (`MAX_NAME_LEN`), `shared/players.ts`, `client/src/ui/lobby.ts` (título de la sala), `client/src/ui/flujo.css`, `client/src/ui/style.css` (chips del marcador)
 - `tests/unit/protocol.test.ts`, `tests/unit/players.test.ts`
 
 ## Implementation Notes
@@ -37,6 +37,7 @@ Corrección del usuario (05-10-2026): el nombre guardado se cortaba en 16 letras
 
 - `MAX_NAME_LEN` pasa de 16 a 20: lo usan el servidor, el campo de la portada y el de la sala. Sin subir `PROTOCOL_VERSION`: el servidor sanea y todos ven el mismo nombre.
 - El nombre corto (`shortName`) ya era la palabra completa; con 20 letras «Marquesa Tortilla» queda entera y su nombre corto es «Tortilla».
+- Chips del marcador en móvil vertical: hasta 112 px con tres jugadores o menos (como en las maquetas de R-15), para que el nombre corto quepa entero también con la cruz de eliminado; con cuatro siguen en 86 px.
 - Donde no cabe, «…» por CSS: plazas de la sala, hoja de resultados, chips, tarjetas del espectador y, nuevo, el título «Sala de <nombre>» de PC (en una línea). En la pantalla final el nombre va completo (R-15 F5).
 
 ## Acceptance Criteria

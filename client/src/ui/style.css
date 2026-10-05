@@ -2490,7 +2490,12 @@ label.check:has(.check-hint) {
 }
 /* La marca de listo, la cruz o la desconexión van a la derecha del nombre, como en PC (decisión del
    usuario del 03-10-2026, R-10 fase 3); a 11 px, para dejarle sitio al nombre. Con la marca, un
-   nombre largo se abrevia con «…». */
+   nombre largo se abrevia con «…». Con tres jugadores o menos, chips de 112 px (maquetas de R-15): el
+   nombre corto cabe entero también con la marca («Tortilla ×»). */
+.hud.tray-mode .hp:first-child:nth-last-child(-n + 3),
+.hud.tray-mode .hp:first-child:nth-last-child(-n + 3) ~ .hp {
+  max-width: 112px;
+}
 .hud.tray-mode .hp {
   flex: 1 1 0;
   max-width: 86px;
