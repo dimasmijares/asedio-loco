@@ -17,6 +17,8 @@ export interface SheetOptions {
   title: string;
   text?: Node | string;
   badge?: IconName; // icono grande sobre el título (aviso de eliminado)
+  // Fondo del recuadro del icono: grana (peligro, por defecto) o ciruela (un aviso sin peligro).
+  badgeTone?: 'ciruela';
   center?: boolean;
   actions: SheetAction[];
   hint?: string;
@@ -30,7 +32,7 @@ export function showSheet(o: SheetOptions) {
   const sheet = h(
     'div',
     { class: `al-sheet${o.center ? ' center' : ''}`, id: o.id, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': `${o.id}-title` },
-    o.badge ? h('span', { class: 'sheet-badge' }, icon(o.badge)) : null,
+    o.badge ? h('span', { class: `sheet-badge${o.badgeTone ? ` ${o.badgeTone}` : ''}` }, icon(o.badge)) : null,
     title,
     o.text ? h('p', { class: 'sheet-text' }, o.text) : null,
     h(

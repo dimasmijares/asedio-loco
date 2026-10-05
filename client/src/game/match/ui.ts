@@ -167,6 +167,7 @@ export class MatchUI {
       id: 'late-sheet',
       title: 'Partida en curso',
       badge: 'eye',
+      badgeTone: 'ciruela',
       center: true,
       text: seat ? 'Entrarás a jugar en la próxima partida. Mientras, puedes mirar esta: arriba tienes el marcador.' : 'La sala está completa: mirarás la partida y entrarás en cuanto quede una plaza libre.',
       actions: [

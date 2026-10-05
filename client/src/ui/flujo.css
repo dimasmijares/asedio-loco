@@ -66,6 +66,10 @@
   font-size: 38px;
   transform: rotate(-8deg);
 }
+/* Aviso sin peligro (llegar con la partida empezada): ciruela; grana es solo para salir o peligro. */
+.sheet-badge.ciruela {
+  background: var(--al-ciruela);
+}
 .sheet-actions {
   width: 100%;
   display: flex;

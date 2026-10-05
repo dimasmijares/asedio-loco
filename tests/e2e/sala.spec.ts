@@ -263,6 +263,8 @@ for (const fmt of FORMATS) {
       // La hoja sale con la partida ya montada (carga la física y el 3D): con tres navegadores, tarda.
       await expect(c.locator('#late-sheet')).toContainText('Partida en curso', { timeout: 150_000 });
       await expect(c.locator('#late-sheet')).toContainText('Entrarás a jugar en la próxima partida');
+      // El recuadro del icono, en ciruela: grana es solo para peligro.
+      await expect(c.locator('#late-sheet .sheet-badge')).toHaveCSS('background-color', 'rgb(74, 7, 48)');
       await c.click('#late-watch');
       await expect(c.locator('#late-sheet')).toHaveCount(0);
       await expect(c.locator('#hud-spect')).toHaveText('Partida en curso · juegas en la próxima');
