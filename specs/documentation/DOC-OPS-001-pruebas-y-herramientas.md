@@ -4,9 +4,9 @@ type: spec
 layer: documentation
 status: active
 confidence: medium
-version: 1.4.0
+version: 1.5.0
 created: 2026-09-26
-updated: 2026-10-03
+updated: 2026-10-06
 owner: dimas
 dependencies:
   - id: ARCH-001
@@ -83,6 +83,8 @@ Rutas: `#solo`, `#sandbox`, `#bench`, `#physics=ccd|tower|glass|fragments`, `#AB
 
 - `node tests/tools/review.mjs <base> <carpeta>`: portada, apuntado, carga, impacto y resultados, con GPU.
 - `node tests/tools/ui-shots.mjs <base> <carpeta> [pc|movil|fase2|fase3|retoques]`: portada, «Jugar solo», apuntando y resultados en 1280×720 y en 390×844, con GPU (revisión de estilo, R-10). Con `fase2`, la partida en móvil vertical (R-10 fase 2): apuntando, manteniendo una carta, cargando, disparo listo y resultados, y apuntando en modo zurdo, con el apuntado de la ronda 1 congelado. Con `fase3`, menús y PC (R-10 fase 3): portada y «Jugar solo» en móvil y PC (con el nombre fijo «Duque Pepino»), PC apuntando con la descripción de una carta al pasar el ratón y con los controles abiertos (H), y los resultados en móvil. Con `retoques`, en móvil vertical: apuntando y cargando al 55 % con un viento de 4,6 m/s puesto a mano en la parábola y la física (el anillo cae en el mismo sitio; imprime sus coordenadas) y «Jugar solo».
+- `node tests/tools/flujo-shots.mjs <base> <carpeta> [movil|pc]`: el flujo de partidas, la sala y el espectador (R-07, R-11, R-13 y R-14) con dos y tres dispositivos, con GPU: 15 capturas por formato.
+- `node tests/tools/correcciones-shots.mjs <base> <carpeta> [movil|pc]`: las correcciones del 05-10-2026 (R-15, nombres y espectador), con GPU: la sala con «Marquesa Tortilla», la pantalla final del anfitrión, del invitado y en solitario (estadísticas puestas a mano) y el espectador en «Todos» y mirando un castillo con la chincheta del objetivo.
 - `node tests/tools/impact-shots.mjs <base> <carpeta> [ronda]`: la cámara panorámica.
 - `node tests/tools/countdown-shots.mjs <base> <carpeta> [ronda]`: la cuenta atrás (3, 2, 1, ¡FUEGO!) y cómo se aleja la cámara hasta el plano general.
 - `node tests/tools/replay-shots.mjs <base> <carpeta>`: la repetición.
