@@ -4,7 +4,7 @@
 
 export const PROTOCOL_VERSION = 15;
 export const MAX_PLAYERS = 4;
-export const MAX_NAME_LEN = 16;
+export const MAX_NAME_LEN = 20;
 export const MAX_MSG_BYTES = 64 * 1024;
 export const ROOM_CODE_RE = /^[A-Z]{4}$/;
 export const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sin I ni O

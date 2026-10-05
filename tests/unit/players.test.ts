@@ -13,6 +13,8 @@ describe('nombre corto del marcador compacto (WRK-TASK-046)', () => {
 
   it('en un nombre con título, la última palabra («Duque Pepino» → «Pepino»)', () => {
     expect(shortName({ name: 'Duque Pepino' })).toBe('Pepino');
+    // La palabra completa: el nombre guardado ya no se corta en 16 letras («Tortill»).
+    expect(shortName({ name: sanitizeName('Marquesa Tortilla') })).toBe('Tortilla');
     expect(shortName({ name: 'Duque' })).toBe('Duque');
   });
 

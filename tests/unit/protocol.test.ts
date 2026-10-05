@@ -7,8 +7,10 @@ describe('sanitizeName', () => {
     expect(sanitizeName('  Pepe   el  Grande ')).toBe('Pepe el Grande');
     expect(sanitizeName('José ¡Olé!')).toBe('José ¡Olé!');
   });
-  it('limita a 16 caracteres', () => {
-    expect(sanitizeName('a'.repeat(40))).toHaveLength(16);
+  it('limita a 20 caracteres', () => {
+    expect(sanitizeName('a'.repeat(40))).toHaveLength(20);
+    // «Marquesa Tortilla» entera (antes se guardaba «Marquesa Tortill»).
+    expect(sanitizeName('Marquesa Tortilla')).toBe('Marquesa Tortilla');
   });
   it('rechaza lo que no es texto', () => {
     expect(sanitizeName(42)).toBe('');

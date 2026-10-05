@@ -334,6 +334,12 @@ body:has(.room) {
     color: var(--al-crema);
     overflow-wrap: anywhere;
   }
+  .room-title-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .code-card {
     position: static;
     margin: 0;

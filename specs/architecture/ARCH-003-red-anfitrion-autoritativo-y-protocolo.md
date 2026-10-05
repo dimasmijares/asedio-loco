@@ -4,9 +4,9 @@ type: spec
 layer: architecture
 status: active
 confidence: medium
-version: 1.1.0
+version: 1.2.0
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-10-05
 owner: dimas
 dependencies:
   - id: RULE-002
@@ -47,7 +47,7 @@ Hasta 4 jugadores y varios espectadores tienen que ver la misma partida, aunque 
 - Límites que aplica el servidor:
   - Mensajes de 64 KB como mucho (`MAX_MSG_BYTES`) y validados campo a campo (`parseClientMsg`).
   - Cubo de fichas por conexión: 30/s (ráfaga 60) o 80/s (ráfaga 160) si es el anfitrión. Tras 300 descartes, cierre 1008.
-  - Nombres saneados a 16 caracteres (`sanitizeName`).
+  - Nombres saneados a 20 caracteres (`sanitizeName`; 16 hasta el 05-10-2026, WRK-TASK-091). No sube `PROTOCOL_VERSION`: el servidor sanea el nombre y todos los clientes ven el mismo.
   - Un `hello` con otra versión recibe `error {code: 'version'}`.
   - `config`, `start` y `lobby` solo del anfitrión. Los espectadores no pueden mandar `relay`. Quien no es anfitrión solo manda a `all` o `host`.
 
@@ -95,7 +95,7 @@ Hasta 4 jugadores y varios espectadores tienen que ver la misma partida, aunque 
 
 - [x] El servidor rechaza mensajes de más de 64 KB, JSON roto y tipos desconocidos.
 - [x] El cubo de fichas limita la ráfaga y se recarga con el tiempo.
-- [x] Los nombres quedan en 16 caracteres como mucho, sin HTML.
+- [x] Los nombres quedan en 20 caracteres como mucho, sin HTML.
 - [x] Un espectador que manda `relay` recibe un error y no juega.
 - [x] Quien recarga con su token recupera su hueco.
 - [x] Si el anfitrión se va en plena partida, otro jugador la hereda y la partida acaba.

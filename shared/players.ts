@@ -21,7 +21,8 @@ export const soloSlots = (bots: number) => [0, 2, 1, 3].slice(0, 1 + bots).sort(
 export const NAME_TITLES = ['Sir', 'Lady', 'Barón', 'Baronesa', 'Duque', 'Duquesa', 'Conde', 'Condesa', 'Rey', 'Reina', 'Capitán', 'Capitana', 'Marqués', 'Marquesa'];
 const NAME_WORDS = ['Pepino', 'Churro', 'Fideo', 'Turrón', 'Bigote', 'Rábano', 'Pelusa', 'Tostada', 'Mostaza', 'Cebolla', 'Patata', 'Buñuelo', 'Boniato', 'Melón', 'Queso', 'Grillo'];
 
-// Un nombre al azar de como mucho 16 letras (MAX_NAME_LEN), distinto de `not` y de los de los bots.
+// Un nombre al azar de como mucho 16 letras (se permiten 20, MAX_NAME_LEN), distinto de `not` y de
+// los de los bots.
 export function randomName(rand: () => number = Math.random, not = ''): string {
   for (;;) {
     const n = `${NAME_TITLES[Math.floor(rand() * NAME_TITLES.length)]} ${NAME_WORDS[Math.floor(rand() * NAME_WORDS.length)]}`;

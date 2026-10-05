@@ -491,7 +491,8 @@ export class LobbyView {
     }
     const you = this.conn.you;
     const hostP = room.players.find((p) => p.id === room.hostId);
-    this.title.replaceChildren(...(hostP ? ['Sala de', h('br'), hostP.name] : [`Sala ${room.code}`]));
+    // El nombre, en una línea; si no cabe, se recorta con «…» (el completo, en el `title`).
+    this.title.replaceChildren(...(hostP ? ['Sala de', h('span', { class: 'room-title-name', title: hostP.name }, hostP.name)] : [`Sala ${room.code}`]));
     const isHost = this.conn.isHost;
     // Si se está editando el nombre y ya no estás en la sala (has pasado a espectador), se deja.
     if (this.editing && !room.players.some((p) => p.id === you.id)) this.editing = null;

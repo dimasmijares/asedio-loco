@@ -64,6 +64,7 @@ Una sola tarea activa a la vez (DOC-OPS-002); cada una se despliega por separado
 | 34 | WRK-TASK-088 · Chincheta del objetivo con bandera (R-14) | completed | 085 | 2026-10-03 |
 | 35 | WRK-TASK-089 · Pantalla final en estilo «Atardecer» | completed | 072 | 2026-10-03 |
 | 36 | WRK-TASK-090 · Pantalla final según R-15 | completed | 089, R-15 | 2026-10-05 |
+| 37 | WRK-TASK-091 · Nombres de hasta 20 letras | completed | 070 | 2026-10-05 |
 
 ## Risk Assessment
 

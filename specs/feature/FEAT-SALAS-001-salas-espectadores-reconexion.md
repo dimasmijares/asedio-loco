@@ -4,9 +4,9 @@ type: spec
 layer: feature
 status: active
 confidence: medium
-version: 1.7.0
+version: 1.8.0
 created: 2026-09-26
-updated: 2026-10-03
+updated: 2026-10-05
 owner: dimas
 dependencies:
   - id: PROD-JUGAR-001
@@ -44,7 +44,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 |---|---|---|---|
 | «Crear sala» | Botón de la portada | — | `POST /api/rooms` → código de 4 letras sin I ni O |
 | Enlace `/#ABCD` | URL | — | Abre la portada con «Entrar en la sala ABCD» |
-| Nombre | Texto | No | Saneado a 16 caracteres; vacío → «Jugador N» |
+| Nombre | Texto | No | Saneado a 20 caracteres; vacío → «Jugador N». Donde no cabe, se recorta solo a la vista con «…» |
 | Token | `localStorage asedio.token.<código>` | No | Se guarda al recibir `welcome` |
 | `config {difficulty, fast}` | Mensaje | Solo anfitrión, en la sala | Dificultad de los bots; `fast` solo por `?fast=1` |
 | `seat {slot, bot}` | Mensaje | Solo anfitrión, en la sala | Tocar una plaza (R-11 S2, WRK-TASK-070): libre → bot; bot o desconectado → libre. Las plazas con bot van en `config.botSlots` |
@@ -109,7 +109,7 @@ Crear y unirse a salas de hasta 4 jugadores, configurar la partida en el lobby, 
 - [x] Un móvil que crea la sala cede el papel a un ordenador desde el principio, sin migración.
 - [x] Quien llega con la partida empezada ve «Partida en curso», la píldora y el marcador, y juega en la revancha (`tests/e2e/sala.spec.ts`).
 - [x] La revancha empieza otra partida en un paso con los mismos jugadores y bots, y solo el anfitrión ve REVANCHA y VOLVER A LA SALA; los demás esperan por su nombre (`tests/e2e/sala.spec.ts`, `multiplayer.spec.ts`).
-- [x] Los nombres se sanean a 16 caracteres y los códigos tienen 4 letras sin I ni O.
+- [x] Los nombres se sanean a 20 caracteres y los códigos tienen 4 letras sin I ni O.
 - [x] Con dos dispositivos, añadir y quitar bots, cambiar la dificultad y cambiar el nombre se ve en los dos; el anfitrión quita a un jugador desconectado tocando su plaza (`tests/e2e/sala.spec.ts`).
 - [x] Quien sale de la sala deja su plaza libre al momento en los demás dispositivos; si era el anfitrión, lo hereda otro, y la confirmación dice quién (`tests/e2e/sala.spec.ts`, PC y móvil vertical).
 - [x] Quien sale de una partida en red vuelve a la portada y su castillo lo lleva un bot desde la ronda siguiente; en solitario, se vuelve a la portada (`tests/e2e/sala.spec.ts`).
