@@ -31,6 +31,7 @@ Con dos filas más (WRK-TASK-058), cinco municiones salen de su franja de destro
 
 ## Implementation Notes
 
+- Decidido por el usuario el 08-10-2026: opción A, la propuesta siguiente.
 - Propuesta: franjas relativas al tamaño del castillo (el mismo porcentaje de castillo por disparo que con 176 bloques) y reajustar solo lo que se desvía de su firma: el pedrusco (daño concentrado) rompe menos porque ahora da más alto, donde no hay forro; la bola de nieve rueda más y se lleva más muralla.
 - RULE-001: destrozo (12 disparos) y equilibrio (8-12 partidas) antes y después.
 
